@@ -12,6 +12,7 @@ import {
   RESOLUTIONS,
 } from "@/config/models";
 import { api } from "@/lib/api";
+import { withBase } from "@/lib/basePath";
 
 type AspectKey = keyof typeof ASPECT_RATIOS;
 type ResKey = keyof typeof RESOLUTIONS;
@@ -78,12 +79,13 @@ export function NewAssemblyCard({ accent }: { accent: string }) {
         className="group relative flex flex-col overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-6 text-left transition duration-200 ease-spring hover:-translate-y-1 hover:shadow-lift"
       >
         <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-1" style={{ background: accent }} />
-        <span
-          className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl text-2xl"
-          style={{ color: accent, background: `color-mix(in srgb, ${accent} 14%, transparent)` }}
-        >
-          ▶
-        </span>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={withBase("/slop/assembleslop.png")}
+          alt=""
+          aria-hidden
+          className="mb-3 h-20 w-auto self-start object-contain drop-shadow"
+        />
         <h2 className="text-lg font-semibold">Assembly</h2>
         <p className="mt-1 text-sm font-medium text-[var(--color-fg)]">
           Build on the timeline with your own media.

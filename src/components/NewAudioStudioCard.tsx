@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { DEFAULT_LLM_MODEL, DEFAULT_TTS_MODEL, DEFAULT_VIDEO_MODEL } from "@/config/models";
 import { api } from "@/lib/api";
+import { withBase } from "@/lib/basePath";
 
 /**
  * The Audio Studio mode entry. Creates a fresh project on click and opens the
@@ -51,12 +52,13 @@ export function NewAudioStudioCard({ accent }: { accent: string }) {
       className="group relative flex flex-col overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-6 text-left transition duration-200 ease-spring hover:-translate-y-1 hover:shadow-lift disabled:opacity-70"
     >
       <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-1" style={{ background: accent }} />
-      <span
-        className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl text-2xl"
-        style={{ color: accent, background: `color-mix(in srgb, ${accent} 14%, transparent)` }}
-      >
-        🎚
-      </span>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={withBase("/slop/audioslop.png")}
+        alt=""
+        aria-hidden
+        className="mb-3 h-20 w-auto self-start object-contain drop-shadow"
+      />
       <h2 className="text-lg font-semibold">Audio Studio</h2>
       <p className="mt-1 text-sm font-medium text-[var(--color-fg)]">
         Edit, separate, and master audio on a multitrack timeline.

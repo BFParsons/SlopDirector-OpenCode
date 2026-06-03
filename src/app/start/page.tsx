@@ -12,6 +12,7 @@ export const dynamic = "force-dynamic";
 interface Mode {
   href: string;
   glyph: string;
+  img?: string;
   title: string;
   blurb: string;
   detail: string;
@@ -23,6 +24,7 @@ const MODES: Mode[] = [
   {
     href: "/dashboard",
     glyph: "◳",
+    img: "/slop/oldslop.png",
     title: "Open project",
     blurb: "Pick up where you left off.",
     detail: "Reopen any of your existing videos to keep editing or re-render.",
@@ -74,15 +76,25 @@ export default async function StartPage() {
                 className="pointer-events-none absolute inset-x-0 top-0 h-1"
                 style={{ background: m.accent, opacity: m.primary ? 1 : 0.6 }}
               />
-              <span
-                className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl text-2xl"
-                style={{
-                  color: m.accent,
-                  background: `color-mix(in srgb, ${m.accent} 14%, transparent)`,
-                }}
-              >
-                {m.glyph}
-              </span>
+              {m.img ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={withBase(m.img)}
+                  alt=""
+                  aria-hidden
+                  className="mb-3 h-20 w-auto self-start object-contain drop-shadow"
+                />
+              ) : (
+                <span
+                  className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl text-2xl"
+                  style={{
+                    color: m.accent,
+                    background: `color-mix(in srgb, ${m.accent} 14%, transparent)`,
+                  }}
+                >
+                  {m.glyph}
+                </span>
+              )}
               <h2 className="text-lg font-semibold">
                 {m.title}
                 {m.href === "/dashboard" && recentCount > 0 ? (

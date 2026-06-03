@@ -8,6 +8,7 @@ import {
   DEFAULT_VIDEO_MODEL,
 } from "@/config/models";
 import { api } from "@/lib/api";
+import { withBase } from "@/lib/basePath";
 
 // The Storyboard mode entry. Creates a fresh project on click (not on render, so
 // link prefetch can't spawn stray projects) and drops into the storyboard board.
@@ -54,12 +55,13 @@ export function NewStoryboardCard({ accent }: { accent: string }) {
         className="pointer-events-none absolute inset-x-0 top-0 h-1"
         style={{ background: accent }}
       />
-      <span
-        className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl text-2xl"
-        style={{ color: accent, background: `color-mix(in srgb, ${accent} 14%, transparent)` }}
-      >
-        ▦
-      </span>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={withBase("/slop/videoslop.png")}
+        alt=""
+        aria-hidden
+        className="mb-3 h-20 w-auto self-start object-contain drop-shadow"
+      />
       <h2 className="text-lg font-semibold">Storyboard</h2>
       <p className="mt-1 text-sm font-medium text-[var(--color-fg)]">
         Design shot-by-shot with AI image generation.
