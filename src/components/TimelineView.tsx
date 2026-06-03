@@ -19,7 +19,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { withBase } from "@/lib/basePath";
-import { hasMediaDrag, type MediaDragPayload, readMediaDrag } from "@/lib/studio/dnd";
+import { hasMediaDrag, type MediaDragPayload, readMediaDrag, hasAudioDrag, readAudioDrag, type AudioStudioDragPayload } from "@/lib/studio/dnd";
 import { fmtClock, segmentHue, type SegmentView } from "./SegmentCard";
 import type { OverlayView } from "./AudioSection";
 
@@ -93,6 +93,7 @@ export function TimelineView({
   onDelete,
   onOffset,
   onDropMedia,
+  onDropAudio,
   onUnlinkAudio,
   selectedId = null,
   onSelect,
@@ -108,6 +109,7 @@ export function TimelineView({
   onDelete?: (id: string) => void;
   onOffset?: (id: string, offsetS: number) => void;
   onDropMedia?: (payload: MediaDragPayload, track: number, offsetS: number) => void;
+  onDropAudio?: (payload: AudioStudioDragPayload, offsetS: number) => void;
   onUnlinkAudio?: (videoSegmentId: string) => void;
   selectedId?: string | null;
   onSelect?: (id: string | null) => void;
@@ -197,10 +199,10 @@ export function TimelineView({
   // Native drop target for Media Bucket drags. V1 drop appends; V2 drop places
   // a PiP overlay at the drop point.
   function laneDropProps(track: "v1" | "v2" | "audio") {
-    if (readOnly || !onDropMedia) return {};
+    if (readOnly || (!onDropMedia && !onDropAudio)) return {};
     return {
       onDragOver: (e: React.DragEvent) => {
-        if (!hasMediaDrag(e.dataTransfer)) return;
+        if (!hasMediaDrag(e.dataTransfer) && !hasAudioDrag(e.dataTransfer)) return;
         e.preventDefault();
         e.dataTransfer.dropEffect = "copy";
         if (dragLane !== track) setDragLane(track);
@@ -211,6 +213,15 @@ export function TimelineView({
         }
       },
       onDrop: (e: React.DragEvent) => {
+        // Audio Studio workspace file → bridge to an Asset, then place audio-only.
+        const audio = readAudioDrag(e.dataTransfer);
+        if (audio && onDropAudio) {
+          e.preventDefault();
+          setDragLane(null);
+          const rect = e.currentTarget.getBoundingClientRect();
+          onDropAudio(audio, Math.max(0, (e.clientX - rect.left) / pps));
+          return;
+        }
         const payload = readMediaDrag(e.dataTransfer);
         setDragLane(null);
         if (!payload) return;

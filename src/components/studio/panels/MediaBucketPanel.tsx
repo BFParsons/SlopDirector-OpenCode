@@ -4,7 +4,7 @@ import { useCallback, useRef, useState } from "react";
 import { CAPS } from "@/config/models";
 import { api } from "@/lib/api";
 import { withBase } from "@/lib/basePath";
-import { setMediaDrag } from "@/lib/studio/dnd";
+import { setMediaDrag, readAudioDrag, hasAudioDrag, type AudioStudioDragPayload } from "@/lib/studio/dnd";
 import { useProjectStore } from "@/stores/projectStore";
 import { YouTubeImport } from "@/components/YouTubeImport";
 import type { PanelProps } from "@/types/panel";
@@ -170,6 +170,38 @@ export default function MediaBucketPanel({ windowControls }: PanelProps) {
       });
     },
     [projectId],
+  );
+
+  // Drop an Audio Studio workspace track here → register it as an Asset on the shelf.
+  const [audioDrop, setAudioDrop] = useState(false);
+  const importAudioFromStudio = useCallback(
+    async (p: AudioStudioDragPayload) => {
+      setError(null);
+      try {
+        const res = await api<{ id: string }>("/api/audio/to-asset", {
+          method: "POST",
+          body: JSON.stringify({ projectId, relPath: p.relPath }),
+        });
+        addItems([
+          {
+            id: res.id,
+            kind: "UPLOAD_AUDIO",
+            mime: "audio/mpeg",
+            sizeBytes: 0,
+            createdAt: new Date().toISOString(),
+            isVideo: false,
+            isAudio: true,
+            durationS: p.durationS,
+            inUse: false,
+            fromCurrent: true,
+            projectTitle: "",
+          },
+        ]);
+      } catch (e) {
+        setError((e as Error).message);
+      }
+    },
+    [projectId, addItems],
   );
 
   const atMax = draft.segments.length >= CAPS.maxSegments;
@@ -351,7 +383,26 @@ export default function MediaBucketPanel({ windowControls }: PanelProps) {
         </div>
 
         {/* Bucket grid — only explicitly imported items render a thumbnail */}
-        <div className="min-h-0 flex-1 overflow-y-auto p-2">
+        <div
+          className={`min-h-0 flex-1 overflow-y-auto p-2 ${audioDrop ? "ring-2 ring-inset ring-[var(--color-accent)]" : ""}`}
+          onDragOver={(e) => {
+            if (hasAudioDrag(e.dataTransfer)) {
+              e.preventDefault();
+              setAudioDrop(true);
+            }
+          }}
+          onDragLeave={(e) => {
+            if (e.currentTarget === e.target) setAudioDrop(false);
+          }}
+          onDrop={(e) => {
+            const p = readAudioDrag(e.dataTransfer);
+            if (p) {
+              e.preventDefault();
+              setAudioDrop(false);
+              void importAudioFromStudio(p);
+            }
+          }}
+        >
           {error ? <p className="mb-2 text-xs text-[var(--color-danger)]">{error}</p> : null}
           {list.length === 0 ? (
             <p className="text-xs text-[var(--color-muted)]">

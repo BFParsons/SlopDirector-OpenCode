@@ -41,3 +41,45 @@ export function readMediaDrag(dt: DataTransfer): MediaDragPayload | null {
 export function hasMediaDrag(dt: DataTransfer): boolean {
   return dt.types.includes(MEDIA_DND_TYPE) || dt.types.includes("text/plain");
 }
+
+/** Drag payload for an Audio Studio *workspace* file (relPath under
+ *  audio-studio/<pid>), distinct from a DB Asset. Lets Audio Importer tracks be
+ *  dragged to the Media Bucket / video timeline, where a bridge registers them
+ *  as Assets. Intentionally does NOT set text/plain so it never reads back as a
+ *  MEDIA_DND payload. */
+export const AUDIO_DND_TYPE = "application/x-slop-audio";
+
+export interface AudioStudioDragPayload {
+  relPath: string;
+  name: string;
+  durationS: number;
+  url: string;
+}
+
+export function setAudioDrag(dt: DataTransfer, payload: AudioStudioDragPayload): void {
+  dt.setData(AUDIO_DND_TYPE, JSON.stringify(payload));
+  dt.effectAllowed = "copy";
+}
+
+export function readAudioDrag(dt: DataTransfer): AudioStudioDragPayload | null {
+  const raw = dt.getData(AUDIO_DND_TYPE);
+  if (!raw) return null;
+  try {
+    const p = JSON.parse(raw) as Partial<AudioStudioDragPayload>;
+    if (p && typeof p.relPath === "string") {
+      return {
+        relPath: p.relPath,
+        name: String(p.name ?? "audio"),
+        durationS: Number(p.durationS) || 0,
+        url: String(p.url ?? ""),
+      };
+    }
+  } catch {
+    // not our payload
+  }
+  return null;
+}
+
+export function hasAudioDrag(dt: DataTransfer): boolean {
+  return dt.types.includes(AUDIO_DND_TYPE);
+}

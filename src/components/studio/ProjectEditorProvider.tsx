@@ -40,6 +40,9 @@ export interface ProjectEditorContextValue {
     asset: { id: string; isVideo: boolean; isAudio?: boolean },
     opts?: { track?: number; offsetS?: number; trimStartS?: number; durationS?: number },
   ) => Promise<void>;
+  /** Drop an Audio Studio workspace track onto the video timeline: register it
+   *  as an Asset, then place it as an audio-only clip at offsetS. */
+  insertAudioFromStudio: (payload: { relPath: string }, offsetS: number) => Promise<void>;
 
   save: () => Promise<boolean>;
   saving: boolean;
@@ -405,6 +408,15 @@ export function ProjectEditorProvider({
     await refetch();
   }
 
+  async function insertAudioFromStudio(payload: { relPath: string }, offsetS: number) {
+    if (readOnly) return;
+    const { id } = await api<{ id: string }>("/api/audio/to-asset", {
+      method: "POST",
+      body: JSON.stringify({ projectId: snapshot.id, relPath: payload.relPath }),
+    });
+    await insertMedia({ id, isVideo: false, isAudio: true }, { offsetS });
+  }
+
   function renderBlocker(): string | null {
     if (draft.segments.filter((s) => (s.track ?? 0) === 0 && !s.audioOnly && !s.library).length === 0)
       return "Add at least one clip to the main (V1) track";
@@ -485,6 +497,7 @@ export function ProjectEditorProvider({
     onSplitSegment,
     onDeleteSegment,
     insertMedia,
+    insertAudioFromStudio,
     save,
     saving,
     saved,
