@@ -17,6 +17,8 @@ import type { TextOverlayView } from "@/components/TextOverlaySection";
 import type { RenderAsset } from "@/components/timeline/ProgramMonitor";
 import { usePreviewEngine } from "@/components/timeline/usePreviewEngine";
 import { useLeaveGuard } from "./useLeaveGuard";
+import { useAudioStudioStore } from "@/stores/audioStudioStore";
+import { pollAudioJob } from "@/lib/audio/jobClient";
 
 type MonitorMode = "live" | "rendered";
 
@@ -510,24 +512,84 @@ export function ProjectEditorProvider({
   }
 
   // Guard leaving a throwaway project: nothing on the timeline (no clips/audio),
-  // or unsaved edits. A saved project with content leaves freely.
+  // or unsaved edits. A saved project with content leaves freely. In the Audio
+  // Studio the multitrack arrangement is session-only, so we also guard when it
+  // has tracks — and "save" there means bounce a master + attach it (persist).
+  const section = useStudioWorkspaceStore((s) => s.section);
+  const audioTrackCount = useAudioStudioStore((s) => s.tracks.length);
+  const inAudio = section === "audio";
   const isEmpty = draft.segments.length === 0 && draft.audioOverlays.length === 0;
+  const hasAudioWork = inAudio && audioTrackCount > 0;
+
+  // Bounce the Audio Studio arrangement to a master file and attach it to the
+  // project as a persisted audio segment (the session arrangement itself isn't
+  // saved — this saves the rendered result). Then persist project settings.
+  async function mixdownAndSave(name: string): Promise<boolean> {
+    if (name && name !== snapshot.title) {
+      await api(`/api/projects/${snapshot.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ title: name }),
+      });
+    }
+    const tracks = useAudioStudioStore.getState().tracks;
+    if (tracks.length > 0) {
+      const { jobId } = await api<{ jobId: string }>("/api/audio/mix", {
+        method: "POST",
+        body: JSON.stringify({
+          projectId: snapshot.id,
+          format: "wav",
+          name: name || "Mixdown",
+          tracks: tracks.map((t) => ({
+            relPath: t.relPath,
+            volume: t.volume,
+            muted: t.muted,
+            solo: t.solo,
+            offsetS: t.offsetS,
+            trimStartS: t.trimStartS,
+            durationS: t.durationS,
+          })),
+        }),
+      });
+      const job = await pollAudioJob(jobId, () => {});
+      const r = job.result as { relPath: string; durationS: number };
+      // Register the master as a project Asset + drop it as an audio segment.
+      const { id: assetId } = await api<{ id: string }>("/api/audio/to-asset", {
+        method: "POST",
+        body: JSON.stringify({ projectId: snapshot.id, relPath: r.relPath }),
+      });
+      await api(`/api/projects/${snapshot.id}/segments`, {
+        method: "POST",
+        body: JSON.stringify({
+          source: "UPLOAD_VIDEO",
+          sourceAssetId: assetId,
+          audioOnly: true,
+          track: 0,
+          offsetS: 0,
+          durationS: r.durationS,
+        }),
+      });
+    }
+    return await save();
+  }
+
   const { guardedLeave, dialog: leaveDialog } = useLeaveGuard({
-    shouldGuard: isEmpty || unsaved,
+    shouldGuard: isEmpty || unsaved || hasAudioWork,
     projectId: snapshot.id,
     initialName: snapshot.title,
+    saveLabel: hasAudioWork ? "Mix down & Save" : "Save",
+    busyLabel: hasAudioWork ? "Mixing down…" : "Saving…",
+    note: hasAudioWork
+      ? "Mix the multitrack down to a master and save it to the project, or discard. (The editable arrangement is session-only.)"
+      : undefined,
     onSave: async (name) => {
-      try {
-        if (name && name !== snapshot.title) {
-          await api(`/api/projects/${snapshot.id}`, {
-            method: "PATCH",
-            body: JSON.stringify({ title: name }),
-          });
-        }
-        return await save();
-      } catch {
-        return false;
+      if (hasAudioWork) return await mixdownAndSave(name);
+      if (name && name !== snapshot.title) {
+        await api(`/api/projects/${snapshot.id}`, {
+          method: "PATCH",
+          body: JSON.stringify({ title: name }),
+        });
       }
+      return await save();
     },
   });
 

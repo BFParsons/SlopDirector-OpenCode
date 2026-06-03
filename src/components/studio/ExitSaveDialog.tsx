@@ -11,12 +11,20 @@ import { Button, Input } from "@/components/ui";
 export function ExitSaveDialog({
   initialName,
   busy,
+  saveLabel = "Save",
+  busyLabel = "Saving…",
+  note,
+  error,
   onSave,
   onDiscard,
   onCancel,
 }: {
   initialName: string;
   busy: boolean;
+  saveLabel?: string;
+  busyLabel?: string;
+  note?: string;
+  error?: string | null;
   onSave: (name: string) => void;
   onDiscard: () => void;
   onCancel: () => void;
@@ -35,8 +43,8 @@ export function ExitSaveDialog({
       >
         <h2 className="text-base font-semibold">Save this project?</h2>
         <p className="mt-1 text-sm text-[var(--color-muted)]">
-          Name and save it to keep it, or discard it so it doesn&apos;t clutter your
-          projects.
+          {note ??
+            "Name and save it to keep it, or discard it so it doesn't clutter your projects."}
         </p>
 
         <div className="mt-4">
@@ -55,6 +63,8 @@ export function ExitSaveDialog({
           />
         </div>
 
+        {error ? <p className="mt-2 text-xs text-[var(--color-danger)]">{error}</p> : null}
+
         <div className="mt-5 flex items-center justify-between gap-2">
           <Button variant="danger" disabled={busy} onClick={onDiscard}>
             {busy ? "…" : "Discard"}
@@ -64,7 +74,7 @@ export function ExitSaveDialog({
               Cancel
             </Button>
             <Button disabled={!canSave} onClick={() => onSave(name.trim())}>
-              {busy ? "Saving…" : "Save"}
+              {busy ? busyLabel : saveLabel}
             </Button>
           </div>
         </div>

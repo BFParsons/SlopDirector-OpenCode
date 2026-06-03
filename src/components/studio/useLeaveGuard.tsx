@@ -22,10 +22,15 @@ export function useLeaveGuard(opts: {
   initialName: string;
   /** Persist the project under `name`; return true on success. */
   onSave: (name: string) => Promise<boolean>;
+  /** Save-button label + busy label + dialog note (e.g. audio "Mix down & Save"). */
+  saveLabel?: string;
+  busyLabel?: string;
+  note?: string;
 }) {
   const router = useRouter();
   const [pending, setPending] = useState<null | (() => void)>(null);
   const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
 
   // Read the latest guard flag from inside stable callbacks / event handlers.
   const guardRef = useRef(opts.shouldGuard);
@@ -53,12 +58,17 @@ export function useLeaveGuard(opts: {
 
   async function handleSave(name: string) {
     setBusy(true);
+    setErr(null);
     try {
       if (await saveRef.current(name)) {
         const go = pending;
         setPending(null);
         run(go);
+      } else {
+        setErr("Couldn't save — please try again.");
       }
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Couldn't save — please try again.");
     } finally {
       setBusy(false);
     }
@@ -80,9 +90,17 @@ export function useLeaveGuard(opts: {
     <ExitSaveDialog
       initialName={opts.initialName}
       busy={busy}
+      saveLabel={opts.saveLabel}
+      busyLabel={opts.busyLabel}
+      note={opts.note}
+      error={err}
       onSave={handleSave}
       onDiscard={handleDiscard}
-      onCancel={() => !busy && setPending(null)}
+      onCancel={() => {
+        if (busy) return;
+        setErr(null);
+        setPending(null);
+      }}
     />
   ) : null;
 
