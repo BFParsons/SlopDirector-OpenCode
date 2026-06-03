@@ -65,6 +65,25 @@ export default function AudioMultitrackPanel({ windowControls, panelId }: PanelP
   const [mixErr, setMixErr] = useState<string | null>(null);
   const [mixOut, setMixOut] = useState<{ url: string; name: string; fmt: string } | null>(null);
 
+  // Per-lane tempo detection (librosa). Stores bpm + beat times on the track so
+  // the timeline can show beat markers for alignment.
+  const [tempoBusy, setTempoBusy] = useState<string | null>(null);
+  async function measureTempo(t: AudioTrack) {
+    if (tempoBusy) return;
+    setTempoBusy(t.id);
+    try {
+      const res = await api<{ tempo: { bpm: number | null; beatsS: number[] } | null }>("/api/audio/analyze", {
+        method: "POST",
+        body: JSON.stringify({ projectId: snapshot.id, path: t.relPath, kinds: ["tempo"] }),
+      });
+      updateTrack(t.id, { bpm: res.tempo?.bpm ?? null, beats: res.tempo?.beatsS ?? [] });
+    } catch {
+      updateTrack(t.id, { bpm: null, beats: [] });
+    } finally {
+      setTempoBusy(null);
+    }
+  }
+
   async function mixDown() {
     if (!tracks.length || mixing) return;
     setMixing(true);
@@ -548,6 +567,25 @@ export default function AudioMultitrackPanel({ windowControls, panelId }: PanelP
                       >
                         S
                       </button>
+                      <div className="flex flex-col items-center leading-none">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            void measureTempo(t);
+                          }}
+                          disabled={tempoBusy === t.id}
+                          title="Measure tempo (BPM) + show beat markers"
+                          className="rounded border border-[var(--color-border)] px-1 text-[9px] font-bold text-[var(--color-muted)] hover:text-[var(--color-fg)] disabled:opacity-50"
+                        >
+                          {tempoBusy === t.id ? "…" : "♩"}
+                        </button>
+                        {t.bpm ? (
+                          <span className="mt-px text-[8px] leading-none text-[var(--color-accent)]" title="Detected BPM">
+                            {Math.round(t.bpm)}
+                          </span>
+                        ) : null}
+                      </div>
                       <input
                         type="range"
                         min={0}
@@ -625,6 +663,20 @@ export default function AudioMultitrackPanel({ windowControls, panelId }: PanelP
                           title="Trim end"
                         />
                       </div>
+                      {/* Beat markers (downward arrows) at detected beats, for alignment. */}
+                      {(t.beats ?? []).map((b, i) => {
+                        const local = b - t.trimStartS;
+                        if (local < 0 || local > t.durationS) return null;
+                        return (
+                          <span
+                            key={i}
+                            className="pointer-events-none absolute top-0 z-20 -translate-x-1/2 text-[8px] leading-none text-[var(--color-accent)]"
+                            style={{ left: (t.offsetS + local) * pxPerSec }}
+                          >
+                            ▾
+                          </span>
+                        );
+                      })}
                     </div>
                   );
                 })}

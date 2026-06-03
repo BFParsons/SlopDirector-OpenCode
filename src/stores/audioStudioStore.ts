@@ -35,6 +35,9 @@ export interface AudioTrack {
   volume: number;
   /** Start offset on the multitrack timeline, in seconds. */
   offsetS: number;
+  /** Detected tempo (BPM) and beat times (seconds, in source time), if measured. */
+  bpm?: number | null;
+  beats?: number[];
 }
 
 let trackSeq = 0;
