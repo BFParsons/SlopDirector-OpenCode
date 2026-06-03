@@ -41,10 +41,6 @@ export default async function StartPage() {
     <>
       <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center p-6">
         <div className="mb-8 flex flex-col items-center text-center">
-          <h1 className="text-2xl font-semibold">Start a new video</h1>
-          <p className="mt-1 text-sm text-[var(--color-muted)]">
-            Choose how you want to begin.
-          </p>
           {/* Animated CinemaBot — autoplays once (no loop) on load. Muted so the
               browser permits autoplay; the final frame stays on screen. The
               SLOP STUDIO PRO marquee wordmark is overlaid across its top. */}
