@@ -42,7 +42,11 @@ export default async function StartPage() {
     <>
       <AppHeader email={user.email} role={user.role} />
       <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center p-6">
-        <div className="mb-8 flex flex-col items-start text-left">
+        <div className="mb-8 flex flex-col items-center text-center">
+          <h1 className="text-2xl font-semibold">Start a new video</h1>
+          <p className="mt-1 text-sm text-[var(--color-muted)]">
+            Choose how you want to begin.
+          </p>
           {/* Animated CinemaBot logo — autoplays once (no loop) on load. Muted so
               the browser permits autoplay; the final frame stays on screen. */}
           <video
@@ -51,13 +55,9 @@ export default async function StartPage() {
             muted
             playsInline
             preload="auto"
-            className="h-40 w-auto object-contain md:h-56"
+            className="mt-6 h-80 w-auto object-contain md:h-[28rem]"
             aria-label="CinemaBot"
           />
-          <h1 className="mt-4 text-2xl font-semibold">Start a new video</h1>
-          <p className="mt-1 text-sm text-[var(--color-muted)]">
-            Choose how you want to begin.
-          </p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
