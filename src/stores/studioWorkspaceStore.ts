@@ -266,10 +266,18 @@ export const useStudioWorkspaceStore = create<WorkspaceState>((set, get) => ({
   enterSection: async (section) => {
     // Already showing this section's layout — keep it (don't clobber on remount).
     if (get().section === section && get().isReady) return;
+    const { containerSize } = get();
     set({ section, isReady: false, isDirty: false });
-    // Each section loads its OWN saved/default layout (scoped in the DB). If a
-    // section has none yet, loadLayout seeds the section default — the audio-studio
-    // preset for audio, the system layout for video.
+    if (section === "audio") {
+      // The Audio Studio always opens to its hardcoded "Audio Studio Default"
+      // (the audio-studio preset) so the default can never drift. Saved audio
+      // workspaces still appear in the Workspace menu and can be loaded/created.
+      const data = sectionDefault("audio", containerSize.width, containerSize.height);
+      applyLayoutData(data, set, { currentLayoutName: "Audio Studio Default" });
+      void get().loadSavedLayouts();
+      return;
+    }
+    // Video: the user's own saved/default layout (or the system default).
     await get().loadLayout();
   },
 

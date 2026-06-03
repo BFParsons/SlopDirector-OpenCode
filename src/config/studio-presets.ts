@@ -71,20 +71,20 @@ export const PRESETS: Record<string, PresetFactory> = {
       makeWindow("text-overlays", "Text Overlays", cw * 0.72 + 16, ch * 0.68 + 24, cw * 0.28 - 24, ch * 0.32 - 32, 4),
     ],
   }),
-  // The Audio Studio default arrangement: an importer/tools column on the left,
-  // the multitrack timeline filling the center bottom, with the visualizer and
-  // stem-separation/processing tools across the top.
-  "audio-studio": (cw, ch) => ({
+  // The hardcoded "Audio Studio Default" — captured from the user's saved layout
+  // so it stays the permanent default. Fixed pixel positions (tuned on a wide
+  // screen); bounds="parent" keeps every panel draggable on smaller displays.
+  "audio-studio": () => ({
     version: 2,
-    nextZIndex: 8,
+    nextZIndex: 14,
     windows: [
-      makeWindow("audio-importer", "Audio Importer", 8, 8, cw * 0.22, ch - 16, 1),
-      makeWindow("audio-visualizer", "Visualizer", cw * 0.22 + 16, 8, cw * 0.42, ch * 0.42, 4),
-      makeWindow("stem-separation", "Stem Separation", cw * 0.64 + 16, 8, cw * 0.36 - 24, ch * 0.42, 5),
-      makeWindow("audio-multitrack", "Multitrack Timeline", cw * 0.22 + 16, ch * 0.42 + 16, cw * 0.78 - 24, ch * 0.58 - 24, 3),
-      makeWindow("audio-processing", "Processing Rack", cw * 0.64 + 16, ch * 0.42 + 16, cw * 0.18, ch * 0.58 - 24, 6),
-      makeWindow("audio-tools", "Audio Tools", cw * 0.82 + 16, ch * 0.42 + 16, cw * 0.18 - 24, ch * 0.58 - 24, 7),
-      makeWindow("loudness-meter", "Loudness Meter", cw * 0.44, ch * 0.2, cw * 0.2, ch * 0.5, 2),
+      makeWindow("audio-importer", "Audio Importer", 8, 8, 322, 766, 1),
+      makeWindow("audio-visualizer", "Visualizer", 338, 8, 1166, 439, 4),
+      makeWindow("loudness-meter", "Loudness Meter", 1513, 7, 290, 320, 11),
+      makeWindow("stem-separation", "Stem Separation", 1812, 9, 280, 323, 12),
+      makeWindow("audio-processing", "Processing Rack", 1517, 340, 264, 430, 10),
+      makeWindow("audio-tools", "Audio Tools", 1812, 344, 280, 427, 9),
+      makeWindow("audio-multitrack", "Multitrack Timeline", 338, 455, 1169, 319, 13),
     ],
   }),
 };
