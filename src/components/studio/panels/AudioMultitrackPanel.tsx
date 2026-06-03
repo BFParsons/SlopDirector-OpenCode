@@ -32,7 +32,7 @@ function audibleSet(tracks: AudioTrack[]): Set<string> {
 }
 
 export default function AudioMultitrackPanel({ windowControls, panelId }: PanelProps) {
-  const { snapshot } = useProjectEditor();
+  const { snapshot, insertAudioFromStudio, readOnly } = useProjectEditor();
   // Is this panel the front (active) window? Used to scope the spacebar shortcut.
   const isFront = useStudioWorkspaceStore((s) => {
     const me = s.windows.find((w) => w.id === panelId);
@@ -57,6 +57,10 @@ export default function AudioMultitrackPanel({ windowControls, panelId }: PanelP
   const [pxPerSec, setPxPerSec] = useState(40);
   const [playing, setPlaying] = useState(false);
   const [playhead, setPlayhead] = useState(0);
+
+  // "Send to Video Timeline" — ingest the whole arrangement as audio layers.
+  const [sending, setSending] = useState(false);
+  const [sendMsg, setSendMsg] = useState("");
 
   // Mixdown / export
   const [mixFmt, setMixFmt] = useState<"wav" | "mp3">("wav");
@@ -445,6 +449,31 @@ export default function AudioMultitrackPanel({ windowControls, panelId }: PanelP
     seekTo(headFromClientX(e.clientX));
   };
 
+  // Push the whole multitrack arrangement onto the Video timeline: each track
+  // becomes an audio-only clip on its own audio layer, preserving offset + trim.
+  // This is the bridge that makes the Audio Studio and Assembly one timeline.
+  async function sendToTimeline() {
+    if (readOnly || sending || tracks.length === 0) return;
+    setSending(true);
+    setSendMsg("");
+    try {
+      let lane = 0;
+      for (const t of tracks) {
+        await insertAudioFromStudio(
+          { relPath: t.relPath, trimStartS: t.trimStartS, durationS: t.durationS },
+          t.offsetS,
+          lane,
+        );
+        lane += 1;
+      }
+      setSendMsg(`Added ${tracks.length} layer${tracks.length === 1 ? "" : "s"} to the Video timeline`);
+    } catch (e) {
+      setSendMsg(e instanceof Error ? e.message : "Failed to send to timeline");
+    } finally {
+      setSending(false);
+    }
+  }
+
   return (
     <PanelChrome title="Multitrack Timeline" icon="▤" {...windowControls}>
       <div className="flex h-full flex-col">
@@ -485,7 +514,16 @@ export default function AudioMultitrackPanel({ windowControls, panelId }: PanelP
           <span className="ml-1 font-mono tnum text-xs text-[var(--color-muted)]">
             {fmtTime(playhead)} / {fmtTime(total)}
           </span>
-          <div className="ml-auto flex items-center gap-1 text-[10px] text-[var(--color-muted)]">
+          <button
+            type="button"
+            onClick={sendToTimeline}
+            disabled={readOnly || sending || tracks.length === 0}
+            title="Add this arrangement to the Video timeline as audio layers"
+            className="ml-auto rounded border border-white/70 px-2 py-0.5 text-[11px] text-white hover:bg-white/10 disabled:opacity-40"
+          >
+            {sending ? "Sending…" : "→ Timeline"}
+          </button>
+          <div className="flex items-center gap-1 text-[10px] text-[var(--color-muted)]">
             <span>Zoom</span>
             <button type="button" className="rounded border border-[var(--color-border)] px-1.5 hover:text-[var(--color-fg)]" onClick={zoomOut} title="Zoom out ( - )">
               −
@@ -706,6 +744,7 @@ export default function AudioMultitrackPanel({ windowControls, panelId }: PanelP
               </a>
             ) : null}
           </div>
+          {sendMsg ? <p className="mt-1 text-[var(--color-muted)]">{sendMsg}</p> : null}
           {mixMsg ? <p className="mt-1 text-[var(--color-muted)]">{mixMsg}</p> : null}
           {mixErr ? <p className="mt-1 text-[var(--color-danger)]">{mixErr}</p> : null}
           {mixOut && !mixMsg ? (

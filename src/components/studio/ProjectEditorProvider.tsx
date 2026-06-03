@@ -42,7 +42,11 @@ export interface ProjectEditorContextValue {
   ) => Promise<void>;
   /** Drop an Audio Studio workspace track onto the video timeline: register it
    *  as an Asset, then place it as an audio-only clip at offsetS. */
-  insertAudioFromStudio: (payload: { relPath: string }, offsetS: number, track?: number) => Promise<void>;
+  insertAudioFromStudio: (
+    payload: { relPath: string; trimStartS?: number; durationS?: number },
+    offsetS: number,
+    track?: number,
+  ) => Promise<void>;
 
   save: () => Promise<boolean>;
   saving: boolean;
@@ -410,13 +414,20 @@ export function ProjectEditorProvider({
     await refetch();
   }
 
-  async function insertAudioFromStudio(payload: { relPath: string }, offsetS: number, track = 0) {
+  async function insertAudioFromStudio(
+    payload: { relPath: string; trimStartS?: number; durationS?: number },
+    offsetS: number,
+    track = 0,
+  ) {
     if (readOnly) return;
     const { id } = await api<{ id: string }>("/api/audio/to-asset", {
       method: "POST",
       body: JSON.stringify({ projectId: snapshot.id, relPath: payload.relPath }),
     });
-    await insertMedia({ id, isVideo: false, isAudio: true }, { offsetS, track });
+    await insertMedia(
+      { id, isVideo: false, isAudio: true },
+      { offsetS, track, trimStartS: payload.trimStartS, durationS: payload.durationS },
+    );
   }
 
   function renderBlocker(): string | null {
