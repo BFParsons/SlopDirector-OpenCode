@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { desktop } from "@/lib/desktop";
 import {
   ASPECT_RATIOS,
   DEFAULT_LLM_MODEL,
@@ -32,6 +33,15 @@ export function NewAssemblyCard({ accent }: { accent: string }) {
   const [resolution, setResolution] = useState<ResKey>("R720P");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Desktop-only per-project save-folder override (else the default folder).
+  const [folder, setFolder] = useState<string | null>(null);
+  const [hasPicker, setHasPicker] = useState(false);
+  useEffect(() => setHasPicker(desktop() != null), []);
+
+  async function chooseFolder() {
+    const picked = await desktop()?.pickFolder({ title: "Save this project in…" });
+    if (picked) setFolder(picked);
+  }
 
   async function create() {
     if (busy) return;
@@ -50,6 +60,7 @@ export function NewAssemblyCard({ accent }: { accent: string }) {
           llmModel: DEFAULT_LLM_MODEL,
           videoModel: DEFAULT_VIDEO_MODEL,
           ttsModel: DEFAULT_TTS_MODEL,
+          ...(folder ? { bundleBase: folder } : {}),
         }),
       });
       router.push(`/projects/${id}`);
@@ -155,6 +166,35 @@ export function NewAssemblyCard({ accent }: { accent: string }) {
                 })}
               </div>
             </div>
+
+            {hasPicker ? (
+              <div className="mt-4">
+                <span className="text-xs font-semibold uppercase tracking-wide text-[var(--color-muted)]">
+                  Save location
+                </span>
+                <div className="mt-2 flex items-center gap-2">
+                  <span className="min-w-0 flex-1 truncate rounded-lg border border-[var(--color-border)] px-3 py-2 text-xs text-[var(--color-muted)]">
+                    {folder ?? "Default folder (from Settings)"}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={chooseFolder}
+                    className="shrink-0 rounded-lg border border-[var(--color-border)] px-3 py-2 text-xs hover:border-[#39414f]"
+                  >
+                    Choose…
+                  </button>
+                  {folder ? (
+                    <button
+                      type="button"
+                      onClick={() => setFolder(null)}
+                      className="shrink-0 text-xs text-[var(--color-muted)] hover:text-[var(--color-fg)]"
+                    >
+                      Reset
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+            ) : null}
 
             {error ? <p className="mt-3 text-xs text-[var(--color-danger)]">{error}</p> : null}
 
