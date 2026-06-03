@@ -40,7 +40,7 @@ export default async function StartPage() {
   return (
     <>
       <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center p-6">
-        <div className="mb-8 flex flex-col items-center text-center">
+        <div className="mb-2 flex flex-col items-center text-center">
           {/* Animated CinemaBot — autoplays once (no loop) on load. Muted so the
               browser permits autoplay; the final frame stays on screen. The
               SLOP STUDIO PRO marquee wordmark is overlaid across its top. */}
