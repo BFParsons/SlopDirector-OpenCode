@@ -8,6 +8,7 @@ import { useProjectEditor } from "../ProjectEditorProvider";
 import { useAudioStudioStore } from "@/stores/audioStudioStore";
 import { hasMediaDrag, readMediaDrag, setAudioDrag } from "@/lib/studio/dnd";
 import { pollAudioJob } from "@/lib/audio/jobClient";
+import { parseYouTubeId } from "@/lib/youtube/url";
 
 interface UploadResult {
   relPath: string;
@@ -141,18 +142,31 @@ export default function AudioImporterPanel({ windowControls }: PanelProps) {
     }
   }
 
-  async function runSearch() {
-    const q = searchQ.trim();
-    if (!q || searching) return;
+  async function runSearch(q?: string) {
+    const query = (q ?? searchQ).trim();
+    if (!query || searching) return;
     setSearching(true);
     setSearchErr(null);
     try {
-      const res = await api<YtSearchResult[]>(`/api/audio/youtube/search?q=${encodeURIComponent(q)}`);
+      const res = await api<YtSearchResult[]>(`/api/audio/youtube/search?q=${encodeURIComponent(query)}`);
       setSearchResults(res);
     } catch (e) {
       setSearchErr((e as Error).message);
     } finally {
       setSearching(false);
+    }
+  }
+
+  // One box does both: a YouTube URL imports directly; anything else searches.
+  function submitYtBox() {
+    const q = ytUrl.trim();
+    if (!q || ytBusy) return;
+    if (parseYouTubeId(q)) {
+      void runYouTubeImport(q);
+    } else {
+      setSearchQ(q);
+      setSearchOpen(true);
+      void runSearch(q);
     }
   }
 
@@ -193,33 +207,25 @@ export default function AudioImporterPanel({ windowControls }: PanelProps) {
           />
         </div>
 
-        {/* YouTube → mp3 */}
+        {/* YouTube → mp3: paste a URL to import, or type to search. */}
         <div className="flex items-center gap-1.5">
           <input
             type="text"
             value={ytUrl}
             onChange={(e) => setYtUrl(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter") void runYouTubeImport(ytUrl);
+              if (e.key === "Enter") submitYtBox();
             }}
-            placeholder="Paste a YouTube URL → mp3"
+            placeholder="YouTube URL to import, or search…"
             className="min-w-0 flex-1 rounded-md border border-[var(--color-border)] bg-[var(--color-card)] px-2 py-1.5 text-xs"
           />
           <button
             type="button"
-            onClick={() => void runYouTubeImport(ytUrl)}
+            onClick={submitYtBox}
             disabled={ytBusy || !ytUrl.trim()}
             className="shrink-0 rounded-md bg-[var(--color-accent)] px-2.5 py-1.5 text-xs font-medium text-white transition hover:brightness-110 disabled:opacity-40"
           >
-            {ytBusy ? "Importing…" : "Import"}
-          </button>
-          <button
-            type="button"
-            onClick={() => setSearchOpen(true)}
-            className="shrink-0 rounded-md border border-[var(--color-border)] px-2 py-1.5 text-xs transition-colors hover:border-[var(--color-accent)]"
-            title="Search YouTube"
-          >
-            🔎
+            {ytBusy ? "Importing…" : parseYouTubeId(ytUrl.trim()) ? "Import" : "Search"}
           </button>
         </div>
         {ytMsg ? <p className="text-[11px] text-[var(--color-muted)]">{ytMsg}</p> : null}
