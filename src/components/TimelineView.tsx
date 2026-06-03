@@ -1141,9 +1141,11 @@ const AudioClipBlock = memo(function AudioClipBlock({
         readOnly ? "" : "cursor-grab active:cursor-grabbing"
       } ${selected ? "ring-2 ring-[var(--color-accent)]" : ""}`}
     >
-      <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: blockBg("#38b27a") }} />
+      <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: blockBg("#1f5a44") }} />
       {s.sourceAssetId ? (
-        <Waveform url={withBase(`/api/assets/${s.sourceAssetId}`)} color="#38b27a" className="absolute inset-0" />
+        // Bright, near-white waveform so it reads clearly against the green clip
+        // (a same-hue waveform blends into the background and looks blank).
+        <Waveform url={withBase(`/api/assets/${s.sourceAssetId}`)} color="#d6ffe9" className="absolute inset-0" />
       ) : null}
       <span className="relative truncate drop-shadow">audio · {s.durationS.toFixed(1)}s</span>
       {onMeasure ? (
