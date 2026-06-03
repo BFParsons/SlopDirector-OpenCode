@@ -174,6 +174,42 @@ button:not(:disabled):active {
   }
 }
 
+/* ===========================================================================
+   Project style convention
+   1. Buttons: no chunky filled accent/control backgrounds — render as the
+      foreground colour text inside a thin white outline (ghost). This targets
+      the shared accent/control background utilities on <button>/<a>, so every
+      current and future button follows the convention with no per-file edits.
+      (Semantic danger/red buttons are intentionally left filled. The faint
+      accent *highlight* utilities like bg-[var(--color-accent)]/10 are a
+      different class and are untouched, as are non-button accent fills such as
+      the timeline playhead.)
+   2. Checkboxes / radios / range sliders use a grey accent so they don't pop.
+   =========================================================================== */
+input[type="checkbox"],
+input[type="radio"],
+input[type="range"] {
+  accent-color: #7c8696;
+}
+
+button.bg-\[var\(--color-accent\)\],
+button.bg-\[var\(--color-control\)\],
+a.bg-\[var\(--color-accent\)\],
+a.bg-\[var\(--color-control\)\] {
+  background-color: transparent;
+  color: var(--color-fg);
+  border: 1px solid color-mix(in srgb, var(--color-fg) 55%, transparent);
+  box-shadow: none;
+}
+button.bg-\[var\(--color-accent\)\]:not(:disabled):hover,
+button.bg-\[var\(--color-control\)\]:not(:disabled):hover,
+a.bg-\[var\(--color-accent\)\]:hover,
+a.bg-\[var\(--color-control\)\]:hover {
+  background-color: color-mix(in srgb, var(--color-fg) 8%, transparent);
+  border-color: var(--color-fg);
+  box-shadow: none;
+}
+
 /* Respect reduced-motion: drop the squish + procedural motion. */
 @media (prefers-reduced-motion: reduce) {
   button,
