@@ -437,6 +437,28 @@ export async function assembleVideo(
     }
   }
 
+  // Overlay (V2…Vn) video layers: like V1 clips, an unmuted overlay clip mixes
+  // its OWN audio in, retimed by its speed and delayed to its timeline offset.
+  // The overlay clip is input index (nV1 + j) and carries its audio stream.
+  const pipAudioLabels: string[] = [];
+  for (let j = 0; j < pipClips.length; j++) {
+    const pc = pipClips[j];
+    if (pc.kind !== "video" || pc.muted !== false) continue;
+    if (!(await hasAudioStream(pc.path))) continue;
+    const m = pipMeta[j];
+    const speed = clampSpeed(pc.speed);
+    const trimStartS = Math.max(0, pc.trimStartS ?? 0);
+    const srcTrim = trimStartS > 0 ? `atrim=start=${trimStartS.toFixed(3)},asetpts=N/SR/TB,` : "";
+    const tempo = speed !== 1 ? `atempo=${speed},` : "";
+    const offsetMs = Math.max(0, Math.round(m.offsetS * 1000));
+    const delayPart = offsetMs > 0 ? `adelay=${offsetMs}:all=1,` : "";
+    const lbl = `pa${j}`;
+    filters.push(
+      `[${nV1 + j}:a]${srcTrim}${tempo}atrim=0:${m.dur.toFixed(3)},asetpts=N/SR/TB,${delayPart}apad,atrim=0:${dur},asetpts=N/SR/TB[${lbl}]`,
+    );
+    pipAudioLabels.push(lbl);
+  }
+
   // Foreground overlays: each plays OVER everything, delayed to its offset and
   // bounded to the final duration (never extends the timeline).
   const overlayLabels: string[] = [];
@@ -475,6 +497,7 @@ export async function assembleVideo(
   const mixLabels = [
     ...(primaryLabel ? [primaryLabel] : []),
     ...segAudioLabels,
+    ...pipAudioLabels,
     ...overlayLabels,
     ...audioClipLabels,
   ];

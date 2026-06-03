@@ -121,6 +121,29 @@ export function usePreviewEngine(spec: RenderSpec, active = true) {
         if (Math.abs(v.currentTime - target) > 0.04) v.currentTime = target;
       }
     }
+    // Overlay (V2…Vn) clips: advance each active overlay element so its PiP
+    // animates, and sound it when unmuted — matching the render (where unmuted
+    // overlay audio is mixed in). Skip any overlay sharing the foreground url.
+    const fgUrls = new Set([current?.url, outgoing?.url].filter(Boolean));
+    for (const ov of s.overlays) {
+      if (ov.kind !== "video" || !ov.url || fgUrls.has(ov.url)) continue;
+      const v = cache.videos.get(ov.url);
+      if (!v || v.readyState < 1) continue;
+      const within = t >= ov.start && t < ov.end;
+      const target = sourceTime(ov, t);
+      if (playingRef.current && within) {
+        v.muted = ov.muted;
+        v.volume = volumeRef.current;
+        v.playbackRate = ov.speed;
+        if (Number.isFinite(v.duration) && Math.abs(v.currentTime - target) > 0.25) v.currentTime = target;
+        if (v.paused) void v.play().catch(() => {});
+      } else {
+        v.muted = true;
+        if (!v.paused) v.pause();
+        if (within && Math.abs(v.currentTime - target) > 0.04) v.currentTime = target;
+      }
+    }
+
     const vo = voRef.current;
     const music = musicRef.current;
     if (playingRef.current) {
