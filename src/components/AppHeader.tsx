@@ -7,12 +7,13 @@ export function AppHeader({ email, role }: { email: string; role: string }) {
   return (
     <header className="border-b border-[var(--color-border)] bg-[var(--color-surface)]">
       <div className="mx-auto flex w-full max-w-4xl items-center justify-between px-6 py-3">
-        <Link href="/start" className="flex items-center gap-2 font-semibold tracking-tight">
+        <Link href="/start" className="flex items-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={withBase("/logo.png")} alt="" className="h-7 w-auto object-contain" />
-          <span>
-            Slop<span className="text-[var(--color-accent)]">Studio</span>
-          </span>
+          <img
+            src={withBase("/logo.png")}
+            alt="SlopStudio Pro"
+            className="h-7 w-auto object-contain"
+          />
         </Link>
         <div className="flex items-center gap-3 text-xs text-[var(--color-muted)]">
           <HeaderCost />
