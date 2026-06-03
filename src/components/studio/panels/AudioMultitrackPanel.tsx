@@ -286,6 +286,24 @@ export default function AudioMultitrackPanel({ windowControls, panelId }: PanelP
     }
   }, [tracks]);
 
+  // The selected lane's waveform brightens to full opacity (others stay hazy) —
+  // a clear visual cue for what's selected.
+  useEffect(() => {
+    for (const t of tracks) {
+      const ws = wsMap.current.get(t.id);
+      if (!ws) continue;
+      const sel = t.id === selectedTrackId;
+      try {
+        ws.setOptions({
+          waveColor: sel ? t.color : `${t.color}80`,
+          progressColor: sel ? t.color : `${t.color}b3`,
+        });
+      } catch {
+        /* ignore — older wavesurfer */
+      }
+    }
+  }, [tracks, selectedTrackId]);
+
   const stopRaf = () => {
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
     rafRef.current = null;
@@ -580,8 +598,12 @@ export default function AudioMultitrackPanel({ windowControls, panelId }: PanelP
                           left: t.offsetS * pxPerSec,
                           width: clipW,
                           height: LANE_H - 16,
-                          // Soft haze in the lane colour so the waveform appears to glow.
-                          filter: `drop-shadow(0 0 3px ${t.color}) drop-shadow(0 0 9px ${t.color}66)`,
+                          // Soft haze in the lane colour so the waveform appears to glow;
+                          // the selected lane brightens and glows harder as a selection cue.
+                          filter:
+                            selectedTrackId === t.id
+                              ? `brightness(1.35) drop-shadow(0 0 5px ${t.color}) drop-shadow(0 0 16px ${t.color})`
+                              : `drop-shadow(0 0 3px ${t.color}) drop-shadow(0 0 9px ${t.color}66)`,
                         }}
                       >
                         {/* Full-source waveform, shifted so only the trimmed window shows. */}
