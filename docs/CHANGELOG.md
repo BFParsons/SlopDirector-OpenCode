@@ -3,6 +3,58 @@
 Notable changes, newest first. See [DEPENDENCIES.md](DEPENDENCIES.md) for setup and
 [AUDIO_STUDIO.md](AUDIO_STUDIO.md) for the audio workspace.
 
+## 2026-06 — Unified timeline, portable project bundles, start-screen redesign
+
+### Unified timeline — video + audio on one multi-layer timeline ([TIMELINE.md](TIMELINE.md))
+- **Waveforms on the video timeline's audio clips** — a reusable non-interactive
+  WaveSurfer (`src/components/studio/Waveform.tsx`), drawn in a bright colour over a
+  deepened-green clip so it reads clearly (a same-hue waveform was invisible).
+- **Per-clip tempo + beat markers** — a ♩ button on each audio clip measures BPM via
+  `/api/audio/analyze` (now accepts a DB `assetId`, not just a workspace `path`) and
+  draws ▾ beat markers mapped through each clip's offset + left-trim.
+- **Arbitrary N video + N audio layers.** `track` is now any layer index (cap raised
+  1→31 in validation); `track >= 1` is a positioned video overlay. The timeline
+  renders one lane per used track plus on-demand **+V / +A** lanes (defaults to one
+  video + one audio). The preview (`spec.ts`) and ffmpeg renderer (`jobs/handlers.ts`,
+  `ffmpeg/assemble.ts`) composite overlays bottom-to-top by track and **mix unmuted
+  overlay-clip audio** (preview engine advances + sounds overlays to match the render).
+- **Audio Studio ↔ Assembly bridge.** "→ Timeline" ingests a whole multitrack
+  arrangement onto the video timeline (one audio layer per track, offset + trim
+  preserved). Media Bucket audio can be dragged onto the multitrack timeline
+  (`/api/audio/from-asset`). The Media Bucket is now a *shared* panel (survives the
+  audio section's layout sanitize).
+
+### Portable project bundles ([PROJECT_BUNDLES.md](PROJECT_BUNDLES.md))
+- Projects can live as a **named folder** under a user-chosen base, holding a portable
+  `project.json` manifest + an `assets/` tree (Premiere-style). New schema:
+  `Project.bundlePath`, `User.defaultProjectFolder`.
+- Storage is bundle-aware (`src/lib/assets/storage.ts`): writes land in
+  `<bundle>/assets/<sub>` and store **absolute** paths; `absolutePath()` passes
+  absolute paths through and still resolves+guards legacy `ASSET_ROOT`-relative ones.
+- Electron native folder picker (`slop:pick-folder`/`reveal` IPC + preload bridge,
+  typed via `src/lib/desktop.ts`); Settings → **Default project folder**; per-project
+  override in the New Project popup. Existing projects are untouched (legacy path).
+
+### Dashboard / start
+- Dashboard renamed **"Your Projects"**, with single + batch **project delete**
+  (soft-delete via `DELETE /api/projects/[id]`), and a split **+ New Video** /
+  **+ New Audio Composition** action.
+- **Start screen redesign:** the four options use transparent **Slop character**
+  art (backgrounds removed via flood-fill / `rembg`), the **SLOP STUDIO PRO** marquee
+  wordmark powers on like an old sign over the centered CinemaBot animation, and the
+  option cards are intentionally **squishy** (spring hover, jelly icons, press-squish,
+  staggered bounce-in, hover shine, idle bob). Card descriptions + Start/Browse labels
+  removed for a tight, icon-first grid.
+
+### UI chrome
+- **Removed the top nav bar** (`AppHeader`) everywhere; a small fixed **Home button**
+  (`src/components/HomeButton.tsx`) sits top-left on plain screens (hidden on
+  home/login/editor; the editor's toolbar logo links home). API-key settings still
+  live at `/settings` pending a new dedicated area.
+- **Studio panels lost their title bars + corner icons** (`PanelChrome` renders just a
+  draggable strip + Close).
+- Media Bucket: **"Browse" → "Assets"**, icons/fonts ~30% smaller.
+
 ## 2026-06 — WebGL preview, Audio Studio, desktop self-containment
 
 ### WebGL (PixiJS) preview compositor — now the default

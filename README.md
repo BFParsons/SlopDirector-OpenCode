@@ -15,7 +15,9 @@ generators. ffmpeg stitches the final MP4.
 >   ffmpeg, the Audio Studio Python/ML stack incl. the **torchcodec** requirement) **+ a
 >   dedicated Windows setup section.**
 > - **[`docs/AUDIO_STUDIO.md`](docs/AUDIO_STUDIO.md)** — the DAW-style audio workspace (Demucs / Whisper).
-> - **[`docs/CHANGELOG.md`](docs/CHANGELOG.md)** — recent changes (WebGL preview, Export window, desktop self-containment).
+> - **[`docs/TIMELINE.md`](docs/TIMELINE.md)** — the unified multi-layer video+audio timeline (N layers, waveforms, tempo/beats, render parity).
+> - **[`docs/PROJECT_BUNDLES.md`](docs/PROJECT_BUNDLES.md)** — portable per-project folders (project.json + assets) and the storage model.
+> - **[`docs/CHANGELOG.md`](docs/CHANGELOG.md)** — recent changes (newest first).
 > - **[`docs/DESKTOP.md`](docs/DESKTOP.md)** — Electron / AppImage architecture.
 
 ---
