@@ -57,7 +57,7 @@ export function NewStoryboardCard({ accent }: { accent: string }) {
       />
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={withBase("/slop/videoslop.png")}
+        src={withBase("/slop/assembleslop.png")}
         alt=""
         aria-hidden
         className="squish-icon mb-3 h-20 w-auto object-contain drop-shadow"

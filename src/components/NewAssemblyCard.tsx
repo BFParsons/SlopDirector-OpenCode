@@ -81,7 +81,7 @@ export function NewAssemblyCard({ accent }: { accent: string }) {
         <span aria-hidden className="squish-bar pointer-events-none absolute inset-x-0 top-0 h-1" style={{ background: accent }} />
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={withBase("/slop/assembleslop.png")}
+          src={withBase("/slop/videoslop.png")}
           alt=""
           aria-hidden
           className="squish-icon mb-3 h-20 w-auto object-contain drop-shadow"

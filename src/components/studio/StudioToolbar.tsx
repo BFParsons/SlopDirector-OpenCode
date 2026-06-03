@@ -113,8 +113,10 @@ export function StudioToolbar() {
     <>
       <div className="flex shrink-0 items-center gap-3 border-b border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2">
         <div className="flex min-w-0 flex-1 items-center gap-3">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={withBase("/logo.png")} alt="SlopStudio" title="SlopStudio" className="h-6 w-auto shrink-0 object-contain" />
+          <Link href="/start" title="Home" aria-label="Home" className="shrink-0">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={withBase("/logo.png")} alt="SlopStudio Pro" className="h-6 w-auto object-contain transition-opacity hover:opacity-80" />
+          </Link>
           <Link
             href="/dashboard"
             title="All videos"
