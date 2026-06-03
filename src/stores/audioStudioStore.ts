@@ -62,6 +62,9 @@ export interface NewTrackInput {
   offsetS?: number;
 }
 
+/** A persisted multitrack track (the editable session), id assigned on load. */
+export type SessionTrack = Omit<AudioTrack, "id"> & { id?: string };
+
 interface AudioStudioState {
   projectId: string | null;
   tracks: AudioTrack[];
@@ -73,6 +76,8 @@ interface AudioStudioState {
   setProject: (id: string) => void;
   addTrack: (t: NewTrackInput) => AudioTrack;
   addTracks: (ts: NewTrackInput[]) => AudioTrack[];
+  /** Replace all tracks from a persisted session (rehydrate the multitrack). */
+  setTracks: (ts: SessionTrack[]) => void;
   removeTrack: (id: string) => void;
   updateTrack: (id: string, patch: Partial<AudioTrack>) => void;
   /** Split a track at a timeline position into two adjacent clips. */
@@ -136,6 +141,28 @@ export const useAudioStudioStore = create<AudioStudioState>((set, get) => ({
     set((s) => ({ tracks: [...s.tracks, ...created], selectedTrackId: created[0]?.id ?? s.selectedTrackId }));
     return created;
   },
+
+  setTracks: (ts) =>
+    set(() => ({
+      tracks: ts.map((t, i) => ({
+        id: nextId(),
+        name: t.name,
+        relPath: t.relPath,
+        url: t.url,
+        durationS: t.durationS,
+        sourceDurationS: t.sourceDurationS ?? t.durationS,
+        trimStartS: t.trimStartS ?? 0,
+        kind: t.kind ?? "import",
+        color: t.color ?? PALETTE[i % PALETTE.length],
+        muted: t.muted ?? false,
+        solo: t.solo ?? false,
+        volume: t.volume ?? 1,
+        offsetS: t.offsetS ?? 0,
+        bpm: t.bpm ?? null,
+        beats: t.beats,
+      })),
+      selectedTrackId: null,
+    })),
 
   removeTrack: (id) =>
     set((s) => ({

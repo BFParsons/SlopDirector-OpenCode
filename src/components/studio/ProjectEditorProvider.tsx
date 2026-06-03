@@ -568,6 +568,28 @@ export function ProjectEditorProvider({
           durationS: r.durationS,
         }),
       });
+      // Persist the editable session so the multitrack reopens for re-editing.
+      await api(`/api/projects/${snapshot.id}/audio-session`, {
+        method: "PUT",
+        body: JSON.stringify({
+          tracks: tracks.map((t) => ({
+            name: t.name,
+            relPath: t.relPath,
+            url: t.url,
+            durationS: t.durationS,
+            sourceDurationS: t.sourceDurationS,
+            trimStartS: t.trimStartS,
+            kind: t.kind,
+            color: t.color,
+            muted: t.muted,
+            solo: t.solo,
+            volume: t.volume,
+            offsetS: t.offsetS,
+            bpm: t.bpm ?? null,
+            beats: t.beats,
+          })),
+        }),
+      });
     }
     return await save();
   }

@@ -44,6 +44,7 @@ CREATE TABLE "Project" (
     "userId" TEXT NOT NULL,
     "title" TEXT NOT NULL,
     "bundlePath" TEXT,
+    "audioSession" TEXT,
     "status" TEXT NOT NULL DEFAULT 'DRAFT',
     "goal" TEXT,
     "subject" TEXT,

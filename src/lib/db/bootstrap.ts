@@ -41,6 +41,8 @@ export async function ensureDesktopDb(): Promise<void> {
     'ALTER TABLE "Project" ADD COLUMN "bundlePath" TEXT',
     // Per-user default base folder new project bundles are created under.
     'ALTER TABLE "User" ADD COLUMN "defaultProjectFolder" TEXT',
+    // Audio Studio editable multitrack session (JSON), for reopening/re-editing.
+    'ALTER TABLE "Project" ADD COLUMN "audioSession" TEXT',
   ];
   for (const stmt of migrations) {
     try {

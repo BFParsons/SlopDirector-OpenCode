@@ -117,6 +117,8 @@ model Project {
   // Portable bundle: absolute folder holding this project's project.json + assets
   // (null = legacy project stored under ASSET_ROOT/<projectId>).
   bundlePath    String?
+  // Audio Studio multitrack arrangement (JSON), so the editable session can be reopened.
+  audioSession  String?
   status        AdStatus     @default(DRAFT)
   // brief — all optional; AI generation is opt-in per track
   goal          String?

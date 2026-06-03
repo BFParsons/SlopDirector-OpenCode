@@ -106,6 +106,7 @@ export async function projectSnapshot(projectId: string) {
     scriptGenStatus: p.scriptGenStatus,
     estCostCents: p.estCostCents,
     cost,
+    audioSession: p.audioSession ?? null,
     createdAt: p.createdAt,
     updatedAt: p.updatedAt,
     segments: p.segments.map((s) => ({

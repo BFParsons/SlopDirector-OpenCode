@@ -41,9 +41,28 @@ export default function AudioMultitrackPanel({ windowControls, panelId }: PanelP
     return !s.windows.some((w) => !w.isMinimized && w.zIndex > me.zIndex);
   });
   const setProject = useAudioStudioStore((s) => s.setProject);
+  const setTracks = useAudioStudioStore((s) => s.setTracks);
   useEffect(() => {
     setProject(snapshot.id);
   }, [snapshot.id, setProject]);
+
+  // Rehydrate the saved editable session once per project load (don't clobber
+  // any in-session tracks the user already has).
+  const hydratedRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (hydratedRef.current === snapshot.id) return;
+    hydratedRef.current = snapshot.id;
+    if (!snapshot.audioSession) return;
+    if (useAudioStudioStore.getState().tracks.length > 0) return;
+    try {
+      const parsed = JSON.parse(snapshot.audioSession) as { tracks?: unknown };
+      if (Array.isArray(parsed?.tracks) && parsed.tracks.length) {
+        setTracks(parsed.tracks as Parameters<typeof setTracks>[0]);
+      }
+    } catch {
+      /* ignore a malformed session */
+    }
+  }, [snapshot.id, snapshot.audioSession, setTracks]);
 
   const tracks = useAudioStudioStore((s) => s.tracks);
   const selectedTrackId = useAudioStudioStore((s) => s.selectedTrackId);
