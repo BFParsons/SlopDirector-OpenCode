@@ -44,7 +44,9 @@ function nextId(): string {
 }
 
 // Lane colors cycle through the palette so adjacent tracks stay distinct.
-const PALETTE = ["#6d8bff", "#38b27a", "#d9a441", "#e05a4a", "#b07cff", "#3fb6c5", "#e07ab0", "#7cc56d"];
+// Muted, desaturated palette — calmer waveform lanes (rendered semi-transparent
+// with a soft glow in the Multitrack panel).
+const PALETTE = ["#8089a8", "#7a9d8a", "#b8a878", "#bf8f88", "#9b90b5", "#7ea3aa", "#b591a6", "#94ad8c"];
 
 export interface NewTrackInput {
   name: string;

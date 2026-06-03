@@ -52,13 +52,13 @@ export default function AudioVisualizerPanel({ windowControls }: PanelProps) {
 
         if (m === "scope") {
           analyser.getByteTimeDomainData(time);
-          g.lineWidth = 2 * devicePixelRatio;
+          g.lineWidth = Math.max(1, 1.5 * devicePixelRatio);
           g.strokeStyle = accent;
           g.beginPath();
           const slice = w / time.length;
           for (let i = 0; i < time.length; i++) {
-            const v = time[i] / 128;
-            const y = (v * h) / 2;
+            const v = time[i] / 128; // 0..2, silence ≈ 1
+            const y = (v / 2) * h; // centered on h/2
             const x = i * slice;
             if (i === 0) g.moveTo(x, y);
             else g.lineTo(x, y);
@@ -66,17 +66,19 @@ export default function AudioVisualizerPanel({ windowControls }: PanelProps) {
           g.stroke();
         } else {
           analyser.getByteFrequencyData(freq);
-          const bins = m === "spectrum" ? freq.length / 2 : 64;
-          const step = Math.max(1, Math.floor(freq.length / 2 / bins));
+          // Skip the highest (mostly-empty) bins so the bars fill the width.
+          const usable = Math.max(16, Math.floor(freq.length * 0.85));
+          const bins = m === "spectrum" ? 128 : 56;
+          const step = Math.max(1, Math.floor(usable / bins));
+          const gapPx = (m === "spectrum" ? 1 : 2) * devicePixelRatio;
           const bw = w / bins;
           for (let i = 0; i < bins; i++) {
             let sum = 0;
             for (let j = 0; j < step; j++) sum += freq[i * step + j] || 0;
             const mag = sum / step / 255;
             const bh = mag * h;
-            const hue = 220 - mag * 140;
-            g.fillStyle = m === "spectrum" ? `hsl(${hue},70%,55%)` : accent;
-            g.fillRect(i * bw, h - bh, Math.max(1, bw - 1 * devicePixelRatio), bh);
+            g.fillStyle = m === "spectrum" ? `hsl(${250 - mag * 200}, 65%, 55%)` : accent;
+            g.fillRect(i * bw, h - bh, Math.max(1, bw - gapPx), bh);
           }
         }
       }
@@ -95,8 +97,7 @@ export default function AudioVisualizerPanel({ windowControls }: PanelProps) {
         <canvas ref={canvasRef} className="block h-full w-full" />
         {/* Collapsed mode selector overlaid on the visualization. */}
         <OptionDrawer
-          className="absolute right-1 top-1 w-28"
-          align="right"
+          className="absolute left-1 top-1 w-24 text-[10px]"
           value={mode}
           options={MODES}
           onChange={(k) => setMode(k as Mode)}

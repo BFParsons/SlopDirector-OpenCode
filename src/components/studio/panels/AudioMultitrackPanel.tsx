@@ -229,8 +229,9 @@ export default function AudioMultitrackPanel({ windowControls, panelId }: PanelP
           container,
           url: t.url,
           height: LANE_H - 16,
-          waveColor: t.color,
-          progressColor: t.color,
+          // Semi-transparent so lanes read as soft/hazy (glow added on the clip).
+          waveColor: `${t.color}80`,
+          progressColor: `${t.color}b3`,
           cursorColor: "transparent",
           normalize: true,
           interact: false,
@@ -575,7 +576,13 @@ export default function AudioMultitrackPanel({ windowControls, panelId }: PanelP
                       <div
                         onMouseDown={(e) => startMove(e, t)}
                         className={`group absolute top-2 cursor-grab overflow-hidden rounded active:cursor-grabbing ${selectedTrackId === t.id ? "ring-1 ring-[var(--color-accent)]" : ""}`}
-                        style={{ left: t.offsetS * pxPerSec, width: clipW, height: LANE_H - 16 }}
+                        style={{
+                          left: t.offsetS * pxPerSec,
+                          width: clipW,
+                          height: LANE_H - 16,
+                          // Soft haze in the lane colour so the waveform appears to glow.
+                          filter: `drop-shadow(0 0 3px ${t.color}) drop-shadow(0 0 9px ${t.color}66)`,
+                        }}
                       >
                         {/* Full-source waveform, shifted so only the trimmed window shows. */}
                         <div
