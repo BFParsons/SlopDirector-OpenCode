@@ -70,7 +70,7 @@ const FILTERS: { key: Filter; label: string }[] = [
 
 function YtMark() {
   return (
-    <svg width="16" height="11" viewBox="0 0 28 20" aria-hidden role="img">
+    <svg width="11" height="8" viewBox="0 0 28 20" aria-hidden role="img">
       <rect width="28" height="20" rx="5" fill="#FF0000" />
       <path d="M11.2 5.8 L20 10 L11.2 14.2 Z" fill="#fff" />
     </svg>
@@ -329,7 +329,7 @@ export default function MediaBucketPanel({ windowControls }: PanelProps) {
   const inBucket = new Set(items.map((a) => a.id));
   const list = displayed.filter((a) => filter === "all" || a.kind === filter);
   const importBtn =
-    "flex items-center gap-1.5 rounded-md border border-[var(--color-border)] px-2.5 py-1.5 text-xs text-[var(--color-fg)] transition-colors hover:border-[var(--color-accent)] disabled:cursor-not-allowed disabled:opacity-40";
+    "flex items-center gap-1 rounded-md border border-[var(--color-border)] px-2 py-1 text-[8px] text-[var(--color-fg)] transition-colors hover:border-[var(--color-accent)] disabled:cursor-not-allowed disabled:opacity-40";
 
   return (
     <PanelChrome title="Media Bucket" icon="🗂" {...windowControls}>
@@ -361,7 +361,7 @@ export default function MediaBucketPanel({ windowControls }: PanelProps) {
             <YtMark /> YouTube
           </button>
           <button type="button" className={importBtn} onClick={openBrowse} title="Reuse media from your other projects">
-            🔎 Browse
+            🔎 Assets
           </button>
         </div>
 
@@ -397,9 +397,9 @@ export default function MediaBucketPanel({ windowControls }: PanelProps) {
             }
           }}
         >
-          {error ? <p className="mb-2 text-xs text-[var(--color-danger)]">{error}</p> : null}
+          {error ? <p className="mb-2 text-[8px] text-[var(--color-danger)]">{error}</p> : null}
           {list.length === 0 ? (
-            <p className="text-xs text-[var(--color-muted)]">
+            <p className="text-[8px] text-[var(--color-muted)]">
               {displayed.length === 0
                 ? "Your bucket is empty. Generate AI video/voiceover, upload a file, grab a YouTube clip, or Browse to reuse media."
                 : "Nothing matches this filter."}
@@ -426,7 +426,7 @@ export default function MediaBucketPanel({ windowControls }: PanelProps) {
                     } ${draggable ? "cursor-grab active:cursor-grabbing" : ""}`}
                   >
                     {a.isNew ? (
-                      <span className="absolute right-1 top-1 z-10 text-[11px] drop-shadow" title="New">
+                      <span className="absolute right-1 top-1 z-10 text-[8px] drop-shadow" title="New">
                         ✨
                       </span>
                     ) : null}
@@ -437,13 +437,13 @@ export default function MediaBucketPanel({ windowControls }: PanelProps) {
                         e.stopPropagation();
                         removeAsset(a);
                       }}
-                      className="absolute left-1 top-1 z-10 flex h-4 w-4 items-center justify-center rounded bg-black/55 text-[10px] text-white/80 opacity-0 transition-opacity hover:bg-[var(--color-danger)] group-hover:opacity-100"
+                      className="absolute left-1 top-1 z-10 flex h-3 w-3 items-center justify-center rounded bg-black/55 text-[7px] text-white/80 opacity-0 transition-opacity hover:bg-[var(--color-danger)] group-hover:opacity-100"
                     >
                       ✕
                     </button>
                     <BucketThumb item={a} />
                     <div className="flex items-center justify-between gap-1 p-1.5">
-                      <span className="min-w-0 truncate text-[10px] text-[var(--color-muted)]" title={a.fromCurrent ? "" : a.projectTitle}>
+                      <span className="min-w-0 truncate text-[7px] text-[var(--color-muted)]" title={a.fromCurrent ? "" : a.projectTitle}>
                         {KIND_LABEL[a.kind]}
                         {!a.fromCurrent && a.projectTitle ? ` · ${a.projectTitle}` : ""}
                       </span>
@@ -451,7 +451,7 @@ export default function MediaBucketPanel({ windowControls }: PanelProps) {
                         type="button"
                         disabled={busyId === a.id || atMax || readOnly || a.generating || a.failed}
                         onClick={() => void add(a)}
-                        className="shrink-0 rounded border border-[var(--color-border)] px-1.5 py-0.5 text-[10px] text-[var(--color-fg)] transition-colors hover:border-[var(--color-accent)] disabled:opacity-40"
+                        className="shrink-0 rounded border border-[var(--color-border)] px-1.5 py-0.5 text-[7px] text-[var(--color-fg)] transition-colors hover:border-[var(--color-accent)] disabled:opacity-40"
                       >
                         {busyId === a.id ? "…" : "+ Add"}
                       </button>
@@ -462,7 +462,7 @@ export default function MediaBucketPanel({ windowControls }: PanelProps) {
             </div>
           )}
           {atMax ? (
-            <p className="mt-2 text-[11px] text-[var(--color-muted)]">Segment limit reached ({CAPS.maxSegments}).</p>
+            <p className="mt-2 text-[8px] text-[var(--color-muted)]">Segment limit reached ({CAPS.maxSegments}).</p>
           ) : null}
         </div>
       </div>
@@ -472,7 +472,7 @@ export default function MediaBucketPanel({ windowControls }: PanelProps) {
         <>
           <div className="fixed inset-0 z-[60]" onClick={() => setMenu(null)} onContextMenu={(e) => { e.preventDefault(); setMenu(null); }} />
           <div
-            className="fixed z-[61] min-w-[170px] overflow-hidden rounded-md border border-[var(--color-border)] bg-[var(--color-card)] py-1 text-xs shadow-lg"
+            className="fixed z-[61] min-w-[170px] overflow-hidden rounded-md border border-[var(--color-border)] bg-[var(--color-card)] py-1 text-[8px] shadow-lg"
             style={{ left: menu.x, top: menu.y }}
           >
             {menu.asset.isVideo && !menu.asset.generating && !menu.asset.failed ? (
@@ -520,38 +520,38 @@ export default function MediaBucketPanel({ windowControls }: PanelProps) {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex shrink-0 items-center justify-between border-b border-[var(--color-border)] px-3 py-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-muted)]">Reuse media from your projects</span>
+              <span className="text-[8px] font-semibold uppercase tracking-wider text-[var(--color-muted)]">Reuse media from your projects</span>
               <button type="button" className="text-[var(--color-muted)] hover:text-[var(--color-fg)]" onClick={() => setBrowseOpen(false)}>
                 ✕
               </button>
             </div>
             <div className="min-h-0 flex-1 overflow-y-auto p-1">
               {libError ? (
-                <p className="p-3 text-xs text-[var(--color-danger)]">{libError}</p>
+                <p className="p-3 text-[8px] text-[var(--color-danger)]">{libError}</p>
               ) : library == null ? (
-                <p className="p-3 text-xs text-[var(--color-muted)]">Loading your media library…</p>
+                <p className="p-3 text-[8px] text-[var(--color-muted)]">Loading your media library…</p>
               ) : library.length === 0 ? (
-                <p className="p-3 text-xs text-[var(--color-muted)]">No reusable media found yet.</p>
+                <p className="p-3 text-[8px] text-[var(--color-muted)]">No reusable media found yet.</p>
               ) : (
                 library.map((a) => {
                   const added = inBucket.has(a.id);
                   return (
                     <div key={a.id} className="flex items-center gap-2 rounded px-2 py-1.5 hover:bg-[var(--color-surface)]">
-                      <span className="text-base" aria-hidden>
+                      <span className="text-[11px]" aria-hidden>
                         {a.isAudio ? "🎵" : a.isVideo ? "🎞️" : "🖼️"}
                       </span>
                       <div className="min-w-0 flex-1">
-                        <div className="truncate text-xs text-[var(--color-fg)]">
+                        <div className="truncate text-[8px] text-[var(--color-fg)]">
                           {KIND_LABEL[a.kind]}
                           {!a.fromCurrent && a.projectTitle ? ` · ${a.projectTitle}` : a.fromCurrent ? " · this project" : ""}
                         </div>
-                        <div className="text-[10px] text-[var(--color-muted)]">{fmtSize(a.sizeBytes)}</div>
+                        <div className="text-[7px] text-[var(--color-muted)]">{fmtSize(a.sizeBytes)}</div>
                       </div>
                       <button
                         type="button"
                         disabled={added}
                         onClick={() => addItems([a])}
-                        className="shrink-0 rounded border border-[var(--color-border)] px-2 py-0.5 text-[10px] text-[var(--color-fg)] transition-colors hover:border-[var(--color-accent)] disabled:opacity-40"
+                        className="shrink-0 rounded border border-[var(--color-border)] px-2 py-0.5 text-[7px] text-[var(--color-fg)] transition-colors hover:border-[var(--color-accent)] disabled:opacity-40"
                       >
                         {added ? "Added" : "+ Add"}
                       </button>
@@ -563,7 +563,7 @@ export default function MediaBucketPanel({ windowControls }: PanelProps) {
             <div className="shrink-0 border-t border-[var(--color-border)] px-3 py-2 text-right">
               <button
                 type="button"
-                className="rounded bg-[var(--color-control)] px-3 py-1 text-xs font-medium text-[var(--color-accent-fg)] hover:brightness-110"
+                className="rounded bg-[var(--color-control)] px-3 py-1 text-[8px] font-medium text-[var(--color-accent-fg)] hover:brightness-110"
                 onClick={() => setBrowseOpen(false)}
               >
                 Done
@@ -603,15 +603,15 @@ function BucketThumb({ item }: { item: MediaAsset }) {
   return (
     <div className="relative flex aspect-video items-center justify-center bg-black/40">
       {item.generating ? (
-        <span className="flex flex-col items-center gap-1 text-[10px] text-[var(--color-muted)]">
+        <span className="flex flex-col items-center gap-1 text-[7px] text-[var(--color-muted)]">
           <span className="h-3 w-3 animate-spin rounded-full border-2 border-[var(--color-accent)] border-t-transparent" />
           Generating…
         </span>
       ) : item.failed ? (
-        <span className="text-[10px] text-[var(--color-danger)]">Failed</span>
+        <span className="text-[7px] text-[var(--color-danger)]">Failed</span>
       ) : item.isAudio ? (
         <>
-          <span className="text-2xl" aria-hidden>
+          <span className="text-[17px]" aria-hidden>
             🎵
           </span>
           <audio src={src} preload="metadata" onLoadedMetadata={onMeta} className="hidden" />
@@ -631,7 +631,7 @@ function BucketThumb({ item }: { item: MediaAsset }) {
         <img src={src} alt="" draggable={false} className="pointer-events-none h-full w-full object-contain" />
       )}
       {label && (item.isVideo || item.isAudio) && !item.generating && !item.failed ? (
-        <span className="pointer-events-none absolute bottom-0.5 right-1 rounded bg-black/55 px-1 font-mono text-[11px] leading-tight text-white">
+        <span className="pointer-events-none absolute bottom-0.5 right-1 rounded bg-black/55 px-1 font-mono text-[8px] leading-tight text-white">
           {label}
         </span>
       ) : null}
