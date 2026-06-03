@@ -51,11 +51,12 @@ model WorkspaceLayout {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   name      String   @default("Workspace")
   isDefault Boolean  @default(false)
+  section   String   @default("video") // "audio" | "video" — keeps the suites' workspaces discrete
   layout    Json
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([userId])
+  @@index([userId, section])
 }
 
 model Session {

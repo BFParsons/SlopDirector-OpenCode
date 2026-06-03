@@ -33,7 +33,10 @@ export async function ensureDesktopDb(): Promise<void> {
   // Lightweight forward migrations: add columns introduced after the initial DDL
   // so existing embedded DBs upgrade in place. SQLite lacks ADD COLUMN IF NOT
   // EXISTS, so we ignore the "duplicate column" error when it's already there.
-  const migrations = ['ALTER TABLE "Segment" ADD COLUMN "effects" JSONB'];
+  const migrations = [
+    'ALTER TABLE "Segment" ADD COLUMN "effects" JSONB',
+    `ALTER TABLE "WorkspaceLayout" ADD COLUMN "section" TEXT NOT NULL DEFAULT 'video'`,
+  ];
   for (const stmt of migrations) {
     try {
       await prisma.$executeRawUnsafe(stmt);

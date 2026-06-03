@@ -19,6 +19,7 @@ CREATE TABLE "WorkspaceLayout" (
     "userId" TEXT NOT NULL,
     "name" TEXT NOT NULL DEFAULT 'Workspace',
     "isDefault" BOOLEAN NOT NULL DEFAULT false,
+    "section" TEXT NOT NULL DEFAULT 'video',
     "layout" JSONB NOT NULL,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL,

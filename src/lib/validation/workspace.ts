@@ -37,6 +37,7 @@ export const putLayoutSchema = z
     name: z.string().min(1).max(80).optional(),
     layout: workspaceLayoutDataSchema.optional(),
     isDefault: z.boolean().optional(),
+    section: z.enum(["audio", "video"]).optional(),
   })
   .refine((b) => b.layout !== undefined || b.id !== undefined, {
     message: "either `layout` (create/update) or `id` (flag toggle) is required",

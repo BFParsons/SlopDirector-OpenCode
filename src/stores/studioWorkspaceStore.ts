@@ -266,23 +266,11 @@ export const useStudioWorkspaceStore = create<WorkspaceState>((set, get) => ({
   enterSection: async (section) => {
     // Already showing this section's layout — keep it (don't clobber on remount).
     if (get().section === section && get().isReady) return;
-    const { containerSize } = get();
     set({ section, isReady: false, isDirty: false });
-    if (section === "audio") {
-      // Hardcoded default — never loaded from / saved to the DB.
-      const data = sectionDefault("audio", containerSize.width, containerSize.height);
-      set({
-        windows: data.windows,
-        nextZIndex: data.nextZIndex,
-        layoutId: null,
-        currentLayoutName: "Audio Studio",
-        savedLayouts: [],
-        isReady: true,
-        isDirty: false,
-      });
-      return;
-    }
-    await get().loadLayout(); // video: the user's saved/default layout
+    // Each section loads its OWN saved/default layout (scoped in the DB). If a
+    // section has none yet, loadLayout seeds the section default — the audio-studio
+    // preset for audio, the system layout for video.
+    await get().loadLayout();
   },
 
   applyPreset: (preset) => {
@@ -298,7 +286,7 @@ export const useStudioWorkspaceStore = create<WorkspaceState>((set, get) => ({
   resetLayout: () => {
     const { section, containerSize } = get();
     const data = sectionDefault(section, containerSize.width, containerSize.height);
-    set({ windows: data.windows, nextZIndex: data.nextZIndex, isDirty: section !== "audio" });
+    set({ windows: data.windows, nextZIndex: data.nextZIndex, isDirty: true });
   },
 
   setDirty: (dirty) => set({ isDirty: dirty }),
@@ -310,14 +298,16 @@ export const useStudioWorkspaceStore = create<WorkspaceState>((set, get) => ({
   },
 
   saveLayout: async () => {
-    if (get().section === "audio") return; // Audio Studio uses a hardcoded default
-    const { layoutId } = get();
+    const { layoutId, section } = get();
     const layout = get().toLayoutData();
     // Update the current workspace in place (preserve its default flag). The very
-    // first save (no row yet) seeds the default. Only invoked on an explicit Save,
-    // so it must NOT silently re-mark a non-default workspace as default.
+    // first save (no row yet) seeds this section's default. Only invoked on an
+    // explicit Save (or the seed), so it must NOT silently re-mark a non-default
+    // workspace as default.
     const data = await putLayout(
-      layoutId ? { id: layoutId, layout } : { name: "Workspace", layout, isDefault: true },
+      layoutId
+        ? { id: layoutId, layout, section }
+        : { name: section === "audio" ? "Audio Studio" : "Workspace", layout, isDefault: true, section },
     );
     if (data) {
       set({ layoutId: data.id, currentLayoutName: data.name, isDirty: false });
@@ -326,10 +316,12 @@ export const useStudioWorkspaceStore = create<WorkspaceState>((set, get) => ({
   },
 
   loadLayout: async () => {
+    const { section, containerSize } = get();
+    const fallback = () => sectionDefault(section, containerSize.width, containerSize.height);
     try {
-      const res = await fetch(withBase(LAYOUT_URL));
+      const res = await fetch(withBase(`${LAYOUT_URL}?section=${section}`));
       if (!res.ok) {
-        applyLayoutData(createDefaultLayout(), set);
+        applyLayoutData(fallback(), set);
         return;
       }
       const json = (await res.json()) as { data?: SavedLayoutWithData[] };
@@ -340,23 +332,22 @@ export const useStudioWorkspaceStore = create<WorkspaceState>((set, get) => ({
         });
         const def = layouts.find((l) => l.isDefault) ?? layouts[0];
         if (def && (def.layout as { version?: number })?.version === 2) {
-          const { section, containerSize } = get();
           const data = sanitizeForSection(def.layout as WorkspaceLayoutData, section, containerSize.width, containerSize.height);
           applyLayoutData(data, set, { layoutId: def.id, currentLayoutName: def.name });
           return;
         }
       }
-      // First-time user (or no usable saved layout): seed + persist the default.
-      applyLayoutData(createDefaultLayout(), set);
+      // No saved layout for this section yet — seed + persist the section default.
+      applyLayoutData(fallback(), set);
       void get().saveLayout();
     } catch {
-      applyLayoutData(createDefaultLayout(), set);
+      applyLayoutData(fallback(), set);
     }
   },
 
   loadSavedLayouts: async () => {
     try {
-      const res = await fetch(withBase(LAYOUT_URL));
+      const res = await fetch(withBase(`${LAYOUT_URL}?section=${get().section}`));
       if (!res.ok) return;
       const json = (await res.json()) as { data?: SavedLayoutWithData[] };
       if (Array.isArray(json.data)) {
@@ -370,9 +361,8 @@ export const useStudioWorkspaceStore = create<WorkspaceState>((set, get) => ({
   },
 
   saveLayoutAs: async (name, makeDefault = false) => {
-    if (get().section === "audio") return; // Audio Studio uses a hardcoded default
     const layout = get().toLayoutData();
-    const data = await putLayout({ name, layout, isDefault: makeDefault });
+    const data = await putLayout({ name, layout, isDefault: makeDefault, section: get().section });
     if (data) {
       set({ layoutId: data.id, currentLayoutName: data.name, isDirty: false });
       get().loadSavedLayouts();
@@ -392,13 +382,13 @@ export const useStudioWorkspaceStore = create<WorkspaceState>((set, get) => ({
   },
 
   setDefaultLayout: async (id) => {
-    const data = await putLayout({ id, isDefault: true });
+    const data = await putLayout({ id, isDefault: true, section: get().section });
     if (data) get().loadSavedLayouts();
   },
 
   loadLayoutById: async (id) => {
     try {
-      const res = await fetch(withBase(LAYOUT_URL));
+      const res = await fetch(withBase(`${LAYOUT_URL}?section=${get().section}`));
       if (!res.ok) return;
       const json = (await res.json()) as { data?: SavedLayoutWithData[] };
       const target = json.data?.find((l) => l.id === id);

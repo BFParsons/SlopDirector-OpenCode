@@ -6,12 +6,14 @@ import { parseJsonBody } from "@/lib/http/parseJsonBody";
 import { err, ok } from "@/lib/http/response";
 import { deleteLayoutSchema, putLayoutSchema } from "@/lib/validation/workspace";
 
-/** GET → the user's saved Studio layouts (array, newest first). */
-export async function GET() {
+/** GET → the user's saved Studio layouts for a section (array, newest first). */
+export async function GET(request: Request) {
   try {
     const { user } = await requireApiUser();
+    const sectionParam = new URL(request.url).searchParams.get("section");
+    const section = sectionParam === "audio" ? "audio" : "video";
     const rows = await prisma.workspaceLayout.findMany({
-      where: { userId: user.id },
+      where: { userId: user.id, section },
       orderBy: { updatedAt: "desc" },
     });
     return ok(
@@ -36,10 +38,13 @@ export async function PUT(request: Request) {
     const { user } = await requireApiUser();
     const body = await parseJsonBody(request, putLayoutSchema, 512 * 1024);
 
+    const section = body.section ?? "video";
+
     const row = await prisma.$transaction(async (tx) => {
       if (body.isDefault) {
+        // Only one default per (user, section) — keeps Audio & Video discrete.
         await tx.workspaceLayout.updateMany({
-          where: { userId: user.id, isDefault: true },
+          where: { userId: user.id, section, isDefault: true },
           data: { isDefault: false },
         });
       }
@@ -51,6 +56,7 @@ export async function PUT(request: Request) {
         if (body.name !== undefined) data.name = body.name;
         if (body.layout !== undefined) data.layout = body.layout;
         if (body.isDefault !== undefined) data.isDefault = body.isDefault;
+        if (body.section !== undefined) data.section = body.section;
         const res = await tx.workspaceLayout.updateMany({
           where: { id: body.id, userId: user.id },
           data,
@@ -66,6 +72,7 @@ export async function PUT(request: Request) {
         data: {
           userId: user.id,
           name: body.name ?? "Workspace",
+          section,
           layout: body.layout ?? { version: 2, windows: [], nextZIndex: 1 },
           isDefault: body.isDefault ?? false,
         },
