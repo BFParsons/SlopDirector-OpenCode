@@ -16,6 +16,15 @@ interface UploadResult {
   url: string;
 }
 
+interface YtSearchResult {
+  id: string;
+  title: string;
+  channel: string;
+  durationS: number;
+  thumbnail: string;
+  url: string;
+}
+
 function fmtDur(s: number): string {
   if (!Number.isFinite(s) || s <= 0) return "0:00";
   const m = Math.floor(s / 60);
@@ -102,8 +111,15 @@ export default function AudioImporterPanel({ windowControls }: PanelProps) {
   const [ytUrl, setYtUrl] = useState("");
   const [ytBusy, setYtBusy] = useState(false);
   const [ytMsg, setYtMsg] = useState("");
-  async function importYouTube() {
-    const url = ytUrl.trim();
+  // YouTube search popup
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQ, setSearchQ] = useState("");
+  const [searchResults, setSearchResults] = useState<YtSearchResult[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [searchErr, setSearchErr] = useState<string | null>(null);
+
+  async function runYouTubeImport(rawUrl: string) {
+    const url = rawUrl.trim();
     if (!url || ytBusy) return;
     setYtBusy(true);
     setError(null);
@@ -116,13 +132,27 @@ export default function AudioImporterPanel({ windowControls }: PanelProps) {
       const job = await pollAudioJob(jobId, (j) => setYtMsg(j.message));
       const r = job.result as { name: string; relPath: string; durationS: number; url: string };
       addTrack({ name: r.name, relPath: r.relPath, url: r.url, durationS: r.durationS, kind: "import" });
-      setYtUrl("");
       setYtMsg("");
     } catch (e) {
       setError((e as Error).message);
       setYtMsg("");
     } finally {
       setYtBusy(false);
+    }
+  }
+
+  async function runSearch() {
+    const q = searchQ.trim();
+    if (!q || searching) return;
+    setSearching(true);
+    setSearchErr(null);
+    try {
+      const res = await api<YtSearchResult[]>(`/api/audio/youtube/search?q=${encodeURIComponent(q)}`);
+      setSearchResults(res);
+    } catch (e) {
+      setSearchErr((e as Error).message);
+    } finally {
+      setSearching(false);
     }
   }
 
@@ -170,18 +200,26 @@ export default function AudioImporterPanel({ windowControls }: PanelProps) {
             value={ytUrl}
             onChange={(e) => setYtUrl(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter") void importYouTube();
+              if (e.key === "Enter") void runYouTubeImport(ytUrl);
             }}
             placeholder="Paste a YouTube URL → mp3"
             className="min-w-0 flex-1 rounded-md border border-[var(--color-border)] bg-[var(--color-card)] px-2 py-1.5 text-xs"
           />
           <button
             type="button"
-            onClick={() => void importYouTube()}
+            onClick={() => void runYouTubeImport(ytUrl)}
             disabled={ytBusy || !ytUrl.trim()}
             className="shrink-0 rounded-md bg-[var(--color-accent)] px-2.5 py-1.5 text-xs font-medium text-white transition hover:brightness-110 disabled:opacity-40"
           >
             {ytBusy ? "Importing…" : "Import"}
+          </button>
+          <button
+            type="button"
+            onClick={() => setSearchOpen(true)}
+            className="shrink-0 rounded-md border border-[var(--color-border)] px-2 py-1.5 text-xs transition-colors hover:border-[var(--color-accent)]"
+            title="Search YouTube"
+          >
+            🔎
           </button>
         </div>
         {ytMsg ? <p className="text-[11px] text-[var(--color-muted)]">{ytMsg}</p> : null}
@@ -237,6 +275,78 @@ export default function AudioImporterPanel({ windowControls }: PanelProps) {
           Imported audio is shared across all Audio Studio panels — separate, process, mix, or visualize any track.
         </p>
       </div>
+
+      {/* YouTube search popup */}
+      {searchOpen ? (
+        <div
+          className="fixed inset-0 z-[80] flex items-center justify-center bg-black/50 p-4"
+          onClick={() => setSearchOpen(false)}
+        >
+          <div
+            className="flex max-h-[80vh] w-full max-w-lg flex-col overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex shrink-0 items-center gap-2 border-b border-[var(--color-border)] p-2">
+              <span className="text-sm" aria-hidden>🔎</span>
+              <input
+                autoFocus
+                type="text"
+                value={searchQ}
+                onChange={(e) => setSearchQ(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") void runSearch();
+                }}
+                placeholder="Search YouTube…"
+                className="min-w-0 flex-1 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-1.5 text-xs"
+              />
+              <button
+                type="button"
+                onClick={() => void runSearch()}
+                disabled={searching || !searchQ.trim()}
+                className="shrink-0 rounded-md bg-[var(--color-accent)] px-3 py-1.5 text-xs font-medium text-white disabled:opacity-40"
+              >
+                {searching ? "Searching…" : "Search"}
+              </button>
+              <button type="button" onClick={() => setSearchOpen(false)} className="shrink-0 px-1 text-[var(--color-muted)] hover:text-[var(--color-fg)]">
+                ✕
+              </button>
+            </div>
+            {ytMsg ? <p className="shrink-0 px-3 py-1 text-[11px] text-[var(--color-muted)]">{ytMsg}</p> : null}
+            {searchErr ? <p className="shrink-0 px-3 py-1 text-[11px] text-[var(--color-danger)]">{searchErr}</p> : null}
+            <div className="min-h-0 flex-1 overflow-y-auto p-2">
+              {searchResults.length === 0 ? (
+                <p className="p-3 text-xs text-[var(--color-muted)]">
+                  {searching ? "Searching…" : "Search YouTube and import any result as an mp3."}
+                </p>
+              ) : (
+                <ul className="space-y-1">
+                  {searchResults.map((r) => (
+                    <li key={r.id} className="flex items-center gap-2 rounded-md border border-[var(--color-border)] p-1.5">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={r.thumbnail} alt="" className="h-9 w-16 shrink-0 rounded bg-black/40 object-cover" />
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-xs text-[var(--color-fg)]" title={r.title}>{r.title}</div>
+                        <div className="truncate text-[10px] text-[var(--color-muted)]">
+                          {r.channel}
+                          {r.durationS ? ` · ${fmtDur(r.durationS)}` : ""}
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        disabled={ytBusy}
+                        onClick={() => void runYouTubeImport(r.url)}
+                        className="shrink-0 rounded border border-[var(--color-border)] px-2 py-1 text-[10px] transition-colors hover:border-[var(--color-accent)] disabled:opacity-40"
+                      >
+                        {ytBusy ? "…" : "+ Import"}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : null}
     </PanelChrome>
   );
 }

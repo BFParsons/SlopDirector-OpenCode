@@ -20,6 +20,74 @@ export interface YtMp3Result {
   durationS: number;
 }
 
+export interface YtSearchResult {
+  id: string;
+  title: string;
+  channel: string;
+  durationS: number;
+  thumbnail: string;
+  url: string;
+}
+
+/**
+ * Search YouTube via yt-dlp's `ytsearchN:` extractor with --flat-playlist (no
+ * per-video resolution, no download) — fast metadata for a results popup.
+ */
+export function searchYouTube(query: string, limit = 12): Promise<YtSearchResult[]> {
+  const q = query.trim().slice(0, 200);
+  const n = Math.min(25, Math.max(1, limit));
+  if (!q) return Promise.resolve([]);
+
+  const args = ["--no-warnings", "--flat-playlist", "--dump-json"];
+  if (env.YTDLP_REMOTE_COMPONENTS) args.push("--remote-components", env.YTDLP_REMOTE_COMPONENTS);
+  args.push(...cookieArgs());
+  args.push(`ytsearch${n}:${q}`);
+
+  return new Promise((resolve, reject) => {
+    const proc = spawn(env.YTDLP_BIN, args, { stdio: ["ignore", "pipe", "pipe"] });
+    let stdout = "";
+    let stderr = "";
+    const killer = setTimeout(() => proc.kill("SIGKILL"), 45_000);
+    proc.stdout.on("data", (d: Buffer) => (stdout += d.toString()));
+    proc.stderr.on("data", (d: Buffer) => {
+      stderr += d.toString();
+      if (stderr.length > 8_000) stderr = stderr.slice(-8_000);
+    });
+    proc.on("error", (e) => {
+      clearTimeout(killer);
+      reject(new Error(`yt-dlp failed to start (${env.YTDLP_BIN}): ${e.message}`));
+    });
+    proc.on("close", (code) => {
+      clearTimeout(killer);
+      if (code !== 0 && !stdout.trim()) {
+        reject(new Error(`yt-dlp search failed: ${stderr.slice(-400) || "no output"}`));
+        return;
+      }
+      const out: YtSearchResult[] = [];
+      for (const line of stdout.split("\n")) {
+        const s = line.trim();
+        if (!s) continue;
+        try {
+          const e = JSON.parse(s) as Record<string, unknown>;
+          const id = typeof e.id === "string" ? e.id : "";
+          if (!/^[\w-]{11}$/.test(id)) continue;
+          out.push({
+            id,
+            title: typeof e.title === "string" ? e.title : id,
+            channel: (e.channel as string) || (e.uploader as string) || "",
+            durationS: Number(e.duration) || 0,
+            thumbnail: `https://i.ytimg.com/vi/${id}/mqdefault.jpg`,
+            url: `https://www.youtube.com/watch?v=${id}`,
+          });
+        } catch {
+          /* skip non-JSON lines */
+        }
+      }
+      resolve(out);
+    });
+  });
+}
+
 function cookieArgs(): string[] {
   if (env.YTDLP_COOKIES) return ["--cookies", env.YTDLP_COOKIES];
   if (env.YTDLP_COOKIES_FROM_BROWSER) return ["--cookies-from-browser", env.YTDLP_COOKIES_FROM_BROWSER];
