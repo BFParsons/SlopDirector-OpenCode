@@ -19,6 +19,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { withBase } from "@/lib/basePath";
+import { Waveform } from "@/components/studio/Waveform";
 import { hasMediaDrag, type MediaDragPayload, readMediaDrag, hasAudioDrag, readAudioDrag, type AudioStudioDragPayload } from "@/lib/studio/dnd";
 import { fmtClock, segmentHue, type SegmentView } from "./SegmentCard";
 import type { OverlayView } from "./AudioSection";
@@ -1031,6 +1032,9 @@ const AudioClipBlock = memo(function AudioClipBlock({
       } ${selected ? "ring-2 ring-[var(--color-accent)]" : ""}`}
     >
       <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: blockBg("#38b27a") }} />
+      {s.sourceAssetId ? (
+        <Waveform url={withBase(`/api/assets/${s.sourceAssetId}`)} color="#38b27a" className="absolute inset-0" />
+      ) : null}
       <span className="relative truncate drop-shadow">audio · {s.durationS.toFixed(1)}s</span>
       {!readOnly ? (
         <>
