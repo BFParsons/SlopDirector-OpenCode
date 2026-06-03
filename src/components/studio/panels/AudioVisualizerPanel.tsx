@@ -90,30 +90,24 @@ export default function AudioVisualizerPanel({ windowControls }: PanelProps) {
 
   return (
     <PanelChrome title="Visualizer" icon="📊" {...windowControls}>
-      <div className="flex h-full flex-col gap-2 p-2">
-        <div className="flex shrink-0 items-center justify-between gap-2">
-          <span className="text-[11px] text-[var(--color-muted)]">Multitrack output</span>
-          <div className="flex overflow-hidden rounded-md border border-[var(--color-border)]">
-            {MODES.map((m) => (
-              <button
-                key={m.key}
-                type="button"
-                onClick={() => setMode(m.key)}
-                className={`px-2 py-1 text-[10px] ${mode === m.key ? "bg-[var(--color-accent)] text-white" : "text-[var(--color-muted)] hover:text-[var(--color-fg)]"}`}
-              >
-                {m.label}
-              </button>
-            ))}
-          </div>
+      <div className="relative h-full w-full bg-[#0b0d12]">
+        <canvas ref={canvasRef} className="block h-full w-full" />
+        {/* Tiny transparent mode toggles overlaid on the visualization. */}
+        <div className="absolute right-1 top-1 flex gap-0.5">
+          {MODES.map((m) => (
+            <button
+              key={m.key}
+              type="button"
+              onClick={() => setMode(m.key)}
+              title={m.label}
+              className={`rounded px-1.5 py-0.5 text-[9px] leading-none backdrop-blur-sm transition-colors ${
+                mode === m.key ? "bg-white/20 text-white" : "bg-black/30 text-white/55 hover:text-white"
+              }`}
+            >
+              {m.label}
+            </button>
+          ))}
         </div>
-
-        <div className="min-h-0 flex-1 overflow-hidden rounded-md border border-[var(--color-border)]">
-          <canvas ref={canvasRef} className="h-full w-full" />
-        </div>
-
-        <p className="text-center text-[11px] text-[var(--color-muted)]">
-          Visualizing the Multitrack Timeline — press play there to see it move.
-        </p>
       </div>
     </PanelChrome>
   );

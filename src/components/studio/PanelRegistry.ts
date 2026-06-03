@@ -36,7 +36,7 @@ registerPanel({ type: "effect-controls", title: "Effects", icon: "◆", group: "
 registerPanel({ type: "polish", title: "Polish", icon: "✨", group: "Finish", component: PolishPanel, minWidth: 360, minHeight: 320 });
 registerPanel({ type: "text-overlays", title: "Text Overlays", icon: "T", group: "Finish", component: TextOverlayPanel, minWidth: 200, minHeight: 200 });
 registerPanel({ type: "audio-multitrack", title: "Multitrack Timeline", icon: "▤", group: "Audio", component: AudioMultitrackPanel, minWidth: 480, minHeight: 240 });
-registerPanel({ type: "audio-visualizer", title: "Visualizer", icon: "📊", group: "Audio", component: AudioVisualizerPanel, minWidth: 280, minHeight: 240 });
+registerPanel({ type: "audio-visualizer", title: "Visualizer", icon: "📊", group: "Audio", component: AudioVisualizerPanel, minWidth: 160, minHeight: 56 });
 registerPanel({ type: "audio-importer", title: "Audio Importer", icon: "🗂", group: "Audio", component: AudioImporterPanel, minWidth: 260, minHeight: 280 });
 registerPanel({ type: "stem-separation", title: "Stem Separation", icon: "🎛", group: "Audio", component: StemSeparationPanel, minWidth: 280, minHeight: 320 });
 registerPanel({ type: "audio-processing", title: "Processing Rack", icon: "◆", group: "Audio", component: AudioProcessingPanel, minWidth: 280, minHeight: 360 });
