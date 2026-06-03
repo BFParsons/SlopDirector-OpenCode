@@ -1,0 +1,573 @@
+// SpotForge — prototype political ad generator
+// Single OpenRouter provider drives LLM scripting, TTS voiceover, and async video.
+// Visual and audio are two INDEPENDENT tracks, composited only by duration at the
+// final render (no lip-sync). AI is optional per track.
+
+generator client {
+  provider      = "prisma-client-js"
+  // Pin engine targets so the Docker image (Debian/OpenSSL 3.0) always has its
+  // query engine — Prisma's auto-detection mis-picked 1.1.x in the slim image.
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ----------------------------------------------------------------------------
+// Auth
+// ----------------------------------------------------------------------------
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String // argon2id
+  role          Role      @default(USER)
+  quotaAdsMonth Int       @default(20)
+  // Optional per-user OpenRouter key (AES-GCM encrypted at rest); falls back to
+  // the shared server key when unset. Hint is a masked form for display.
+  openrouterKeyEnc  String?
+  openrouterKeyHint String?
+  // Optional per-user fal.ai key (image generation), same encryption + fallback.
+  falKeyEnc         String?
+  falKeyHint        String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sessions      Session[]
+  projects      Project[]
+  workspaceLayouts WorkspaceLayout[]
+}
+
+/// A saved Studio panel arrangement, per user (reused across all projects).
+model WorkspaceLayout {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String   @default("Workspace")
+  isDefault Boolean  @default(false)
+  layout    Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  ip        String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+// ----------------------------------------------------------------------------
+// Domain
+// ----------------------------------------------------------------------------
+
+enum AdStatus {
+  DRAFT // composing the visual + audio tracks
+  RENDERING // render in flight (AI segments + audio synth + assembly)
+  DONE
+  FAILED
+}
+
+enum AspectRatio {
+  R16_9
+  R9_16
+  R1_1
+}
+
+enum Resolution {
+  R480P
+  R720P
+  R1080P
+}
+
+enum AudioFitMode {
+  PAD_VIDEO // pad/freeze video to match a longer audio track (default)
+  TRIM_VO // trim audio to the video length
+}
+
+enum AudioMode {
+  TTS_FROM_SCRIPT // LLM-written voScript -> TTS
+  TTS_VERBATIM // user-supplied verbatim transcript -> TTS
+  UPLOAD_AUDIO // user-uploaded master audio (VO take or music bed)
+  NONE // silent (video only)
+}
+
+model Project {
+  id            String       @id @default(cuid())
+  userId        String
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title         String
+  status        AdStatus     @default(DRAFT)
+  // brief — all optional; AI generation is opt-in per track
+  goal          String?
+  subject       String? // politician / issue
+  tone          String?
+  targetLengthS Int          @default(30)
+  aspectRatio   AspectRatio  @default(R16_9)
+  resolution    Resolution   @default(R720P)
+  audioFitMode  AudioFitMode @default(PAD_VIDEO)
+  shotCount     Int          @default(5) // hint for AI storyboard generation
+  // storyboard mode: style anchor applied to every keyframe (continuity)
+  stylePrompt        String? // shared look/style appended to each shot's prompt
+  styleAnchorAssetId String? // reference image conditioned on (img2img/IP-Adapter)
+  styleAnchorAsset   Asset?  @relation("StyleAnchorAsset", fields: [styleAnchorAssetId], references: [id])
+  styleStrength      Float   @default(0.85) // how strongly the anchor steers
+  // production polish (applied at final assembly)
+  audioNormalize Boolean    @default(true) // EBU R128 loudnorm on the final mix
+  colorLook      ColorLook  @default(NONE) // color grade applied to all visuals
+  transition     Transition @default(NONE) // between-segment transition style
+  transitionMs   Int        @default(500) // transition duration (ms)
+  fillMode       FillMode   @default(LETTERBOX) // off-aspect fill (letterbox vs blur)
+  vignette       Boolean    @default(false) // subtle edge darkening over the whole ad
+  grain          Int        @default(0) // film-grain strength 0..100 (0 = off)
+  audioFadeInS   Float      @default(0) // fade the final mix up over N seconds
+  audioFadeOutS  Float      @default(0) // fade the final mix out over N seconds
+  // burned-in captions auto-generated from the voiceover script
+  captionsEnabled Boolean         @default(false)
+  captionPosition OverlayPosition @default(BOTTOM_CENTER)
+  captionSizePct  Int             @default(6) // font size as a percent of frame height
+  // optional logo / watermark composited over the whole ad
+  watermarkAssetId String?
+  watermarkAsset   Asset?          @relation("WatermarkAsset", fields: [watermarkAssetId], references: [id])
+  watermarkPosition OverlayPosition @default(BOTTOM_RIGHT)
+  watermarkScale    Float          @default(0.15) // width as a fraction of the frame width
+  watermarkOpacity  Float          @default(0.85) // 0..1
+  watermarkMargin   Int            @default(24) // inset from the frame edges, px
+  // audio track
+  audioMode       AudioMode @default(TTS_FROM_SCRIPT)
+  voScript        String? // LLM-written narration (TTS_FROM_SCRIPT)
+  voVerbatim      String? // user verbatim transcript (TTS_VERBATIM)
+  voDeliveryNotes String? // delivery direction passed to TTS
+  // optional music bed, mixed UNDER the voiceover at render (independent of audioMode)
+  musicAssetId String?
+  musicAsset   Asset?  @relation("MusicAsset", fields: [musicAssetId], references: [id])
+  musicVolume  Float   @default(0.25) // 0..1 gain applied to the bed
+  musicDucking Boolean @default(true) // sidechain-duck the bed under the VO
+  musicMuted   Boolean @default(false)
+  // audio mixer: voiceover (master dialogue) gain + mute
+  voVolume     Float   @default(1) // 0..2 gain on the voiceover
+  voMuted      Boolean @default(false)
+  // model selection (OpenRouter ids)
+  llmModel      String
+  videoModel    String
+  ttsModel      String
+  ttsVoice      String?
+  imageModel    String        @default("fal-ai/flux/dev") // fal image model for storyboard gen
+  generateAudio Boolean       @default(false) // native model audio (kept off; VO is master)
+  // generated artifacts + per-track generation state (null = never AI-generated)
+  concept         String?
+  scriptFull      String?
+  visualGenStatus SimpleStatus?
+  scriptGenStatus SimpleStatus?
+  estCostCents    Int?
+  error           String?
+  deletedAt       DateTime?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  segments        Segment[]
+  audioOverlays   AudioOverlay[]
+  textOverlays    TextOverlay[]
+  storyElements   StoryElement[]
+  voiceover       VoiceoverAsset?
+  finalRender     FinalRender?
+  assets          Asset[]
+  jobs            Job[]
+
+  @@index([userId, status])
+}
+
+enum ShotStatus {
+  PENDING // not yet submitted / not yet ready
+  SUBMITTED // sent to OpenRouter, have providerJobId (AI/driver only)
+  RENDERING // provider in_progress (AI/driver only)
+  DOWNLOADING // completed at provider, fetching content (AI/driver only)
+  READY // playable on disk (uploads are READY immediately)
+  FAILED
+}
+
+enum RefRole {
+  FIRST_FRAME
+  LAST_FRAME
+  STYLE
+}
+
+enum SegmentSource {
+  AI_GENERATED // text prompt -> AI video
+  UPLOAD_VIDEO // user-uploaded video used directly
+  UPLOAD_IMAGE_STILL // user-uploaded photo shown for durationS (optional motion)
+  UPLOAD_IMAGE_DRIVER // user-uploaded photo seeds/styles an AI video (image-to-video)
+}
+
+// Color grade applied to all visuals at final assembly.
+enum ColorLook {
+  NONE
+  WARM // golden, hopeful
+  COOL // cold, clinical
+  BW // black & white
+  VINTAGE // faded, sepia-ish
+  PUNCH // high contrast/saturation
+  TEAL_ORANGE // blockbuster: teal shadows, warm skin
+  NOIR // hard, high-contrast black & white
+  CAMPAIGN // warm patriotic lift (hopeful ad look)
+  BLEACH // bleach-bypass: desaturated, crushed, gritty
+}
+
+// How off-aspect media fills the frame when it doesn't match the output ratio.
+enum FillMode {
+  LETTERBOX // fit inside + black bars (default)
+  BLUR_FILL // fit inside, fill the bars with a blurred enlargement of the same frame
+}
+
+// Nine-grid anchor for a text overlay or watermark.
+enum OverlayPosition {
+  TOP_LEFT
+  TOP_CENTER
+  TOP_RIGHT
+  MIDDLE_LEFT
+  CENTER
+  MIDDLE_RIGHT
+  BOTTOM_LEFT
+  BOTTOM_CENTER
+  BOTTOM_RIGHT
+}
+
+// Reveal style for a text overlay over its on-screen window.
+enum TextAnimation {
+  NONE // hard on/off
+  FADE // fade in and out at the edges of its window
+}
+
+// Transition style between consecutive segments.
+enum Transition {
+  NONE // hard cut
+  CROSSFADE
+  DISSOLVE
+  FADE_BLACK
+  WIPE
+  SLIDE
+}
+
+// Pan/scan/zoom applied to an UPLOAD_IMAGE_STILL segment over its duration.
+enum ImageMotion {
+  NONE // static, no movement
+  ZOOM_IN // slow push in (fills frame, crops to fit)
+  ZOOM_OUT // slow pull out (fills frame, crops to fit)
+  PAN_LEFT // glide toward the left edge
+  PAN_RIGHT // glide toward the right edge
+  PAN_UP // glide toward the top
+  PAN_DOWN // glide toward the bottom
+  SUBTLE_ZOOM_IN // gentle push in, keeps the whole image (letterboxed if needed)
+  SUBTLE_ZOOM_OUT // gentle pull out, keeps the whole image (letterboxed if needed)
+}
+
+// A visual segment in the sequence. May be AI-generated or user-uploaded.
+model Segment {
+  id            String        @id @default(cuid())
+  projectId     String
+  project       Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  index         Int
+  title         String?
+  source        SegmentSource @default(AI_GENERATED)
+  prompt        String        @default("") // AI_GENERATED / UPLOAD_IMAGE_DRIVER only
+  videoModel    String? // per-segment AI video model override (null = project default)
+  speed         Float         @default(1.0) // playback speed for video segments (0.5–2.0)
+  durationS     Float         @default(5) // on-screen length (trimmable to 0.1s)
+  sourceDurationS Float? // raw source media length (speed-independent); cap for re-extending a trim. null for stills.
+  trimStartS    Float         @default(0) // source seconds skipped from the start (Premiere-style in-point). 0 for stills.
+  imageMotion   ImageMotion   @default(NONE) // UPLOAD_IMAGE_STILL only — pan/zoom style
+  muted         Boolean       @default(true) // video segments: include the clip's own audio in the final mix?
+  // per-segment color adjustments (applied before the project-wide color look)
+  brightness    Float         @default(0) // -0.3..0.3 additive
+  contrast      Float         @default(1) // 0.5..1.5
+  saturation    Float         @default(1) // 0..2
+  // keyframed Motion (Effect Controls): { scale[], posX[], posY[] } of {t,v}
+  transform     Json?
+  // multi-track: 0 = V1 main sequence (contiguous), 1 = V2 overlay (positioned)
+  track         Int           @default(0)
+  // audio-only clip (no video output): the clip's audio living on an audio track,
+  // positioned by offsetS. Created by "Unlink audio" on a video clip.
+  audioOnly     Boolean       @default(false)
+  // library clip: a generated AI video / voiceover that lives in the Media Bucket,
+  // NOT on the timeline or in the render, until the user drags it onto a track.
+  library       Boolean       @default(false)
+  offsetS       Float         @default(0) // V2 overlay + audio clips: timeline start (V1 ignores)
+  pip           Json? // V2 overlay placement: { scale, posX, posY, opacity }
+  // Per-clip effect stack: ordered EffectSpec[] ({ kind, enabled, ...params }) —
+  // gaussian blur, chroma key, crop, color, mirror, rotate, pixelate, glow,
+  // stabilize. Applied in order in the preview (draw.ts) + export (assemble.ts).
+  effects       Json? // see src/lib/render/effects.ts
+  status        ShotStatus    @default(PENDING)
+  // YouTube import (a UPLOAD_VIDEO whose file is fetched async by yt-dlp)
+  importUrl     String? // canonical source URL (provenance + retry)
+  importStartS  Int? // clip start seconds
+  importEndS    Int? // clip end seconds
+  // uploaded source (UPLOAD_VIDEO / UPLOAD_IMAGE_*)
+  sourceAssetId String?
+  sourceAsset   Asset?        @relation("SegmentSource", fields: [sourceAssetId], references: [id])
+  // optional image-to-video reference for AI_GENERATED
+  refImageId    String?
+  refImage      Asset?        @relation("SegmentRefImage", fields: [refImageId], references: [id])
+  refRole       RefRole?
+  // provider tracking (AI_GENERATED / UPLOAD_IMAGE_DRIVER)
+  providerJobId String?       @unique
+  clipAssetId   String?
+  clipAsset     Asset?        @relation("SegmentClip", fields: [clipAssetId], references: [id])
+  attempts      Int           @default(0)
+  error         String?
+  elementRefs   SegmentElementRef[] // library elements composed into this shot
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@unique([projectId, index])
+  @@index([providerJobId])
+}
+
+// A library element (scene / character / object) referenced by a shot so the
+// shot's keyframe is generated FROM those elements (multi-reference). An optional
+// variantId picks a specific outfit / camera angle instead of the base image.
+model SegmentElementRef {
+  id        String       @id @default(cuid())
+  segmentId String
+  segment   Segment      @relation(fields: [segmentId], references: [id], onDelete: Cascade)
+  elementId String
+  element   StoryElement @relation("ElementShotRefs", fields: [elementId], references: [id], onDelete: Cascade)
+  variantId String? // optional StoryElementVariant id (plain ref; resolved at use)
+  index     Int
+  createdAt DateTime     @default(now())
+
+  @@index([segmentId])
+  @@index([elementId])
+}
+
+enum SimpleStatus {
+  PENDING
+  RUNNING
+  READY
+  FAILED
+}
+
+enum AudioAssetSource {
+  SYNTHESIZED // produced by TTS
+  UPLOADED // user-uploaded master audio
+}
+
+model VoiceoverAsset {
+  id        String           @id @default(cuid())
+  projectId String           @unique
+  project   Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assetId   String?
+  asset     Asset?           @relation("VoAsset", fields: [assetId], references: [id])
+  source    AudioAssetSource @default(SYNTHESIZED)
+  durationS Float?
+  status    SimpleStatus     @default(PENDING)
+  error     String?
+  updatedAt DateTime         @updatedAt
+}
+
+// An audio clip (e.g. grabbed from YouTube) mixed OVER the final audio. Unlike
+// the music bed it is a foreground layer: it plays on top of the VO/clips,
+// starting at `offsetS` on the timeline, and never extends the video length.
+model AudioOverlay {
+  id           String       @id @default(cuid())
+  projectId    String
+  project      Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  index        Int // order added (stable display)
+  label        String?
+  assetId      String? // downloaded audio (null until the import job finishes)
+  asset        Asset?       @relation("OverlayAsset", fields: [assetId], references: [id])
+  sourceUrl    String // YouTube provenance + retry
+  importStartS Int // source clip start seconds
+  importEndS   Int // source clip end seconds
+  offsetS      Float        @default(0) // when it starts on the final timeline
+  volume       Float        @default(1.0) // 0..1 gain
+  included     Boolean      @default(true) // mix into the final?
+  durationS    Float? // probed clip length
+  status       SimpleStatus @default(PENDING)
+  error        String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@index([projectId])
+}
+
+model FinalRender {
+  id        String       @id @default(cuid())
+  projectId String       @unique
+  project   Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assetId   String?
+  asset     Asset?       @relation("FinalAsset", fields: [assetId], references: [id])
+  durationS Float?
+  status    SimpleStatus @default(PENDING)
+  progress  Int          @default(0) // 0..100 from ffmpeg
+  error     String?
+  updatedAt DateTime     @updatedAt
+}
+
+enum AssetKind {
+  UPLOAD_IMAGE
+  UPLOAD_VIDEO
+  UPLOAD_AUDIO
+  OVERLAY_AUDIO // audio clip mixed over the final (e.g. YouTube grab)
+  WATERMARK // logo / badge composited over the whole ad
+  SHOT_CLIP
+  VO_AUDIO
+  FINAL_MP4
+}
+
+model Asset {
+  id        String    @id @default(cuid())
+  projectId String
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  kind      AssetKind
+  path      String // relative to ASSET_ROOT
+  mime      String
+  sizeBytes Int
+  sha256    String?
+  createdAt DateTime  @default(now())
+
+  segmentRefs    Segment[]        @relation("SegmentRefImage")
+  segmentClips   Segment[]        @relation("SegmentClip")
+  segmentSources Segment[]        @relation("SegmentSource")
+  voAssets       VoiceoverAsset[] @relation("VoAsset")
+  finals         FinalRender[]    @relation("FinalAsset")
+  musicProjects  Project[]        @relation("MusicAsset")
+  overlayAssets  AudioOverlay[]   @relation("OverlayAsset")
+  watermarkProjects Project[]     @relation("WatermarkAsset")
+  styleAnchorProjects Project[]   @relation("StyleAnchorAsset")
+  elementAssets   StoryElement[]        @relation("ElementAsset")
+  variantAssets   StoryElementVariant[] @relation("VariantAsset")
+
+  @@index([projectId, kind])
+}
+
+// A burned-in text overlay (lower-third, title card, stat callout, disclaimer).
+// Rendered with ffmpeg drawtext over the whole timeline, shown only within its
+// [startS, endS] window. Independent of the visual segments.
+model TextOverlay {
+  id         String          @id @default(cuid())
+  projectId  String
+  project    Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  index      Int // order added (stable display + draw order)
+  text       String // may contain newlines for multi-line
+  position   OverlayPosition @default(BOTTOM_CENTER)
+  sizePct    Int             @default(6) // font size as a percent of frame height
+  color      String          @default("#FFFFFF") // hex fill
+  boxEnabled Boolean         @default(true) // draw a contrasting background box
+  boxColor   String          @default("#000000") // hex box color
+  boxOpacity Float           @default(0.5) // 0..1
+  marginPx   Int             @default(40) // inset from the anchored edge(s)
+  startS     Float           @default(0) // appears at this time
+  endS       Float? // disappears at this time; null = until the end
+  animation  TextAnimation   @default(NONE)
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  @@index([projectId])
+}
+
+// Reusable storyboard building blocks with a PERSISTENT visual identity, so the
+// same character / setting / prop stays consistent across shots. Each has a
+// canonical identity image (generated via the image seam) plus optional variants
+// (a character's outfits, a scene at night, a prop in a different state) that are
+// generated FROM the identity image to preserve the look.
+enum StoryElementKind {
+  SCENE // a setting / location / environment
+  CHARACTER // a person, with outfit/state variants
+  OBJECT // a prop / product / sign
+}
+
+model StoryElement {
+  id        String           @id @default(cuid())
+  projectId String
+  project   Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  kind      StoryElementKind
+  name      String
+  prompt    String           @default("") // identity description
+  assetId   String? // canonical identity image
+  asset     Asset?           @relation("ElementAsset", fields: [assetId], references: [id])
+  refImageIds String[]       @default([]) // user-uploaded reference images that inform generation
+  error     String? // last generation error (cleared on success)
+  costCents Float            @default(0) // accumulated image-gen spend in cents (base + variants)
+  index     Int
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  variants  StoryElementVariant[]
+  shotRefs  SegmentElementRef[] @relation("ElementShotRefs")
+
+  @@index([projectId, kind])
+}
+
+model StoryElementVariant {
+  id        String       @id @default(cuid())
+  elementId String
+  element   StoryElement @relation(fields: [elementId], references: [id], onDelete: Cascade)
+  label     String // e.g. "red dress", "winter coat", "at night"
+  prompt    String       @default("")
+  assetId   String?
+  asset     Asset?       @relation("VariantAsset", fields: [assetId], references: [id])
+  error     String?
+  index     Int
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@index([elementId])
+}
+
+// ----------------------------------------------------------------------------
+// Durable job queue
+// ----------------------------------------------------------------------------
+
+enum JobType {
+  GEN_STORYBOARD // LLM -> concept + AI segments
+  GEN_SCRIPT // LLM -> scriptFull + voScript
+  GEN_IMAGE // image provider (fal.ai/ComfyUI) -> keyframe image asset
+  SUBMIT_SHOT // submit one AI/driver segment to the video provider
+  RECONCILE_VIDEO
+  DOWNLOAD_CLIP
+  IMPORT_YOUTUBE // yt-dlp download + clip into a UPLOAD_VIDEO segment
+  IMPORT_AUDIO // yt-dlp audio-only download into an AudioOverlay
+  SYNTH_VO
+  ASSEMBLE_FINAL
+  CLEANUP
+}
+
+enum JobStatus {
+  QUEUED
+  RUNNING
+  DONE
+  FAILED
+}
+
+model Job {
+  id          String    @id @default(cuid())
+  projectId   String?
+  project     Project?  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  type        JobType
+  status      JobStatus @default(QUEUED)
+  payload     Json      @default("{}")
+  attempts    Int       @default(0)
+  maxAttempts Int       @default(5)
+  availableAt DateTime  @default(now())
+  lockedAt    DateTime?
+  lockedBy    String?
+  lastError   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([status, availableAt])
+  @@index([type, status])
+}

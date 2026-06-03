@@ -1,0 +1,14 @@
+overrides:
+  # Patch the transitive postcss XSS advisory (GHSA-qx2v-qp2m-jg93).
+  postcss: ">=8.5.10"
+ignoredBuiltDependencies:
+  - sharp
+  - unrs-resolver
+onlyBuiltDependencies:
+  - "@prisma/client"
+  - "@prisma/engines"
+  - prisma
+  - esbuild
+  # Electron's postinstall fetches the platform Electron binary (desktop shell).
+  - electron
+  - electron-builder

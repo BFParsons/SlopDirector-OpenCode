@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Segment" ADD COLUMN     "trimStartS" DOUBLE PRECISION NOT NULL DEFAULT 0;

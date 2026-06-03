@@ -1,0 +1,51 @@
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: spotforge
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD}
+      POSTGRES_DB: spotforge
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U spotforge"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  app:
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_BASE_PATH: ${NEXT_PUBLIC_BASE_PATH:-}
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://spotforge:${DB_PASSWORD:?set DB_PASSWORD}@db:5432/spotforge?schema=public
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:?set OPENROUTER_API_KEY}
+      OPENROUTER_WEBHOOK_SECRET: ${OPENROUTER_WEBHOOK_SECRET:-}
+      AUTH_SECRET: ${AUTH_SECRET:?set AUTH_SECRET}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-}
+      ASSET_ROOT: /data/assets
+      TRUST_PROXY: "true"
+      # Subpath served under (read by next.config at runtime; must match build arg).
+      NEXT_PUBLIC_BASE_PATH: ${NEXT_PUBLIC_BASE_PATH:-}
+      # Optional: a Netscape cookies.txt mounted below so YouTube import works
+      # server-side (browser cookie extraction isn't available in a container).
+      YTDLP_COOKIES: ${YTDLP_COOKIES:-}
+    volumes:
+      - assets:/data/assets
+      # Uncomment to provide YouTube cookies (set YTDLP_COOKIES=/secrets/yt-cookies.txt):
+      # - ./yt-cookies.txt:/secrets/yt-cookies.txt:ro
+    # Bind to loopback only — the public entrypoint is nginx (TLS + password).
+    # Never expose the app port directly, or the password wall is bypassed.
+    ports:
+      - "127.0.0.1:3000:3000"
+
+volumes:
+  pgdata:
+  assets:

@@ -1,0 +1,101 @@
+{
+  "name": "slopstudio-pro",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Desktop-class, high-performance NLE with built-in AI generation.",
+  "main": "electron/main.js",
+  "packageManager": "pnpm@10.33.0",
+  "scripts": {
+    "dev": "NODE_OPTIONS=--max-old-space-size=4096 next dev",
+    "worker": "tsx --env-file=.env scripts/worker.ts",
+    "create-admin": "tsx scripts/create-admin.ts",
+    "seed-perf": "tsx --env-file=.env scripts/seed-perf-project.ts",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:studio": "prisma studio",
+    "gen-enums": "node scripts/gen-enums.mjs",
+    "db:sqlite:derive": "node scripts/derive-sqlite-schema.mjs",
+    "db:sqlite:ddl": "node scripts/gen-desktop-ddl.mjs",
+    "db:sqlite:generate": "prisma generate --schema prisma/schema.sqlite.prisma",
+    "db:sqlite:migrate": "prisma migrate dev --schema prisma/schema.sqlite.prisma",
+    "desktop:dev": "concurrently -k -n next,electron -c blue,magenta \"next dev\" \"wait-on -t 60000 http://localhost:3000 && cross-env ELECTRON_DEV=1 electron electron/main.js\"",
+    "desktop:start": "cross-env ELECTRON_DEV=1 electron electron/main.js",
+    "desktop:standalone": "rm -rf dist .next/standalone && pnpm db:sqlite:generate && next build && node scripts/postbuild-standalone.mjs",
+    "desktop:build": "pnpm desktop:standalone && bash scripts/fetch-ffmpeg.sh && electron-builder --linux AppImage"
+  },
+  "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
+    "@fontsource-variable/source-code-pro": "^5.2.7",
+    "@fontsource-variable/source-sans-3": "^5.2.9",
+    "@fontsource/lora": "^5.2.8",
+    "@node-rs/argon2": "^2.0.2",
+    "@prisma/client": "^6.19.2",
+    "next": "16.2.6",
+    "pixi-filters": "^6.1.5",
+    "pixi.js": "^8.18.1",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "react-rnd": "10.5.2",
+    "wavesurfer.js": "^7.12.7",
+    "zod": "^4.3.6",
+    "zustand": "^5.0.11"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "concurrently": "^9.1.0",
+    "cross-env": "^10.1.0",
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.6",
+    "prisma": "^6.19.2",
+    "tailwindcss": "^4",
+    "tsx": "^4.19.2",
+    "typescript": "^5",
+    "wait-on": "^8.0.1"
+  },
+  "build": {
+    "appId": "com.slopdirector.opencode",
+    "productName": "SlopStudio Pro",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "electron/**",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": ".next/standalone",
+        "to": "standalone"
+      },
+      {
+        "from": "prisma/desktop-schema.sql",
+        "to": "desktop-schema.sql"
+      },
+      {
+        "from": "vendor/ffmpeg",
+        "to": "ffmpeg",
+        "filter": [
+          "ffmpeg",
+          "ffprobe"
+        ]
+      }
+    ],
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "AudioVideo"
+    }
+  }
+}

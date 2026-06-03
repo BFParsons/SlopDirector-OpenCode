@@ -1,0 +1,58 @@
+# SpotForge — nginx reverse proxy (host-level) for the Hetzner demo.
+# The app container binds 127.0.0.1:3000 (see docker-compose.yml); nginx is the
+# only public entrypoint, terminating TLS and enforcing the password wall.
+#
+# Setup:
+#   sudo apt install apache2-utils
+#   sudo htpasswd -c /etc/nginx/spotforge.htpasswd <you>     # create the password
+#   certbot --nginx -d demo.example.com                      # TLS cert
+#   ln -s .../nginx.conf.example /etc/nginx/sites-enabled/spotforge && nginx -t && systemctl reload nginx
+
+# Redirect all HTTP to HTTPS.
+server {
+    listen 80;
+    listen [::]:80;
+    server_name demo.example.com;            # <-- your domain
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;
+    server_name demo.example.com;            # <-- your domain
+
+    ssl_certificate     /etc/letsencrypt/live/demo.example.com/fullchain.pem;   # <-- certbot
+    ssl_certificate_key /etc/letsencrypt/live/demo.example.com/privkey.pem;     # <-- certbot
+    ssl_protocols TLSv1.2 TLSv1.3;
+
+    # Password wall in front of the whole app (the "password-protected demo").
+    auth_basic           "SpotForge demo";
+    auth_basic_user_file /etc/nginx/spotforge.htpasswd;
+
+    # Uploads cap at 100 MB in-app; allow a little headroom.
+    client_max_body_size 110m;
+
+    # So the app (TRUST_PROXY=true) sees the real client IP + scheme.
+    proxy_set_header Host              $host;
+    proxy_set_header X-Real-IP         $remote_addr;
+    proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_http_version 1.1;
+
+    # Server-Sent Events (live render progress): must NOT be buffered, and needs
+    # a long read timeout so the stream isn't cut.
+    location ~ ^/api/projects/[^/]+/events$ {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_buffering off;
+        proxy_cache off;
+        proxy_read_timeout 3600s;
+        proxy_set_header Connection "";
+        add_header X-Accel-Buffering no;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_read_timeout 300s;             # headroom for large uploads/streaming
+    }
+}

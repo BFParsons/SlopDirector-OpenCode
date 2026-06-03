@@ -1,0 +1,190 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #0b0d12;
+  --color-surface: #12151c;
+  --color-card: #181c25;
+  --color-border: #262b36;
+  --color-fg: #e8eaf0;
+  --color-muted: #9aa3b2;
+  --color-accent: #6d8bff;
+  --color-accent-fg: #ffffff;
+  /* Neutral fill for primary buttons (was the blue/violet accent gradient). */
+  --color-control: #353b47;
+  --color-control-hover: #404757;
+  --color-control-fg: #e8eaf0;
+  --color-success: #38b27a;
+  --color-warning: #d9a441;
+  --color-danger: #e05a4a;
+
+  /* Adobe's own open-source typefaces — the "Premiere" feel, self-hosted. */
+  --font-sans:
+    "Source Sans 3 Variable", ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono:
+    "Source Code Pro Variable", ui-monospace, "SFMono-Regular", "Menlo",
+    "Consolas", monospace;
+
+  /* Squishy / premium motion + depth. The spring overshoots well past 1 so
+     releasing a press bounces back with a visible pop. */
+  --ease-spring: cubic-bezier(0.34, 2, 0.4, 1);
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.3), 0 2px 6px rgb(0 0 0 / 0.22);
+  --shadow-lift: 0 8px 24px rgb(0 0 0 / 0.38), 0 2px 5px rgb(0 0 0 / 0.3);
+}
+
+html,
+body {
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  /* Subtle premium backdrop: a faint accent glow up top over the base. */
+  background-image: radial-gradient(
+    110% 60% at 50% -10%,
+    rgb(109 139 255 / 0.07),
+    transparent 60%
+  );
+  background-attachment: fixed;
+}
+
+body {
+  letter-spacing: 0.005em;
+}
+
+* {
+  border-color: var(--color-border);
+}
+
+::selection {
+  background: var(--color-accent);
+  color: var(--color-accent-fg);
+}
+
+/* Tabular numerals where it reads like an editor (timecodes, cost). */
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Studio panel title bar is the react-rnd drag surface. */
+.window-drag-handle {
+  cursor: move;
+  touch-action: none;
+  user-select: none;
+}
+.window-drag-handle button {
+  cursor: pointer;
+}
+
+/* Form controls inherit the dark theme */
+input,
+textarea,
+select,
+button {
+  font: inherit;
+  color: inherit;
+}
+
+/* Squishy: every enabled button squashes in with a bouncy spring, then pops
+   back on release. The longer transform duration lets the overshoot read. */
+button {
+  transition:
+    transform 260ms var(--ease-spring),
+    box-shadow 160ms var(--ease-out-soft),
+    background-color 160ms var(--ease-out-soft),
+    border-color 160ms var(--ease-out-soft),
+    opacity 160ms var(--ease-out-soft),
+    filter 160ms var(--ease-out-soft);
+}
+button:not(:disabled) {
+  cursor: pointer;
+}
+button:not(:disabled):active {
+  transform: scale(0.9);
+  transition-duration: 90ms; /* snap IN fast; the spring handles the bounce OUT */
+}
+
+/* Slim, premium scrollbars. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 9999px;
+  border: 3px solid var(--color-bg);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-muted);
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Procedural UI animations. */
+@keyframes edge-flow {
+  0% {
+    background-position: 50% 0%;
+  }
+  100% {
+    background-position: 50% 200%;
+  }
+}
+@keyframes sheen {
+  0% {
+    transform: translateX(-130%) skewX(-18deg);
+  }
+  100% {
+    transform: translateX(230%) skewX(-18deg);
+  }
+}
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+@keyframes timeline-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes flip-in {
+  0% {
+    transform: rotateX(-90deg);
+    opacity: 0;
+  }
+  55% {
+    transform: rotateX(12deg);
+    opacity: 1;
+  }
+  100% {
+    transform: rotateX(0deg);
+  }
+}
+
+/* Respect reduced-motion: drop the squish + procedural motion. */
+@media (prefers-reduced-motion: reduce) {
+  button,
+  button:active {
+    transition: none;
+    transform: none;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
