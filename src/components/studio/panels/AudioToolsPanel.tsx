@@ -4,6 +4,7 @@ import { useState } from "react";
 import { api } from "@/lib/api";
 import type { PanelProps } from "@/types/panel";
 import PanelChrome from "../PanelChrome";
+import { OptionDrawer } from "../OptionDrawer";
 import { useAudioStudioStore, type AudioTrack } from "@/stores/audioStudioStore";
 import { pollAudioJob } from "@/lib/audio/jobClient";
 
@@ -199,18 +200,13 @@ export default function AudioToolsPanel({ windowControls }: PanelProps) {
   return (
     <PanelChrome title="Audio Tools" icon="🧰" {...windowControls}>
       <div className="flex h-full flex-col gap-2 p-3 text-xs">
-        <div className="flex shrink-0 overflow-hidden rounded-md border border-[var(--color-border)]">
-          {TABS.map((t) => (
-            <button
-              key={t.key}
-              type="button"
-              onClick={() => setTab(t.key)}
-              className={`flex-1 px-2 py-1 text-[10px] ${tab === t.key ? "bg-[var(--color-accent)] text-white" : "text-[var(--color-muted)] hover:text-[var(--color-fg)]"}`}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
+        <OptionDrawer
+          className="shrink-0"
+          label="Tool"
+          value={tab}
+          options={TABS}
+          onChange={(k) => setTab(k as Tab)}
+        />
 
         <div className="min-h-0 flex-1 space-y-2 overflow-auto">
           {tab === "duck" ? (

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { PanelProps } from "@/types/panel";
 import PanelChrome from "../PanelChrome";
+import { OptionDrawer } from "../OptionDrawer";
 import { getAnalyser } from "@/lib/audio/visualizerBus";
 
 type Mode = "bars" | "scope" | "spectrum";
@@ -92,22 +93,14 @@ export default function AudioVisualizerPanel({ windowControls }: PanelProps) {
     <PanelChrome title="Visualizer" icon="📊" {...windowControls}>
       <div className="relative h-full w-full bg-[#0b0d12]">
         <canvas ref={canvasRef} className="block h-full w-full" />
-        {/* Tiny transparent mode toggles overlaid on the visualization. */}
-        <div className="absolute right-1 top-1 flex gap-0.5">
-          {MODES.map((m) => (
-            <button
-              key={m.key}
-              type="button"
-              onClick={() => setMode(m.key)}
-              title={m.label}
-              className={`rounded px-1.5 py-0.5 text-[9px] leading-none backdrop-blur-sm transition-colors ${
-                mode === m.key ? "bg-white/20 text-white" : "bg-black/30 text-white/55 hover:text-white"
-              }`}
-            >
-              {m.label}
-            </button>
-          ))}
-        </div>
+        {/* Collapsed mode selector overlaid on the visualization. */}
+        <OptionDrawer
+          className="absolute right-1 top-1 w-28"
+          align="right"
+          value={mode}
+          options={MODES}
+          onChange={(k) => setMode(k as Mode)}
+        />
       </div>
     </PanelChrome>
   );
