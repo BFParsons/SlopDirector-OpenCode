@@ -47,17 +47,26 @@ export default async function StartPage() {
           <p className="mt-1 text-sm text-[var(--color-muted)]">
             Choose how you want to begin.
           </p>
-          {/* Animated CinemaBot logo — autoplays once (no loop) on load. Muted so
-              the browser permits autoplay; the final frame stays on screen. */}
-          <video
-            src={withBase("/cinemabot.webm")}
-            autoPlay
-            muted
-            playsInline
-            preload="auto"
-            className="mt-6 h-80 w-auto object-contain md:h-[28rem]"
-            aria-label="CinemaBot"
-          />
+          {/* Animated CinemaBot — autoplays once (no loop) on load. Muted so the
+              browser permits autoplay; the final frame stays on screen. The
+              SLOP STUDIO PRO marquee wordmark is overlaid across its top. */}
+          <div className="relative mt-6 inline-block">
+            <video
+              src={withBase("/cinemabot.webm")}
+              autoPlay
+              muted
+              playsInline
+              preload="auto"
+              className="h-80 w-auto object-contain md:h-[28rem]"
+              aria-label="CinemaBot"
+            />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={withBase("/logo.png")}
+              alt="SlopStudio Pro"
+              className="pointer-events-none absolute left-1/2 top-2 w-[88%] -translate-x-1/2 object-contain [filter:drop-shadow(0_2px_6px_rgba(0,0,0,0.65))] md:top-6"
+            />
+          </div>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
