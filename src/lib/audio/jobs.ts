@@ -8,7 +8,7 @@
  */
 import { randomUUID } from "node:crypto";
 
-export type AudioJobType = "stems" | "transcribe" | "mix";
+export type AudioJobType = "stems" | "transcribe" | "mix" | "ytmp3";
 export type AudioJobStatus = "running" | "done" | "error";
 
 export interface AudioJob {

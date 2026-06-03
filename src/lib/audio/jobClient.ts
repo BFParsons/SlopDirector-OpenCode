@@ -4,7 +4,7 @@ import { api } from "@/lib/api";
 
 export interface AudioJobView {
   id: string;
-  type: "stems" | "transcribe" | "mix";
+  type: "stems" | "transcribe" | "mix" | "ytmp3";
   status: "running" | "done" | "error";
   progress: number | null;
   message: string;
