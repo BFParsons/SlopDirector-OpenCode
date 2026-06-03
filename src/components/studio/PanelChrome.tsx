@@ -17,10 +17,11 @@ interface PanelChromeProps {
   bare?: boolean;
 }
 
-/** Window chrome for a Studio panel: a slim drag-handle title bar with a Close
- *  button (resize/move the window directly; min/max are in the right-click menu),
- *  and the panel body scrolling beneath. With `bare`, the title bar is omitted. */
-export default function PanelChrome({ title, icon, children, actions, onClose, bare }: PanelChromeProps) {
+/** Window chrome for a Studio panel: a slim drag-handle bar with a Close button
+ *  (resize/move the window directly; min/max are in the right-click menu), and
+ *  the panel body scrolling beneath. The bar shows no title or icon — just the
+ *  draggable strip and Close. With `bare`, the bar is omitted entirely. */
+export default function PanelChrome({ children, actions, onClose, bare }: PanelChromeProps) {
   if (bare) {
     return (
       <div className="flex h-full flex-col bg-[var(--color-surface)] text-[var(--color-fg)]">
@@ -30,11 +31,7 @@ export default function PanelChrome({ title, icon, children, actions, onClose, b
   }
   return (
     <div className="flex h-full flex-col bg-[var(--color-surface)] text-[var(--color-fg)]">
-      <div className="window-drag-handle flex shrink-0 items-center justify-between gap-2 bg-[var(--color-surface)] px-2 py-0 leading-none">
-        <div className="flex select-none items-center gap-1.5 text-[9px] font-medium uppercase tracking-wider leading-none text-[var(--color-muted)]">
-          {icon ? <span className="text-[var(--color-accent)]">{icon}</span> : null}
-          <span className="truncate">{title}</span>
-        </div>
+      <div className="window-drag-handle flex shrink-0 items-center justify-end gap-1 bg-[var(--color-surface)] px-2 py-0 leading-none">
         <div className="flex items-center gap-1">
           {actions}
           {onClose ? (
