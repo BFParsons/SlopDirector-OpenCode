@@ -4,7 +4,6 @@ import { NewAudioStudioCard } from "@/components/NewAudioStudioCard";
 import { NewStoryboardCard } from "@/components/NewStoryboardCard";
 import { requirePageUser } from "@/lib/auth/rbac";
 import { withBase } from "@/lib/basePath";
-import { prisma } from "@/lib/db/client";
 
 export const dynamic = "force-dynamic";
 
@@ -32,10 +31,7 @@ const MODES: Mode[] = [
 ];
 
 export default async function StartPage() {
-  const { user } = await requirePageUser();
-  const recentCount = await prisma.project.count({
-    where: { userId: user.id, deletedAt: null },
-  });
+  await requirePageUser();
 
   return (
     <>
@@ -98,14 +94,7 @@ export default async function StartPage() {
                   {m.glyph}
                 </span>
               )}
-              <h2 className="text-lg font-semibold">
-                {m.title}
-                {m.href === "/dashboard" && recentCount > 0 ? (
-                  <span className="ml-2 text-xs font-normal text-[var(--color-muted)]">
-                    {recentCount}
-                  </span>
-                ) : null}
-              </h2>
+              <h2 className="text-lg font-semibold">{m.title}</h2>
             </Link>
           ))}
         </div>
