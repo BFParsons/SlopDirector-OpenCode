@@ -76,7 +76,7 @@ export function NewAssemblyCard({ accent }: { accent: string }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="group relative flex flex-col overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-6 text-left transition duration-200 ease-spring hover:-translate-y-1 hover:shadow-lift"
+        className="group relative flex flex-col items-center overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-6 text-center transition duration-200 ease-spring hover:-translate-y-1 hover:shadow-lift"
       >
         <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-1" style={{ background: accent }} />
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -84,12 +84,9 @@ export function NewAssemblyCard({ accent }: { accent: string }) {
           src={withBase("/slop/assembleslop.png")}
           alt=""
           aria-hidden
-          className="mb-3 h-20 w-auto self-start object-contain drop-shadow"
+          className="mb-3 h-20 w-auto object-contain drop-shadow"
         />
         <h2 className="text-lg font-semibold">Assembly</h2>
-        <span className="mt-4 text-sm font-medium" style={{ color: accent }}>
-          Start →
-        </span>
       </button>
 
       {open ? (

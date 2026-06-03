@@ -71,7 +71,7 @@ export default async function StartPage() {
             <Link
               key={m.href}
               href={m.href}
-              className="group relative flex flex-col overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-6 transition duration-200 ease-spring hover:-translate-y-1 hover:shadow-lift"
+              className="group relative flex flex-col items-center overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-6 text-center transition duration-200 ease-spring hover:-translate-y-1 hover:shadow-lift"
               style={{ ["--mode-accent" as string]: m.accent }}
             >
               <span
@@ -85,7 +85,7 @@ export default async function StartPage() {
                   src={withBase(m.img)}
                   alt=""
                   aria-hidden
-                  className="mb-3 h-20 w-auto self-start object-contain drop-shadow"
+                  className="mb-3 h-20 w-auto object-contain drop-shadow"
                 />
               ) : (
                 <span
@@ -106,12 +106,6 @@ export default async function StartPage() {
                   </span>
                 ) : null}
               </h2>
-              <span
-                className="mt-4 text-sm font-medium opacity-0 transition group-hover:opacity-100"
-                style={{ color: m.accent }}
-              >
-                {m.href === "/dashboard" ? "Browse →" : "Start →"}
-              </span>
             </Link>
           ))}
         </div>

@@ -49,7 +49,7 @@ export function NewAudioStudioCard({ accent }: { accent: string }) {
       type="button"
       onClick={start}
       disabled={busy}
-      className="group relative flex flex-col overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-6 text-left transition duration-200 ease-spring hover:-translate-y-1 hover:shadow-lift disabled:opacity-70"
+      className="group relative flex flex-col items-center overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-6 text-center transition duration-200 ease-spring hover:-translate-y-1 hover:shadow-lift disabled:opacity-70"
     >
       <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-1" style={{ background: accent }} />
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -57,12 +57,14 @@ export function NewAudioStudioCard({ accent }: { accent: string }) {
         src={withBase("/slop/audioslop.png")}
         alt=""
         aria-hidden
-        className="mb-3 h-20 w-auto self-start object-contain drop-shadow"
+        className="mb-3 h-20 w-auto object-contain drop-shadow"
       />
       <h2 className="text-lg font-semibold">Audio Studio</h2>
-      <span className="mt-4 text-sm font-medium" style={{ color: accent }}>
-        {busy ? "Creating…" : "Start →"}
-      </span>
+      {busy ? (
+        <span className="mt-4 text-sm font-medium" style={{ color: accent }}>
+          Creating…
+        </span>
+      ) : null}
       {error ? <span className="mt-2 text-xs text-[var(--color-danger)]">{error}</span> : null}
     </button>
   );
