@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { AppHeader } from "@/components/AppHeader";
-import { Button, Card } from "@/components/ui";
+import { Card } from "@/components/ui";
 import { ProjectGrid } from "@/components/dashboard/ProjectGrid";
+import { DashboardNewButtons } from "@/components/dashboard/DashboardNewButtons";
 import { requirePageUser } from "@/lib/auth/rbac";
 import { prisma } from "@/lib/db/client";
 
@@ -20,9 +20,7 @@ export default async function Dashboard() {
       <main className="mx-auto w-full max-w-4xl flex-1 p-6">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-xl font-semibold">Your Projects</h1>
-          <Link href="/start">
-            <Button>+ New video</Button>
-          </Link>
+          <DashboardNewButtons />
         </div>
 
         {projects.length === 0 ? (
