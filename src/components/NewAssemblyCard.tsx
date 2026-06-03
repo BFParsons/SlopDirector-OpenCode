@@ -87,13 +87,6 @@ export function NewAssemblyCard({ accent }: { accent: string }) {
           className="mb-3 h-20 w-auto self-start object-contain drop-shadow"
         />
         <h2 className="text-lg font-semibold">Assembly</h2>
-        <p className="mt-1 text-sm font-medium text-[var(--color-fg)]">
-          Build on the timeline with your own media.
-        </p>
-        <p className="mt-2 text-sm leading-relaxed text-[var(--color-muted)]">
-          Open an empty editing dashboard — drop in clips, photos, YouTube grabs, voiceover and
-          music, and cut it together.
-        </p>
         <span className="mt-4 text-sm font-medium" style={{ color: accent }}>
           Start →
         </span>

@@ -60,13 +60,6 @@ export function NewAudioStudioCard({ accent }: { accent: string }) {
         className="mb-3 h-20 w-auto self-start object-contain drop-shadow"
       />
       <h2 className="text-lg font-semibold">Audio Studio</h2>
-      <p className="mt-1 text-sm font-medium text-[var(--color-fg)]">
-        Edit, separate, and master audio on a multitrack timeline.
-      </p>
-      <p className="mt-2 text-sm leading-relaxed text-[var(--color-muted)]">
-        Import tracks, split songs into stems with AI, sweeten with the processing rack, meter loudness,
-        duck music under voice, detect tempo, and auto-caption.
-      </p>
       <span className="mt-4 text-sm font-medium" style={{ color: accent }}>
         {busy ? "Creating…" : "Start →"}
       </span>

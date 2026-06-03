@@ -106,10 +106,6 @@ export default async function StartPage() {
                   </span>
                 ) : null}
               </h2>
-              <p className="mt-1 text-sm font-medium text-[var(--color-fg)]">{m.blurb}</p>
-              <p className="mt-2 text-sm leading-relaxed text-[var(--color-muted)]">
-                {m.detail}
-              </p>
               <span
                 className="mt-4 text-sm font-medium opacity-0 transition group-hover:opacity-100"
                 style={{ color: m.accent }}

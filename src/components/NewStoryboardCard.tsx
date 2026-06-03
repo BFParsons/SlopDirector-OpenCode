@@ -63,13 +63,6 @@ export function NewStoryboardCard({ accent }: { accent: string }) {
         className="mb-3 h-20 w-auto self-start object-contain drop-shadow"
       />
       <h2 className="text-lg font-semibold">Storyboard</h2>
-      <p className="mt-1 text-sm font-medium text-[var(--color-fg)]">
-        Design shot-by-shot with AI image generation.
-      </p>
-      <p className="mt-2 text-sm leading-relaxed text-[var(--color-muted)]">
-        Lock a style and characters with generated keyframes, then animate each into
-        a video clip — continuity built in.
-      </p>
       <span className="mt-4 text-sm font-medium" style={{ color: accent }}>
         {busy ? "Creating…" : "Start →"}
       </span>
