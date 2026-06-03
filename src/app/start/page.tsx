@@ -54,7 +54,7 @@ export default async function StartPage() {
             <img
               src={withBase("/logo.png")}
               alt="SlopStudio Pro"
-              className="pointer-events-none absolute left-1/2 top-2 w-[88%] -translate-x-1/2 object-contain [filter:drop-shadow(0_2px_6px_rgba(0,0,0,0.65))] md:top-6"
+              className="animate-marquee-on pointer-events-none absolute left-1/2 top-2 w-[88%] -translate-x-1/2 object-contain md:top-6"
             />
           </div>
         </div>

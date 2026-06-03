@@ -224,3 +224,71 @@ a.bg-\[var\(--color-control\)\]:hover {
     animation-iteration-count: 1 !important;
   }
 }
+
+/* ── SLOP STUDIO PRO marquee power-on ────────────────────────────────────────
+   Logo starts blacked out, then flickers to life like an old marquee/neon sign
+   and settles fully lit with a warm bulb glow. Runs once on mount. */
+@keyframes marquee-power-on {
+  0%,
+  28% {
+    filter: brightness(0.05) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.65));
+  }
+  29% {
+    filter: brightness(1.25) drop-shadow(0 0 9px rgba(255, 190, 80, 0.8))
+      drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6));
+  }
+  31% {
+    filter: brightness(0.07) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.65));
+  }
+  37% {
+    filter: brightness(0.07) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.65));
+  }
+  38% {
+    filter: brightness(1) drop-shadow(0 0 8px rgba(255, 190, 80, 0.7))
+      drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6));
+  }
+  40% {
+    filter: brightness(0.1) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.65));
+  }
+  46% {
+    filter: brightness(0.1) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.65));
+  }
+  47% {
+    filter: brightness(1.15) drop-shadow(0 0 9px rgba(255, 190, 80, 0.8))
+      drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6));
+  }
+  49% {
+    filter: brightness(0.18) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.65));
+  }
+  52% {
+    filter: brightness(1) drop-shadow(0 0 8px rgba(255, 190, 80, 0.7))
+      drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6));
+  }
+  55% {
+    filter: brightness(0.4) drop-shadow(0 1px 6px rgba(0, 0, 0, 0.6));
+  }
+  58% {
+    filter: brightness(1.2) drop-shadow(0 0 10px rgba(255, 190, 80, 0.85))
+      drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6));
+  }
+  61% {
+    filter: brightness(0.6) drop-shadow(0 1px 6px rgba(0, 0, 0, 0.6));
+  }
+  66%,
+  100% {
+    filter: brightness(1) drop-shadow(0 0 7px rgba(255, 190, 80, 0.65))
+      drop-shadow(0 2px 6px rgba(0, 0, 0, 0.55));
+  }
+}
+
+.animate-marquee-on {
+  animation: marquee-power-on 2.8s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee-on {
+    animation: none;
+    filter: brightness(1) drop-shadow(0 0 7px rgba(255, 190, 80, 0.65))
+      drop-shadow(0 2px 6px rgba(0, 0, 0, 0.55));
+  }
+}
