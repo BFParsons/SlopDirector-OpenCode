@@ -32,6 +32,8 @@ model User {
   id            String    @id @default(cuid())
   email         String    @unique
   passwordHash  String // argon2id
+  // Per-user default base folder new project bundles are created under (desktop).
+  defaultProjectFolder String?
   role          Role      @default(USER)
   quotaAdsMonth Int       @default(20)
   // Optional per-user OpenRouter key (AES-GCM encrypted at rest); falls back to
@@ -116,6 +118,9 @@ model Project {
   userId        String
   user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   title         String
+  // Portable bundle: absolute folder holding this project's project.json + assets
+  // (null = legacy project stored under ASSET_ROOT/<projectId>).
+  bundlePath    String?
   status        AdStatus     @default(DRAFT)
   // brief — all optional; AI generation is opt-in per track
   goal          String?

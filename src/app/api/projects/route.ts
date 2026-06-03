@@ -2,8 +2,9 @@ import { requireApiUser } from "@/lib/auth/rbac";
 import { prisma } from "@/lib/db/client";
 import { handleApiError } from "@/lib/http/handleError";
 import { parseJsonBody } from "@/lib/http/parseJsonBody";
-import { ok } from "@/lib/http/response";
+import { err, ok } from "@/lib/http/response";
 import { createProjectSchema } from "@/lib/validation/project";
+import { createProjectBundle, writeProjectManifest } from "@/lib/projects/bundle";
 
 export async function GET() {
   try {
@@ -33,12 +34,29 @@ export async function POST(request: Request) {
     const { user } = await requireApiUser();
     const body = await parseJsonBody(request, createProjectSchema, 8 * 1024);
 
+    // Portable bundle: create a named folder under the chosen base (or the
+    // user's default). If neither is set, fall back to a legacy DB project.
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: { defaultProjectFolder: true },
+    });
+    const base = body.bundleBase ?? dbUser?.defaultProjectFolder ?? null;
+    let bundlePath: string | null = null;
+    if (base) {
+      try {
+        bundlePath = await createProjectBundle(base, body.title);
+      } catch (e) {
+        return err(`Couldn't create the project folder: ${(e as Error).message}`, 400);
+      }
+    }
+
     // No auto-generation: the project starts as a DRAFT with empty visual and
     // audio tracks. The user builds each track (AI generation is opt-in).
     const project = await prisma.project.create({
       data: {
         userId: user.id,
         title: body.title,
+        bundlePath,
         goal: body.goal,
         subject: body.subject,
         tone: body.tone,
@@ -55,6 +73,9 @@ export async function POST(request: Request) {
         status: "DRAFT",
       },
     });
+
+    // Seed the portable project.json (best-effort; the DB row is canonical).
+    if (bundlePath) await writeProjectManifest(project.id).catch(() => {});
 
     return ok({ id: project.id });
   } catch (e) {

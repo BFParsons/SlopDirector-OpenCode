@@ -36,6 +36,11 @@ export async function ensureDesktopDb(): Promise<void> {
   const migrations = [
     'ALTER TABLE "Segment" ADD COLUMN "effects" JSONB',
     `ALTER TABLE "WorkspaceLayout" ADD COLUMN "section" TEXT NOT NULL DEFAULT 'video'`,
+    // Portable project bundles: the absolute folder a project's file + assets
+    // live in (null = legacy project under ASSET_ROOT/<projectId>).
+    'ALTER TABLE "Project" ADD COLUMN "bundlePath" TEXT',
+    // Per-user default base folder new project bundles are created under.
+    'ALTER TABLE "User" ADD COLUMN "defaultProjectFolder" TEXT',
   ];
   for (const stmt of migrations) {
     try {

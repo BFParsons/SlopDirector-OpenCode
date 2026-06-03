@@ -13,7 +13,7 @@
 // is scaffolded but not yet fully wired — see docs/DESKTOP.md. The dev path runs
 // today.
 
-const { app, BrowserWindow, shell } = require("electron");
+const { app, BrowserWindow, shell, ipcMain, dialog } = require("electron");
 const path = require("node:path");
 const http = require("node:http");
 const fs = require("node:fs");
@@ -159,6 +159,25 @@ async function createWindow() {
     mainWindow = null;
   });
 }
+
+// Native "choose a folder" dialog for project-save locations. Returns the
+// selected absolute path, or null if the user cancels.
+ipcMain.handle("slop:pick-folder", async (_evt, opts) => {
+  const win = mainWindow ?? BrowserWindow.getFocusedWindow();
+  const res = await dialog.showOpenDialog(win, {
+    title: (opts && opts.title) || "Choose a folder",
+    defaultPath: (opts && opts.defaultPath) || app.getPath("documents"),
+    properties: ["openDirectory", "createDirectory"],
+  });
+  if (res.canceled || res.filePaths.length === 0) return null;
+  return res.filePaths[0];
+});
+
+// Reveal a path in the OS file manager (Explorer/Finder).
+ipcMain.handle("slop:reveal", async (_evt, target) => {
+  if (typeof target === "string" && target) shell.showItemInFolder(target);
+  return true;
+});
 
 app.whenReady().then(createWindow);
 

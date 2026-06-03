@@ -100,6 +100,9 @@ export const createProjectSchema = z.object({
   ttsModel: z.string().min(1).max(120),
   ttsVoice: z.string().max(120).optional(),
   audioFitMode: audioFitEnum.optional(),
+  // Desktop: absolute base folder to create this project's bundle under. When
+  // omitted, falls back to the user's default folder (or a legacy DB project).
+  bundleBase: z.string().min(1).max(1024).optional(),
 });
 export type CreateProjectInput = z.infer<typeof createProjectSchema>;
 

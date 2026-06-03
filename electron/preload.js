@@ -4,7 +4,7 @@
 // native filesystem reads and OS drag-in. For now it just lets the UI detect it
 // is running inside the desktop shell.
 
-const { contextBridge } = require("electron");
+const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("slopstudioDesktop", {
   isDesktop: true,
@@ -14,4 +14,8 @@ contextBridge.exposeInMainWorld("slopstudioDesktop", {
     chrome: process.versions.chrome,
     node: process.versions.node,
   },
+  /** Open a native folder picker. Resolves to an absolute path, or null. */
+  pickFolder: (opts) => ipcRenderer.invoke("slop:pick-folder", opts),
+  /** Reveal a file/folder in the OS file manager. */
+  reveal: (target) => ipcRenderer.invoke("slop:reveal", target),
 });

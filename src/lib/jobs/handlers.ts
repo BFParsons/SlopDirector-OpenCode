@@ -16,9 +16,9 @@ import {
   absolutePath,
   cleanupTmp,
   ensureProjectTmp,
+  projectDir,
   saveAsset,
   saveAssetStream,
-  subDir,
 } from "@/lib/assets/storage";
 import { fileToDataUri } from "@/lib/assets/serve";
 import { assembleVideo, type OverlayInput, type VisualInput } from "@/lib/ffmpeg/assemble";
@@ -656,9 +656,14 @@ async function assembleFinalJob(payload: { projectId: string }): Promise<void> {
 
   const { w, h } = frameDimensions(project.aspectRatio, project.resolution);
   await ensureProjectTmp(project.id);
-  const tmpDir = subDir(project.id, "tmp");
+  // Bundle projects render into their own folder; legacy under ASSET_ROOT/<id>.
+  const assetBase = project.bundlePath
+    ? path.join(project.bundlePath, "assets")
+    : projectDir(project.id);
+  const tmpDir = path.join(assetBase, "tmp");
+  await mkdir(tmpDir, { recursive: true });
   const tmpPath = path.join(tmpDir, "final.mp4");
-  const finalDir = subDir(project.id, "final");
+  const finalDir = path.join(assetBase, "final");
   await mkdir(finalDir, { recursive: true });
   const finalPath = path.join(finalDir, "final.mp4");
 
@@ -774,7 +779,8 @@ async function assembleFinalJob(payload: { projectId: string }): Promise<void> {
     },
   });
 
-  const relativePath = path.relative(ASSET_ROOT, finalPath);
+  // Bundle projects store the final render's absolute path; legacy store relative.
+  const relativePath = project.bundlePath ? finalPath : path.relative(ASSET_ROOT, finalPath);
   const st = await stat(finalPath);
   const asset = await prisma.asset.create({
     data: {

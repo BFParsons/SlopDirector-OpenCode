@@ -5,6 +5,7 @@ import { parseJsonBody } from "@/lib/http/parseJsonBody";
 import { err, ok } from "@/lib/http/response";
 import { getOwnedProject } from "@/lib/projects/access";
 import { projectSnapshot } from "@/lib/projects/serialize";
+import { writeProjectManifest } from "@/lib/projects/bundle";
 import { patchProjectSchema } from "@/lib/validation/project";
 
 type Ctx = { params: Promise<{ id: string }> };
@@ -163,6 +164,8 @@ export async function PATCH(request: Request, { params }: Ctx) {
     });
 
     const snapshot = await projectSnapshot(id);
+    // Keep the portable project.json in sync with this save (no-op if legacy).
+    await writeProjectManifest(id).catch(() => {});
     return ok(snapshot);
   } catch (e) {
     return handleApiError(e);

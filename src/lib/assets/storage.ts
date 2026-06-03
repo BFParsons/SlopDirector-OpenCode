@@ -22,13 +22,44 @@ export function subDir(projectId: string, sub: AssetSubdir): string {
   return path.join(projectDir(projectId), sub);
 }
 
-/** Resolve a stored relative path to an absolute path, guarding traversal. */
+/** Resolve a stored asset path to an absolute path.
+ *  - Bundle projects store ABSOLUTE paths (files live in the user's chosen
+ *    project folder) — pass those through (normalized).
+ *  - Legacy projects store paths relative to ASSET_ROOT — resolve + guard
+ *    against traversal escapes. */
 export function absolutePath(relativePath: string): string {
+  if (path.isAbsolute(relativePath)) return path.normalize(relativePath);
   const abs = path.resolve(ASSET_ROOT, relativePath);
   if (abs !== ASSET_ROOT && !abs.startsWith(ASSET_ROOT + path.sep)) {
     throw new Error("Asset path escapes ASSET_ROOT");
   }
   return abs;
+}
+
+/** A project's portable bundle folder, or null for a legacy (ASSET_ROOT) project. */
+async function bundlePathFor(projectId: string): Promise<string | null> {
+  const p = await prisma.project.findUnique({
+    where: { id: projectId },
+    select: { bundlePath: true },
+  });
+  return p?.bundlePath ?? null;
+}
+
+/** Resolve where a project's {sub} assets are written:
+ *   - bundle projects → <bundle>/assets/<sub>   (Asset.path stored ABSOLUTE)
+ *   - legacy projects → ASSET_ROOT/<projectId>/<sub>  (Asset.path RELATIVE) */
+export async function projectAssetDir(
+  projectId: string,
+  sub: AssetSubdir,
+): Promise<{ dir: string; bundle: boolean }> {
+  const bundle = await bundlePathFor(projectId);
+  if (bundle) return { dir: path.join(bundle, "assets", sub), bundle: true };
+  return { dir: subDir(projectId, sub), bundle: false };
+}
+
+/** The value to store in Asset.path for a file written under a project's dir. */
+function storedAssetPath(absPath: string, bundle: boolean): string {
+  return bundle ? absPath : path.relative(ASSET_ROOT, absPath);
 }
 
 async function ensureDir(dir: string): Promise<void> {
@@ -42,13 +73,13 @@ export async function writeAssetFile(
   filename: string,
   data: Buffer,
 ): Promise<string> {
-  const dir = subDir(projectId, sub);
+  const { dir, bundle } = await projectAssetDir(projectId, sub);
   await ensureDir(dir);
   const finalPath = path.join(dir, filename);
   const tmpPath = `${finalPath}.tmp-${process.pid}-${Date.now()}`;
   await writeFile(tmpPath, data);
   await rename(tmpPath, finalPath);
-  return path.relative(ASSET_ROOT, finalPath);
+  return storedAssetPath(finalPath, bundle);
 }
 
 /** Write a file and create its Asset DB row in one step. */
@@ -90,7 +121,7 @@ export async function copyAssetToProject(
   targetProjectId: string,
 ): Promise<Asset> {
   const sub: AssetSubdir = asset.kind === "SHOT_CLIP" ? "clips" : "uploads";
-  const dir = subDir(targetProjectId, sub);
+  const { dir, bundle } = await projectAssetDir(targetProjectId, sub);
   await mkdir(dir, { recursive: true });
   const filename = `${randomUUID()}${path.extname(asset.path)}`;
   const dest = path.join(dir, filename);
@@ -99,7 +130,7 @@ export async function copyAssetToProject(
     data: {
       projectId: targetProjectId,
       kind: asset.kind,
-      path: path.relative(ASSET_ROOT, dest),
+      path: storedAssetPath(dest, bundle),
       mime: asset.mime,
       sizeBytes: asset.sizeBytes,
       sha256: asset.sha256,
@@ -118,7 +149,7 @@ export async function writeAssetStream(
   filename: string,
   body: ReadableStream<Uint8Array>,
 ): Promise<{ relativePath: string; sizeBytes: number; sha256: string }> {
-  const dir = subDir(projectId, sub);
+  const { dir, bundle } = await projectAssetDir(projectId, sub);
   await ensureDir(dir);
   const finalPath = path.join(dir, filename);
   const tmpPath = `${finalPath}.tmp-${process.pid}-${Date.now()}`;
@@ -148,7 +179,7 @@ export async function writeAssetStream(
   }
   await rename(tmpPath, finalPath);
   return {
-    relativePath: path.relative(ASSET_ROOT, finalPath),
+    relativePath: storedAssetPath(finalPath, bundle),
     sizeBytes: size,
     sha256: hash.digest("hex"),
   };
@@ -191,19 +222,20 @@ export async function fileExists(relativePath: string): Promise<boolean> {
 }
 
 export async function ensureProjectTmp(projectId: string): Promise<string> {
-  const dir = subDir(projectId, "tmp");
+  const { dir } = await projectAssetDir(projectId, "tmp");
   await ensureDir(dir);
   return dir;
 }
 
 export async function cleanupTmp(projectId: string): Promise<void> {
-  await rm(subDir(projectId, "tmp"), { recursive: true, force: true }).catch(
-    () => {},
-  );
+  const { dir } = await projectAssetDir(projectId, "tmp");
+  await rm(dir, { recursive: true, force: true }).catch(() => {});
 }
 
 export async function deleteProjectAssets(projectId: string): Promise<void> {
-  await rm(projectDir(projectId), { recursive: true, force: true }).catch(
-    () => {},
-  );
+  const bundle = await bundlePathFor(projectId);
+  // Bundle projects: only clear the assets dir (leave the user's named folder
+  // + project.json in place). Legacy: remove the whole ASSET_ROOT/<id> folder.
+  const target = bundle ? path.join(bundle, "assets") : projectDir(projectId);
+  await rm(target, { recursive: true, force: true }).catch(() => {});
 }
