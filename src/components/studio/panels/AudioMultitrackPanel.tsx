@@ -8,6 +8,7 @@ import { useAudioStudioStore, type AudioTrack } from "@/stores/audioStudioStore"
 import { useStudioWorkspaceStore } from "@/stores/studioWorkspaceStore";
 import { api } from "@/lib/api";
 import { pollAudioJob } from "@/lib/audio/jobClient";
+import { connectMediaElement, resumeAudio } from "@/lib/audio/visualizerBus";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type WaveSurferInstance = any;
@@ -236,6 +237,13 @@ export default function AudioMultitrackPanel({ windowControls, panelId }: PanelP
           dragToSeek: false,
         });
         ws.setVolume(t.muted ? 0 : t.volume);
+        // Route this lane into the shared analyser bus so the Visualizer can
+        // render the combined multitrack output.
+        try {
+          connectMediaElement(ws.getMediaElement?.());
+        } catch {
+          /* ignore */
+        }
         map.set(t.id, ws);
       }
     })();
@@ -368,6 +376,7 @@ export default function AudioMultitrackPanel({ windowControls, panelId }: PanelP
 
   const playAll = useCallback(() => {
     if (!tracks.length) return;
+    resumeAudio(); // unlock the shared AudioContext on this user gesture
     playStartRef.current = { at: performance.now(), head: playhead >= total ? 0 : playhead };
     setPlaying(true);
     rafRef.current = requestAnimationFrame(tick);
