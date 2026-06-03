@@ -5,6 +5,7 @@ import { CAPS } from "@/config/models";
 import { api } from "@/lib/api";
 import { withBase } from "@/lib/basePath";
 import { setMediaDrag, readAudioDrag, hasAudioDrag, type AudioStudioDragPayload } from "@/lib/studio/dnd";
+import { OptionDrawer } from "../OptionDrawer";
 import { useProjectStore } from "@/stores/projectStore";
 import { YouTubeImport } from "@/components/YouTubeImport";
 import type { PanelProps } from "@/types/panel";
@@ -364,22 +365,15 @@ export default function MediaBucketPanel({ windowControls }: PanelProps) {
           </button>
         </div>
 
-        {/* Filter chips */}
-        <div className="flex shrink-0 flex-wrap gap-1 border-b border-[var(--color-border)] p-2">
-          {FILTERS.map((f) => (
-            <button
-              key={f.key}
-              type="button"
-              onClick={() => setFilter(f.key)}
-              className={`rounded px-2 py-0.5 text-[11px] transition-colors ${
-                filter === f.key
-                  ? "bg-[var(--color-control)] text-[var(--color-accent-fg)]"
-                  : "text-[var(--color-muted)] hover:text-[var(--color-fg)]"
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
+        {/* Filter (collapsed drawer for density) */}
+        <div className="shrink-0 border-b border-[var(--color-border)] p-2">
+          <OptionDrawer
+            className="w-44"
+            label="Show"
+            value={filter}
+            options={FILTERS}
+            onChange={(k) => setFilter(k as Filter)}
+          />
         </div>
 
         {/* Bucket grid — only explicitly imported items render a thumbnail */}
