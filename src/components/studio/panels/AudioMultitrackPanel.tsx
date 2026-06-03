@@ -388,23 +388,36 @@ export default function AudioMultitrackPanel({ windowControls, panelId }: PanelP
     else playAll();
   }, [tracks.length, pauseAll, playAll]);
 
+  // Multiplicative zoom with a very wide range (px per second of audio).
+  const zoomIn = useCallback(() => setPxPerSec((z) => Math.min(5000, z * 1.3)), []);
+  const zoomOut = useCallback(() => setPxPerSec((z) => Math.max(0.2, z / 1.3)), []);
+
   // Spacebar toggles multitrack playback when this panel is the active window.
   // Capture phase + stopImmediatePropagation so the global (video preview)
   // Space handler doesn't also fire.
   useEffect(() => {
     if (!isFront) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.code !== "Space" && e.key !== " ") return;
       const el = e.target as HTMLElement | null;
       const tag = el?.tagName;
       if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || tag === "BUTTON" || el?.isContentEditable) return;
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      togglePlay();
+      if (e.code === "Space" || e.key === " ") {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        togglePlay();
+      } else if (e.key === "+" || e.key === "=") {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        zoomIn();
+      } else if (e.key === "-" || e.key === "_") {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        zoomOut();
+      }
     };
     window.addEventListener("keydown", onKey, true);
     return () => window.removeEventListener("keydown", onKey, true);
-  }, [isFront, togglePlay]);
+  }, [isFront, togglePlay, zoomIn, zoomOut]);
 
   const onRulerMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     seekTo(headFromClientX(e.clientX));
@@ -452,10 +465,10 @@ export default function AudioMultitrackPanel({ windowControls, panelId }: PanelP
           </span>
           <div className="ml-auto flex items-center gap-1 text-[10px] text-[var(--color-muted)]">
             <span>Zoom</span>
-            <button type="button" className="rounded border border-[var(--color-border)] px-1.5 hover:text-[var(--color-fg)]" onClick={() => setPxPerSec((z) => Math.max(8, z - 12))}>
+            <button type="button" className="rounded border border-[var(--color-border)] px-1.5 hover:text-[var(--color-fg)]" onClick={zoomOut} title="Zoom out ( - )">
               −
             </button>
-            <button type="button" className="rounded border border-[var(--color-border)] px-1.5 hover:text-[var(--color-fg)]" onClick={() => setPxPerSec((z) => Math.min(200, z + 12))}>
+            <button type="button" className="rounded border border-[var(--color-border)] px-1.5 hover:text-[var(--color-fg)]" onClick={zoomIn} title="Zoom in ( + )">
               +
             </button>
           </div>
