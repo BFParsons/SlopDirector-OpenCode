@@ -330,7 +330,7 @@ a.bg-\[var\(--color-control\)\]:hover {
   will-change: transform;
 }
 .squish-card:hover .squish-icon {
-  animation: squish-jelly 0.72s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: squish-jelly 0.72s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 }
 
 /* The top accent bar squishes taller on hover. */
@@ -352,4 +352,61 @@ a.bg-\[var\(--color-control\)\]:hover {
   .squish-card:hover .squish-icon {
     animation: none;
   }
+}
+
+/* ── More squish: entrance, de-sync, shine, title pop ───────────────────────── */
+/* Cards bounce in (staggered) on load. `backwards` fill so they sit hidden
+   until their turn, then revert to CSS control (hover still works). */
+@keyframes squish-pop-in {
+  0% { opacity: 0; transform: translateY(26px) scale(0.6); }
+  60% { opacity: 1; transform: translateY(-6px) scale(1.08); }
+  80% { transform: translateY(0) scale(0.96); }
+  100% { transform: translateY(0) scale(1); }
+}
+.squish-card {
+  animation: squish-pop-in 0.55s cubic-bezier(0.34, 1.7, 0.5, 1) backwards;
+}
+.squish-card:nth-child(1) { animation-delay: 0.04s; }
+.squish-card:nth-child(2) { animation-delay: 0.12s; }
+.squish-card:nth-child(3) { animation-delay: 0.2s; }
+.squish-card:nth-child(4) { animation-delay: 0.28s; }
+
+/* De-sync the idle bob so the cards don't bob in lockstep (negative delays
+   start each mid-cycle). The hover jelly uses !important so it still wins. */
+.squish-card:nth-child(1) .squish-icon { animation-delay: -0.4s; }
+.squish-card:nth-child(2) .squish-icon { animation-delay: -1.7s; }
+.squish-card:nth-child(3) .squish-icon { animation-delay: -2.6s; }
+.squish-card:nth-child(4) .squish-icon { animation-delay: -0.95s; }
+
+/* A light glints across the card on hover. */
+.squish-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    115deg,
+    transparent 32%,
+    rgba(255, 255, 255, 0.16) 48%,
+    transparent 64%
+  );
+  transform: translateX(-130%);
+}
+.squish-card:hover::after {
+  animation: squish-shine 0.75s ease-out;
+}
+@keyframes squish-shine {
+  0% { transform: translateX(-130%); }
+  100% { transform: translateX(130%); }
+}
+
+/* The title gives a little pop on hover. */
+.squish-card:hover .squish-title {
+  animation: squish-title-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: inline-block;
+}
+@keyframes squish-title-pop {
+  0%, 100% { transform: scale(1); }
+  40% { transform: scale(1.16) rotate(-1.5deg); }
+  70% { transform: scale(0.95); }
 }

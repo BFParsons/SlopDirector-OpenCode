@@ -94,7 +94,7 @@ export default async function StartPage() {
                   {m.glyph}
                 </span>
               )}
-              <h2 className="text-lg font-semibold">{m.title}</h2>
+              <h2 className="squish-title text-lg font-semibold">{m.title}</h2>
             </Link>
           ))}
         </div>

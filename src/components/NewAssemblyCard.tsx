@@ -86,7 +86,7 @@ export function NewAssemblyCard({ accent }: { accent: string }) {
           aria-hidden
           className="squish-icon mb-3 h-20 w-auto object-contain drop-shadow"
         />
-        <h2 className="text-lg font-semibold">Assembly</h2>
+        <h2 className="squish-title text-lg font-semibold">Assembly</h2>
       </button>
 
       {open ? (
