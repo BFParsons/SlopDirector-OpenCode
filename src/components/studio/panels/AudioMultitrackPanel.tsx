@@ -9,6 +9,7 @@ import { useStudioWorkspaceStore } from "@/stores/studioWorkspaceStore";
 import { api } from "@/lib/api";
 import { pollAudioJob } from "@/lib/audio/jobClient";
 import { connectMediaElement, resumeAudio } from "@/lib/audio/visualizerBus";
+import { hasMediaDrag, readMediaDrag } from "@/lib/studio/dnd";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type WaveSurferInstance = any;
@@ -61,6 +62,10 @@ export default function AudioMultitrackPanel({ windowControls, panelId }: PanelP
   // "Send to Video Timeline" — ingest the whole arrangement as audio layers.
   const [sending, setSending] = useState(false);
   const [sendMsg, setSendMsg] = useState("");
+
+  // Drop a Media Bucket audio asset onto the timeline → bridge it into the
+  // workspace and add it as a new track.
+  const [bucketDrop, setBucketDrop] = useState(false);
 
   // Mixdown / export
   const [mixFmt, setMixFmt] = useState<"wav" | "mp3">("wav");
@@ -449,6 +454,25 @@ export default function AudioMultitrackPanel({ windowControls, panelId }: PanelP
     seekTo(headFromClientX(e.clientX));
   };
 
+  // Accept Media Bucket audio assets dropped onto the timeline: copy the DB
+  // asset into the Audio Studio workspace, then add it as a track.
+  async function onBucketDrop(e: React.DragEvent) {
+    setBucketDrop(false);
+    const payload = readMediaDrag(e.dataTransfer);
+    if (!payload || !payload.isAudio) return;
+    e.preventDefault();
+    setSendMsg("");
+    try {
+      const t = await api<{ relPath: string; name: string; durationS: number; url: string }>(
+        "/api/audio/from-asset",
+        { method: "POST", body: JSON.stringify({ projectId: snapshot.id, assetId: payload.id }) },
+      );
+      addTrack({ name: t.name, relPath: t.relPath, url: t.url, durationS: t.durationS, kind: "import" });
+    } catch (err) {
+      setSendMsg(err instanceof Error ? err.message : "Failed to add bucket audio");
+    }
+  }
+
   // Push the whole multitrack arrangement onto the Video timeline: each track
   // becomes an audio-only clip on its own audio layer, preserving offset + trim.
   // This is the bridge that makes the Audio Studio and Assembly one timeline.
@@ -476,7 +500,19 @@ export default function AudioMultitrackPanel({ windowControls, panelId }: PanelP
 
   return (
     <PanelChrome title="Multitrack Timeline" icon="▤" {...windowControls}>
-      <div className="flex h-full flex-col">
+      <div
+        className={`flex h-full flex-col ${bucketDrop ? "ring-2 ring-inset ring-[var(--color-accent)]" : ""}`}
+        onDragOver={(e) => {
+          if (readOnly || !hasMediaDrag(e.dataTransfer)) return;
+          e.preventDefault();
+          e.dataTransfer.dropEffect = "copy";
+          if (!bucketDrop) setBucketDrop(true);
+        }}
+        onDragLeave={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget as Node)) setBucketDrop(false);
+        }}
+        onDrop={onBucketDrop}
+      >
         {/* Transport */}
         <div className="flex shrink-0 items-center gap-2 border-b border-[var(--color-border)] px-2 py-1.5">
           <button

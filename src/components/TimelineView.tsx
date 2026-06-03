@@ -151,6 +151,9 @@ export function TimelineView({
   );
   // Highlighted drop lane, keyed "v1" | `video:<track>` | `audio:<track>`.
   const [dragLane, setDragLane] = useState<string | null>(null);
+  // Extra empty lanes added via the "+ video"/"+ audio" buttons (beyond used tracks).
+  const [videoExtra, setVideoExtra] = useState(0);
+  const [audioExtra, setAudioExtra] = useState(0);
   // One height for every track row; drag any divider to resize them in unison.
   const [trackH, setTrackH] = useState(64);
   const resizeTracks = (h: number) =>
@@ -170,19 +173,24 @@ export function TimelineView({
   const videoOverlays = onTimeline.filter((s) => (s.track ?? 0) >= 1 && !s.audioOnly);
   const audioOnlySegs = onTimeline.filter((s) => s.audioOnly);
 
-  // Dynamic video overlay lanes: one per used track, plus a trailing spare lane
-  // so there's always somewhere to drop a brand-new layer. Always show ≥ V2.
+  // Lanes start minimal — one video (V1) + one audio (A1) — and grow on demand:
+  // a used track always shows a lane, and the "+ video"/"+ audio" toolbar buttons
+  // reveal an extra empty lane to drop onto (tracked in videoExtra / audioExtra).
   const maxVideoTrack = videoOverlays.reduce((m, s) => Math.max(m, s.track ?? 0), 0);
+  const videoLaneCount = Math.max(maxVideoTrack, videoExtra); // overlay lanes V2…Vn (0 = none)
   const videoLaneTracks: number[] = [];
-  for (let t = 1; t <= Math.max(1, maxVideoTrack) + 1; t++) videoLaneTracks.push(t);
+  for (let t = 1; t <= videoLaneCount; t++) videoLaneTracks.push(t);
   const overlaysOnTrack = (t: number) => videoOverlays.filter((s) => (s.track ?? 0) === t);
+  const addVideoLane = () => setVideoExtra(Math.max(maxVideoTrack, videoExtra) + 1);
 
-  // Dynamic audio lanes: lane 0 (A1) also hosts linked clip-audio mirrors; each
-  // used audio track gets a lane, plus a trailing spare.
+  // Audio lane 0 (A1) is always present (it also hosts linked clip-audio mirrors);
+  // extra audio lanes appear for used tracks or via the "+ audio" button.
   const maxAudioTrack = audioOnlySegs.reduce((m, s) => Math.max(m, s.track ?? 0), 0);
+  const audioLaneCount = Math.max(maxAudioTrack, audioExtra); // extra lanes beyond A1
   const audioLaneTracks: number[] = [];
-  for (let t = 0; t <= maxAudioTrack + 1; t++) audioLaneTracks.push(t);
+  for (let t = 0; t <= audioLaneCount; t++) audioLaneTracks.push(t);
   const audioOnTrack = (t: number) => audioOnlySegs.filter((s) => (s.track ?? 0) === t);
+  const addAudioLane = () => setAudioExtra(Math.max(maxAudioTrack, audioExtra) + 1);
   const effDur = v1.map((s) => s.durationS);
   const starts: number[] = [];
   let acc = 0;
@@ -355,6 +363,26 @@ export function TimelineView({
             🗑
           </button>
         ) : null}
+        {!readOnly ? (
+          <>
+            <button
+              type="button"
+              className="flex h-6 items-center justify-center rounded border border-[var(--color-border)] bg-[var(--color-surface)] px-1.5 text-[10px] font-semibold hover:border-[#39414f]"
+              onClick={addVideoLane}
+              title="Add a video layer"
+            >
+              ＋V
+            </button>
+            <button
+              type="button"
+              className="flex h-6 items-center justify-center rounded border border-[var(--color-border)] bg-[var(--color-surface)] px-1.5 text-[10px] font-semibold hover:border-[#39414f]"
+              onClick={addAudioLane}
+              title="Add an audio layer"
+            >
+              ＋A
+            </button>
+          </>
+        ) : null}
         <button
           type="button"
           aria-label="Zoom out"
@@ -374,7 +402,7 @@ export function TimelineView({
       </div>
 
       <div className="flex min-h-0 flex-1 overflow-y-auto">
-        {/* Track header gutter — dynamic: V1, V2…Vn (+spare), A1…An (+spare), imports */}
+        {/* Track header gutter — dynamic: V1, V2…Vn, A1…An, imports */}
         <div className="w-14 shrink-0 select-none text-[10px] font-semibold text-[var(--color-muted)]">
           <div className={ROW.ruler} />
           <GutterLabel h={trackH}>V1</GutterLabel>
@@ -480,11 +508,7 @@ export function TimelineView({
                   } ${dragLane === `video:${t}` ? "ring-2 ring-inset ring-[var(--color-accent)]" : ""}`}
                 >
                   {segs.length === 0 ? (
-                    <Empty>
-                      {spare
-                        ? "drop a clip to add a video layer"
-                        : "drag a clip here, or use Effect Controls → “Move to overlay”"}
-                    </Empty>
+                    <Empty>drag a clip here, or use Effect Controls → “Move to overlay”</Empty>
                   ) : (
                     segs.map((s) => (
                       <OverlayBlock
@@ -588,7 +612,7 @@ export function TimelineView({
                       .filter(Boolean);
                   })}
                   {segs.length === 0 && (spare || (isLane0 && !hasClipAudio)) ? (
-                    <Empty>{spare ? "drop audio to add a layer" : "clip audio appears here"}</Empty>
+                    <Empty>{spare ? "drop audio here" : "clip audio appears here"}</Empty>
                   ) : null}
                   <ResizeHandle value={trackH} onResize={resizeTracks} />
                 </div>

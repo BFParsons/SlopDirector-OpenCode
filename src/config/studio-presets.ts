@@ -23,6 +23,16 @@ export function panelSection(type: PanelType): WorkspaceSection {
   return AUDIO_STUDIO_PANELS.has(type) ? "audio" : "video";
 }
 
+/** Panels allowed in BOTH suites (so they survive a section's layout sanitize).
+ *  The Media Bucket is the project's asset shelf — useful in Video Assembly AND
+ *  the Audio Studio (drag a bucket audio file straight onto the multitrack). */
+export const SHARED_PANELS = new Set<PanelType>(["media-bucket"]);
+
+/** Whether a panel may appear in the given section (its home section, or shared). */
+export function panelAllowedIn(type: PanelType, section: WorkspaceSection): boolean {
+  return panelSection(type) === section || SHARED_PANELS.has(type);
+}
+
 /** Which presets each section offers in the Workspace menu. */
 export const SECTION_PRESETS: Record<WorkspaceSection, string[]> = {
   audio: ["audio-studio"],

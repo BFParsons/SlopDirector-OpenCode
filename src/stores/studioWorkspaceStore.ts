@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 import { withBase } from "@/lib/basePath";
-import { PRESETS, SECTION_PRESETS, panelSection, type WorkspaceSection } from "@/config/studio-presets";
+import { PRESETS, SECTION_PRESETS, panelAllowedIn, type WorkspaceSection } from "@/config/studio-presets";
 import { SYSTEM_DEFAULT_LAYOUT } from "@/config/studio-default-layout";
 import { CASCADE_OFFSET, DEFAULT_HEIGHT, DEFAULT_WIDTH, genWindowId } from "@/lib/studio/window-utils";
 import type { PanelType } from "@/types/panel";
@@ -35,7 +35,7 @@ function sanitizeForSection(
   cw: number,
   ch: number,
 ): WorkspaceLayoutData {
-  const windows = data.windows.filter((w) => panelSection(w.panelType) === section);
+  const windows = data.windows.filter((w) => panelAllowedIn(w.panelType, section));
   if (windows.length === 0) return sectionDefault(section, cw, ch);
   return { version: 2, windows, nextZIndex: data.nextZIndex };
 }
