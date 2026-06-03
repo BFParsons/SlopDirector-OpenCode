@@ -25,8 +25,10 @@ export default async function Dashboard() {
 
         {projects.length === 0 ? (
           <Card className="text-center text-sm text-[var(--color-muted)]">
-            No projects yet. Click <span className="text-[var(--color-fg)]">+ New video</span>{" "}
-            to write a brief and generate your first one.
+            No projects yet. Click{" "}
+            <span className="text-[var(--color-fg)]">+ New Video</span> or{" "}
+            <span className="text-[var(--color-fg)]">+ New Audio Composition</span>{" "}
+            to get started.
           </Card>
         ) : (
           <ProjectGrid

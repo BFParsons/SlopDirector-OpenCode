@@ -27,7 +27,7 @@ const MODES: Mode[] = [
     img: "/slop/oldslop.png",
     title: "Open project",
     blurb: "Pick up where you left off.",
-    detail: "Reopen any of your existing videos to keep editing or re-render.",
+    detail: "Reopen any of your existing projects to keep editing or re-render.",
     accent: "#e0a93f",
   },
 ];
