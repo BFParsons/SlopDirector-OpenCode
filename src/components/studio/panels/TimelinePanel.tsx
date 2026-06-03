@@ -44,7 +44,8 @@ export default function TimelinePanel({ windowControls }: PanelProps) {
     [],
   );
   const onDropAudio = useCallback(
-    (payload: { relPath: string }, offsetS: number) => void ref.current.insertAudioFromStudio(payload, offsetS),
+    (payload: { relPath: string }, offsetS: number, track: number) =>
+      void ref.current.insertAudioFromStudio(payload, offsetS, track),
     [],
   );
   const onUnlinkAudio = useCallback((id: string) => void ref.current.onUnlinkAudio(id), []);

@@ -112,7 +112,7 @@ export function TimelineView({
   onDelete?: (id: string) => void;
   onOffset?: (id: string, offsetS: number) => void;
   onDropMedia?: (payload: MediaDragPayload, track: number, offsetS: number) => void;
-  onDropAudio?: (payload: AudioStudioDragPayload, offsetS: number) => void;
+  onDropAudio?: (payload: AudioStudioDragPayload, offsetS: number, track: number) => void;
   onUnlinkAudio?: (videoSegmentId: string) => void;
   selectedId?: string | null;
   onSelect?: (id: string | null) => void;
@@ -149,7 +149,8 @@ export function TimelineView({
     },
     [projectId, tempoBusy],
   );
-  const [dragLane, setDragLane] = useState<"v1" | "v2" | "audio" | null>(null);
+  // Highlighted drop lane, keyed "v1" | `video:<track>` | `audio:<track>`.
+  const [dragLane, setDragLane] = useState<string | null>(null);
   // One height for every track row; drag any divider to resize them in unison.
   const [trackH, setTrackH] = useState(64);
   const resizeTracks = (h: number) =>
@@ -165,8 +166,23 @@ export function TimelineView({
   // clips live in the Media Bucket only, never on the timeline.
   const onTimeline = segments.filter((s) => !s.library);
   const v1 = onTimeline.filter((s) => (s.track ?? 0) === 0 && !s.audioOnly);
-  const v2 = onTimeline.filter((s) => (s.track ?? 0) === 1 && !s.audioOnly);
+  // Every track >= 1 is a positioned video overlay layer (V2, V3, …).
+  const videoOverlays = onTimeline.filter((s) => (s.track ?? 0) >= 1 && !s.audioOnly);
   const audioOnlySegs = onTimeline.filter((s) => s.audioOnly);
+
+  // Dynamic video overlay lanes: one per used track, plus a trailing spare lane
+  // so there's always somewhere to drop a brand-new layer. Always show ≥ V2.
+  const maxVideoTrack = videoOverlays.reduce((m, s) => Math.max(m, s.track ?? 0), 0);
+  const videoLaneTracks: number[] = [];
+  for (let t = 1; t <= Math.max(1, maxVideoTrack) + 1; t++) videoLaneTracks.push(t);
+  const overlaysOnTrack = (t: number) => videoOverlays.filter((s) => (s.track ?? 0) === t);
+
+  // Dynamic audio lanes: lane 0 (A1) also hosts linked clip-audio mirrors; each
+  // used audio track gets a lane, plus a trailing spare.
+  const maxAudioTrack = audioOnlySegs.reduce((m, s) => Math.max(m, s.track ?? 0), 0);
+  const audioLaneTracks: number[] = [];
+  for (let t = 0; t <= maxAudioTrack + 1; t++) audioLaneTracks.push(t);
+  const audioOnTrack = (t: number) => audioOnlySegs.filter((s) => (s.track ?? 0) === t);
   const effDur = v1.map((s) => s.durationS);
   const starts: number[] = [];
   let acc = 0;
@@ -175,7 +191,7 @@ export function TimelineView({
     acc += d;
   }
   const totalVideo = acc;
-  const v2End = v2.reduce((m, s) => Math.max(m, (s.offsetS ?? 0) + s.durationS), 0);
+  const v2End = videoOverlays.reduce((m, s) => Math.max(m, (s.offsetS ?? 0) + s.durationS), 0);
 
   const overlayEnd = overlays.reduce(
     (m, o) => Math.max(m, o.offsetS + (o.durationS ?? Math.max(0, o.importEndS - o.importStartS))),
@@ -228,47 +244,49 @@ export function TimelineView({
     if (canUnlink && selectedId) onUnlinkAudio?.(selectedId);
   }
 
-  // Native drop target for Media Bucket drags. V1 drop appends; V2 drop places
-  // a PiP overlay at the drop point.
-  function laneDropProps(track: "v1" | "v2" | "audio") {
+  // Native drop target for Media Bucket / Audio Studio drags.
+  //  - kind "v1": the contiguous main video track — drop appends.
+  //  - kind "video": an overlay layer (track ≥ 1) — drop places a PiP at the point.
+  //  - kind "audio": an audio layer — drop places an audio clip at the point.
+  function laneDropProps(kind: "v1" | "video" | "audio", track = 0) {
     if (readOnly || (!onDropMedia && !onDropAudio)) return {};
+    const key = kind === "v1" ? "v1" : `${kind}:${track}`;
     return {
       onDragOver: (e: React.DragEvent) => {
         if (!hasMediaDrag(e.dataTransfer) && !hasAudioDrag(e.dataTransfer)) return;
         e.preventDefault();
         e.dataTransfer.dropEffect = "copy";
-        if (dragLane !== track) setDragLane(track);
+        if (dragLane !== key) setDragLane(key);
       },
       onDragLeave: (e: React.DragEvent) => {
         if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-          setDragLane((l) => (l === track ? null : l));
+          setDragLane((l) => (l === key ? null : l));
         }
       },
       onDrop: (e: React.DragEvent) => {
+        const atS = (el: Element) =>
+          Math.max(0, (e.clientX - el.getBoundingClientRect().left) / pps);
         // Audio Studio workspace file → bridge to an Asset, then place audio-only.
         const audio = readAudioDrag(e.dataTransfer);
-        if (audio && onDropAudio) {
+        if (audio && onDropAudio && kind === "audio") {
           e.preventDefault();
           setDragLane(null);
-          const rect = e.currentTarget.getBoundingClientRect();
-          onDropAudio(audio, Math.max(0, (e.clientX - rect.left) / pps));
+          onDropAudio(audio, atS(e.currentTarget), track);
           return;
         }
         const payload = readMediaDrag(e.dataTransfer);
         setDragLane(null);
         if (!payload) return;
-        if (track === "audio") {
-          if (!payload.isAudio) return; // audio tracks only take audio
+        if (kind === "audio") {
+          if (!payload.isAudio) return; // audio lanes only take audio
           e.preventDefault();
-          const rect = e.currentTarget.getBoundingClientRect();
-          onDropMedia(payload, 0, Math.max(0, (e.clientX - rect.left) / pps));
-        } else if (track === "v2") {
+          onDropMedia?.(payload, track, atS(e.currentTarget));
+        } else if (kind === "video") {
           e.preventDefault();
-          const rect = e.currentTarget.getBoundingClientRect();
-          onDropMedia(payload, 1, Math.max(0, (e.clientX - rect.left) / pps));
+          onDropMedia?.(payload, track, atS(e.currentTarget));
         } else {
           e.preventDefault();
-          onDropMedia(payload, 0, 0);
+          onDropMedia?.(payload, 0, 0);
         }
       },
     };
@@ -298,14 +316,14 @@ export function TimelineView({
     const from = v1ids.indexOf(String(active.id));
     const to = v1ids.indexOf(String(over.id));
     if (from < 0 || to < 0) return;
-    // Reorder within V1; keep the V2 overlays in their existing order.
-    onReorder([...arrayMove(v1ids, from, to), ...v2.map((s) => s.id)]);
+    // Reorder within V1; keep the overlay layers in their existing order.
+    onReorder([...arrayMove(v1ids, from, to), ...videoOverlays.map((s) => s.id)]);
   }
 
   // Clip audio present on the timeline (linked clips' audio or unlinked clips).
   const hasClipAudio =
     v1.some((s) => s.muted === false) ||
-    v2.some((s) => s.muted === false) ||
+    videoOverlays.some((s) => s.muted === false) ||
     audioOnlySegs.length > 0;
 
   const ROW = { ruler: "h-7" };
@@ -356,13 +374,17 @@ export function TimelineView({
       </div>
 
       <div className="flex min-h-0 flex-1 overflow-y-auto">
-        {/* Track header gutter */}
+        {/* Track header gutter — dynamic: V1, V2…Vn (+spare), A1…An (+spare), imports */}
         <div className="w-14 shrink-0 select-none text-[10px] font-semibold text-[var(--color-muted)]">
           <div className={ROW.ruler} />
           <GutterLabel h={trackH}>V1</GutterLabel>
-          <GutterLabel h={trackH}>V2</GutterLabel>
-          <GutterLabel h={trackH}>A1</GutterLabel>
-          <GutterLabel h={trackH}>A2</GutterLabel>
+          {videoLaneTracks.map((t) => (
+            <GutterLabel key={`gv-${t}`} h={trackH}>{`V${t + 1}`}</GutterLabel>
+          ))}
+          {audioLaneTracks.map((t) => (
+            <GutterLabel key={`ga-${t}`} h={trackH}>{`A${t + 1}`}</GutterLabel>
+          ))}
+          <GutterLabel h={trackH}>♪imp</GutterLabel>
         </div>
 
         {/* Scrolling timeline */}
@@ -443,112 +465,137 @@ export function TimelineView({
               <ResizeHandle value={trackH} onResize={resizeTracks} />
             </div>
 
-            {/* V2 video track — positioned PiP overlay clips, drag to set the offset
-                (also a media drop target: drop places a PiP at the drop point) */}
-            <div
-              {...laneDropProps("v2")}
-              style={{ height: trackH }}
-              className={`relative border-b border-[var(--color-border)] bg-[#101626] ${
-                dragLane === "v2" ? "ring-2 ring-inset ring-[var(--color-accent)]" : ""
-              }`}
-            >
-              {v2.length === 0 ? (
-                <Empty>drag a clip here, or use Effect Controls → “Move to overlay”</Empty>
-              ) : (
-                v2.map((s) => (
-                  <OverlayBlock
-                    key={s.id}
-                    segment={s}
-                    pps={pps}
-                    span={span}
-                    readOnly={readOnly}
-                    selected={selectedId === s.id}
-                    onSelect={onSelect}
-                    onOffset={onOffset}
-                    onTrim={onTrim}
-                    snapTimesRef={snapTimesRef}
-                  />
-                ))
-              )}
-              <ResizeHandle value={trackH} onResize={resizeTracks} />
-            </div>
+            {/* Video overlay layers (V2…Vn) — positioned PiP clips per layer, plus
+                a trailing spare lane that adds a new layer when you drop onto it. */}
+            {videoLaneTracks.map((t) => {
+              const segs = overlaysOnTrack(t);
+              const spare = t > maxVideoTrack;
+              return (
+                <div
+                  key={`vlane-${t}`}
+                  {...laneDropProps("video", t)}
+                  style={{ height: trackH }}
+                  className={`relative border-b border-[var(--color-border)] ${
+                    spare ? "bg-[#0d1119]" : "bg-[#101626]"
+                  } ${dragLane === `video:${t}` ? "ring-2 ring-inset ring-[var(--color-accent)]" : ""}`}
+                >
+                  {segs.length === 0 ? (
+                    <Empty>
+                      {spare
+                        ? "drop a clip to add a video layer"
+                        : "drag a clip here, or use Effect Controls → “Move to overlay”"}
+                    </Empty>
+                  ) : (
+                    segs.map((s) => (
+                      <OverlayBlock
+                        key={s.id}
+                        segment={s}
+                        pps={pps}
+                        span={span}
+                        readOnly={readOnly}
+                        selected={selectedId === s.id}
+                        onSelect={onSelect}
+                        onOffset={onOffset}
+                        onTrim={onTrim}
+                        snapTimesRef={snapTimesRef}
+                      />
+                    ))
+                  )}
+                  <ResizeHandle value={trackH} onResize={resizeTracks} />
+                </div>
+              );
+            })}
 
-            {/* A1 — clip audio: linked mirrors (move with their clip) + unlinked clips.
-                Also a drop target for audio media from the Media Bucket. */}
-            <div
-              {...laneDropProps("audio")}
-              style={{ height: trackH }}
-              className={`relative border-b border-[var(--color-border)] bg-[#0c1016] ${
-                dragLane === "audio" ? "ring-2 ring-inset ring-[var(--color-accent)]" : ""
-              }`}
-            >
-              {v1.map((s, i) =>
-                s.muted === false ? (
-                  <AudioBlock
-                    key={`lk-${s.id}`}
-                    left={starts[i] * pps}
-                    width={Math.max(effDur[i] * pps, 6)}
-                    hue="#2ec5c5"
-                    label="🔗 audio"
-                    title="Linked audio — right-click to Unlink"
-                  />
-                ) : null,
-              )}
-              {v2.map((s) =>
-                s.muted === false ? (
-                  <AudioBlock
-                    key={`lk2-${s.id}`}
-                    left={(s.offsetS ?? 0) * pps}
-                    width={Math.max(s.durationS * pps, 6)}
-                    hue="#2ec5c5"
-                    label="🔗 audio"
-                    title="Linked audio — right-click to Unlink"
-                  />
-                ) : null,
-              )}
-              {audioOnlySegs.map((s) => (
-                <AudioClipBlock
-                  key={s.id}
-                  segment={s}
-                  pps={pps}
-                  readOnly={readOnly}
-                  selected={selectedId === s.id}
-                  onSelect={onSelect}
-                  onOffset={onOffset}
-                  onTrim={onTrim}
-                  bpm={tempos[s.id]?.bpm ?? null}
-                  busy={tempoBusy === s.id}
-                  onMeasure={projectId && s.sourceAssetId ? () => void measureTempo(s) : undefined}
-                />
-              ))}
-              {/* Beat markers (▾) for any measured audio clip, mapped through its
-                  offset + left-trim into timeline time. */}
-              {audioOnlySegs.flatMap((s) => {
-                const beats = tempos[s.id]?.beats;
-                if (!beats?.length) return [];
-                const trim = s.trimStartS ?? 0;
-                const off = s.offsetS ?? 0;
-                return beats
-                  .map((b, i) => {
-                    const local = b - trim;
-                    if (local < 0 || local > s.durationS) return null;
-                    return (
-                      <span
-                        key={`beat-${s.id}-${i}`}
-                        className="pointer-events-none absolute top-0 z-30 -translate-x-1/2 text-[8px] leading-none text-[var(--color-accent)]"
-                        style={{ left: (off + local) * pps }}
-                      >
-                        ▾
-                      </span>
-                    );
-                  })
-                  .filter(Boolean);
-              })}
-              {!hasClipAudio ? <Empty>clip audio appears here</Empty> : null}
-              <ResizeHandle value={trackH} onResize={resizeTracks} />
-            </div>
+            {/* Audio layers (A1…An). Lane 0 also hosts linked clip-audio mirrors.
+                The trailing spare lane adds a new audio layer on drop. */}
+            {audioLaneTracks.map((t) => {
+              const segs = audioOnTrack(t);
+              const spare = t > maxAudioTrack;
+              const isLane0 = t === 0;
+              return (
+                <div
+                  key={`alane-${t}`}
+                  {...laneDropProps("audio", t)}
+                  style={{ height: trackH }}
+                  className={`relative border-b border-[var(--color-border)] bg-[#0c1016] ${
+                    dragLane === `audio:${t}` ? "ring-2 ring-inset ring-[var(--color-accent)]" : ""
+                  }`}
+                >
+                  {isLane0
+                    ? v1.map((s, i) =>
+                        s.muted === false ? (
+                          <AudioBlock
+                            key={`lk-${s.id}`}
+                            left={starts[i] * pps}
+                            width={Math.max(effDur[i] * pps, 6)}
+                            hue="#2ec5c5"
+                            label="🔗 audio"
+                            title="Linked audio — right-click to Unlink"
+                          />
+                        ) : null,
+                      )
+                    : null}
+                  {isLane0
+                    ? videoOverlays.map((s) =>
+                        s.muted === false ? (
+                          <AudioBlock
+                            key={`lk2-${s.id}`}
+                            left={(s.offsetS ?? 0) * pps}
+                            width={Math.max(s.durationS * pps, 6)}
+                            hue="#2ec5c5"
+                            label="🔗 audio"
+                            title="Linked audio — right-click to Unlink"
+                          />
+                        ) : null,
+                      )
+                    : null}
+                  {segs.map((s) => (
+                    <AudioClipBlock
+                      key={s.id}
+                      segment={s}
+                      pps={pps}
+                      readOnly={readOnly}
+                      selected={selectedId === s.id}
+                      onSelect={onSelect}
+                      onOffset={onOffset}
+                      onTrim={onTrim}
+                      bpm={tempos[s.id]?.bpm ?? null}
+                      busy={tempoBusy === s.id}
+                      onMeasure={projectId && s.sourceAssetId ? () => void measureTempo(s) : undefined}
+                    />
+                  ))}
+                  {/* Beat markers (▾) for measured clips on this lane, mapped through
+                      each clip's offset + left-trim into timeline time. */}
+                  {segs.flatMap((s) => {
+                    const beats = tempos[s.id]?.beats;
+                    if (!beats?.length) return [];
+                    const trim = s.trimStartS ?? 0;
+                    const off = s.offsetS ?? 0;
+                    return beats
+                      .map((b, i) => {
+                        const local = b - trim;
+                        if (local < 0 || local > s.durationS) return null;
+                        return (
+                          <span
+                            key={`beat-${s.id}-${i}`}
+                            className="pointer-events-none absolute top-0 z-30 -translate-x-1/2 text-[8px] leading-none text-[var(--color-accent)]"
+                            style={{ left: (off + local) * pps }}
+                          >
+                            ▾
+                          </span>
+                        );
+                      })
+                      .filter(Boolean);
+                  })}
+                  {segs.length === 0 && (spare || (isLane0 && !hasClipAudio)) ? (
+                    <Empty>{spare ? "drop audio to add a layer" : "clip audio appears here"}</Empty>
+                  ) : null}
+                  <ResizeHandle value={trackH} onResize={resizeTracks} />
+                </div>
+              );
+            })}
 
-            {/* A2 — audio overlays (imported audio) */}
+            {/* Imported audio (YouTube / foreground overlays) — mixed over everything */}
             <div style={{ height: trackH }} className="relative bg-[#0c1016]">
               {overlays.map((o) => {
                 const len = o.durationS ?? Math.max(0, o.importEndS - o.importStartS);

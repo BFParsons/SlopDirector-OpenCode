@@ -175,7 +175,11 @@ export function buildRenderSpec(input: BuildInput): RenderSpec {
   // clips live in the Media Bucket only — never in the preview/render.
   const seg0 = input.segments.filter((s) => !s.library);
   const v1Segs = seg0.filter((s) => (s.track ?? 0) === 0 && !s.audioOnly);
-  const v2Segs = seg0.filter((s) => (s.track ?? 0) === 1 && !s.audioOnly);
+  // Any track >= 1 is a positioned overlay layer (V2, V3, …), composited
+  // bottom-to-top by track index then offset (matches assemble.ts).
+  const v2Segs = seg0
+    .filter((s) => (s.track ?? 0) >= 1 && !s.audioOnly)
+    .sort((a, b) => (a.track ?? 0) - (b.track ?? 0) || (a.offsetS ?? 0) - (b.offsetS ?? 0));
   const effDur = v1Segs.map((s) => Math.max(0.1, s.durationS));
   const n = v1Segs.length;
 

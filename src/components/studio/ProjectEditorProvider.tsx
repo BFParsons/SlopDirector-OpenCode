@@ -42,7 +42,7 @@ export interface ProjectEditorContextValue {
   ) => Promise<void>;
   /** Drop an Audio Studio workspace track onto the video timeline: register it
    *  as an Asset, then place it as an audio-only clip at offsetS. */
-  insertAudioFromStudio: (payload: { relPath: string }, offsetS: number) => Promise<void>;
+  insertAudioFromStudio: (payload: { relPath: string }, offsetS: number, track?: number) => Promise<void>;
 
   save: () => Promise<boolean>;
   saving: boolean;
@@ -386,6 +386,7 @@ export function ProjectEditorProvider({
         source: "UPLOAD_VIDEO",
         sourceAssetId: asset.id,
         audioOnly: true,
+        track: Math.max(0, opts?.track ?? 0),
         offsetS: Math.max(0, Math.round((opts?.offsetS ?? 0) * 10) / 10),
       };
       if (opts?.trimStartS != null) body.trimStartS = opts.trimStartS;
@@ -399,8 +400,9 @@ export function ProjectEditorProvider({
       : { source: "UPLOAD_IMAGE_STILL", sourceAssetId: asset.id, durationS: 5 };
     if (opts?.trimStartS != null) body.trimStartS = opts.trimStartS;
     if (opts?.durationS != null) body.durationS = opts.durationS;
-    if (opts?.track === 1) {
-      body.track = 1;
+    if (opts?.track && opts.track >= 1) {
+      // Any track >= 1 is a positioned overlay layer (V2, V3, …).
+      body.track = opts.track;
       body.offsetS = Math.max(0, Math.round((opts.offsetS ?? 0) * 10) / 10);
       body.pip = DEFAULT_PIP;
     }
@@ -408,13 +410,13 @@ export function ProjectEditorProvider({
     await refetch();
   }
 
-  async function insertAudioFromStudio(payload: { relPath: string }, offsetS: number) {
+  async function insertAudioFromStudio(payload: { relPath: string }, offsetS: number, track = 0) {
     if (readOnly) return;
     const { id } = await api<{ id: string }>("/api/audio/to-asset", {
       method: "POST",
       body: JSON.stringify({ projectId: snapshot.id, relPath: payload.relPath }),
     });
-    await insertMedia({ id, isVideo: false, isAudio: true }, { offsetS });
+    await insertMedia({ id, isVideo: false, isAudio: true }, { offsetS, track });
   }
 
   function renderBlocker(): string | null {

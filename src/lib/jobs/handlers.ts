@@ -614,8 +614,11 @@ async function assembleFinalJob(payload: { projectId: string }): Promise<void> {
   const inputs: VisualInput[] = project.segments
     .filter((s) => (s.track ?? 0) === 0 && !s.audioOnly && !s.library)
     .map(toVisualInput);
+  // Any track >= 1 is a positioned overlay layer (V2, V3, …). Composite them
+  // bottom-to-top by track index (then offset) so higher layers sit on top.
   const overlayClips: OverlayInput[] = project.segments
-    .filter((s) => (s.track ?? 0) === 1 && !s.audioOnly && !s.library)
+    .filter((s) => (s.track ?? 0) >= 1 && !s.audioOnly && !s.library)
+    .sort((a, b) => (a.track ?? 0) - (b.track ?? 0) || (a.offsetS ?? 0) - (b.offsetS ?? 0))
     .map((s) => ({ ...toVisualInput(s), offsetS: s.offsetS ?? 0, pip: asPip(s.pip) }));
 
   // Audio-only clips (unlinked clip audio): an asset, trimmed to [in, in+dur],

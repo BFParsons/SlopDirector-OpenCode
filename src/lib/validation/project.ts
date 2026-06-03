@@ -181,7 +181,7 @@ export const patchProjectSchema = z.object({
           .max(24)
           .nullable()
           .optional(),
-        track: z.number().int().min(0).max(1).optional(),
+        track: z.number().int().min(0).max(31).optional(),
         offsetS: z.number().min(0).max(12 * 60 * 60).optional(),
         pip: pipSchema.nullable().optional(),
         audioOnly: z.boolean().optional(),
@@ -238,7 +238,7 @@ export const addSegmentSchema = z.object({
   refImageId: z.string().nullable().optional(),
   refRole: refRoleEnum.nullable().optional(),
   // multi-track placement (e.g. dropping media onto the V2 overlay lane)
-  track: z.number().int().min(0).max(1).optional(),
+  track: z.number().int().min(0).max(31).optional(),
   offsetS: z.number().min(0).max(12 * 60 * 60).optional(),
   pip: pipSchema.nullable().optional(),
   // include the clip's own audio in the final mix (video clips)
