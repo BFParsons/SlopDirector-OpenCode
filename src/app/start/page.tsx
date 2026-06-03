@@ -67,12 +67,12 @@ export default async function StartPage() {
             <Link
               key={m.href}
               href={m.href}
-              className="group relative flex flex-col items-center overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-6 text-center transition duration-200 ease-spring hover:-translate-y-1 hover:shadow-lift"
+              className="squish-card group relative flex flex-col items-center overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-6 text-center"
               style={{ ["--mode-accent" as string]: m.accent }}
             >
               <span
                 aria-hidden
-                className="pointer-events-none absolute inset-x-0 top-0 h-1"
+                className="squish-bar pointer-events-none absolute inset-x-0 top-0 h-1"
                 style={{ background: m.accent, opacity: m.primary ? 1 : 0.6 }}
               />
               {m.img ? (
@@ -81,7 +81,7 @@ export default async function StartPage() {
                   src={withBase(m.img)}
                   alt=""
                   aria-hidden
-                  className="mb-3 h-20 w-auto object-contain drop-shadow"
+                  className="squish-icon mb-3 h-20 w-auto object-contain drop-shadow"
                 />
               ) : (
                 <span

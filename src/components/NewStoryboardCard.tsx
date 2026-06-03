@@ -48,11 +48,11 @@ export function NewStoryboardCard({ accent }: { accent: string }) {
       type="button"
       onClick={start}
       disabled={busy}
-      className="group relative flex flex-col items-center overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-6 text-center transition duration-200 ease-spring hover:-translate-y-1 hover:shadow-lift disabled:opacity-70"
+      className="squish-card group relative flex flex-col items-center overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-6 text-center disabled:opacity-70"
     >
       <span
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-1"
+        className="squish-bar pointer-events-none absolute inset-x-0 top-0 h-1"
         style={{ background: accent }}
       />
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -60,7 +60,7 @@ export function NewStoryboardCard({ accent }: { accent: string }) {
         src={withBase("/slop/videoslop.png")}
         alt=""
         aria-hidden
-        className="mb-3 h-20 w-auto object-contain drop-shadow"
+        className="squish-icon mb-3 h-20 w-auto object-contain drop-shadow"
       />
       <h2 className="text-lg font-semibold">Storyboard</h2>
       {busy ? (
