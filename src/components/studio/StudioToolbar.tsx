@@ -117,13 +117,6 @@ export function StudioToolbar() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={withBase("/logo.png")} alt="SlopStudio Pro" className="h-6 w-auto object-contain transition-opacity hover:opacity-80" />
           </Link>
-          <Link
-            href="/dashboard"
-            title="All videos"
-            className="shrink-0 text-xs text-[var(--color-muted)] transition-colors hover:text-[var(--color-fg)]"
-          >
-            ← Videos
-          </Link>
           <FileMenu email={userEmail} isAdmin={isAdmin} />
         </div>
 
