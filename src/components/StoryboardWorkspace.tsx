@@ -7,6 +7,7 @@ import { IMAGE_MODELS, getImageModel, isRefEditorModel } from "@/config/models";
 import { api } from "@/lib/api";
 import { withBase } from "@/lib/basePath";
 import { Button, Card, Label, Select, Textarea } from "@/components/ui";
+import { useLeaveGuard } from "@/components/studio/useLeaveGuard";
 
 /** Format a cent amount as a short USD string (3dp under a cent). */
 function usd(cents: number): string {
@@ -199,10 +200,34 @@ export function StoryboardWorkspace({ initial }: { initial: Snap }) {
 
   const isGen = (key: string) => generating.has(key);
 
+  // Guard leaving an empty storyboard project (no scenes + no story elements).
+  const isEmpty = snap.segments.length === 0 && snap.storyElements.length === 0;
+  const { guardedLeave, dialog: leaveDialog } = useLeaveGuard({
+    shouldGuard: isEmpty,
+    projectId: initial.id,
+    initialName: title,
+    onSave: async (name) => {
+      try {
+        await patchProject({ title: name });
+        return true;
+      } catch {
+        return false;
+      }
+    },
+  });
+
   return (
     <ZoomCtx.Provider value={setZoom}>
       {zoom ? <Lightbox assetId={zoom} onClose={() => setZoom(null)} /> : null}
+      {leaveDialog}
       <main className="mx-auto w-full max-w-5xl flex-1 p-6">
+        <button
+          type="button"
+          onClick={() => guardedLeave(() => router.push("/start"))}
+          className="mb-4 block text-sm text-[var(--color-muted)] hover:text-[var(--color-fg)]"
+        >
+          ← Modes
+        </button>
       <div className="mb-4 flex items-center justify-between gap-3">
         <div className="min-w-0">
           <input

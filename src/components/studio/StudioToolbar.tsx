@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { withBase } from "@/lib/basePath";
 import { Button } from "@/components/ui";
@@ -86,7 +86,9 @@ export function StudioToolbar() {
     redo,
     canUndo,
     canRedo,
+    guardedLeave,
   } = useProjectEditor();
+  const router = useRouter();
   const arrangeWindows = useStudioWorkspaceStore((s) => s.arrangeWindows);
 
   const blocker = renderBlocker();
@@ -113,10 +115,16 @@ export function StudioToolbar() {
     <>
       <div className="flex shrink-0 items-center gap-3 border-b border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2">
         <div className="flex min-w-0 flex-1 items-center gap-3">
-          <Link href="/start" title="Home" aria-label="Home" className="shrink-0">
+          <button
+            type="button"
+            onClick={() => guardedLeave(() => router.push("/start"))}
+            title="Home"
+            aria-label="Home"
+            className="shrink-0"
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={withBase("/logo.png")} alt="SlopStudio Pro" className="h-6 w-auto object-contain transition-opacity hover:opacity-80" />
-          </Link>
+          </button>
           <FileMenu email={userEmail} isAdmin={isAdmin} />
         </div>
 

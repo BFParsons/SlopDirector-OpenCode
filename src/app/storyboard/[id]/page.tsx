@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { StoryboardWorkspace } from "@/components/StoryboardWorkspace";
 import { requirePageUser } from "@/lib/auth/rbac";
@@ -21,15 +20,5 @@ export default async function StoryboardProjectPage({ params }: Props) {
   const snapshot = await projectSnapshot(id);
   if (!snapshot) notFound();
 
-  return (
-    <>
-      <Link
-        href="/start"
-        className="mx-auto mt-4 block w-full max-w-5xl px-6 text-sm text-[var(--color-muted)] hover:text-[var(--color-fg)]"
-      >
-        ← Modes
-      </Link>
-      <StoryboardWorkspace initial={snapshot} />
-    </>
-  );
+  return <StoryboardWorkspace initial={snapshot} />;
 }

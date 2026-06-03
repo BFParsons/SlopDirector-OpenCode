@@ -1,0 +1,90 @@
+"use client";
+
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { api } from "@/lib/api";
+import { ExitSaveDialog } from "./ExitSaveDialog";
+
+/**
+ * Guards leaving an editor (Assembly / Audio Studio / Storyboard): when the
+ * project still looks like a throwaway (`shouldGuard`), an attempt to navigate
+ * away pops the {@link ExitSaveDialog} forcing the user to name+save or discard
+ * (delete) the project — so empty/unsaved projects don't accumulate.
+ *
+ *  - `guardedLeave(go)` — call instead of navigating directly; runs `go` now if
+ *    safe, else opens the dialog and runs it after save/discard.
+ *  - `dialog` — render this in your tree (null when not prompting).
+ *  - also installs a `beforeunload` warning for hard tab/window closes.
+ */
+export function useLeaveGuard(opts: {
+  shouldGuard: boolean;
+  projectId: string;
+  initialName: string;
+  /** Persist the project under `name`; return true on success. */
+  onSave: (name: string) => Promise<boolean>;
+}) {
+  const router = useRouter();
+  const [pending, setPending] = useState<null | (() => void)>(null);
+  const [busy, setBusy] = useState(false);
+
+  // Read the latest guard flag from inside stable callbacks / event handlers.
+  const guardRef = useRef(opts.shouldGuard);
+  guardRef.current = opts.shouldGuard;
+  const saveRef = useRef(opts.onSave);
+  saveRef.current = opts.onSave;
+
+  const guardedLeave = useCallback((go: () => void) => {
+    if (guardRef.current) setPending(() => go);
+    else go();
+  }, []);
+
+  // Native warning for hard closes / reloads (can't run a custom dialog there).
+  useEffect(() => {
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (!guardRef.current) return;
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, []);
+
+  const run = (go: (() => void) | null) => (go ?? (() => router.push("/start")))();
+
+  async function handleSave(name: string) {
+    setBusy(true);
+    try {
+      if (await saveRef.current(name)) {
+        const go = pending;
+        setPending(null);
+        run(go);
+      }
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleDiscard() {
+    setBusy(true);
+    try {
+      await api(`/api/projects/${opts.projectId}`, { method: "DELETE" }).catch(() => {});
+      const go = pending;
+      setPending(null);
+      run(go);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const dialog = pending ? (
+    <ExitSaveDialog
+      initialName={opts.initialName}
+      busy={busy}
+      onSave={handleSave}
+      onDiscard={handleDiscard}
+      onCancel={() => !busy && setPending(null)}
+    />
+  ) : null;
+
+  return { guardedLeave, dialog };
+}

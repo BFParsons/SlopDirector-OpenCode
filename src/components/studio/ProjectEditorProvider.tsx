@@ -16,6 +16,7 @@ import type { SegmentPatch } from "@/components/SegmentCard";
 import type { TextOverlayView } from "@/components/TextOverlaySection";
 import type { RenderAsset } from "@/components/timeline/ProgramMonitor";
 import { usePreviewEngine } from "@/components/timeline/usePreviewEngine";
+import { useLeaveGuard } from "./useLeaveGuard";
 
 type MonitorMode = "live" | "rendered";
 
@@ -84,6 +85,10 @@ export interface ProjectEditorContextValue {
   openInVideoEdit: (assetId: string) => void;
   /** Unlink a video clip's audio into a separate audio-only clip (mutes the clip). */
   onUnlinkAudio: (videoSegmentId: string) => Promise<void>;
+
+  /** Leave the editor through the unsaved/empty-project guard: runs `go` now if
+   *  the project is saved + has content, else prompts to name+save or discard. */
+  guardedLeave: (go: () => void) => void;
 }
 
 const ProjectEditorContext = createContext<ProjectEditorContextValue | null>(null);
@@ -201,6 +206,13 @@ export function ProjectEditorProvider({
       : null;
   const [initialJson] = useState(() => JSON.stringify(draft));
   const dirty = useMemo(() => JSON.stringify(draft) !== initialJson, [draft, initialJson]);
+  // Baseline for "unsaved since last save" (distinct from `dirty`, which is
+  // "edited since load"). Resets when a save succeeds → drives the leave guard.
+  const [savedJson, setSavedJson] = useState<string | null>(null);
+  const unsaved = useMemo(
+    () => (savedJson === null ? dirty : JSON.stringify(draft) !== savedJson),
+    [draft, savedJson, dirty],
+  );
 
   // Always default to Live (the editing surface); the user can switch to the
   // rendered MP4 from the monitor's toggle. Still auto-flips to Live on the dirty
@@ -319,6 +331,7 @@ export function ProjectEditorProvider({
         }),
       });
       setSaved(true);
+      setSavedJson(JSON.stringify(draft)); // clear the leave-guard "unsaved" baseline
       setTimeout(() => setSaved(false), 1500);
       return true;
     } catch (e) {
@@ -496,6 +509,28 @@ export function ProjectEditorProvider({
     await refetch();
   }
 
+  // Guard leaving a throwaway project: nothing on the timeline (no clips/audio),
+  // or unsaved edits. A saved project with content leaves freely.
+  const isEmpty = draft.segments.length === 0 && draft.audioOverlays.length === 0;
+  const { guardedLeave, dialog: leaveDialog } = useLeaveGuard({
+    shouldGuard: isEmpty || unsaved,
+    projectId: snapshot.id,
+    initialName: snapshot.title,
+    onSave: async (name) => {
+      try {
+        if (name && name !== snapshot.title) {
+          await api(`/api/projects/${snapshot.id}`, {
+            method: "PATCH",
+            body: JSON.stringify({ title: name }),
+          });
+        }
+        return await save();
+      } catch {
+        return false;
+      }
+    },
+  });
+
   const value: ProjectEditorContextValue = {
     snapshot,
     isAdmin,
@@ -536,7 +571,13 @@ export function ProjectEditorProvider({
     videoEditSourceId,
     openInVideoEdit,
     onUnlinkAudio,
+    guardedLeave,
   };
 
-  return <ProjectEditorContext.Provider value={value}>{children}</ProjectEditorContext.Provider>;
+  return (
+    <ProjectEditorContext.Provider value={value}>
+      {children}
+      {leaveDialog}
+    </ProjectEditorContext.Provider>
+  );
 }

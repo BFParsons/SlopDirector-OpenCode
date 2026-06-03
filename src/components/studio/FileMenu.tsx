@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { formatCents } from "@/lib/cost/estimate";
 import { useCostStore } from "@/stores/costStore";
+import { useProjectEditor } from "./ProjectEditorProvider";
 
 /** Editor "File" menu — folds the old global-header items (cost estimate, who's
  *  signed in, Users, Settings, Sign out) into one dropdown by the project title. */
@@ -14,6 +14,13 @@ export function FileMenu({ email, isAdmin }: { email: string; isAdmin: boolean }
   const ref = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const cents = useCostStore((s) => s.cents);
+  const { guardedLeave } = useProjectEditor();
+
+  // Leave the editor through the unsaved/empty-project guard.
+  const leaveTo = (go: () => void) => {
+    setOpen(false);
+    guardedLeave(go);
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -54,20 +61,17 @@ export function FileMenu({ email, isAdmin }: { email: string; isAdmin: boolean }
           </div>
           <div className="my-1 border-t border-[var(--color-border)]" />
           {isAdmin ? (
-            <Link href="/admin/users" className={item} onClick={() => setOpen(false)}>
+            <button type="button" className={item} onClick={() => leaveTo(() => router.push("/admin/users"))}>
               Users
-            </Link>
+            </button>
           ) : null}
-          <Link href="/settings" className={item} onClick={() => setOpen(false)}>
+          <button type="button" className={item} onClick={() => leaveTo(() => router.push("/settings"))}>
             Settings
-          </Link>
+          </button>
           <button
             type="button"
             className={item}
-            onClick={() => {
-              setOpen(false);
-              void logout();
-            }}
+            onClick={() => leaveTo(() => void logout())}
           >
             Sign out
           </button>
