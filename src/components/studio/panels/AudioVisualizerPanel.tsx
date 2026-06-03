@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { PanelProps } from "@/types/panel";
 import PanelChrome from "../PanelChrome";
-import { OptionDrawer } from "../OptionDrawer";
 import { getAnalyser } from "@/lib/audio/visualizerBus";
 
 type Mode = "bars" | "scope" | "spectrum";
@@ -42,6 +41,8 @@ export default function AudioVisualizerPanel({ windowControls }: PanelProps) {
       const analyser = getAnalyser();
       const w = (canvas.width = canvas.clientWidth * devicePixelRatio);
       const h = (canvas.height = canvas.clientHeight * devicePixelRatio);
+      // Setting canvas.width above reset the context, so the background fill has
+      // no shadow. The visualization itself gets a transparent fill + a glow.
       g.fillStyle = "#0b0d12";
       g.fillRect(0, 0, w, h);
 
@@ -49,11 +50,13 @@ export default function AudioVisualizerPanel({ windowControls }: PanelProps) {
         if (freq.length !== analyser.frequencyBinCount) freq = new Uint8Array(analyser.frequencyBinCount);
         if (time.length !== analyser.fftSize) time = new Uint8Array(analyser.fftSize);
         const m = modeRef.current;
+        g.shadowBlur = 8 * devicePixelRatio; // hazy halo to match the multitrack lanes
 
         if (m === "scope") {
           analyser.getByteTimeDomainData(time);
           g.lineWidth = Math.max(1, 1.5 * devicePixelRatio);
-          g.strokeStyle = accent;
+          g.strokeStyle = "rgba(109,139,255,0.65)";
+          g.shadowColor = accent;
           g.beginPath();
           const slice = w / time.length;
           for (let i = 0; i < time.length; i++) {
@@ -77,7 +80,14 @@ export default function AudioVisualizerPanel({ windowControls }: PanelProps) {
             for (let j = 0; j < step; j++) sum += freq[i * step + j] || 0;
             const mag = sum / step / 255;
             const bh = mag * h;
-            g.fillStyle = m === "spectrum" ? `hsl(${250 - mag * 200}, 65%, 55%)` : accent;
+            if (m === "spectrum") {
+              const hue = 250 - mag * 200;
+              g.fillStyle = `hsla(${hue}, 70%, 60%, 0.55)`;
+              g.shadowColor = `hsl(${hue}, 70%, 60%)`;
+            } else {
+              g.fillStyle = "rgba(109,139,255,0.55)";
+              g.shadowColor = accent;
+            }
             g.fillRect(i * bw, h - bh, Math.max(1, bw - gapPx), bh);
           }
         }
@@ -93,15 +103,21 @@ export default function AudioVisualizerPanel({ windowControls }: PanelProps) {
 
   return (
     <PanelChrome title="Visualizer" icon="📊" {...windowControls}>
-      <div className="relative h-full w-full bg-[#0b0d12]">
+      <div className="relative h-full w-full overflow-hidden bg-[#0b0d12]">
         <canvas ref={canvasRef} className="block h-full w-full" />
-        {/* Collapsed mode selector overlaid on the visualization. */}
-        <OptionDrawer
-          className="absolute left-1 top-1 w-24 text-[10px]"
+        {/* Compact mode selector, top-left. Native <select> so its menu renders in
+            the browser's top layer — never clipped and never adds a scrollbar. */}
+        <select
           value={mode}
-          options={MODES}
-          onChange={(k) => setMode(k as Mode)}
-        />
+          onChange={(e) => setMode(e.target.value as Mode)}
+          className="absolute left-1 top-1 z-10 rounded border border-[var(--color-border)] bg-[var(--color-card)]/80 px-1 py-0.5 text-[10px] text-[var(--color-fg)] outline-none backdrop-blur-sm"
+        >
+          {MODES.map((m) => (
+            <option key={m.key} value={m.key}>
+              {m.label}
+            </option>
+          ))}
+        </select>
       </div>
     </PanelChrome>
   );
