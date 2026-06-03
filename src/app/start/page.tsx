@@ -42,7 +42,7 @@ export default async function StartPage() {
     <>
       <AppHeader email={user.email} role={user.role} />
       <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center p-6">
-        <div className="mb-8 flex flex-col items-center text-center">
+        <div className="mb-8 flex flex-col items-start text-left">
           {/* Animated CinemaBot logo — autoplays once (no loop) on load. Muted so
               the browser permits autoplay; the final frame stays on screen. */}
           <video
