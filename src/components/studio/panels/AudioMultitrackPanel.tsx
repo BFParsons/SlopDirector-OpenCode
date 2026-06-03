@@ -127,28 +127,12 @@ export default function AudioMultitrackPanel({ windowControls, panelId }: PanelP
     select(t.id);
     const startX = e.clientX;
     const origOffset = t.offsetS;
-    const len = t.durationS;
-    const snapS = 8 / pxPerSec; // ~8px snap radius
-    const targets = [0, playhead, ...tracks.filter((o) => o.id !== t.id).flatMap((o) => [o.offsetS, o.offsetS + o.durationS])];
     let moved = false;
     const onMove = (ev: MouseEvent) => {
       if (Math.abs(ev.clientX - startX) > 3) moved = true;
       if (!moved) return;
-      let start = Math.max(0, origOffset + (ev.clientX - startX) / pxPerSec);
-      // Snap whichever edge (start or end) is closest to a target.
-      let bestDist = snapS;
-      let bestStart = start;
-      for (const tgt of targets) {
-        if (Math.abs(start - tgt) < bestDist) {
-          bestDist = Math.abs(start - tgt);
-          bestStart = tgt;
-        }
-        if (Math.abs(start + len - tgt) < bestDist) {
-          bestDist = Math.abs(start + len - tgt);
-          bestStart = tgt - len;
-        }
-      }
-      updateTrack(t.id, { offsetS: Math.max(0, bestStart) });
+      // Free positioning — no snapping, so fine adjustments stay precise.
+      updateTrack(t.id, { offsetS: Math.max(0, origOffset + (ev.clientX - startX) / pxPerSec) });
     };
     const onUp = (ev: MouseEvent) => {
       window.removeEventListener("mousemove", onMove);
