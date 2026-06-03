@@ -62,7 +62,9 @@ export default function StemSeparationPanel({ windowControls }: PanelProps) {
       setSourceName(selected.name);
       addTracks(
         resultStems.map((s) => ({
-          name: `${selected.name} · ${s.name}`,
+          // Stem name first so it stays visible when the lane label truncates,
+          // e.g. "Vocals · Daft Punk - Around the World".
+          name: `${s.name.charAt(0).toUpperCase()}${s.name.slice(1)} · ${selected.name}`,
           relPath: s.relPath,
           url: s.url,
           durationS: selected.durationS,
