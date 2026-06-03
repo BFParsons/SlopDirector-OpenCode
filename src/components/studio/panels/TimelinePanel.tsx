@@ -9,7 +9,7 @@ import { useProjectEditor } from "../ProjectEditorProvider";
 
 export default function TimelinePanel({ windowControls }: PanelProps) {
   const ed = useProjectEditor();
-  const { draft, readOnly, selectedSegmentId, setSelectedSegmentId, engine } = ed;
+  const { draft, snapshot, readOnly, selectedSegmentId, setSelectedSegmentId, engine } = ed;
 
   // The provider re-creates its handlers on every render — including each
   // playhead tick (~16×/s while playing), because it owns the engine's `time`
@@ -68,6 +68,7 @@ export default function TimelinePanel({ windowControls }: PanelProps) {
           onSelect={setSelectedSegmentId}
           playheadS={engine.time}
           onSeek={engine.seek}
+          projectId={snapshot.id}
         />
       </div>
     </PanelChrome>

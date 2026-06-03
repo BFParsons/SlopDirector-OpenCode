@@ -19,6 +19,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { withBase } from "@/lib/basePath";
+import { api } from "@/lib/api";
 import { Waveform } from "@/components/studio/Waveform";
 import { hasMediaDrag, type MediaDragPayload, readMediaDrag, hasAudioDrag, readAudioDrag, type AudioStudioDragPayload } from "@/lib/studio/dnd";
 import { fmtClock, segmentHue, type SegmentView } from "./SegmentCard";
@@ -100,6 +101,7 @@ export function TimelineView({
   onSelect,
   playheadS,
   onSeek,
+  projectId,
 }: {
   segments: SegmentView[];
   overlays: OverlayView[];
@@ -116,8 +118,37 @@ export function TimelineView({
   onSelect?: (id: string | null) => void;
   playheadS?: number;
   onSeek?: (t: number) => void;
+  projectId?: string;
 }) {
   const [pps, setPps] = useState(48);
+  // Per-clip detected tempo (BPM) + beat times, keyed by segment id. Measured on
+  // demand via the ♩ button on each audio clip; beat markers draw in the A1 lane.
+  const [tempos, setTempos] = useState<Record<string, { bpm: number | null; beats: number[] }>>({});
+  const [tempoBusy, setTempoBusy] = useState<string | null>(null);
+  const measureTempo = useCallback(
+    async (seg: SegmentView) => {
+      if (!projectId || !seg.sourceAssetId || tempoBusy) return;
+      setTempoBusy(seg.id);
+      try {
+        const res = await api<{ tempo: { bpm: number | null; beatsS: number[] } | null }>(
+          "/api/audio/analyze",
+          {
+            method: "POST",
+            body: JSON.stringify({ projectId, assetId: seg.sourceAssetId, kinds: ["tempo"] }),
+          },
+        );
+        setTempos((m) => ({
+          ...m,
+          [seg.id]: { bpm: res.tempo?.bpm ?? null, beats: res.tempo?.beatsS ?? [] },
+        }));
+      } catch {
+        /* ignore — measurement is best-effort */
+      } finally {
+        setTempoBusy(null);
+      }
+    },
+    [projectId, tempoBusy],
+  );
   const [dragLane, setDragLane] = useState<"v1" | "v2" | "audio" | null>(null);
   // One height for every track row; drag any divider to resize them in unison.
   const [trackH, setTrackH] = useState(64);
@@ -485,8 +516,34 @@ export function TimelineView({
                   onSelect={onSelect}
                   onOffset={onOffset}
                   onTrim={onTrim}
+                  bpm={tempos[s.id]?.bpm ?? null}
+                  busy={tempoBusy === s.id}
+                  onMeasure={projectId && s.sourceAssetId ? () => void measureTempo(s) : undefined}
                 />
               ))}
+              {/* Beat markers (▾) for any measured audio clip, mapped through its
+                  offset + left-trim into timeline time. */}
+              {audioOnlySegs.flatMap((s) => {
+                const beats = tempos[s.id]?.beats;
+                if (!beats?.length) return [];
+                const trim = s.trimStartS ?? 0;
+                const off = s.offsetS ?? 0;
+                return beats
+                  .map((b, i) => {
+                    const local = b - trim;
+                    if (local < 0 || local > s.durationS) return null;
+                    return (
+                      <span
+                        key={`beat-${s.id}-${i}`}
+                        className="pointer-events-none absolute top-0 z-30 -translate-x-1/2 text-[8px] leading-none text-[var(--color-accent)]"
+                        style={{ left: (off + local) * pps }}
+                      >
+                        ▾
+                      </span>
+                    );
+                  })
+                  .filter(Boolean);
+              })}
               {!hasClipAudio ? <Empty>clip audio appears here</Empty> : null}
               <ResizeHandle value={trackH} onResize={resizeTracks} />
             </div>
@@ -949,6 +1006,9 @@ const AudioClipBlock = memo(function AudioClipBlock({
   onSelect,
   onOffset,
   onTrim,
+  bpm,
+  busy,
+  onMeasure,
 }: {
   segment: SegmentView;
   pps: number;
@@ -957,6 +1017,9 @@ const AudioClipBlock = memo(function AudioClipBlock({
   onSelect?: (id: string | null) => void;
   onOffset?: (id: string, offsetS: number) => void;
   onTrim: (id: string, patch: { durationS?: number; trimStartS?: number }) => void;
+  bpm?: number | null;
+  busy?: boolean;
+  onMeasure?: () => void;
 }) {
   const s = segment;
   const off = s.offsetS ?? 0;
@@ -1036,6 +1099,21 @@ const AudioClipBlock = memo(function AudioClipBlock({
         <Waveform url={withBase(`/api/assets/${s.sourceAssetId}`)} color="#38b27a" className="absolute inset-0" />
       ) : null}
       <span className="relative truncate drop-shadow">audio · {s.durationS.toFixed(1)}s</span>
+      {onMeasure ? (
+        <button
+          type="button"
+          disabled={busy}
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+            onMeasure();
+          }}
+          title={bpm ? `${Math.round(bpm)} BPM — click to re-measure` : "Measure tempo (BPM)"}
+          className="absolute left-1 top-1 z-30 rounded bg-black/45 px-1 text-[8px] font-semibold leading-none text-white/80 backdrop-blur-sm hover:text-white disabled:opacity-50"
+        >
+          {busy ? "…" : bpm ? `♩${Math.round(bpm)}` : "♩"}
+        </button>
+      ) : null}
       {!readOnly ? (
         <>
           <div onPointerDown={trimLeft} title="Drag to trim from the start" className={`${handle} left-0`}>
