@@ -14,8 +14,8 @@ interface StemResult {
 }
 
 const MODELS = [
-  { id: "htdemucs", label: "htdemucs — 4 stems (vocals · drums · bass · other)" },
   { id: "htdemucs_ft", label: "htdemucs_ft — 4 stems, fine-tuned (slower, cleaner)" },
+  { id: "htdemucs", label: "htdemucs — 4 stems (vocals · drums · bass · other)" },
   { id: "htdemucs_6s", label: "htdemucs_6s — 6 stems (+ guitar · piano)" },
 ];
 
@@ -27,7 +27,7 @@ export default function StemSeparationPanel({ windowControls }: PanelProps) {
   const projectId = useAudioStudioStore((s) => s.projectId);
 
   const selected = tracks.find((t) => t.id === selectedTrackId) ?? tracks[0] ?? null;
-  const [model, setModel] = useState("htdemucs");
+  const [model, setModel] = useState("htdemucs_ft");
   const [karaoke, setKaraoke] = useState(false);
   const [running, setRunning] = useState(false);
   const [progress, setProgress] = useState(0);
