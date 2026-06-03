@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { AppHeader } from "@/components/AppHeader";
 import { NewAssemblyCard } from "@/components/NewAssemblyCard";
 import { NewAudioStudioCard } from "@/components/NewAudioStudioCard";
 import { NewStoryboardCard } from "@/components/NewStoryboardCard";
@@ -40,7 +39,6 @@ export default async function StartPage() {
 
   return (
     <>
-      <AppHeader email={user.email} role={user.role} />
       <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center p-6">
         <div className="mb-8 flex flex-col items-center text-center">
           <h1 className="text-2xl font-semibold">Start a new video</h1>

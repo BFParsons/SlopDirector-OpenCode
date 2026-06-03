@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { AppHeader } from "@/components/AppHeader";
 import { BriefForm } from "@/components/BriefForm";
 import {
   CHAT_MODELS,
@@ -15,7 +14,6 @@ export default async function NewProjectPage() {
   const { user } = await requirePageUser();
   return (
     <>
-      <AppHeader email={user.email} role={user.role} />
       <main className="mx-auto w-full max-w-2xl flex-1 p-6">
         <Link
           href="/dashboard"

@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { AppHeader } from "@/components/AppHeader";
 import { StoryboardWorkspace } from "@/components/StoryboardWorkspace";
 import { requirePageUser } from "@/lib/auth/rbac";
 import { getOwnedProject } from "@/lib/projects/access";
@@ -24,7 +23,6 @@ export default async function StoryboardProjectPage({ params }: Props) {
 
   return (
     <>
-      <AppHeader email={user.email} role={user.role} />
       <Link
         href="/start"
         className="mx-auto mt-4 block w-full max-w-5xl px-6 text-sm text-[var(--color-muted)] hover:text-[var(--color-fg)]"

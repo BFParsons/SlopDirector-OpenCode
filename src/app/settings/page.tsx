@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { AppHeader } from "@/components/AppHeader";
 import { FalKeySettings } from "@/components/FalKeySettings";
 import { OpenRouterKeySettings } from "@/components/OpenRouterKeySettings";
 import { ProjectFolderSettings } from "@/components/ProjectFolderSettings";
@@ -12,7 +11,6 @@ export default async function SettingsPage() {
 
   return (
     <>
-      <AppHeader email={user.email} role={user.role} />
       <main className="mx-auto w-full max-w-2xl flex-1 p-6">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-xl font-semibold">Settings</h1>

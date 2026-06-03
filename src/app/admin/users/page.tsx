@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AdminUsers } from "@/components/AdminUsers";
-import { AppHeader } from "@/components/AppHeader";
 import { requirePageUser } from "@/lib/auth/rbac";
 import { prisma } from "@/lib/db/client";
 
@@ -32,7 +31,6 @@ export default async function AdminUsersPage() {
 
   return (
     <>
-      <AppHeader email={user.email} role={user.role} />
       <main className="mx-auto w-full max-w-2xl flex-1 p-6">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-xl font-semibold">Users</h1>

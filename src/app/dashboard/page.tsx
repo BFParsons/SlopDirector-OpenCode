@@ -1,4 +1,3 @@
-import { AppHeader } from "@/components/AppHeader";
 import { Card } from "@/components/ui";
 import { ProjectGrid } from "@/components/dashboard/ProjectGrid";
 import { DashboardNewButtons } from "@/components/dashboard/DashboardNewButtons";
@@ -16,7 +15,6 @@ export default async function Dashboard() {
 
   return (
     <>
-      <AppHeader email={user.email} role={user.role} />
       <main className="mx-auto w-full max-w-4xl flex-1 p-6">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-xl font-semibold">Your Projects</h1>
