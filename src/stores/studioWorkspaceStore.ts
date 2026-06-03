@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 import { withBase } from "@/lib/basePath";
-import { PRESETS } from "@/config/studio-presets";
+import { PRESETS, SECTION_PRESETS, panelSection, type WorkspaceSection } from "@/config/studio-presets";
 import { SYSTEM_DEFAULT_LAYOUT } from "@/config/studio-default-layout";
 import { CASCADE_OFFSET, DEFAULT_HEIGHT, DEFAULT_WIDTH, genWindowId } from "@/lib/studio/window-utils";
 import type { PanelType } from "@/types/panel";
@@ -17,6 +17,27 @@ function createDefaultLayout(): WorkspaceLayoutData {
     // Fresh copies so window operations never mutate the shared constant.
     windows: SYSTEM_DEFAULT_LAYOUT.windows.map((w) => ({ ...w, position: { ...w.position }, size: { ...w.size } })),
   };
+}
+
+/** The hardcoded default arrangement for a section, fit to the container. Audio
+ *  is the fixed `audio-studio` preset; video is the system Premiere-style layout. */
+function sectionDefault(section: WorkspaceSection, cw: number, ch: number): WorkspaceLayoutData {
+  if (section === "audio") return PRESETS["audio-studio"](cw, ch);
+  return createDefaultLayout();
+}
+
+/** Drop windows that don't belong to this section, so a saved layout that mixed
+ *  Audio + Video panels can't bleed across suites. Falls back to the section
+ *  default if nothing relevant remains. */
+function sanitizeForSection(
+  data: WorkspaceLayoutData,
+  section: WorkspaceSection,
+  cw: number,
+  ch: number,
+): WorkspaceLayoutData {
+  const windows = data.windows.filter((w) => panelSection(w.panelType) === section);
+  if (windows.length === 0) return sectionDefault(section, cw, ch);
+  return { version: 2, windows, nextZIndex: data.nextZIndex };
 }
 
 function applyLayoutData(
@@ -50,6 +71,8 @@ interface WorkspaceState {
   containerSize: { width: number; height: number };
   isReady: boolean;
   savedLayouts: SavedLayoutMeta[];
+  /** Which suite this workspace is showing — keeps Audio & Video discrete. */
+  section: WorkspaceSection;
 
   // Window operations
   addWindow: (panelType: PanelType, title: string) => void;
@@ -64,6 +87,7 @@ interface WorkspaceState {
   arrangeWindows: () => void;
 
   // Layout operations
+  enterSection: (section: WorkspaceSection) => Promise<void>;
   applyPreset: (preset: string) => void;
   getPresetNames: () => string[];
   saveLayout: () => Promise<void>;
@@ -96,9 +120,10 @@ export const useStudioWorkspaceStore = create<WorkspaceState>((set, get) => ({
   layoutId: null,
   currentLayoutName: null,
   isDirty: false,
-  containerSize: { width: 1200, height: 800 },
+  containerSize: { width: 0, height: 0 }, // set by the ResizeObserver before first paint
   isReady: false,
   savedLayouts: [],
+  section: "video",
 
   addWindow: (panelType, title) => {
     const { windows, nextZIndex, containerSize } = get();
@@ -238,6 +263,28 @@ export const useStudioWorkspaceStore = create<WorkspaceState>((set, get) => ({
       return { windows: arranged, nextZIndex: s.nextZIndex + visible.length, isDirty: true };
     }),
 
+  enterSection: async (section) => {
+    // Already showing this section's layout — keep it (don't clobber on remount).
+    if (get().section === section && get().isReady) return;
+    const { containerSize } = get();
+    set({ section, isReady: false, isDirty: false });
+    if (section === "audio") {
+      // Hardcoded default — never loaded from / saved to the DB.
+      const data = sectionDefault("audio", containerSize.width, containerSize.height);
+      set({
+        windows: data.windows,
+        nextZIndex: data.nextZIndex,
+        layoutId: null,
+        currentLayoutName: "Audio Studio",
+        savedLayouts: [],
+        isReady: true,
+        isDirty: false,
+      });
+      return;
+    }
+    await get().loadLayout(); // video: the user's saved/default layout
+  },
+
   applyPreset: (preset) => {
     const { containerSize } = get();
     const factory = PRESETS[preset];
@@ -246,11 +293,12 @@ export const useStudioWorkspaceStore = create<WorkspaceState>((set, get) => ({
     set({ windows: data.windows, nextZIndex: data.nextZIndex, isDirty: true });
   },
 
-  getPresetNames: () => Object.keys(PRESETS),
+  getPresetNames: () => (SECTION_PRESETS[get().section] ?? []).filter((p) => p in PRESETS),
 
   resetLayout: () => {
-    const data = createDefaultLayout();
-    set({ windows: data.windows, nextZIndex: data.nextZIndex, isDirty: true });
+    const { section, containerSize } = get();
+    const data = sectionDefault(section, containerSize.width, containerSize.height);
+    set({ windows: data.windows, nextZIndex: data.nextZIndex, isDirty: section !== "audio" });
   },
 
   setDirty: (dirty) => set({ isDirty: dirty }),
@@ -262,6 +310,7 @@ export const useStudioWorkspaceStore = create<WorkspaceState>((set, get) => ({
   },
 
   saveLayout: async () => {
+    if (get().section === "audio") return; // Audio Studio uses a hardcoded default
     const { layoutId } = get();
     const layout = get().toLayoutData();
     // Update the current workspace in place (preserve its default flag). The very
@@ -291,7 +340,9 @@ export const useStudioWorkspaceStore = create<WorkspaceState>((set, get) => ({
         });
         const def = layouts.find((l) => l.isDefault) ?? layouts[0];
         if (def && (def.layout as { version?: number })?.version === 2) {
-          applyLayoutData(def.layout as WorkspaceLayoutData, set, { layoutId: def.id, currentLayoutName: def.name });
+          const { section, containerSize } = get();
+          const data = sanitizeForSection(def.layout as WorkspaceLayoutData, section, containerSize.width, containerSize.height);
+          applyLayoutData(data, set, { layoutId: def.id, currentLayoutName: def.name });
           return;
         }
       }
@@ -319,6 +370,7 @@ export const useStudioWorkspaceStore = create<WorkspaceState>((set, get) => ({
   },
 
   saveLayoutAs: async (name, makeDefault = false) => {
+    if (get().section === "audio") return; // Audio Studio uses a hardcoded default
     const layout = get().toLayoutData();
     const data = await putLayout({ name, layout, isDefault: makeDefault });
     if (data) {
@@ -351,7 +403,9 @@ export const useStudioWorkspaceStore = create<WorkspaceState>((set, get) => ({
       const json = (await res.json()) as { data?: SavedLayoutWithData[] };
       const target = json.data?.find((l) => l.id === id);
       if (target && (target.layout as { version?: number })?.version === 2) {
-        applyLayoutData(target.layout as WorkspaceLayoutData, set, { layoutId: target.id, currentLayoutName: target.name });
+        const { section, containerSize } = get();
+        const data = sanitizeForSection(target.layout as WorkspaceLayoutData, section, containerSize.width, containerSize.height);
+        applyLayoutData(data, set, { layoutId: target.id, currentLayoutName: target.name });
       }
     } catch {
       // Silently fail.

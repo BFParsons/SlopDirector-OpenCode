@@ -13,6 +13,7 @@ import {
 import { useShallow } from "zustand/react/shallow";
 import type { PanelProps } from "@/types/panel";
 import { useStudioWorkspaceStore } from "@/stores/studioWorkspaceStore";
+import type { WorkspaceSection } from "@/config/studio-presets";
 import { getPanel, getPanelComponent } from "./PanelRegistry";
 import PanelChrome from "./PanelChrome";
 import MinimizedBar from "./MinimizedBar";
@@ -21,16 +22,14 @@ import { StudioToolbar } from "./StudioToolbar";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type RndComponent = ComponentType<any>;
 
-export default function WorkspaceShell({ initialPreset }: { initialPreset?: string } = {}) {
+export default function WorkspaceShell({ section = "video" }: { section?: WorkspaceSection } = {}) {
   const containerRef = useRef<HTMLDivElement>(null);
   const isReady = useStudioWorkspaceStore((s) => s.isReady);
-  const loadLayout = useStudioWorkspaceStore((s) => s.loadLayout);
-  const applyPreset = useStudioWorkspaceStore((s) => s.applyPreset);
+  const enterSection = useStudioWorkspaceStore((s) => s.enterSection);
   const containerWidth = useStudioWorkspaceStore((s) => s.containerSize.width);
   const setContainerSize = useStudioWorkspaceStore((s) => s.setContainerSize);
   const [Rnd, setRnd] = useState<RndComponent | null>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; windowId: string } | null>(null);
-  const presetAppliedRef = useRef(false);
 
   // react-rnd touches `window`, so import it on the client only.
   useEffect(() => {
@@ -43,23 +42,14 @@ export default function WorkspaceShell({ initialPreset }: { initialPreset?: stri
     };
   }, []);
 
+  // Enter the requested suite once the container has a real measured size (so the
+  // hardcoded layout fits). enterSection() self-guards: a remount with the same
+  // section keeps the current arrangement, while switching suites reloads that
+  // section's own discrete layout (Audio = hardcoded default; Video = saved).
   useEffect(() => {
-    // Load the saved layout once per session. The store persists across the keyed
-    // StudioRoot remount, so skipping when already loaded stops a late async load
-    // from clobbering an applied preset (e.g. ?ws=audio-studio) on remount.
-    if (!isReady) void loadLayout();
-  }, [isReady, loadLayout]);
-
-  // Apply the requested workspace preset once — after the saved layout has
-  // loaded (isReady) and the container has a real measured size so the preset
-  // factory lays panels out to fit. Marks the layout dirty (no auto-save), so
-  // the user's saved Default Workspace is never overwritten by opening here.
-  useEffect(() => {
-    if (!initialPreset || presetAppliedRef.current) return;
-    if (!isReady || containerWidth < 2) return;
-    applyPreset(initialPreset);
-    presetAppliedRef.current = true;
-  }, [initialPreset, isReady, containerWidth, applyPreset]);
+    if (containerWidth < 2) return;
+    void enterSection(section);
+  }, [section, containerWidth, enterSection]);
 
   // Track the container size so presets + maximize fit the real workspace.
   useEffect(() => {

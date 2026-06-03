@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import Link from "next/link";
 import type { ProjectSnapshot } from "@/lib/projects/serialize";
 import { api } from "@/lib/api";
-import { PRESETS } from "@/config/studio-presets";
+import type { WorkspaceSection } from "@/config/studio-presets";
 import { useExportStore } from "@/stores/exportStore";
 import { useProjectStore } from "@/stores/projectStore";
 import { Button, StatusBadge } from "@/components/ui";
@@ -33,9 +33,10 @@ export function ProjectWorkspace({
   const exportProjectId = useExportStore((s) => s.projectId);
   const closeExport = useExportStore((s) => s.close);
 
-  // The `?ws=<preset>` launch param (set by the Audio Studio launcher), read
-  // server-side and passed down — reliable across SSR + client navigation.
-  const initialPreset = ws && ws in PRESETS ? ws : undefined;
+  // The `?ws=` launch param selects the suite: `audio-studio` → the Audio Editing
+  // Suite, anything else → Video Assembly. Read server-side + passed down so it's
+  // reliable across SSR and client navigation.
+  const section: WorkspaceSection = ws === "audio-studio" ? "audio" : "video";
 
   useEffect(() => {
     setSnapshot(initial);
@@ -140,7 +141,7 @@ export function ProjectWorkspace({
             refetch={refetch}
             isAdmin={isAdmin}
             userEmail={userEmail}
-            initialPreset={initialPreset}
+            section={section}
           />
         </div>
       </div>

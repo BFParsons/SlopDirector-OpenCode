@@ -26,6 +26,9 @@ export function SaveMenu() {
   const resetLayout = useStudioWorkspaceStore((s) => s.resetLayout);
   const applyPreset = useStudioWorkspaceStore((s) => s.applyPreset);
   const getPresetNames = useStudioWorkspaceStore((s) => s.getPresetNames);
+  const section = useStudioWorkspaceStore((s) => s.section);
+  // The Audio Editing Suite uses a fixed, hardcoded default — no per-user saving.
+  const canSave = section === "video";
 
   useEffect(() => {
     if (!open) return;
@@ -77,16 +80,18 @@ export function SaveMenu() {
 
       {open ? (
         <div className="absolute right-0 z-[10000] mt-1 w-64 overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] py-1 text-xs shadow-[0_8px_24px_rgba(0,0,0,0.6)]">
-          {layoutId ? (
+          {canSave && layoutId ? (
             <button type="button" className={item} onClick={() => { void saveLayout(); close(); }}>
               💾 Save changes{currentLayoutName ? ` to “${currentLayoutName}”` : ""}
             </button>
           ) : null}
 
           {!saveForm ? (
-            <button type="button" className={item} onClick={openSaveForm}>
-              ＋ Save Workspace…
-            </button>
+            canSave ? (
+              <button type="button" className={item} onClick={openSaveForm}>
+                ＋ Save Workspace…
+              </button>
+            ) : null
           ) : (
             <div className="space-y-2 px-3 py-2">
               <input
@@ -120,7 +125,7 @@ export function SaveMenu() {
             </div>
           )}
 
-          {layoutId && !currentIsDefault ? (
+          {canSave && layoutId && !currentIsDefault ? (
             <button type="button" className={item} onClick={() => { void setDefaultLayout(layoutId); close(); }}>
               ★ Make this the default
             </button>

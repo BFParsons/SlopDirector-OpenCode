@@ -2,6 +2,7 @@
 
 import { PerfHud } from "@/components/perf/PerfHud";
 import type { ProjectSnapshot } from "@/lib/projects/serialize";
+import type { WorkspaceSection } from "@/config/studio-presets";
 import { ProjectEditorProvider } from "./ProjectEditorProvider";
 import WorkspaceShell from "./WorkspaceShell";
 
@@ -13,18 +14,18 @@ export function StudioRoot({
   refetch,
   isAdmin,
   userEmail,
-  initialPreset,
+  section,
 }: {
   snapshot: ProjectSnapshot;
   refetch: () => Promise<void>;
   isAdmin: boolean;
   userEmail: string;
-  /** Optional workspace preset to apply on open (e.g. "audio-studio"). */
-  initialPreset?: string;
+  /** Which suite to show: "audio" (Audio Editing) or "video" (Assembly). */
+  section?: WorkspaceSection;
 }) {
   return (
     <ProjectEditorProvider snapshot={snapshot} refetch={refetch} isAdmin={isAdmin} userEmail={userEmail}>
-      <WorkspaceShell initialPreset={initialPreset} />
+      <WorkspaceShell section={section} />
       <PerfHud />
     </ProjectEditorProvider>
   );

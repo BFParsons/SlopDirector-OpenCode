@@ -1,7 +1,33 @@
 import type { WorkspaceLayoutData } from "@/types/window";
+import type { PanelType } from "@/types/panel";
 import { makeWindow } from "@/lib/studio/window-utils";
 
+export type WorkspaceSection = "audio" | "video";
+
 export type PresetFactory = (cw: number, ch: number) => WorkspaceLayoutData;
+
+/** Panels that belong to the Audio Editing Suite (everything else is Video
+ *  Assembly). Used to keep the two workspaces discrete and to self-heal a saved
+ *  layout that accidentally mixed panels from both. */
+export const AUDIO_STUDIO_PANELS = new Set<PanelType>([
+  "audio-multitrack",
+  "audio-visualizer",
+  "audio-importer",
+  "stem-separation",
+  "audio-processing",
+  "loudness-meter",
+  "audio-tools",
+]);
+
+export function panelSection(type: PanelType): WorkspaceSection {
+  return AUDIO_STUDIO_PANELS.has(type) ? "audio" : "video";
+}
+
+/** Which presets each section offers in the Workspace menu. */
+export const SECTION_PRESETS: Record<WorkspaceSection, string[]> = {
+  audio: ["audio-studio"],
+  video: ["editing", "finishing", "audio", "everything"],
+};
 
 /** Named workspace presets. Each is recomputed to the live container size, so the
  *  same preset "fits whatever display" you apply it on. */
