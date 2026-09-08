@@ -193,3 +193,48 @@ export async function extractWav(abs: string, projectId: string, assetId: string
   if (code !== 0 || !existsSync(out)) throw new Error(`audio extract failed: ${stderr.slice(-400)}`);
   return out;
 }
+
+export interface BlackFrameResult {
+  durationS: number;
+  /** stretches where the picture is (nearly) all black */
+  black: { startS: number; endS: number; durationS: number }[];
+}
+
+/** Black stretches (ffmpeg `blackdetect`): a flash of black at a cut, a missing clip, an unintended fade. */
+export async function detectBlack(abs: string, minS = 0.1, pixThreshold = 0.1): Promise<BlackFrameResult> {
+  const durationS = await probeDuration(abs);
+  const { code, stderr } = await run(["-i", abs, "-an", "-vf", `blackdetect=d=${minS}:pix_th=${pixThreshold}`, "-f", "null", "-"]);
+  if (code !== 0) throw new Error(`black detection failed: ${stderr.slice(-400)}`);
+  const black: BlackFrameResult["black"] = [];
+  for (const m of stderr.matchAll(/black_start:\s*([0-9.]+)\s+black_end:\s*([0-9.]+)\s+black_duration:\s*([0-9.]+)/g)) {
+    black.push({ startS: +Number(m[1]).toFixed(3), endS: +Number(m[2]).toFixed(3), durationS: +Number(m[3]).toFixed(3) });
+  }
+  return { durationS, black };
+}
+
+export interface FrozenFrameResult {
+  durationS: number;
+  /** stretches where consecutive frames are identical (a stalled clip, a hold that wasn't meant) */
+  frozen: { startS: number; endS: number; durationS: number }[];
+}
+
+/** Frozen picture (ffmpeg `freezedetect`), on a 320px proxy for speed. */
+export async function detectFrozen(abs: string, minS = 1, noiseDb = -60): Promise<FrozenFrameResult> {
+  const durationS = await probeDuration(abs);
+  const { code, stderr } = await run(["-i", abs, "-an", "-vf", `scale=320:-2,freezedetect=n=${noiseDb}dB:d=${minS}`, "-f", "null", "-"]);
+  if (code !== 0) throw new Error(`freeze detection failed: ${stderr.slice(-400)}`);
+  const frozen: FrozenFrameResult["frozen"] = [];
+  let start: number | null = null;
+  for (const line of stderr.split("\n")) {
+    const s = /freeze_start:\s*([0-9.]+)/.exec(line);
+    if (s) start = Number(s[1]);
+    const e = /freeze_end:\s*([0-9.]+)/.exec(line);
+    if (e && start != null) {
+      const endS = Number(e[1]);
+      frozen.push({ startS: +start.toFixed(3), endS: +endS.toFixed(3), durationS: +(endS - start).toFixed(3) });
+      start = null;
+    }
+  }
+  if (start != null && durationS - start > minS) frozen.push({ startS: +start.toFixed(3), endS: +durationS.toFixed(3), durationS: +(durationS - start).toFixed(3) });
+  return { durationS, frozen };
+}

@@ -15,6 +15,18 @@ function headers(extra: Record<string, string> = {}): Record<string, string> {
   return h;
 }
 
+const MIME: Record<string, string> = {
+  mp4: "video/mp4", m4v: "video/mp4", mov: "video/quicktime", mkv: "video/x-matroska", webm: "video/webm", avi: "video/x-msvideo",
+  ts: "video/mp2t", mts: "video/mp2t", mpg: "video/mpeg", mpeg: "video/mpeg", "3gp": "video/3gpp",
+  wav: "audio/wav", mp3: "audio/mpeg", m4a: "audio/mp4", aac: "audio/aac", ogg: "audio/ogg", oga: "audio/ogg", flac: "audio/flac", opus: "audio/ogg",
+  png: "image/png", jpg: "image/jpeg", jpeg: "image/jpeg", webp: "image/webp", gif: "image/gif",
+  cube: "text/plain", srt: "text/plain", vtt: "text/vtt", txt: "text/plain",
+};
+/** MIME type from the extension — the API's stricter routes (music, LUT) refuse untyped uploads. */
+export function mimeFor(file: string): string {
+  return MIME[path.extname(file).slice(1).toLowerCase()] ?? "application/octet-stream";
+}
+
 export class ApiError extends Error {
   status: number;
   constructor(message: string, status: number) {
@@ -53,7 +65,7 @@ export const api = {
     const form = new FormData();
     for (const [k, v] of Object.entries(fields)) form.append(k, v);
     const abs = path.resolve(file);
-    form.append("file", new Blob([await readFile(abs)]), path.basename(abs));
+    form.append("file", new Blob([await readFile(abs)], { type: mimeFor(abs) }), path.basename(abs));
     return call<T>("POST", p, undefined, form);
   },
   /** raw bytes (images, media) */

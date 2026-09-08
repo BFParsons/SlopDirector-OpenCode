@@ -51,9 +51,12 @@ Against a multi-user server (desktop auth off) add `SLOPSTUDIO_API_TOKEN` to
 | Inspect | `get_frame` (image), `get_contact_sheet` (image + times), `detect_scenes`, `detect_silences`, `transcribe` (word timings) |
 | Timeline | `add_segment`, `update_segments`, `split_segment`, `reorder_segments`, `delete_segment`, `add_text_overlay`, `remove_text_overlay`, `create_checkpoint`, `list_checkpoints`, `restore_checkpoint`, `apply_edit_list` (checkpointed batch with rollback) |
 | Render | `render_draft` (≤640×360, seconds), `render_final`, `render_status`, `cancel_render`, `export_formats` |
+| Checks | `pacing_report`, `check_cuts`, `check_beat_alignment`, `verify_export`, `compare_versions`, `analyze_audio` — the guide's mechanical checks |
+| Guide | `search_guide`, `read_guide`, `list_guide`, `get_playbook` — the editing guide and playbooks (`guide/`) |
 
-Resources: `slopstudio://projects`, `slopstudio://projects/{id}`. Prompt:
-`edit_video` (the editing playbook).
+Resources: `slopstudio://projects[/{id}]`, `slopstudio://guide[/{section}]`, `slopstudio://playbooks/{name}`.
+Prompts: `edit_video`, `playbook` (a job's procedure + the always-on rules). The server's
+instructions carry `guide/RULES.md`, so every client sees the rules without asking.
 
 ## Try it
 

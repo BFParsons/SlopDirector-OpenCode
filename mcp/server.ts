@@ -17,15 +17,20 @@ import { registerMediaTools } from "./tools/media";
 import { registerProjectTools } from "./tools/project";
 import { registerRenderTools } from "./tools/render";
 import { registerTimelineTools } from "./tools/timeline";
+import { registerVerifyTools } from "./tools/verify";
+import { loadGuide, registerGuide } from "./guide";
 
 export function buildServer(): McpServer {
+  const { rules, playbooks } = loadGuide();
   const server = new McpServer(
-    { name: "slopstudio", version: "0.1.0" },
+    { name: "slopstudio", version: "0.2.0" },
     {
       instructions:
-        "SlopStudio is a video editor. Typical loop: create_project (or list_projects) → import_media → look with get_contact_sheet / detect_scenes / detect_silences / transcribe → " +
-        "create_checkpoint → cut with add_segment (same asset, different trimStartS/durationS) + update_segments / apply_edit_list → render_draft and inspect the draft asset with get_frame / detect_silences → " +
-        "iterate or restore_checkpoint → render_final and hand the person the returned file path. Times are seconds. Segment ids come from get_project.",
+        "SlopStudio is a video editor. Loop: create_project (or list_projects) → import_media → LOOK (get_contact_sheet, detect_scenes, detect_silences, transcribe) → " +
+        "create_checkpoint → cut (add_segment: same asset, different trimStartS/durationS; update_segments; apply_edit_list) → render_draft → CHECK (get_frame, check_cuts, pacing_report, verify_export) → " +
+        "iterate or restore_checkpoint → render_final and hand over the file path. Times are seconds at 30 fps. " +
+        `Playbooks for common jobs (get_playbook): ${[...playbooks.keys()].join(", ") || "none installed"}. search_guide / read_guide hold the full craft guide.\n\n` +
+        rules,
     },
   );
 
@@ -34,6 +39,8 @@ export function buildServer(): McpServer {
   registerInspectTools(server);
   registerTimelineTools(server);
   registerRenderTools(server);
+  registerVerifyTools(server);
+  registerGuide(server);
 
   server.registerResource(
     "projects",
@@ -69,6 +76,7 @@ export function buildServer(): McpServer {
             type: "text",
             text:
               `Goal: ${goal}\n` +
+              `${loadGuide().rules}\n\n` +
               (projectId ? `Project: ${projectId} (call get_project first).\n` : "Start with list_projects or create_project, then import_media.\n") +
               "Work like an editor: 1) perceive the source (get_contact_sheet, detect_scenes, detect_silences, transcribe) before cutting; " +
               "2) create_checkpoint; 3) express the cut as segments (same asset, trimStartS + durationS per kept range; muted=false to keep clip sound) — prefer apply_edit_list for multi-step changes; " +

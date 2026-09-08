@@ -107,6 +107,52 @@ async function main() {
     check("highlight draft: 8 s with 3 cuts", close(d2.json.durationS, 8, 0.5) && Math.abs(outSc.json.cuts.length - 3) <= 1, `duration=${d2.json.durationS} cuts=${outSc.json.cuts.length}`);
     const res = await client.readResource({ uri: `slopstudio://projects/${p2.json.id}` });
     check("resource read returns the project", (res.contents[0] as { text?: string }).text?.includes(p2.json.id) === true);
+
+    // --- the guide as harness knowledge
+    const guideHit = await call<{ id: string; chapter: string }[]>("search_guide", { query: "jump cut consistently", limit: 3 });
+    check("search_guide finds the 30-degree / jump-cut section", guideHit.json.some((h) => /15/.test(h.chapter)), guideHit.json.map((h) => h.id).join(", "));
+    const ch17 = await call<string>("read_guide", { section: "17" });
+    check("read_guide returns chapter 17 (dialogue)", typeof ch17.json === "string" && /J-cuts and L-cuts/.test(ch17.json));
+    const toc = await call<{ chapters: unknown[]; playbooks: { name: string }[] }>("list_guide", {});
+    check("list_guide: ≥ 37 chapters, 6 playbooks", toc.json.chapters.length >= 37 && toc.json.playbooks.length === 6, `${toc.json.chapters.length} chapters`);
+    const pb = await call<string>("get_playbook", { name: "interview-cleanup" });
+    check("get_playbook interview-cleanup", typeof pb.json === "string" && /apply_edit_list/.test(pb.json));
+    const prompt = await client.getPrompt({ name: "playbook", arguments: { name: "scene-highlight", projectId: p2.json.id } });
+    const promptText = (prompt.messages[0].content as { text?: string }).text ?? "";
+    check("playbook prompt embeds the rules", /Always-on rules/.test(promptText) && /pacing_report/.test(promptText));
+    const guideRes = await client.readResource({ uri: "slopstudio://guide/16-rhythm-and-pacing" });
+    check("guide chapter resource", ((guideRes.contents[0] as { text?: string }).text ?? "").includes("Average shot length"));
+
+    // --- mechanical checks (guide ch.16/17/24/29/32)
+    const pacing = await call<{ count: number; aslS: number; findings: unknown[]; comparison: string | null }>("pacing_report", { projectId: p2.json.id, genre: "social" });
+    check("pacing_report: 4 shots of 2 s, uniform flagged, social norm", pacing.json.count === 4 && pacing.json.aslS === 2 && pacing.json.findings.length >= 1 && /inside|faster|slower/.test(pacing.json.comparison ?? ""), `asl=${pacing.json.aslS} findings=${pacing.json.findings.length}`);
+    const cuts0 = await call<{ cuts: number[]; findings: { rule: string }[]; untranscribedSources: string[] }>("check_cuts", { projectId: p2.json.id });
+    check("check_cuts: 3 cut times, no transcript → hint, no false errors", cuts0.json.cuts.length === 3 && cuts0.json.untranscribedSources.length === 1 && !cuts0.json.findings.some((f) => /mid-word|inside the word/.test(f.rule)));
+    // a fake transcript in the server's cache puts a word across the 3.0 s cut → check_cuts must catch it
+    const { writeFileSync, mkdirSync } = await import("node:fs");
+    const info = await call<{ path: string; projectId: string }>("probe_asset", { assetId: a2.json.id });
+    const cacheDir = path.join(path.dirname(path.dirname(info.json.path)), "cache");
+    mkdirSync(cacheDir, { recursive: true });
+    writeFileSync(path.join(cacheDir, `transcript-${a2.json.id}-base.json`), JSON.stringify({ language: "en", text: "hello world", segments: [{ startS: 2.5, endS: 3.6, text: "hello world", words: [{ startS: 2.5, endS: 2.8, text: "hello" }, { startS: 2.85, endS: 3.4, text: "world" }] }], words: [{ startS: 2.5, endS: 2.8, text: "hello" }, { startS: 2.85, endS: 3.4, text: "world" }], srt: null, vtt: null }));
+    const cuts1 = await call<{ findings: { rule: string; message: string; index?: number }[] }>("check_cuts", { projectId: p2.json.id });
+    const mid = cuts1.json.findings.filter((f) => /inside the word/.test(f.message));
+    check("check_cuts flags the cut inside \"world\" at 3.0 s", mid.length === 1 && /"world"/.test(mid[0].message), mid.map((m) => m.message).join(" | "));
+    const ver = await call<{ pass: boolean; findings: { rule: string }[]; loudness: { integratedLufs: number | null } | null; file: { durationS: number } }>("verify_export", { assetId: d2.json.draftAssetId, target: "none", expectedDurationS: 8, expectedWidth: 640, expectedHeight: 360 });
+    check("verify_export passes the 8 s draft with loudness measured", ver.json.pass && ver.json.loudness?.integratedLufs != null, `lufs=${ver.json.loudness?.integratedLufs} findings=${ver.json.findings.length}`);
+    const verBad = await call<{ pass: boolean; findings: { rule: string }[] }>("verify_export", { assetId: d2.json.draftAssetId, target: "web", expectedDurationS: 9 });
+    check("verify_export fails a wrong expected duration", !verBad.json.pass && verBad.json.findings.some((f) => /duration/.test(f.rule)));
+    await call("delete_segment", { projectId: p2.json.id, segmentId: before.json.segments[3].id });
+    const diff = await call<{ removed: unknown[]; added: unknown[]; changed: unknown[]; from: { runtimeS: number }; to: { runtimeS: number } }>("compare_versions", { projectId: p2.json.id, fromCheckpointId: cp.json.id });
+    check("compare_versions: one segment removed, runtime 8 → 6", diff.json.removed.length === 1 && diff.json.added.length === 0 && diff.json.from.runtimeS === 8 && diff.json.to.runtimeS === 6, `runtime ${diff.json.from.runtimeS}→${diff.json.to.runtimeS}`);
+    const au = await call<{ loudness: { integratedLufs: number | null } | null; tempo: { bpm: number | null; beatsS: number[] } | null }>("analyze_audio", { assetId: a2.json.id, kinds: ["loudness", "tempo"] });
+    check("analyze_audio returns loudness + a beat grid", au.json.loudness?.integratedLufs != null && Array.isArray(au.json.tempo?.beatsS), `lufs=${au.json.loudness?.integratedLufs} beats=${au.json.tempo?.beatsS.length}`);
+    // click track at 120 BPM as the music bed: 2 s shots cut on beats
+    const click = path.join(TMP, "click-120.wav");
+    const { execFileSync } = await import("node:child_process");
+    execFileSync("ffmpeg", ["-hide_banner", "-loglevel", "error", "-y", "-f", "lavfi", "-i", "aevalsrc=if(lt(mod(t\\,0.5)\\,0.03)\\,sin(2*PI*1000*t)\\,0):s=48000", "-t", "12", click]);
+    await call("set_music", { projectId: p2.json.id, path: click, volume: 0.5 });
+    const beat = await call<{ bpm: number | null; total: number; onGrid: number; onGridPct: number | null }>("check_beat_alignment", { projectId: p2.json.id, toleranceFrames: 2 });
+    check("check_beat_alignment: 120 BPM click, cuts at 2/4 s on grid", beat.json.total === 2 && beat.json.onGrid === 2 && (beat.json.bpm ?? 0) > 100 && (beat.json.bpm ?? 0) < 140, `bpm=${beat.json.bpm} onGrid=${beat.json.onGrid}/${beat.json.total}`);
   } finally {
     for (const id of created) await call("delete_project", { projectId: id }).catch(() => {});
     await client.close();

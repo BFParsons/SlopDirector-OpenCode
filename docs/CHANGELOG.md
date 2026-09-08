@@ -5,6 +5,22 @@ Notable changes, newest first. See [DEPENDENCIES.md](DEPENDENCIES.md) for setup 
 
 ## 2026-09 — no-storyboard fork
 
+- **The editing guide as harness knowledge** (`guide/`). Albert's *A Guide to Great Digital Film
+  Editing* is now part of the harness in three layers: `guide/RULES.md` (24 always-on rules,
+  folded into the MCP server instructions and every prompt), the full guide as chapter
+  resources with `search_guide` / `read_guide` / `list_guide` (Parts I–III and the appendices
+  written for SlopStudio; all 40 `[TOOL: …]` placeholders mapped to a real tool or marked *not
+  available*), and six task playbooks (`get_playbook`, `playbook` prompt): interview-cleanup,
+  scene-highlight, vertical-repurpose, music-montage, assembly-from-transcript,
+  delivery-verify. The guide's mechanical checks became tools: `pacing_report` (ch.16),
+  `check_cuts` (mid-word cuts via word timings, kept dead air, flash frames, lone jump cuts,
+  overlays across cuts, transition meaning), `check_beat_alignment` (ch.28, beat grid via
+  librosa), `verify_export` (ch.32: duration to the frame, black/frozen picture, silence,
+  loudness vs platform), `compare_versions` (ch.24 change list), `analyze_audio`. New route
+  `GET /api/assets/:id/analyze` (blackdetect, freezedetect, ebur128, silences, probe).
+  `CLAUDE.md` / `AGENTS.md` point Claude Code and Codex at the rules and playbooks.
+  `guide/appendix-a-tools.md` is generated from the server (`scripts/gen-tool-reference.ts`).
+
 - **MCP server** (`mcp/`, `pnpm mcp`, see [mcp/README.md](../mcp/README.md)). 32 tools over the
   HTTP API for Claude Code / Claude Desktop / Codex: project (create with frame presets, get
   compact view, update, delete), media (import file / YouTube, list, probe incl. file path,
