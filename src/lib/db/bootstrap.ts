@@ -18,12 +18,13 @@ export async function ensureDesktopDb(): Promise<void> {
   // Performance pragmas. WAL is persistent (stored in the DB file): readers no
   // longer block on writers and each timeline edit stops rewriting the journal.
   // synchronous=NORMAL is safe with WAL (durable at checkpoint, not per write).
-  try {
-    await prisma.$queryRawUnsafe("PRAGMA journal_mode=WAL");
-    await prisma.$executeRawUnsafe("PRAGMA synchronous=NORMAL");
-    await prisma.$executeRawUnsafe("PRAGMA busy_timeout=5000");
-  } catch (e) {
-    console.warn("[desktop] sqlite pragmas:", (e as Error).message);
+  // (queryRaw, not executeRaw: PRAGMAs report their value as a row.)
+  for (const pragma of ["PRAGMA journal_mode=WAL", "PRAGMA synchronous=NORMAL", "PRAGMA busy_timeout=5000"]) {
+    try {
+      await prisma.$queryRawUnsafe(pragma);
+    } catch (e) {
+      console.warn(`[desktop] ${pragma} failed:`, e instanceof Error ? e.message : String(e));
+    }
   }
 
   // Fresh DB? (no `User` table yet) -> run the shipped CREATE TABLE/INDEX DDL.
@@ -43,31 +44,38 @@ export async function ensureDesktopDb(): Promise<void> {
 
   // Lightweight forward migrations: add columns introduced after the initial DDL
   // so existing embedded DBs upgrade in place. SQLite lacks ADD COLUMN IF NOT
-  // EXISTS, so we ignore the "duplicate column" error when it's already there.
-  const migrations = [
-    'ALTER TABLE "Segment" ADD COLUMN "effects" JSONB',
-    `ALTER TABLE "WorkspaceLayout" ADD COLUMN "section" TEXT NOT NULL DEFAULT 'video'`,
+  // EXISTS, so check table_info first (a failed ALTER would also make Prisma
+  // print a scary "prisma:error … duplicate column" line on every launch).
+  const migrations: { table: string; column: string; ddl: string }[] = [
+    { table: "Segment", column: "effects", ddl: "JSONB" },
+    { table: "WorkspaceLayout", column: "section", ddl: "TEXT NOT NULL DEFAULT 'video'" },
     // Portable project bundles: the absolute folder a project's file + assets
     // live in (null = legacy project under ASSET_ROOT/<projectId>).
-    'ALTER TABLE "Project" ADD COLUMN "bundlePath" TEXT',
+    { table: "Project", column: "bundlePath", ddl: "TEXT" },
     // Per-user default base folder new project bundles are created under.
-    'ALTER TABLE "User" ADD COLUMN "defaultProjectFolder" TEXT',
+    { table: "User", column: "defaultProjectFolder", ddl: "TEXT" },
     // Audio Studio editable multitrack session (JSON), for reopening/re-editing.
-    'ALTER TABLE "Project" ADD COLUMN "audioSession" TEXT',
+    { table: "Project", column: "audioSession", ddl: "TEXT" },
     // Custom frame size (px); null = aspectRatio/resolution preset.
-    'ALTER TABLE "Project" ADD COLUMN "frameWidth" INTEGER',
-    'ALTER TABLE "Project" ADD COLUMN "frameHeight" INTEGER',
+    { table: "Project", column: "frameWidth", ddl: "INTEGER" },
+    { table: "Project", column: "frameHeight", ddl: "INTEGER" },
     // Export format / custom LUT / libass caption style.
-    `ALTER TABLE "Project" ADD COLUMN "exportCodec" TEXT NOT NULL DEFAULT 'h264'`,
-    'ALTER TABLE "Project" ADD COLUMN "lutAssetId" TEXT',
-    `ALTER TABLE "Project" ADD COLUMN "captionStyle" TEXT NOT NULL DEFAULT 'OUTLINE'`,
+    { table: "Project", column: "exportCodec", ddl: "TEXT NOT NULL DEFAULT 'h264'" },
+    { table: "Project", column: "lutAssetId", ddl: "TEXT" },
+    { table: "Project", column: "captionStyle", ddl: "TEXT NOT NULL DEFAULT 'OUTLINE'" },
   ];
-  for (const stmt of migrations) {
-    try {
-      await prisma.$executeRawUnsafe(stmt);
-    } catch {
-      /* column already present */
+  const columnCache = new Map<string, Set<string>>();
+  for (const m of migrations) {
+    let cols = columnCache.get(m.table);
+    if (!cols) {
+      const rows = await prisma.$queryRawUnsafe<{ name: string }[]>(`PRAGMA table_info("${m.table}")`);
+      cols = new Set(rows.map((r) => r.name));
+      columnCache.set(m.table, cols);
     }
+    if (cols.has(m.column)) continue;
+    await prisma.$executeRawUnsafe(`ALTER TABLE "${m.table}" ADD COLUMN "${m.column}" ${m.ddl}`);
+    cols.add(m.column);
+    console.log(`[desktop] added column ${m.table}.${m.column}`);
   }
 
   // Seed a first admin if the DB has no users.

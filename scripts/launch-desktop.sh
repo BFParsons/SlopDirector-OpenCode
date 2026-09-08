@@ -38,7 +38,7 @@ if [ "$MODE" = "prod" ]; then
   # Rebuild when there's no build, or anything under src/ prisma/ public/ or the
   # Next config is newer than the last standalone server.
   SERVER=".next/standalone/server.js"
-  if [ ! -f "$SERVER" ] || [ -n "$(find src prisma public next.config.ts package.json -newer "$SERVER" -print -quit 2>/dev/null)" ]; then
+  if [ ! -f "$SERVER" ] || [ -n "$(find src prisma public next.config.ts package.json scripts/postbuild-standalone.mjs -newer "$SERVER" -print -quit 2>/dev/null)" ]; then
     echo "Building the production bundle (first run / sources changed)…"
     pnpm desktop:standalone
   fi

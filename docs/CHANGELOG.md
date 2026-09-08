@@ -13,6 +13,12 @@ Notable changes, newest first. See [DEPENDENCIES.md](DEPENDENCIES.md) for setup 
   after ~4 GB for the desktop shell (an 8 GB laptop renders one at a time). (4) Hardware
   video decode in the renderer was checked and is already on by default in Electron 44 on
   Wayland/VA-API — documented in `electron/main.js`, no switches added.
+  Production-mode fix: the standalone postbuild step backfilled Next's route runtime from
+  the *first* `next@*` entry in the pnpm store (a stale 16.2.6), so the 16.3.4 route modules
+  loaded with an empty handler map and every `/api/*` call answered **405**. It now resolves
+  the installed `next` package and only adds files tracing missed. The desktop DB bootstrap
+  also checks `table_info` before each forward-migration ALTER instead of relying on the
+  "duplicate column" error (which Prisma logged as `prisma:error` on every launch).
 
 - **Render quota only for AI-billed renders.** The monthly quota (20/user) used to cap *every*
   export, deleted projects included; a local re-assembly of your own clips now bills nothing
