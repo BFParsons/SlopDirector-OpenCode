@@ -83,20 +83,38 @@ export function pacingReport(s: Snapshot, genre?: string) {
 
 type Transcript = { words: { startS: number; endS: number; text: string }[]; segments: { startS: number; endS: number; text: string }[] };
 
+/** Whisper emits non-words on music and noise ("ʔʔʔ", "♪"); only lexical words count. */
+const isWord = (t: string) => /[\p{L}\p{N}]/u.test(t);
+
 export function midWordCut(words: Transcript["words"], pointS: number, tolS: number) {
-  return words.find((w) => w.startS + tolS < pointS && w.endS - tolS > pointS) ?? null;
+  return words.find((w) => isWord(w.text) && w.startS + tolS < pointS && w.endS - tolS > pointS) ?? null;
 }
 
-export function checkCuts(s: Snapshot, opts: { transcripts: Map<string, Transcript | null>; silences: Map<string, { startS: number; endS: number; durationS: number }[]> }) {
+export function checkCuts(
+  s: Snapshot,
+  opts: { transcripts: Map<string, Transcript | null>; silences: Map<string, { startS: number; endS: number; durationS: number }[]>; sceneCuts?: Map<string, number[]> },
+) {
   const segs = mainSequence(s);
   const findings: Finding[] = [];
   const tol = 0.04;
   let jumpCuts = 0;
   let crossCuts = 0;
+  const jumpCutAt: { afterShot: number; atS: number; skippedS: number }[] = [];
+  // Narration / unlinked audio clips: their in/out points must sit in pauses too (ch17).
+  for (const x of s.segments.filter((a) => a.audioOnly && !a.library)) {
+    const tr = x.sourceAssetId ? opts.transcripts.get(x.sourceAssetId) : null;
+    if (!tr?.words.length) continue;
+    const { inS, outS } = sourceRange(x);
+    for (const [label, p] of [["in-point", inS], ["out-point", outS]] as const) {
+      const w = midWordCut(tr.words, p, tol);
+      if (w) findings.push({ severity: "error", rule: "ch17 cut in the pauses, never inside a word (audio clip)", segmentId: x.id, atS: x.offsetS, message: `${label} of the audio clip at ${x.offsetS}s lands inside the word "${w.text}" (${w.startS}–${w.endS}s of the source)`, fix: label === "in-point" ? `trimStartS ${w.startS.toFixed(3)}` : `end at ${w.endS.toFixed(3)} (extend) or ${w.startS.toFixed(3)} (shorten)` });
+    }
+  }
   segs.forEach((x, i) => {
     const { inS, outS } = sourceRange(x);
     if (x.durationS < 6 * FRAME) findings.push({ severity: "error", rule: "ch16 / ch32 flash frame", segmentId: x.id, index: i, message: `shot ${i} is ${Math.round(x.durationS * FPS)} frames long`, fix: "delete it or extend durationS" });
-    const tr = x.sourceAssetId ? opts.transcripts.get(x.sourceAssetId) : null;
+    // Speech matters only when this clip's own audio is heard (muted=false).
+    const tr = x.sourceAssetId && x.muted === false ? opts.transcripts.get(x.sourceAssetId) : null;
     if (tr && tr.words.length) {
       for (const [label, p] of [["in-point", inS], ["out-point", outS]] as const) {
         const w = midWordCut(tr.words, p, tol);
@@ -113,13 +131,23 @@ export function checkCuts(s: Snapshot, opts: { transcripts: Map<string, Transcri
     if (i > 0) {
       const prev = segs[i - 1];
       if (prev.sourceAssetId && prev.sourceAssetId === x.sourceAssetId) {
-        const contiguous = Math.abs(sourceRange(prev).outS - inS) < 0.05;
-        if (!contiguous) jumpCuts++;
+        const prevOut = sourceRange(prev).outS;
+        const contiguous = Math.abs(prevOut - inS) < 0.05;
+        // A cut between two different shots of a multi-shot source is a
+        // conventional cut; a jump cut is a skip within ONE shot.
+        const scenes = opts.sceneCuts?.get(x.sourceAssetId) ?? [];
+        const lo = Math.min(prevOut, inS);
+        const hi = Math.max(prevOut, inS);
+        const sameShot = !scenes.some((c) => c > lo && c < hi);
+        if (!contiguous && sameShot) {
+          jumpCuts++;
+          jumpCutAt.push({ afterShot: i - 1, atS: +segs.slice(0, i).reduce((a, b) => a + b.durationS, 0).toFixed(3), skippedS: +(inS - prevOut).toFixed(3) });
+        } else crossCuts++;
       } else crossCuts++;
     }
   });
   if (jumpCuts > 0 && crossCuts > 0 && jumpCuts <= 2)
-    findings.push({ severity: "warn", rule: "ch15 use jump cuts consistently or not at all", message: `${jumpCuts} jump cut(s) among ${crossCuts} conventional cuts: one accidental jump cut reads as an error`, fix: "cover the jump with a different angle / B-roll (overlay track) or commit to jump cuts as the style" });
+    findings.push({ severity: "warn", rule: "ch15 use jump cuts consistently or not at all", message: `${jumpCuts} jump cut(s) among ${crossCuts} conventional cuts: ${jumpCutAt.map((j) => `at ${j.atS}s (shot ${j.afterShot} → ${j.afterShot + 1}, same source shot, ${j.skippedS > 0 ? `${j.skippedS}s skipped` : `${-j.skippedS}s repeated`})`).join("; ")} — one accidental jump cut reads as an error`, fix: "cover the jump with a different angle / B-roll (overlay track), make the two shots contiguous, or commit to jump cuts as the style" });
   // Text overlays straddling a cut (ch31: don't put a lower third over a cut).
   let t = 0;
   const cutTimes: number[] = [];
@@ -139,7 +167,7 @@ export function checkCuts(s: Snapshot, opts: { transcripts: Map<string, Transcri
     const meaning = ms <= 400 ? "a softened cut" : ms <= 2000 ? "a time passage" : "a statement";
     findings.push({ severity: "info", rule: "ch20 dissolve duration sets its meaning", message: `every cut uses ${s.transition} at ${ms} ms — reads as ${meaning}; the straight cut is the default and dissolves are punctuation`, fix: "set transition NONE unless you can name the reason" });
   }
-  return { cuts: cutTimes, jumpCuts, conventionalCuts: crossCuts, findings };
+  return { cuts: cutTimes, jumpCuts, jumpCutAt, conventionalCuts: crossCuts, findings };
 }
 
 export function beatAlignment(cutTimes: number[], beatsS: number[], toleranceS: number) {
@@ -192,17 +220,33 @@ export function registerVerifyTools(server: McpServer) {
     },
     guarded(async ({ projectId, transcribe, model }) => {
       const s = await snapshot(projectId);
-      const assets = [...new Set(mainSequence(s).map((x) => x.sourceAssetId).filter((x): x is string => !!x))];
+      const videoAssets = [...new Set(mainSequence(s).map((x) => x.sourceAssetId).filter((x): x is string => !!x))];
+      const audioAssets = [...new Set(s.segments.filter((x) => x.audioOnly && !x.library).map((x) => x.sourceAssetId).filter((x): x is string => !!x))];
+      const assets = [...new Set([...videoAssets, ...audioAssets])];
       const transcripts = new Map<string, Transcript | null>();
       const silences = new Map<string, { startS: number; endS: number; durationS: number }[]>();
+      const sceneCuts = new Map<string, number[]>();
       for (const id of assets) {
         let tr: Transcript | null = null;
-        try {
-          tr = await api.get<Transcript>(`/api/assets/${id}/transcribe?model=${model}`);
-        } catch {
-          if (transcribe) tr = await api.post<Transcript>(`/api/assets/${id}/transcribe`, { model });
+        // Any cached transcript will do (the requested model first).
+        for (const m of [model, "small", "base", "medium", "tiny", "large-v3"].filter((v, i, a) => a.indexOf(v) === i)) {
+          try {
+            tr = await api.get<Transcript>(`/api/assets/${id}/transcribe?model=${m}`);
+            break;
+          } catch {
+            /* not cached for this model */
+          }
         }
+        if (!tr && transcribe) tr = await api.post<Transcript>(`/api/assets/${id}/transcribe`, { model });
         transcripts.set(id, tr);
+        if (videoAssets.includes(id)) {
+          try {
+            const sc = await api.get<{ cuts: number[] }>(`/api/assets/${id}/scenes?threshold=0.35`);
+            sceneCuts.set(id, sc.cuts);
+          } catch {
+            sceneCuts.set(id, []);
+          }
+        }
         try {
           const sil = await api.get<{ silences: { startS: number; endS: number; durationS: number }[] }>(`/api/assets/${id}/silences?noise=-35&min=0.5`);
           silences.set(id, sil.silences);
@@ -210,7 +254,7 @@ export function registerVerifyTools(server: McpServer) {
           silences.set(id, []);
         }
       }
-      const r = checkCuts(s, { transcripts, silences });
+      const r = checkCuts(s, { transcripts, silences, sceneCuts });
       const untranscribed = assets.filter((id) => !transcripts.get(id));
       return text({ ...r, transcriptsUsed: assets.length - untranscribed.length, untranscribedSources: untranscribed, hint: untranscribed.length ? "mid-word checks skipped for sources without a transcript — call again with transcribe=true" : undefined });
     }),

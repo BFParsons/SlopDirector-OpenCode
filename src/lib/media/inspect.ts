@@ -94,19 +94,24 @@ export async function contactSheet(
     `sheet-${assetId}-${o.cols}x${o.rows}-${o.width}-${clean(o.startS)}-${clean(o.endS)}.jpg`,
   );
   if (existsSync(out)) return { path: out, times, cellWidth };
-  // fps=1/interval samples at startS, startS+interval, …; drawtext prints the
-  // absolute source time (pts offset by startS since -ss rebases timestamps).
+  // Pick the FIRST frame at or after each sample time (select on the bucket
+  // index), so the frame shown is the one the stamp says. (`fps=1/interval`
+  // keeps the last frame of each bucket — half an interval later than its
+  // label — which sent an agent's trims to the wrong place.) drawtext prints
+  // the absolute source time: pts is rebased by -ss, so add startS back.
   const font = FONT_BOLD.replace(/\\/g, "/").replace(/:/g, "\\:");
   const fontsize = Math.max(12, Math.round(cellWidth / 12));
+  const iv = interval.toFixed(4);
+  const pick = `select='isnan(prev_selected_t)+gt(floor(t/${iv}),floor(prev_selected_t/${iv}))'`;
   const stamp =
     `drawtext=fontfile='${font}':text='%{pts\\:hms\\:${o.startS}}':x=6:y=6:` +
     `fontsize=${fontsize}:fontcolor=white:box=1:boxcolor=black@0.55:boxborderw=4`;
   const vf =
-    `fps=1/${interval.toFixed(4)},scale=${cellWidth}:-2,${stamp},` +
+    `${pick},scale=${cellWidth}:-2,${stamp},` +
     `tile=${o.cols}x${o.rows}:padding=2:margin=2:color=black`;
   const { code, stderr } = await run([
-    "-y", "-ss", String(o.startS), "-t", String(span + interval), "-i", abs,
-    "-frames:v", "1", "-vf", vf, "-q:v", "4", out,
+    "-y", "-ss", String(o.startS), "-t", String(span), "-i", abs,
+    "-fps_mode", "passthrough", "-frames:v", "1", "-vf", vf, "-q:v", "4", out,
   ]);
   if (code !== 0 || !existsSync(out)) throw new Error(`contact sheet failed: ${stderr.slice(-400)}`);
   return { path: out, times, cellWidth };

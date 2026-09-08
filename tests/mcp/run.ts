@@ -25,7 +25,7 @@ async function main() {
   await client.connect(transport);
 
   const call = async <T = unknown>(name: string, args: Record<string, unknown> = {}): Promise<{ json: T; content: Content[] }> => {
-    const res = (await client.callTool({ name, arguments: args })) as { content: Content[]; isError?: boolean };
+    const res = (await client.callTool({ name, arguments: args }, undefined, { timeout: 10 * 60_000 })) as { content: Content[]; isError?: boolean };
     const first = res.content.find((c) => c.type === "text");
     if (res.isError) throw new Error(`${name}: ${first?.text ?? "error"}`);
     let json: T = undefined as T;

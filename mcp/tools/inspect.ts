@@ -1,6 +1,6 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { api } from "../client";
+import { MAX_TOOL_WAIT_S, api } from "../client";
 import { guarded, image, text } from "../format";
 
 export function registerInspectTools(server: McpServer) {
@@ -81,10 +81,26 @@ export function registerInspectTools(server: McpServer) {
       annotations: { readOnlyHint: true },
     },
     guarded(async ({ assetId, model, language, includeWords }) => {
-      const r = await api.post<{ text: string; language: string | null; segments: unknown[]; words: unknown[]; cached: boolean }>(`/api/assets/${assetId}/transcribe`, {
-        model,
-        ...(language ? { language } : {}),
-      });
+      type T = { text: string; language: string | null; segments: unknown[]; words: unknown[]; cached: boolean; jobId?: string };
+      // Cached? Return at once. Else start the job and long-poll under the MCP
+      // request timeout; a slow transcript returns {running:true} — call again.
+      let r: T | null = null;
+      try {
+        r = await api.get<T>(`/api/assets/${assetId}/transcribe?model=${model}`);
+      } catch {
+        const started = await api.post<T>(`/api/assets/${assetId}/transcribe`, { model, ...(language ? { language } : {}), wait: false });
+        const t0 = Date.now();
+        while (Date.now() - t0 < MAX_TOOL_WAIT_S * 1000) {
+          await new Promise((res) => setTimeout(res, 1500));
+          const job = await api.get<{ status: string; error?: string | null; progress?: number }>(`/api/audio/jobs/${started.jobId}`);
+          if (job.status === "error") throw new Error(`transcription failed: ${job.error ?? "unknown"}`);
+          if (job.status === "done") {
+            r = await api.get<T>(`/api/assets/${assetId}/transcribe?model=${model}`);
+            break;
+          }
+        }
+        if (!r) return text({ running: true, jobId: started.jobId, hint: `transcribing with "${model}" takes longer than one call — call transcribe again with the same arguments in a minute` });
+      }
       return text(includeWords ? r : { ...r, words: `(${r.words.length} words omitted; includeWords=true to get them)` });
     }),
   );

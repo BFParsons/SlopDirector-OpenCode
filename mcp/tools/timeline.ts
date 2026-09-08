@@ -36,6 +36,18 @@ const addSegmentInput = {
   imageMotion: z.string().optional(),
 };
 
+/**
+ * The reorder route wants EVERY segment id (overlays and audio-only clips
+ * included); callers think in main-sequence order, so append whatever they
+ * left out in its current order.
+ */
+async function completeOrder(projectId: string, orderedIds: string[]): Promise<string[]> {
+  const s = await snapshot(projectId);
+  const given = new Set(orderedIds);
+  const rest = s.segments.filter((x) => !given.has(x.id)).sort((a, b) => a.index - b.index).map((x) => x.id);
+  return [...orderedIds, ...rest];
+}
+
 async function addSegment(a: {
   projectId: string; assetId: string; trimStartS?: number; durationS?: number; track: number; offsetS?: number; audioOnly: boolean; muted?: boolean; imageMotion?: string;
 }): Promise<Snapshot> {
@@ -86,10 +98,12 @@ export function registerTimelineTools(server: McpServer) {
     "reorder_segments",
     {
       title: "Reorder the main sequence",
-      description: "Give the complete list of segment ids in the new order.",
+      description: "The main-sequence segment ids in their new order (overlay and audio-only clips may be omitted; they keep their place).",
       inputSchema: { projectId: z.string(), orderedIds: z.array(z.string()).min(1) },
     },
-    guarded(async ({ projectId, orderedIds }) => text(summarize(await api.post<Snapshot>(`/api/projects/${projectId}/segments/reorder`, { orderedIds })))),
+    guarded(async ({ projectId, orderedIds }) =>
+      text(summarize(await api.post<Snapshot>(`/api/projects/${projectId}/segments/reorder`, { orderedIds: await completeOrder(projectId, orderedIds) }))),
+    ),
   );
 
   server.registerTool(
@@ -205,7 +219,7 @@ export function registerTimelineTools(server: McpServer) {
           } else if (o.op === "split_segment") {
             await api.post(`/api/projects/${projectId}/segments/${resolve(o.id)}/split`, { atS: o.atS });
           } else if (o.op === "reorder") {
-            await api.post(`/api/projects/${projectId}/segments/reorder`, { orderedIds: o.orderedIds.map(resolve) });
+            await api.post(`/api/projects/${projectId}/segments/reorder`, { orderedIds: await completeOrder(projectId, o.orderedIds.map(resolve)) });
           } else if (o.op === "clear_timeline") {
             for (const s of (await snapshot(projectId)).segments) await api.del(`/api/projects/${projectId}/segments/${s.id}`);
           }

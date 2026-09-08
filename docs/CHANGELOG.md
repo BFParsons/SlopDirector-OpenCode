@@ -5,6 +5,21 @@ Notable changes, newest first. See [DEPENDENCIES.md](DEPENDENCIES.md) for setup 
 
 ## 2026-09 — no-storyboard fork
 
+- **First real job through the harness (a 60 s LEGO documentary preview from eight
+  Creative Commons YouTube clips) and what it fixed.** (1) MCP clients time a request out at
+  ~60 s: `render_draft` / `render_final` / `transcribe` now hand back within 50 s with
+  `stillRendering` / `running` and new `draft_result` / `final_result` tools return the
+  asset once `render_status` is done. (2) The contact sheet stamped each cell with a time
+  half an interval *earlier* than the frame it showed (`fps=1/N` keeps the last frame of a
+  bucket); it now selects the first frame at or after each stamp. (3) `check_cuts` counts a
+  jump cut only within one source shot (scene-cut aware), reports where it is, checks
+  narration (`audioOnly`) clips against word timings, applies mid-word checks only to
+  audible clips, ignores Whisper's non-word tokens on music, and falls back to any cached
+  transcript model. (4) `reorder_segments` / the `reorder` op complete the id list with
+  overlay and audio-only clips. (5) The MCP client infers upload MIME types (the music/LUT
+  routes refuse untyped files); `get_project` exposes each audio overlay's asset id.
+  `scripts/mcp-call.ts` calls one tool from the shell (images saved to files).
+
 - **The editing guide as harness knowledge** (`guide/`). Albert's *A Guide to Great Digital Film
   Editing* is now part of the harness in three layers: `guide/RULES.md` (24 always-on rules,
   folded into the MCP server instructions and every prompt), the full guide as chapter

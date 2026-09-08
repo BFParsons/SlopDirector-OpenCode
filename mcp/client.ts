@@ -132,7 +132,7 @@ export interface Snapshot {
   voScript: string | null;
   segments: Segment[];
   textOverlays: { id: string; text: string; position: string; startS: number; endS: number | null }[];
-  audioOverlays: { id: string; label: string | null; offsetS: number; volume: number; included: boolean; status: string }[];
+  audioOverlays: { id: string; label: string | null; assetId: string | null; offsetS: number; volume: number; included: boolean; status: string; durationS: number | null }[];
   voiceover: { status: string; assetId: string | null; durationS: number | null } | null;
   finalRender: {
     status: string;
@@ -195,7 +195,7 @@ export function summarize(p: Snapshot) {
       error: s.error,
     })),
     textOverlays: p.textOverlays,
-    audioOverlays: p.audioOverlays,
+    audioOverlays: p.audioOverlays.map((a) => ({ id: a.id, label: a.label, assetId: a.assetId, offsetS: a.offsetS, volume: a.volume, included: a.included, status: a.status, durationS: a.durationS })),
     finalRender: p.finalRender,
     updatedAt: p.updatedAt,
   };
@@ -215,8 +215,14 @@ export interface AssetInfo {
 }
 export const assetInfo = (id: string) => api.get<AssetInfo>(`/api/assets/${id}/info`);
 
-/** Poll until a render (draft or final) finishes. */
-export async function waitForRender(projectId: string, draft: boolean, timeoutS: number, prevDraft: string | null) {
+/**
+ * Poll until a render (draft or final) finishes, or until `maxWaitS` passes —
+ * MCP clients time a single request out at ~60 s, so a blocking tool must
+ * hand back before that and let the caller poll render_status. Returns
+ * `null` when the render is still running.
+ */
+export const MAX_TOOL_WAIT_S = 50;
+export async function waitForRender(projectId: string, draft: boolean, maxWaitS: number, prevDraft: string | null): Promise<Snapshot | null> {
   const t0 = Date.now();
   for (;;) {
     await new Promise((r) => setTimeout(r, 500));
@@ -228,6 +234,6 @@ export async function waitForRender(projectId: string, draft: boolean, timeoutS:
     } else if (s.status === "DONE" && fr?.status === "READY" && fr.assetId) {
       return s;
     }
-    if (Date.now() - t0 > timeoutS * 1000) throw new ApiError(`render still running after ${timeoutS}s (progress ${fr?.progress ?? 0}%) — call render_status later`, 504);
+    if (Date.now() - t0 > Math.min(maxWaitS, MAX_TOOL_WAIT_S) * 1000) return null;
   }
 }
