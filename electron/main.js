@@ -13,7 +13,7 @@
 // is scaffolded but not yet fully wired — see docs/DESKTOP.md. The dev path runs
 // today.
 
-const { app, BrowserWindow, shell, ipcMain, dialog } = require("electron");
+const { app, BrowserWindow, shell, ipcMain, dialog, screen } = require("electron");
 const path = require("node:path");
 const http = require("node:http");
 const fs = require("node:fs");
@@ -129,11 +129,21 @@ function waitForServer(url, timeoutMs = 30_000) {
 }
 
 async function createWindow() {
+  // Fit the display: the design size is 1480x900, but a HiDPI laptop at 2x
+  // scale can have a logical work area as small as ~960x540. Never ask for a
+  // window larger than what the screen can actually show.
+  //
+  // Keep the MINIMUM small. On Wayland tiling compositors (Hyprland) the tile
+  // can be smaller than any minimum we declare; Chromium then renders at the
+  // minimum anyway and the compositor crops the surface, so the bottom/right
+  // of the UI is simply cut off. The web UI is responsive down to small
+  // viewports (see /start), so let the window manager own the size.
+  const { workAreaSize } = screen.getPrimaryDisplay();
   mainWindow = new BrowserWindow({
-    width: 1480,
-    height: 900,
-    minWidth: 1024,
-    minHeight: 640,
+    width: Math.min(1480, workAreaSize.width),
+    height: Math.min(900, workAreaSize.height),
+    minWidth: 480,
+    minHeight: 320,
     backgroundColor: "#0b0e14",
     autoHideMenuBar: true,
     title: "SlopStudio Pro",
@@ -148,6 +158,23 @@ async function createWindow() {
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     shell.openExternal(url);
     return { action: "deny" };
+  });
+
+  // The editor installs a `beforeunload` guard (useLeaveGuard) for unsaved /
+  // unnamed projects. A browser shows a "Leave site?" prompt for that; Electron
+  // shows NOTHING and silently cancels the reload / navigation / window close
+  // unless the app handles `will-prevent-unload`. Ask the user natively instead.
+  mainWindow.webContents.on("will-prevent-unload", (event) => {
+    const choice = dialog.showMessageBoxSync(mainWindow, {
+      type: "question",
+      buttons: ["Leave", "Stay"],
+      defaultId: 1,
+      cancelId: 1,
+      title: "Project not saved",
+      message: "This project hasn't been named and saved yet.",
+      detail: "Leave anyway? Use the app's Home button to name and save it first.",
+    });
+    if (choice === 0) event.preventDefault(); // ignore the guard → proceed
   });
 
   const url = DEV ? DEV_URL : PROD_URL;

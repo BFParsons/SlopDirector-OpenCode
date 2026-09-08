@@ -45,6 +45,9 @@ const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  // The floating dev-tools badge sat on top of the bottom-left Studio panel in
+  // the (dev-mode) Electron window; the console still reports build status.
+  devIndicators: false,
   // Keep non-runtime dirs out of the standalone trace — notably `dist` (the
   // electron-builder output), which would otherwise copy the previous AppImage
   // into the next build and compound the bundle size every rebuild.

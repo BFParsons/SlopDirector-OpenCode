@@ -27,9 +27,11 @@ const TARGETS = [
 
 function Stat({ label, value, unit }: { label: string; value: number | null; unit: string }) {
   return (
-    <div className="rounded-md border border-[var(--color-border)] p-2 text-center">
-      <div className="font-mono tnum text-lg font-semibold">{value == null ? "—" : value.toFixed(1)}</div>
-      <div className="text-[9px] uppercase tracking-wider text-[var(--color-muted)]">
+    // min-w-0 + break-words: in a narrow panel the three tiles are ~48px wide,
+    // so the caption must wrap inside its tile instead of colliding with the next.
+    <div className="min-w-0 rounded-md border border-[var(--color-border)] p-2 text-center short:p-1">
+      <div className="font-mono tnum text-lg font-semibold short:text-base">{value == null ? "—" : value.toFixed(1)}</div>
+      <div className="break-words text-[9px] uppercase leading-tight tracking-wider text-[var(--color-muted)] short:text-[8px] short:tracking-normal">
         {label} {unit}
       </div>
     </div>
@@ -118,7 +120,7 @@ export default function LoudnessMeterPanel({ windowControls }: PanelProps) {
           {busy ? "Measuring…" : "Measure loudness (EBU R128)"}
         </button>
 
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-3 gap-2 short:gap-1">
           <Stat label="Integrated" value={integrated} unit="LUFS" />
           <Stat label="True peak" value={report?.truePeakDb ?? null} unit="dBTP" />
           <Stat label="Range" value={report?.loudnessRange ?? null} unit="LU" />

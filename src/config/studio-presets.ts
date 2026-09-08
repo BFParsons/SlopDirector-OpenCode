@@ -1,6 +1,7 @@
 import type { WorkspaceLayoutData } from "@/types/window";
 import type { PanelType } from "@/types/panel";
 import { makeWindow } from "@/lib/studio/window-utils";
+import { panelMin } from "@/config/panel-min-sizes";
 
 export type WorkspaceSection = "audio" | "video";
 
@@ -81,20 +82,44 @@ export const PRESETS: Record<string, PresetFactory> = {
       makeWindow("text-overlays", "Text Overlays", cw * 0.72 + 16, ch * 0.68 + 24, cw * 0.28 - 24, ch * 0.32 - 32, 4),
     ],
   }),
-  // The hardcoded "Audio Studio Default" — captured from the user's saved layout
-  // so it stays the permanent default. Fixed pixel positions (tuned on a wide
-  // screen); bounds="parent" keeps every panel draggable on smaller displays.
-  "audio-studio": () => ({
-    version: 2,
-    nextZIndex: 14,
-    windows: [
-      makeWindow("audio-importer", "Audio Importer", 8, 8, 322, 766, 1),
-      makeWindow("audio-visualizer", "Visualizer", 338, 8, 1166, 439, 4),
-      makeWindow("loudness-meter", "Loudness Meter", 1513, 7, 290, 320, 11),
-      makeWindow("stem-separation", "Stem Separation", 1812, 9, 280, 323, 12),
-      makeWindow("audio-processing", "Processing Rack", 1517, 340, 264, 430, 10),
-      makeWindow("audio-tools", "Audio Tools", 1812, 344, 280, 427, 9),
-      makeWindow("audio-multitrack", "Multitrack Timeline", 338, 455, 1169, 319, 13),
-    ],
-  }),
+  // The "Audio Studio Default" — the arrangement captured from the user's saved
+  // layout (Importer column | Visualizer over Multitrack | a 2×2 grid of
+  // Loudness / Stems / Rack / Tools), expressed as fractions of the live
+  // workspace so it fits any display. (It was fixed pixels tuned for a
+  // ~2100×780 workspace, which put most panels off-screen on a laptop.) The
+  // fixed columns/rows never drop below their panels' minimums; the flexible
+  // centre (Visualizer + Multitrack) absorbs the difference.
+  "audio-studio": (cw, ch) => {
+    const g = 8;
+    const m = panelMin;
+    const impW = Math.max(Math.round(cw * 0.155), m("audio-importer").width);
+    const colW = Math.max(
+      Math.round(cw * 0.135),
+      m("loudness-meter").width, m("stem-separation").width, m("audio-processing").width, m("audio-tools").width,
+    );
+    const midW = Math.max(cw - g * 5 - impW - colW * 2, m("audio-visualizer").width, m("audio-multitrack").width);
+    const midX = g + impW + g;
+    const rightX = midX + midW + g;
+    const col2X = rightX + colW + g;
+    const rowH = Math.max(Math.round(ch * 0.41), m("loudness-meter").height, m("stem-separation").height);
+    const row2Y = g + rowH + g;
+    const row2H = Math.max(ch - row2Y - g, m("audio-processing").height, m("audio-tools").height);
+    const mtH = Math.max(Math.round(ch * 0.42), m("audio-multitrack").height);
+    const visH = Math.max(ch - g * 3 - mtH, m("audio-visualizer").height);
+    const mtY = g + visH + g;
+    return {
+      version: 2,
+      nextZIndex: 14,
+      container: { width: cw, height: ch },
+      windows: [
+        makeWindow("audio-importer", "Audio Importer", g, g, impW, Math.max(ch - g * 2, m("audio-importer").height), 1),
+        makeWindow("audio-visualizer", "Visualizer", midX, g, midW, visH, 4),
+        makeWindow("loudness-meter", "Loudness Meter", rightX, g, colW, rowH, 11),
+        makeWindow("stem-separation", "Stem Separation", col2X, g, colW, rowH, 12),
+        makeWindow("audio-processing", "Processing Rack", rightX, row2Y, colW, row2H, 10),
+        makeWindow("audio-tools", "Audio Tools", col2X, row2Y, colW, row2H, 9),
+        makeWindow("audio-multitrack", "Multitrack Timeline", midX, mtY, midW, mtH, 13),
+      ],
+    };
+  },
 };

@@ -36,17 +36,20 @@ function PanelLauncher() {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-1.5 rounded-md border border-[var(--color-border)] px-2.5 py-1.5 text-xs text-[var(--color-fg)] transition-colors hover:border-[var(--color-accent)]"
+        className="flex items-center gap-1.5 whitespace-nowrap rounded-md border border-[var(--color-border)] px-2.5 py-1.5 text-xs text-[var(--color-fg)] transition-colors hover:border-[var(--color-accent)]"
       >
-        + Panel
+        +<span className="max-md:hidden"> Panel</span>
       </button>
       {open ? (
-        <div className="absolute left-0 z-[10000] mt-1 w-56 overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] py-1 text-xs shadow-[0_8px_24px_rgba(0,0,0,0.6)]">
+        // Never taller than the window (scrolls past that). On short screens the
+        // 18 panels won't fit in one column, so it becomes two: the Audio group
+        // (the tallest) fills the right column, the other groups stack on the left.
+        <div className="absolute left-0 z-[10000] mt-1 max-h-[calc(100dvh-4rem)] w-56 overflow-y-auto rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] py-1 text-xs shadow-[0_8px_24px_rgba(0,0,0,0.6)] short:grid short:w-[26rem] short:grid-cols-2 short:items-start">
           {GROUP_ORDER.map((group) => {
             const inGroup = panels.filter((p) => p.group === group);
             if (inGroup.length === 0) return null;
             return (
-              <div key={group}>
+              <div key={group} className={group === "Audio" ? "short:col-start-2 short:row-start-1 short:row-span-4" : undefined}>
                 <div className="px-3 pb-0.5 pt-1.5 text-[10px] uppercase tracking-wider text-[var(--color-muted)]">{group}</div>
                 {inGroup.map((p) => (
                   <button
@@ -113,8 +116,12 @@ export function StudioToolbar() {
 
   return (
     <>
-      <div className="flex shrink-0 items-center gap-3 border-b border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2">
-        <div className="flex min-w-0 flex-1 items-center gap-3">
+      {/* One row, always: labels never wrap (a wrapped "+ Panel" used to double
+          the toolbar height on narrow windows), the title shrinks first, and below
+          `md` the labels collapse to icons. NB: no `overflow-*` here — it would turn
+          the bar into a clip box and hide the Panel / Workspace / File dropdowns. */}
+      <div className="flex shrink-0 items-center gap-2 border-b border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1.5">
+        <div className="flex min-w-0 flex-1 items-center gap-2">
           <button
             type="button"
             onClick={() => guardedLeave(() => router.push("/start"))}
@@ -128,8 +135,9 @@ export function StudioToolbar() {
           <FileMenu email={userEmail} isAdmin={isAdmin} />
         </div>
 
-        {/* Centered project title */}
-        <div className="flex shrink-0 items-center gap-2">
+        {/* Centered project title — shrinks before anything else does; hidden on
+            very narrow windows (below md), where even the icons barely fit */}
+        <div className="flex min-w-0 shrink items-center gap-2 max-md:hidden">
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -145,7 +153,7 @@ export function StudioToolbar() {
             aria-label="Project title"
             spellCheck={false}
             style={{ width: `${Math.min(40, Math.max(8, title.length + 1))}ch`, fontFamily: "Lora, serif" }}
-            className="truncate rounded bg-transparent px-1 text-center text-base font-bold text-[var(--color-fg)] outline-none transition-colors hover:bg-white/5 focus:bg-white/10"
+            className="max-w-full truncate rounded bg-transparent px-1 text-center text-base font-bold text-[var(--color-fg)] outline-none transition-colors hover:bg-white/5 focus:bg-white/10"
           />
         </div>
 
@@ -162,21 +170,21 @@ export function StudioToolbar() {
           <button
             type="button"
             onClick={arrangeWindows}
-            className="rounded-md border border-[var(--color-border)] px-2.5 py-1.5 text-xs text-[var(--color-muted)] transition-colors hover:text-[var(--color-fg)]"
+            className="whitespace-nowrap rounded-md border border-[var(--color-border)] px-2.5 py-1.5 text-xs text-[var(--color-muted)] transition-colors hover:text-[var(--color-fg)]"
             title="Tile all open panels"
           >
-            ▦ Arrange
+            ▦<span className="max-md:hidden"> Arrange</span>
           </button>
           <SaveMenu />
 
-          <div className="ml-1 flex items-center gap-2 border-l border-[var(--color-border)] pl-3">
+          <div className="ml-1 flex items-center gap-2 border-l border-[var(--color-border)] pl-2">
             {blocker ? <span className="hidden text-xs text-[var(--color-muted)] lg:inline">{blocker}</span> : null}
             {saved ? <span className="text-xs text-[var(--color-success)]">Saved</span> : null}
             <Button variant="ghost" className="px-3 py-1.5 text-xs" onClick={save} disabled={saving || readOnly}>
               {saving ? "Saving…" : "Save"}
             </Button>
             <Button className="px-3 py-1.5 text-xs" onClick={openRender} disabled={saving || readOnly || !!blocker}>
-              Export →
+              Export<span className="max-md:hidden"> →</span>
             </Button>
           </div>
         </div>

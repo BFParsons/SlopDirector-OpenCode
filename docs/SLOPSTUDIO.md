@@ -26,6 +26,12 @@ ShuttleDeck:
   `WorkspaceLayout` table. There is **no auto-save**: a saved workspace is only overwritten on
   an explicit Save (so experimenting/testing can't clobber a layout). The workspace named
   **"Default Workspace"** is delete-protected.
+  Layouts are **display-adaptive**: every save stamps the workspace `container` size it
+  was authored at, and on load `fitLayoutToContainer` (`src/lib/studio/window-utils.ts`)
+  scales positions/sizes to the current workspace, then clamps everything on-screen. The
+  same fit runs when the container resizes. The system default (`studio-default-layout.ts`)
+  and the presets (`studio-presets.ts`, incl. the Audio Studio default) are computed from
+  the live size, so they fit a 1080p laptop at 2× scale (~936×411) as well as a wide monitor.
 - **`ProjectEditorProvider`** (React Context) — the per-project edit draft, the shared preview
   `engine` (`usePreviewEngine`), undo/redo (`useUndoable`), selection, and the handlers every
   panel reads via `useProjectEditor()`. The whole provider is keyed on `snapshot.updatedAt` so

@@ -49,7 +49,7 @@ export function FileMenu({ email, isAdmin }: { email: string; isAdmin: boolean }
         File ▾
       </button>
       {open ? (
-        <div className="absolute left-0 z-[10000] mt-1 w-56 overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] py-1 text-xs shadow-[0_8px_24px_rgba(0,0,0,0.6)]">
+        <div className="absolute left-0 z-[10000] mt-1 max-h-[calc(100dvh-4rem)] w-56 overflow-y-auto rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] py-1 text-xs shadow-[0_8px_24px_rgba(0,0,0,0.6)]">
           <div className="px-3 py-1.5 text-[var(--color-muted)]">
             <div className="truncate">
               {email}

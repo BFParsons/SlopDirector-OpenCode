@@ -3,31 +3,25 @@
 import { create } from "zustand";
 import { withBase } from "@/lib/basePath";
 import { PRESETS, SECTION_PRESETS, panelAllowedIn, type WorkspaceSection } from "@/config/studio-presets";
-import { SYSTEM_DEFAULT_LAYOUT } from "@/config/studio-default-layout";
-import { CASCADE_OFFSET, DEFAULT_HEIGHT, DEFAULT_WIDTH, genWindowId } from "@/lib/studio/window-utils";
+import { systemDefaultLayout } from "@/config/studio-default-layout";
+import { CASCADE_OFFSET, DEFAULT_HEIGHT, DEFAULT_WIDTH, FIT_PAD, fitLayoutToContainer, genWindowId } from "@/lib/studio/window-utils";
 import type { PanelType } from "@/types/panel";
-import type { WindowState, WorkspaceLayoutData } from "@/types/window";
+import type { WindowSize, WindowState, WorkspaceLayoutData } from "@/types/window";
 
 const LAYOUT_URL = "/api/workspace/layout";
 
-function createDefaultLayout(): WorkspaceLayoutData {
-  return {
-    version: 2,
-    nextZIndex: SYSTEM_DEFAULT_LAYOUT.nextZIndex,
-    // Fresh copies so window operations never mutate the shared constant.
-    windows: SYSTEM_DEFAULT_LAYOUT.windows.map((w) => ({ ...w, position: { ...w.position }, size: { ...w.size } })),
-  };
-}
-
-/** The hardcoded default arrangement for a section, fit to the container. Audio
- *  is the fixed `audio-studio` preset; video is the system Premiere-style layout. */
+/** The default arrangement for a section, computed for the live container.
+ *  Audio is the `audio-studio` preset; video is the system Premiere-style
+ *  layout. Both are proportional, so they fit any display. */
 function sectionDefault(section: WorkspaceSection, cw: number, ch: number): WorkspaceLayoutData {
-  if (section === "audio") return PRESETS["audio-studio"](cw, ch);
-  return createDefaultLayout();
+  const data = section === "audio" ? PRESETS["audio-studio"](cw, ch) : systemDefaultLayout(cw, ch);
+  return fitLayoutToContainer(data, cw, ch);
 }
 
 /** Drop windows that don't belong to this section, so a saved layout that mixed
- *  Audio + Video panels can't bleed across suites. Falls back to the section
+ *  Audio + Video panels can't bleed across suites, then scale/clamp the rest to
+ *  the live container (a layout saved on a bigger display shrinks to fit; one
+ *  saved here grows back on a bigger display). Falls back to the section
  *  default if nothing relevant remains. */
 function sanitizeForSection(
   data: WorkspaceLayoutData,
@@ -37,7 +31,7 @@ function sanitizeForSection(
 ): WorkspaceLayoutData {
   const windows = data.windows.filter((w) => panelAllowedIn(w.panelType, section));
   if (windows.length === 0) return sectionDefault(section, cw, ch);
-  return { version: 2, windows, nextZIndex: data.nextZIndex };
+  return fitLayoutToContainer({ version: 2, windows, nextZIndex: data.nextZIndex, container: data.container }, cw, ch);
 }
 
 function applyLayoutData(
@@ -52,6 +46,7 @@ function applyLayoutData(
     currentLayoutName: extra?.currentLayoutName ?? null,
     isDirty: extra?.isDirty ?? false,
     isReady: true,
+    fitBase: data.container ? { windows: data.windows, container: data.container } : null,
   });
 }
 
@@ -69,6 +64,11 @@ interface WorkspaceState {
   currentLayoutName: string | null;
   isDirty: boolean;
   containerSize: { width: number; height: number };
+  /** The arrangement as last loaded/applied, with the container it was fitted
+   *  to. Container resizes re-fit from THIS (not from the current, possibly
+   *  min-clamped windows), so shrinking a window and growing it back restores
+   *  the layout exactly. Cleared by any user edit (which becomes the new truth). */
+  fitBase: { windows: WindowState[]; container: WindowSize } | null;
   isReady: boolean;
   savedLayouts: SavedLayoutMeta[];
   /** Which suite this workspace is showing — keeps Audio & Video discrete. */
@@ -121,6 +121,7 @@ export const useStudioWorkspaceStore = create<WorkspaceState>((set, get) => ({
   currentLayoutName: null,
   isDirty: false,
   containerSize: { width: 0, height: 0 }, // set by the ResizeObserver before first paint
+  fitBase: null,
   isReady: false,
   savedLayouts: [],
   section: "video",
@@ -128,28 +129,31 @@ export const useStudioWorkspaceStore = create<WorkspaceState>((set, get) => ({
   addWindow: (panelType, title) => {
     const { windows, nextZIndex, containerSize } = get();
     const offset = (windows.length % 10) * CASCADE_OFFSET;
+    // Never open a new panel bigger than the workspace (small laptop screens).
+    const width = Math.max(1, Math.min(DEFAULT_WIDTH, containerSize.width - FIT_PAD * 2));
+    const height = Math.max(1, Math.min(DEFAULT_HEIGHT, containerSize.height - FIT_PAD * 2));
     const win: WindowState = {
       id: genWindowId(),
       panelType,
       title,
       position: {
-        x: Math.max(0, Math.min(40 + offset, containerSize.width - DEFAULT_WIDTH)),
-        y: Math.max(0, Math.min(40 + offset, containerSize.height - DEFAULT_HEIGHT)),
+        x: Math.max(0, Math.min(40 + offset, containerSize.width - width)),
+        y: Math.max(0, Math.min(40 + offset, containerSize.height - height)),
       },
-      size: { width: DEFAULT_WIDTH, height: DEFAULT_HEIGHT },
+      size: { width, height },
       zIndex: nextZIndex,
       isMinimized: false,
       isMaximized: false,
     };
-    set({ windows: [...windows, win], nextZIndex: nextZIndex + 1, isDirty: true });
+    set({ windows: [...windows, win], nextZIndex: nextZIndex + 1, isDirty: true, fitBase: null });
   },
 
-  closeWindow: (id) => set((s) => ({ windows: s.windows.filter((w) => w.id !== id), isDirty: true })),
+  closeWindow: (id) => set((s) => ({ windows: s.windows.filter((w) => w.id !== id), isDirty: true, fitBase: null })),
 
   minimizeWindow: (id) =>
     set((s) => ({
       windows: s.windows.map((w) => (w.id === id ? { ...w, isMinimized: true } : w)),
-      isDirty: true,
+      isDirty: true, fitBase: null,
     })),
 
   maximizeWindow: (id) =>
@@ -167,7 +171,7 @@ export const useStudioWorkspaceStore = create<WorkspaceState>((set, get) => ({
           : w,
       ),
       nextZIndex: s.nextZIndex + 1,
-      isDirty: true,
+      isDirty: true, fitBase: null,
     })),
 
   restoreWindow: (id) =>
@@ -188,7 +192,7 @@ export const useStudioWorkspaceStore = create<WorkspaceState>((set, get) => ({
         return { ...w, zIndex: s.nextZIndex };
       }),
       nextZIndex: s.nextZIndex + 1,
-      isDirty: true,
+      isDirty: true, fitBase: null,
     })),
 
   bringToFront: (id) => {
@@ -204,13 +208,13 @@ export const useStudioWorkspaceStore = create<WorkspaceState>((set, get) => ({
   updateWindowPosition: (id, x, y) =>
     set((s) => ({
       windows: s.windows.map((w) => (w.id === id ? { ...w, position: { x, y } } : w)),
-      isDirty: true,
+      isDirty: true, fitBase: null,
     })),
 
   updateWindowSize: (id, width, height) =>
     set((s) => ({
       windows: s.windows.map((w) => (w.id === id ? { ...w, size: { width, height } } : w)),
-      isDirty: true,
+      isDirty: true, fitBase: null,
     })),
 
   resetWindowPosition: (id) =>
@@ -227,7 +231,7 @@ export const useStudioWorkspaceStore = create<WorkspaceState>((set, get) => ({
             : w,
         ),
         nextZIndex: nextZIndex + 1,
-        isDirty: true,
+        isDirty: true, fitBase: null,
       };
     }),
 
@@ -260,7 +264,7 @@ export const useStudioWorkspaceStore = create<WorkspaceState>((set, get) => ({
           zIndex: s.nextZIndex + idx,
         };
       });
-      return { windows: arranged, nextZIndex: s.nextZIndex + visible.length, isDirty: true };
+      return { windows: arranged, nextZIndex: s.nextZIndex + visible.length, isDirty: true, fitBase: null };
     }),
 
   enterSection: async (section) => {
@@ -285,8 +289,13 @@ export const useStudioWorkspaceStore = create<WorkspaceState>((set, get) => ({
     const { containerSize } = get();
     const factory = PRESETS[preset];
     if (!factory) return;
-    const data = factory(containerSize.width, containerSize.height);
-    set({ windows: data.windows, nextZIndex: data.nextZIndex, isDirty: true });
+    const data = fitLayoutToContainer(factory(containerSize.width, containerSize.height), containerSize.width, containerSize.height);
+    set({
+      windows: data.windows,
+      nextZIndex: data.nextZIndex,
+      isDirty: true,
+      fitBase: data.container ? { windows: data.windows, container: data.container } : null,
+    });
   },
 
   getPresetNames: () => (SECTION_PRESETS[get().section] ?? []).filter((p) => p in PRESETS),
@@ -294,15 +303,51 @@ export const useStudioWorkspaceStore = create<WorkspaceState>((set, get) => ({
   resetLayout: () => {
     const { section, containerSize } = get();
     const data = sectionDefault(section, containerSize.width, containerSize.height);
-    set({ windows: data.windows, nextZIndex: data.nextZIndex, isDirty: true });
+    set({
+      windows: data.windows,
+      nextZIndex: data.nextZIndex,
+      isDirty: true,
+      fitBase: data.container ? { windows: data.windows, container: data.container } : null,
+    });
   },
 
   setDirty: (dirty) => set({ isDirty: dirty }),
-  setContainerSize: (width, height) => set({ containerSize: { width, height } }),
+
+  // The workspace container follows the app window (on a tiling compositor the
+  // tile can change size at any time). Scale the current arrangement with it so
+  // panels never end up off-screen — the same proportional fit a saved layout
+  // gets on load. Not a user edit, so it doesn't mark the layout dirty.
+  setContainerSize: (width, height) =>
+    set((s) => {
+      const prev = s.containerSize;
+      if (prev.width === width && prev.height === height) return s;
+      const measured = width >= 2 && height >= 2;
+      const hadSize = prev.width >= 2 && prev.height >= 2;
+      if (!s.isReady || !measured || !hadSize || s.windows.length === 0) {
+        return { containerSize: { width, height } };
+      }
+      // Re-fit from the last loaded/applied arrangement when the user hasn't
+      // edited since (see fitBase); otherwise from the current windows.
+      const base =
+        s.fitBase && s.fitBase.container.width >= 2 && s.fitBase.container.height >= 2
+          ? s.fitBase
+          : { windows: s.windows, container: prev };
+      const fitted = fitLayoutToContainer(
+        { version: 2, windows: base.windows, nextZIndex: s.nextZIndex, container: base.container },
+        width,
+        height,
+      );
+      // Keep the live z-order (bringToFront doesn't touch fitBase).
+      const z = new Map(s.windows.map((w) => [w.id, w.zIndex]));
+      const windows = fitted.windows.map((w) => ({ ...w, zIndex: z.get(w.id) ?? w.zIndex }));
+      return { containerSize: { width, height }, windows };
+    }),
 
   toLayoutData: (): WorkspaceLayoutData => {
-    const { windows, nextZIndex } = get();
-    return { version: 2, windows, nextZIndex };
+    const { windows, nextZIndex, containerSize } = get();
+    const measured = containerSize.width >= 2 && containerSize.height >= 2;
+    // Stamp the authoring size so the layout can be rescaled on other displays.
+    return { version: 2, windows, nextZIndex, ...(measured ? { container: { ...containerSize } } : {}) };
   },
 
   saveLayout: async () => {

@@ -68,15 +68,15 @@ export function SaveMenu() {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-1.5 rounded-md border border-[var(--color-border)] px-2.5 py-1.5 text-xs text-[var(--color-muted)] transition-colors hover:text-[var(--color-fg)]"
+        className="flex items-center gap-1.5 whitespace-nowrap rounded-md border border-[var(--color-border)] px-2.5 py-1.5 text-xs text-[var(--color-muted)] transition-colors hover:text-[var(--color-fg)]"
         title="Workspaces"
       >
-        <span>⊞ {currentLayoutName ?? "Workspace"}</span>
+        <span>⊞<span className="max-md:hidden"> {currentLayoutName ?? "Workspace"}</span></span>
         {isDirty ? <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-warning)]" title="Unsaved changes" /> : null}
       </button>
 
       {open ? (
-        <div className="absolute right-0 z-[10000] mt-1 w-64 overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] py-1 text-xs shadow-[0_8px_24px_rgba(0,0,0,0.6)]">
+        <div className="absolute right-0 z-[10000] mt-1 max-h-[calc(100dvh-4rem)] w-64 overflow-y-auto rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] py-1 text-xs shadow-[0_8px_24px_rgba(0,0,0,0.6)]">
           {layoutId ? (
             <button type="button" className={item} onClick={() => { void saveLayout(); close(); }}>
               💾 Save changes{currentLayoutName ? ` to “${currentLayoutName}”` : ""}

@@ -76,7 +76,7 @@ export function NewAssemblyCard({ accent }: { accent: string }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="squish-card group relative flex flex-col items-center overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-6 text-center"
+        className="squish-card group relative flex flex-col items-center overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-6 text-center short:p-4"
       >
         <span aria-hidden className="squish-bar pointer-events-none absolute inset-x-0 top-0 h-1" style={{ background: accent }} />
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -84,9 +84,9 @@ export function NewAssemblyCard({ accent }: { accent: string }) {
           src={withBase("/slop/videoslop.png")}
           alt=""
           aria-hidden
-          className="squish-icon mb-3 h-20 w-auto object-contain drop-shadow"
+          className="squish-icon mb-3 h-20 w-auto object-contain drop-shadow short:mb-2 short:h-14"
         />
-        <h2 className="squish-title text-lg font-semibold">Assembly</h2>
+        <h2 className="squish-title text-lg font-semibold short:text-base">Assembly</h2>
       </button>
 
       {open ? (

@@ -4,26 +4,28 @@ import { Input, Label, Select } from "@/components/ui";
 import type { Draft } from "@/lib/projects/draft";
 import { WatermarkControl } from "./WatermarkControl";
 
+// Short labels on purpose: a closed <select> shows only ~12 characters in a
+// narrow panel, so parenthetical descriptions were just truncated noise.
 const COLOR_LOOKS: { value: string; label: string }[] = [
-  { value: "NONE", label: "None (as shot)" },
+  { value: "NONE", label: "None" },
   { value: "WARM", label: "Warm" },
   { value: "COOL", label: "Cool" },
   { value: "BW", label: "Black & white" },
   { value: "VINTAGE", label: "Vintage" },
-  { value: "PUNCH", label: "Punch (high contrast)" },
-  { value: "TEAL_ORANGE", label: "Teal & orange (cinematic)" },
-  { value: "NOIR", label: "Noir (hard B&W)" },
-  { value: "CAMPAIGN", label: "Campaign (warm patriotic)" },
-  { value: "BLEACH", label: "Bleach bypass (gritty)" },
+  { value: "PUNCH", label: "Punch" },
+  { value: "TEAL_ORANGE", label: "Teal & orange" },
+  { value: "NOIR", label: "Noir" },
+  { value: "CAMPAIGN", label: "Campaign" },
+  { value: "BLEACH", label: "Bleach bypass" },
 ];
 
 const FILL_MODES: { value: string; label: string }[] = [
-  { value: "LETTERBOX", label: "Letterbox (black bars)" },
-  { value: "BLUR_FILL", label: "Blur fill (no bars)" },
+  { value: "LETTERBOX", label: "Letterbox" },
+  { value: "BLUR_FILL", label: "Blur fill" },
 ];
 
 const TRANSITIONS: { value: string; label: string }[] = [
-  { value: "NONE", label: "Hard cut (none)" },
+  { value: "NONE", label: "Hard cut" },
   { value: "CROSSFADE", label: "Crossfade" },
   { value: "DISSOLVE", label: "Dissolve" },
   { value: "FADE_BLACK", label: "Fade through black" },

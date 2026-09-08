@@ -1,3 +1,4 @@
+import { panelMin } from "@/config/panel-min-sizes";
 import type { WorkspaceLayoutData } from "@/types/window";
 
 /** The one saved workspace that can never be deleted — it's the user's
@@ -6,20 +7,48 @@ import type { WorkspaceLayoutData } from "@/types/window";
 export const PROTECTED_LAYOUT_NAME = "Default Workspace";
 
 /**
- * System default Studio arrangement — a Premiere-style layout: a tall media/visual
- * column on the left, the program Monitor over the Timeline in the center, and the
- * finishing tools (Audio / Polish / Text) stacked on the right. Fixed pixel sizes
- * (tuned for ~1366-wide); the ResizeObserver + `bounds="parent"` keep everything
- * draggable on smaller screens, and the presets recompute to the real size.
+ * System default Studio arrangement — the startup workspace when a user opens a
+ * project: the **Program Monitor** across the top of the main area, the
+ * **Timeline** below it, and the **Media Bucket** as a full-height column on
+ * the right. (Chosen by the user on 2026-09-08 as the standard startup
+ * workspace; other panels are a click away in "+ Panel".)
+ *
+ * Computed from the live workspace size (`cw`×`ch`) so the same arrangement fits
+ * any display — from a 1080p laptop at 2× scale (~936×448 workspace) up to a
+ * wide monitor — instead of fixed pixels tuned for one screen. The bucket column
+ * and the rows never shrink below their panels' minimums (the main area takes
+ * the remainder), so nothing renders off-screen. The `sys-*` ids are stable so a
+ * seeded default can be recognised later.
  */
-export const SYSTEM_DEFAULT_LAYOUT: WorkspaceLayoutData = {
-  version: 2,
-  nextZIndex: 7,
-  windows: [
-    { id: "sys-visual", panelType: "visual", title: "Visual / Media", position: { x: 8, y: 8 }, size: { width: 340, height: 760 }, zIndex: 1, isMinimized: false, isMaximized: false },
-    { id: "sys-monitor", panelType: "monitor", title: "Program Monitor", position: { x: 356, y: 8 }, size: { width: 600, height: 400 }, zIndex: 6, isMinimized: false, isMaximized: false },
-    { id: "sys-timeline", panelType: "timeline", title: "Timeline", position: { x: 356, y: 416 }, size: { width: 600, height: 352 }, zIndex: 5, isMinimized: false, isMaximized: false },
-    { id: "sys-polish", panelType: "polish", title: "Polish", position: { x: 964, y: 266 }, size: { width: 360, height: 290 }, zIndex: 3, isMinimized: false, isMaximized: false },
-    { id: "sys-text", panelType: "text-overlays", title: "Text Overlays", position: { x: 964, y: 564 }, size: { width: 360, height: 204 }, zIndex: 4, isMinimized: false, isMaximized: false },
-  ],
-};
+export function systemDefaultLayout(cw: number, ch: number): WorkspaceLayoutData {
+  const g = 8; // gutter
+  const bucketW = Math.max(Math.round(cw * 0.28), panelMin("media-bucket").width);
+  const mainW = Math.max(cw - g * 3 - bucketW, panelMin("monitor").width, panelMin("timeline").width);
+  const bucketX = g + mainW + g;
+  const monitorH = Math.max(Math.round(ch * 0.58), panelMin("monitor").height);
+  const timelineY = g + monitorH + g;
+  const timelineH = Math.max(ch - timelineY - g, panelMin("timeline").height);
+  const fullH = Math.max(ch - g * 2, panelMin("media-bucket").height);
+
+  const win = (
+    id: string,
+    panelType: WorkspaceLayoutData["windows"][number]["panelType"],
+    title: string,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    zIndex: number,
+  ) => ({ id, panelType, title, position: { x, y }, size: { width, height }, zIndex, isMinimized: false, isMaximized: false });
+
+  return {
+    version: 2,
+    nextZIndex: 4,
+    container: { width: cw, height: ch },
+    windows: [
+      win("sys-monitor", "monitor", "Program Monitor", g, g, mainW, monitorH, 3),
+      win("sys-timeline", "timeline", "Timeline", g, timelineY, mainW, timelineH, 2),
+      win("sys-bucket", "media-bucket", "Media Bucket", bucketX, g, bucketW, fullH, 1),
+    ],
+  };
+}

@@ -25,10 +25,17 @@ const windowSchema = z.object({
     .optional(),
 });
 
+const containerSchema = z.object({
+  width: z.number().min(1).max(20_000),
+  height: z.number().min(1).max(20_000),
+});
+
 export const workspaceLayoutDataSchema = z.object({
   version: z.literal(2),
   windows: z.array(windowSchema).max(40),
   nextZIndex: z.number().int().min(0).max(1_000_000),
+  // Authoring workspace size (optional; legacy layouts lack it).
+  container: containerSchema.optional(),
 });
 
 export const putLayoutSchema = z

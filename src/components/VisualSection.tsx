@@ -190,8 +190,8 @@ export function VisualSection({
           : { text: `${delta.toFixed(1)}s longer than voiceover`, color: "var(--color-warning)" };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 short:space-y-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h2 className="text-sm font-semibold">Visual track</h2>
           <p className="text-xs text-[var(--color-muted)]">
@@ -361,9 +361,11 @@ function AddTile({
       title={title}
       disabled={disabled}
       onClick={onClick}
-      className="flex w-14 flex-col items-center justify-center gap-0.5 rounded-md border border-[var(--color-border)] px-1 py-1.5 text-[10px] text-[var(--color-muted)] transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-fg)] disabled:cursor-not-allowed disabled:opacity-40"
+      // Square icon-over-label tiles; on short viewports they collapse into
+      // icon+label pills (~half the height) so the row fits a narrow panel.
+      className="flex w-14 flex-col items-center justify-center gap-0.5 whitespace-nowrap rounded-md border border-[var(--color-border)] px-1 py-1.5 text-[10px] text-[var(--color-muted)] transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-fg)] disabled:cursor-not-allowed disabled:opacity-40 short:h-7 short:w-auto short:flex-row short:gap-1.5 short:px-2 short:py-0"
     >
-      <span className="flex h-[18px] items-center justify-center text-base leading-none">{icon}</span>
+      <span className="flex h-[18px] items-center justify-center text-base leading-none short:h-auto short:text-sm">{icon}</span>
       <span className="truncate">{label}</span>
     </button>
   );

@@ -1,5 +1,21 @@
 @import "tailwindcss";
 
+/* Short viewports (e.g. a 1080p laptop at 2x scale = 490px tall). Lets the
+   start screen tighten spacing so the hero + option cards fit without scroll. */
+@custom-variant short (@media (max-height: 640px));
+
+/* Compact density on short viewports. Tailwind's type + spacing scale is
+   rem-based (text-xs … text-lg, p-*, gap-*, h-*), so shrinking the root
+   font-size tightens the whole UI ~19% in one place — labels in buttons and
+   selects, paddings, toolbar height — without touching components. Hand-tuned
+   px sizes (text-[10px] etc. in the timeline) are already tiny and unaffected.
+   At 2× display scale 13px is still 26 device px, so it stays legible. */
+@media (max-height: 640px) {
+  html {
+    font-size: 13px;
+  }
+}
+
 @theme {
   --color-bg: #0b0d12;
   --color-surface: #12151c;

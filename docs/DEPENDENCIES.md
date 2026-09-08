@@ -20,7 +20,7 @@ app runs fine without it).
 
 | Tool | Version used here | Notes |
 |---|---|---|
-| **Node.js** | v20.19 (works on 20 or 22) | LTS |
+| **Node.js** | v22 (works on 20 or 22; **not 26** — see Omarchy section) | LTS; pinned in `mise.toml` |
 | **pnpm** | 10.33.0 | `packageManager` is pinned in `package.json`; use `corepack enable` to get the exact version |
 | **Git** | any | |
 
@@ -176,6 +176,49 @@ pnpm db:generate       # IMPORTANT: restore the Postgres client afterwards for w
 
 ---
 
+## Omarchy / Arch Linux setup (desktop-target dev, no Postgres)
+
+Dev moved to an **Omarchy** laptop (Arch Linux + Hyprland, Intel iGPU) in 2026-09.
+What differs from the Debian/Windows notes above:
+
+- **Toolchain via mise.** `mise.toml` pins **Node 22** + pnpm 10.33.0 and mise
+  activates them on `cd` (on a fresh clone: `mise trust && mise install`). Do **not**
+  use Node ≥ 26: Electron's postinstall (extract-zip/yauzl) silently fails to unpack
+  the binary, `node_modules/electron/dist` ends up holding only `locales/`, and launch
+  dies with *"Electron failed to install correctly"*. Fix: switch to 22, then
+  `pnpm rebuild electron`.
+- **No Postgres needed.** `.env` runs the **desktop target in dev**:
+  `SLOPSTUDIO_DB=sqlite`, `DATABASE_URL=file:<repo>/.data/slopstudio.db`,
+  `SLOPSTUDIO_DESKTOP=1` (single local user, no login screen), `WORKER_ENABLED=true`.
+  First boot creates the schema from `prisma/desktop-schema.sql` and seeds
+  `admin@slopstudio.local` / `slopstudio`. The `.env` only works with the SQLite client:
+  run `pnpm db:sqlite:generate` after `pnpm install`. The `prisma:error … duplicate
+  column name` lines on every boot are the forward migrations in
+  `src/lib/db/bootstrap.ts` probing columns that already exist — harmless.
+- **Postgres (web target) still works** if you want it: `sudo pacman -S postgresql`,
+  then `scripts/pg.sh init` (auto-detects Arch's `/usr/bin`; creates the `spotforge`
+  role + `slopstudio_pro` DB on :5434), point `DATABASE_URL` at
+  `postgresql://spotforge:spotforge_dev@localhost:5434/slopstudio_pro`, unset
+  `SLOPSTUDIO_DB`, and `pnpm db:generate && pnpm exec prisma db push`.
+- **ffmpeg** — Arch's `ffmpeg` 9.x with **VAAPI + QSV** (`intel-media-driver`); the
+  capability probe validates and picks VAAPI (`[worker] … encode VAAPI (GPU)`).
+- **yt-dlp + Deno** — pacman packages, on PATH.
+- **Audio Studio** — Python 3.14 venv at `~/.slopstudio-py` using the **CPU** wheel
+  index (`pip install torch torchaudio torchcodec --index-url
+  https://download.pytorch.org/whl/cpu`, then `pip install demucs openai-whisper`);
+  ~2.2 GB. Wired via `SLOPSTUDIO_PYTHON` in `.env`. Verified: torch 2.14 / torchaudio
+  2.11 / torchcodec 0.16 / demucs 4.1 / openai-whisper.
+- **Launcher** — `scripts/launch-desktop.sh` (Linux port of `launch-desktop.ps1`)
+  activates mise, clears a stale :3000 server, and runs `pnpm desktop:dev`.
+  `~/.local/share/applications/slopstudio-pro.desktop` puts **SlopStudio Pro** in the
+  Omarchy app menu. Electron opens a native Wayland window
+  (`ELECTRON_OZONE_PLATFORM_HINT=wayland` is set by Omarchy's Hyprland env).
+- **`.npmrc`** — the Windows-only `script-shell=C:\PROGRA~1\Git\bin\bash.exe` line was
+  removed from the repo (it made every `pnpm <script>` fail on Linux with ENOENT).
+  Windows devs set it in their **user** `%USERPROFILE%\.npmrc` instead — see Option B.
+
+---
+
 ## Windows setup
 
 The codebase is portable Node/TypeScript and runs on Windows, **but a few pieces are
@@ -206,7 +249,12 @@ What changes vs. Linux:
    is still required** for saving. Set `SLOPSTUDIO_PYTHON` to your `python.exe` /
    venv if `python3` isn't on PATH (on Windows the launcher is usually `py` or
    `python`).
-5. **Desktop build for Windows** — the AppImage target is Linux-only. To make a Windows
+5. **pnpm scripts use Unix shell syntax** (inline env vars, `rm -rf`, `&&`). Put
+   `script-shell=C:\PROGRA~1\Git\bin\bash.exe` in your **user** `%USERPROFILE%\.npmrc`
+   (8.3 short path avoids the space in "Program Files"). It is deliberately *not*
+   in the repo `.npmrc` any more — a project-level value can't be overridden and
+   broke every script on Linux.
+6. **Desktop build for Windows** — the AppImage target is Linux-only. To make a Windows
    build you'd add an electron-builder **`win` target** (NSIS or portable), and:
    - bundle **Windows** ffmpeg/ffprobe `.exe` (the `vendor/ffmpeg` binaries are Linux
      ELF — `scripts/fetch-ffmpeg.sh` would need a Windows branch),

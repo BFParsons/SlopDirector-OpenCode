@@ -3,6 +3,68 @@
 Notable changes, newest first. See [DEPENDENCIES.md](DEPENDENCIES.md) for setup and
 [AUDIO_STUDIO.md](AUDIO_STUDIO.md) for the audio workspace.
 
+## 2026-09 — Omarchy (Arch + Hyprland) dev setup
+
+- **Dev box moved to Omarchy.** Repo ported to run on Arch/Hyprland; details in
+  [DEPENDENCIES.md → Omarchy / Arch Linux setup](DEPENDENCIES.md#omarchy--arch-linux-setup-desktop-target-dev-no-postgres).
+- **`mise.toml`** pins Node 22 + pnpm 10.33.0. Node 26 breaks Electron's postinstall
+  (binary never unpacks → "Electron failed to install correctly").
+- **Dev runs the desktop target on SQLite** (`SLOPSTUDIO_DB=sqlite`, `SLOPSTUDIO_DESKTOP=1`
+  in `.env`) — no Postgres server required for local work.
+- **`scripts/pg.sh`** auto-detects the Postgres binaries (Arch `/usr/bin` or Debian
+  `/usr/lib/postgresql/<ver>/bin`), gains an `init` step (cluster + role +
+  `slopstudio_pro` DB), and its `psql` shortcut targets `slopstudio_pro`.
+- **`scripts/launch-desktop.sh`** — Linux port of the PowerShell launcher, plus an XDG
+  `.desktop` entry so **SlopStudio Pro** shows in the app menu.
+- **Start screen fits short displays.** The hero (CinemaBot + marquee logo) now flexes
+  into whatever height is left above the option cards (capped at its 28rem design
+  size) instead of a fixed 28rem that pushed the cards below the fold on a 1080p
+  laptop at 2x scale (~936×490 CSS px). Cards are four-across from `md` up and use a
+  new Tailwind `short:` variant (`max-height: 640px`) for tighter padding/icons.
+- **Electron window fits tiling compositors.** The default size now follows the
+  display work area (`screen.getPrimaryDisplay()`), and the *minimum* dropped from
+  1024×640 to 480×320. On Hyprland the tile can be smaller than the declared minimum;
+  Chromium then renders at the minimum and the compositor crops the surface, which is
+  why the bottom/right of the UI was cut off on a 960×540 logical screen.
+- **Studio panels fit small displays.** Panel *minimum* sizes (now in one place,
+  `src/config/panel-min-sizes.ts`, shared by PanelRegistry and the layout math) were
+  roughly halved (e.g. Monitor 480×320 → 280×180, Timeline 560×220 → 320×140) so a
+  full layout fits a ~936×411 workspace. The system video default and the Audio
+  Studio default are now **proportional** to the live workspace instead of fixed
+  pixels tuned for 1366- and 2100-wide screens (which put the Audio Studio's right-hand
+  panels off-screen on a laptop). New `fitLayoutToContainer` (window-utils) scales a
+  layout by the `container` size it was authored at (a new optional field stamped on
+  every save) and clamps everything on-screen; it runs on load, on preset/reset, and
+  whenever the workspace container resizes (e.g. the Hyprland tile changes). Legacy
+  layouts without `container` are clamped only. The defaults allocate side columns and
+  rows no smaller than their panels' minimums (the flexible centre absorbs the rest), so
+  the seven-panel Audio Studio fits a laptop workspace without spilling off-screen.
+- **Compact density on short viewports.** Under 640px tall the root font-size drops to
+  13px, which shrinks Tailwind's rem-based type/spacing (button + select labels, paddings,
+  toolbar) ~19% app-wide. Plus targeted trims: button labels never wrap (`Button` base +
+  the toolbar menus — a wrapped "+ Panel" used to double the toolbar height), the toolbar
+  title shrinks first, the Visual panel's add-media tiles become icon+label pills on
+  short screens, form `Label` hints move into tooltips, and Next's dev badge is off
+  (`devIndicators: false`).
+- **Electron: reload/close no longer silently ignored.** The editor's `beforeunload`
+  guard (unsaved/unnamed project) made Electron cancel reloads, navigations and window
+  closes with no prompt at all; `electron/main.js` now handles `will-prevent-unload`
+  with a native Leave/Stay dialog.
+- **Narrow windows.** Below the `md` breakpoint (a half-width Hyprland tile) the
+  toolbar collapses button labels to icons and hides the title so it fits without
+  overlapping itself. Container resizes re-fit the layout from the last loaded/applied
+  arrangement (`fitBase`), so shrinking a window and growing it back restores the
+  layout exactly even when panels were pinned at their minimums in between.
+- **New startup workspace (Assembly).** The system default is now three panels:
+  Program Monitor across the top of the main area, Timeline below it, Media Bucket as a
+  full-height column on the right (`studio-default-layout.ts`). Everything else is
+  available from "+ Panel".
+- **Toolbar menus fit the window.** The "+ Panel", Workspace and File dropdowns are
+  capped to the viewport height and scroll past it; on short screens the panel launcher
+  becomes two columns (Audio on the right) so all 18 panels show without scrolling.
+- **`.npmrc`**: removed the Windows-only `script-shell` line (broke all pnpm scripts on
+  Linux); Windows devs set it in their user-level `.npmrc`.
+
 ## 2026-06 — Unified timeline, portable project bundles, start-screen redesign
 
 ### Unified timeline — video + audio on one multi-layer timeline ([TIMELINE.md](TIMELINE.md))

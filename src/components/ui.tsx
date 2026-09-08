@@ -13,7 +13,7 @@ export function Button({
   variant?: "primary" | "ghost" | "danger";
 }) {
   const base =
-    "inline-flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold ease-spring will-change-transform " +
+    "inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-semibold ease-spring will-change-transform " +
     "hover:scale-[1.05] hover:-translate-y-0.5 " +
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)] " +
     "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:scale-100 disabled:active:scale-100";
@@ -34,7 +34,7 @@ export function Input({
 }: InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input
-      className={`w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-2.5 py-1.5 text-xs outline-none transition duration-150 ease-out-soft hover:border-[#39414f] focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/30 ${className}`}
+      className={`w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-2.5 py-1.5 text-xs outline-none short:px-1.5 short:py-1 transition duration-150 ease-out-soft hover:border-[#39414f] focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/30 ${className}`}
       {...props}
     />
   );
@@ -46,7 +46,7 @@ export function Textarea({
 }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
   return (
     <textarea
-      className={`w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-2.5 py-1.5 text-xs outline-none transition duration-150 ease-out-soft hover:border-[#39414f] focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/30 ${className}`}
+      className={`w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-2.5 py-1.5 text-xs outline-none short:px-1.5 short:py-1 transition duration-150 ease-out-soft hover:border-[#39414f] focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/30 ${className}`}
       {...props}
     />
   );
@@ -58,7 +58,7 @@ export function Select({
 }: SelectHTMLAttributes<HTMLSelectElement>) {
   return (
     <select
-      className={`w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-2.5 py-1.5 text-xs outline-none transition duration-150 ease-out-soft hover:border-[#39414f] focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/30 ${className}`}
+      className={`w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-2.5 py-1.5 text-xs outline-none short:px-1.5 short:py-1 transition duration-150 ease-out-soft hover:border-[#39414f] focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/30 ${className}`}
       {...props}
     />
   );
@@ -72,9 +72,11 @@ export function Label({
   hint?: string;
 }) {
   return (
-    <label className="block text-xs font-medium text-[var(--color-muted)] mb-1">
+    // On short viewports the hint moves into a tooltip so narrow panels don't
+    // spend three lines of height on helper text.
+    <label className="block text-xs font-medium text-[var(--color-muted)] mb-1" title={hint}>
       {children}
-      {hint ? <span className="ml-2 font-normal opacity-70">{hint}</span> : null}
+      {hint ? <span className="ml-2 font-normal opacity-70 short:hidden">{hint}</span> : null}
     </label>
   );
 }

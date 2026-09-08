@@ -254,10 +254,16 @@ Prisma + Postgres (`prisma/schema.prisma`). Key models:
 
 ## Local development
 
-No-sudo dev box uses a **user-owned Postgres** on port **5434**:
+> **Omarchy / Arch (current dev box):** no Postgres needed — the desktop target runs
+> in dev on embedded SQLite. Node 22 is pinned via `mise.toml`. Launch with
+> `scripts/launch-desktop.sh` or the **SlopStudio Pro** app-menu entry. Details:
+> [`docs/DEPENDENCIES.md`](docs/DEPENDENCIES.md#omarchy--arch-linux-setup-desktop-target-dev-no-postgres).
+
+No-sudo Debian dev box uses a **user-owned Postgres** on port **5434**:
 
 ```bash
-scripts/pg.sh start          # initdb in .data/pg, port 5434 (DATABASE_URL points here)
+scripts/pg.sh init           # once: initdb in .data/pg + role + DB, port 5434
+scripts/pg.sh start          # later boots (DATABASE_URL points here)
 # put your key in .env:  OPENROUTER_API_KEY="sk-or-..."
 pnpm install
 pnpm db:migrate

@@ -48,7 +48,7 @@ export function NewStoryboardCard({ accent }: { accent: string }) {
       type="button"
       onClick={start}
       disabled={busy}
-      className="squish-card group relative flex flex-col items-center overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-6 text-center disabled:opacity-70"
+      className="squish-card group relative flex flex-col items-center overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-6 text-center short:p-4 disabled:opacity-70"
     >
       <span
         aria-hidden
@@ -60,9 +60,9 @@ export function NewStoryboardCard({ accent }: { accent: string }) {
         src={withBase("/slop/assembleslop.png")}
         alt=""
         aria-hidden
-        className="squish-icon mb-3 h-20 w-auto object-contain drop-shadow"
+        className="squish-icon mb-3 h-20 w-auto object-contain drop-shadow short:mb-2 short:h-14"
       />
-      <h2 className="squish-title text-lg font-semibold">Storyboard</h2>
+      <h2 className="squish-title text-lg font-semibold short:text-base">Storyboard</h2>
       {busy ? (
         <span className="mt-4 text-sm font-medium" style={{ color: accent }}>
           Creating…
