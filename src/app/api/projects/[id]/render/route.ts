@@ -11,6 +11,7 @@ import {
 } from "@/lib/jobs/orchestrator";
 import { getOwnedProject } from "@/lib/projects/access";
 import { exportFormats } from "@/lib/system/capabilities";
+import { notifyProjectChanged } from "@/lib/projects/changed";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -100,6 +101,16 @@ export async function POST(_req: Request, { params }: Ctx) {
     if (!RENDERABLE.has(project.status)) {
       return err(`Cannot render while ${project.status}`, 409);
     }
+    // Optional body { draft: true } → low-res preview of what exists now.
+    let draft = false;
+    const raw = await _req.text().catch(() => "");
+    if (raw.trim()) {
+      try {
+        draft = (JSON.parse(raw) as { draft?: unknown }).draft === true;
+      } catch {
+        return err("Invalid JSON body", 400);
+      }
+    }
 
     const segments = await prisma.segment.findMany({
       where: { projectId: id },
@@ -107,6 +118,18 @@ export async function POST(_req: Request, { params }: Ctx) {
     });
     if (segments.length === 0) {
       return err("Add at least one visual segment before rendering", 400);
+    }
+    if (draft) {
+      if (segments.some((s) => aiSegmentNeedsRender(s))) {
+        return err("Draft previews only assemble existing media — run a full render to generate AI clips first", 400);
+      }
+      const vo = await prisma.voiceoverAsset.findUnique({ where: { projectId: id } });
+      if (project.audioMode !== "NONE" && !vo?.assetId) {
+        return err("Draft previews need an existing voiceover (or audioMode NONE)", 400);
+      }
+      await startRender(id, { draft: true });
+      notifyProjectChanged(id, _req, { reason: "draft" });
+      return ok({ ok: true, draft: true });
     }
     // A YouTube import that hasn't produced its file yet (in flight or failed)
     // would assemble to nothing — make the user resolve it first.
@@ -182,6 +205,7 @@ export async function POST(_req: Request, { params }: Ctx) {
     });
 
     await startRender(id);
+    notifyProjectChanged(id, _req);
     return ok({ ok: true, estCostCents: cost.totalCents });
   } catch (e) {
     return handleApiError(e);

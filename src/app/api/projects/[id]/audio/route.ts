@@ -7,6 +7,7 @@ import { handleApiError } from "@/lib/http/handleError";
 import { err, ok } from "@/lib/http/response";
 import { getOwnedProject } from "@/lib/projects/access";
 import { projectSnapshot } from "@/lib/projects/serialize";
+import { notifyProjectChanged } from "@/lib/projects/changed";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -72,6 +73,8 @@ export async function POST(request: Request, { params }: Ctx) {
       data: { audioMode: "UPLOAD_AUDIO" },
     });
 
+    notifyProjectChanged(id, request);
+
     return ok(await projectSnapshot(id));
   } catch (e) {
     return handleApiError(e);
@@ -89,6 +92,7 @@ export async function DELETE(_req: Request, { params }: Ctx) {
     }
     await prisma.voiceoverAsset.deleteMany({ where: { projectId: id } });
     await prisma.project.update({ where: { id }, data: { audioMode: "NONE" } });
+    notifyProjectChanged(id, _req);
     return ok(await projectSnapshot(id));
   } catch (e) {
     return handleApiError(e);

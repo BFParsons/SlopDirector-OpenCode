@@ -4,6 +4,7 @@ import { handleApiError } from "@/lib/http/handleError";
 import { err, ok } from "@/lib/http/response";
 import { getOwnedProject } from "@/lib/projects/access";
 import { projectSnapshot } from "@/lib/projects/serialize";
+import { notifyProjectChanged } from "@/lib/projects/changed";
 
 type Ctx = { params: Promise<{ id: string; overlayId: string }> };
 
@@ -22,6 +23,8 @@ export async function DELETE(_req: Request, { params }: Ctx) {
       where: { id: overlayId, projectId: id },
     });
     if (deleted.count === 0) return err("Audio overlay not found", 404);
+
+    notifyProjectChanged(id, _req);
 
     return ok(await projectSnapshot(id));
   } catch (e) {

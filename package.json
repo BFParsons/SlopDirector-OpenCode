@@ -27,6 +27,8 @@
     "desktop:standalone": "rm -rf dist .next/standalone && pnpm db:sqlite:generate && next build && node scripts/postbuild-standalone.mjs",
     "desktop:build": "pnpm desktop:standalone && bash scripts/fetch-ffmpeg.sh && electron-builder --linux AppImage",
     "test:e2e": "playwright test",
+    "test:eval": "tsx tests/eval/run.ts",
+    "serve:headless": "bash scripts/serve-headless.sh",
     "test:e2e:ui": "playwright test --ui",
     "desktop:prod": "bash scripts/launch-desktop.sh --prod"
   },

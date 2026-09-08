@@ -7,6 +7,7 @@ import { getOwnedProject } from "@/lib/projects/access";
 import { projectSnapshot } from "@/lib/projects/serialize";
 import { writeProjectManifest } from "@/lib/projects/bundle";
 import { patchProjectSchema } from "@/lib/validation/project";
+import { notifyProjectChanged } from "@/lib/projects/changed";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -173,6 +174,7 @@ export async function PATCH(request: Request, { params }: Ctx) {
     const snapshot = await projectSnapshot(id);
     // Keep the portable project.json in sync with this save (no-op if legacy).
     await writeProjectManifest(id).catch(() => {});
+    notifyProjectChanged(id, request);
     return ok(snapshot);
   } catch (e) {
     return handleApiError(e);
@@ -188,6 +190,7 @@ export async function DELETE(_req: Request, { params }: Ctx) {
       where: { id },
       data: { deletedAt: new Date() },
     });
+    notifyProjectChanged(id, _req);
     return ok({ ok: true });
   } catch (e) {
     return handleApiError(e);

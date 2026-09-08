@@ -13,6 +13,7 @@ import { keyForProject } from "@/lib/openrouter/userKey";
 import { getOwnedProject } from "@/lib/projects/access";
 import { projectSnapshot } from "@/lib/projects/serialize";
 import { generateVoiceoverSchema } from "@/lib/validation/project";
+import { notifyProjectChanged } from "@/lib/projects/changed";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -80,6 +81,8 @@ export async function POST(request: Request, { params }: Ctx) {
         library: true, // lands in the Media Bucket, not the timeline
       },
     });
+
+    notifyProjectChanged(id, request);
 
     return ok(await projectSnapshot(id));
   } catch (e) {

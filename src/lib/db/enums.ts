@@ -158,6 +158,7 @@ export const AssetKind = {
   SHOT_CLIP: "SHOT_CLIP",
   VO_AUDIO: "VO_AUDIO",
   FINAL_MP4: "FINAL_MP4",
+  DRAFT_MP4: "DRAFT_MP4",
 } as const;
 export type AssetKind = (typeof AssetKind)[keyof typeof AssetKind];
 

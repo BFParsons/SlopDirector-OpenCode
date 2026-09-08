@@ -6,6 +6,7 @@ import { err, ok } from "@/lib/http/response";
 import { getOwnedProject } from "@/lib/projects/access";
 import { projectSnapshot } from "@/lib/projects/serialize";
 import { reorderSegmentsSchema } from "@/lib/validation/project";
+import { notifyProjectChanged } from "@/lib/projects/changed";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -46,6 +47,8 @@ export async function POST(request: Request, { params }: Ctx) {
         });
       }
     });
+
+    notifyProjectChanged(id, request);
 
     return ok(await projectSnapshot(id));
   } catch (e) {

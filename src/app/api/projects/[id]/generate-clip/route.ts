@@ -9,6 +9,7 @@ import { enqueue } from "@/lib/jobs/queue";
 import { getOwnedProject } from "@/lib/projects/access";
 import { projectSnapshot } from "@/lib/projects/serialize";
 import { generateClipSchema } from "@/lib/validation/project";
+import { notifyProjectChanged } from "@/lib/projects/changed";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -70,6 +71,8 @@ export async function POST(request: Request, { params }: Ctx) {
     });
 
     await enqueue("SUBMIT_SHOT", { segmentId: segment.id }, { projectId: id });
+
+    notifyProjectChanged(id, request);
 
     return ok(await projectSnapshot(id));
   } catch (e) {

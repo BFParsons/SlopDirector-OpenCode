@@ -10,6 +10,7 @@ import { getOwnedProject } from "@/lib/projects/access";
 import { projectSnapshot } from "@/lib/projects/serialize";
 import { importYoutubeSchema } from "@/lib/validation/project";
 import { canonicalYouTubeUrl, parseYouTubeId } from "@/lib/youtube/url";
+import { notifyProjectChanged } from "@/lib/projects/changed";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -56,6 +57,7 @@ export async function POST(request: Request, { params }: Ctx) {
         },
       });
       await enqueue("IMPORT_AUDIO", { overlayId: overlay.id }, { projectId: id });
+      notifyProjectChanged(id, request);
       return ok(await projectSnapshot(id));
     }
 
@@ -85,6 +87,8 @@ export async function POST(request: Request, { params }: Ctx) {
       },
     });
     await enqueue("IMPORT_YOUTUBE", { segmentId: segment.id }, { projectId: id });
+
+    notifyProjectChanged(id, request);
 
     return ok(await projectSnapshot(id));
   } catch (e) {

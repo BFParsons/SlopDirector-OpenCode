@@ -212,6 +212,8 @@ CREATE TABLE "FinalRender" (
     "status" TEXT NOT NULL DEFAULT 'PENDING',
     "progress" INTEGER NOT NULL DEFAULT 0,
     "error" TEXT,
+    "draftAssetId" TEXT,
+    "draftUpdatedAt" DATETIME,
     "updatedAt" DATETIME NOT NULL,
     CONSTRAINT "FinalRender_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "Project" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT "FinalRender_assetId_fkey" FOREIGN KEY ("assetId") REFERENCES "Asset" ("id") ON DELETE SET NULL ON UPDATE CASCADE
@@ -249,6 +251,16 @@ CREATE TABLE "TextOverlay" (
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL,
     CONSTRAINT "TextOverlay_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "Project" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "ProjectCheckpoint" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "projectId" TEXT NOT NULL,
+    "label" TEXT,
+    "data" JSONB NOT NULL,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "ProjectCheckpoint_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "Project" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- CreateTable
@@ -346,6 +358,9 @@ CREATE INDEX "Asset_projectId_kind_idx" ON "Asset"("projectId", "kind");
 
 -- CreateIndex
 CREATE INDEX "TextOverlay_projectId_idx" ON "TextOverlay"("projectId");
+
+-- CreateIndex
+CREATE INDEX "ProjectCheckpoint_projectId_createdAt_idx" ON "ProjectCheckpoint"("projectId", "createdAt");
 
 -- CreateIndex
 CREATE INDEX "StoryElement_projectId_kind_idx" ON "StoryElement"("projectId", "kind");

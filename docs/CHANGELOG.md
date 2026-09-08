@@ -5,6 +5,30 @@ Notable changes, newest first. See [DEPENDENCIES.md](DEPENDENCIES.md) for setup 
 
 ## 2026-09 — no-storyboard fork
 
+- **Fix: trimmed clip audio played early, then silence (ffmpeg 9 regression).** Every
+  delayed audio chain (unmuted clip audio, overlay clip audio, audio-only clips, audio
+  overlays) used `adelay … apad,atrim=0:dur`; since ffmpeg 7 `adelay` keeps the input
+  timestamps and the padding lands before them, so the timestamp-based `atrim` dropped the
+  delay and the clip's sound landed at t=0. Samples are now re-numbered right after `adelay`.
+  Found by the new eval harness (`remove-silences` left a 6 s hole); no earlier e2e test
+  listened to the output.
+
+- **Agent harness groundwork** (see [AGENT-API.md](AGENT-API.md)). *Perception*:
+  `GET /api/assets/:id/frame`, `/contact-sheet` (timestamped grid), `/scenes`, `/silences`
+  (with the complementary speech ranges) and `POST /transcribe` (Whisper with word timings,
+  cached per asset). *Live refresh*: every mutating project route now broadcasts
+  `project.changed` on the SSE stream, so an open editor resyncs when an agent or another
+  window edits the project (the sender's `X-Slop-Client` id is echoed so it can skip its own
+  echo). *Draft renders*: `POST /render { draft: true }` assembles the current timeline at
+  ≤640×360 with a fast H.264 profile into a separate file (`finalRender.draftAssetId`,
+  `GET /api/projects/:id/draft`) without touching the final. *Headless*: `pnpm serve:headless`
+  runs the same server without Electron; `SLOPSTUDIO_API_TOKEN` enables bearer-token auth
+  for non-desktop deployments. *Checkpoints*: `POST /api/projects/:id/checkpoints` captures
+  settings + segments + overlays server-side and `…/restore` puts them back (same ids).
+  *Eval harness*: `pnpm test:eval` runs scored editing tasks (remove silences, scene
+  highlight, checkpoint round-trip, draft speed, transcript) whose reference solutions use
+  only the HTTP API.
+
 - **Speed, round two.** (1) **Instant first page**: the server no longer waits for the
   worker's ffmpeg/GPU probe before answering — the probe runs in the background and its
   result is cached on disk (`capabilities-cache.json` next to the SQLite DB, keyed on the

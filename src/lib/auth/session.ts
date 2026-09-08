@@ -1,5 +1,5 @@
-import { cookies } from "next/headers";
-import { randomBytes } from "node:crypto";
+import { cookies, headers } from "next/headers";
+import { randomBytes, timingSafeEqual } from "node:crypto";
 import type { Session, User } from "@prisma/client";
 import { prisma } from "@/lib/db/client";
 import { isProd } from "@/env";
@@ -49,24 +49,55 @@ export async function createSession(
  * Read + validate the current session. Performs sliding renewal: if a session
  * is past half its life, extend it. Returns null if missing/expired.
  */
+function syntheticSession(id: string, userId: string): Session {
+  return {
+    id,
+    userId,
+    expiresAt: new Date(Date.now() + REMEMBER_TTL_MS),
+    ip: null,
+    userAgent: null,
+    createdAt: new Date(),
+  } as Session;
+}
+
+/**
+ * Agent / headless access: `Authorization: Bearer <SLOPSTUDIO_API_TOKEN>`.
+ * Only active when the env var is set. The token acts as the user named by
+ * SLOPSTUDIO_API_TOKEN_USER (email), else the first admin. A presented but
+ * wrong token is rejected outright (no cookie fallback).
+ */
+async function tokenUser(): Promise<SessionContext | null | undefined> {
+  const expected = process.env.SLOPSTUDIO_API_TOKEN;
+  if (!expected) return undefined;
+  let auth = "";
+  try {
+    auth = (await headers()).get("authorization") ?? "";
+  } catch {
+    return undefined; // no request scope (build time) — behave as unset
+  }
+  if (!auth.toLowerCase().startsWith("bearer ")) return undefined;
+  const presented = auth.slice(7).trim();
+  const a = Buffer.from(presented);
+  const b = Buffer.from(expected);
+  if (a.length !== b.length || !timingSafeEqual(a, b)) return null;
+  const email = process.env.SLOPSTUDIO_API_TOKEN_USER?.trim().toLowerCase();
+  const user = email
+    ? await prisma.user.findUnique({ where: { email } })
+    : await prisma.user.findFirst({ where: { role: "ADMIN" }, orderBy: { createdAt: "asc" } });
+  if (!user) return null;
+  return { user, session: syntheticSession("api-token", user.id) };
+}
+
 export async function getSessionUser(): Promise<SessionContext | null> {
+  const viaToken = await tokenUser();
+  if (viaToken !== undefined) return viaToken;
   // Desktop build: a single local user, no login screen. Resolve the seeded
   // admin (the first user) directly so every request is authenticated without a
   // session cookie. electron/main.js sets SLOPSTUDIO_DESKTOP=1.
   if (process.env.SLOPSTUDIO_DESKTOP === "1") {
     const user = await prisma.user.findFirst({ orderBy: { createdAt: "asc" } });
     if (!user) return null;
-    return {
-      user,
-      session: {
-        id: "desktop-local",
-        userId: user.id,
-        expiresAt: new Date(Date.now() + REMEMBER_TTL_MS),
-        ip: null,
-        userAgent: null,
-        createdAt: new Date(),
-      } as Session,
-    };
+    return { user, session: syntheticSession("desktop-local", user.id) };
   }
 
   const store = await cookies();

@@ -22,7 +22,7 @@ import { fileToDataUri } from "@/lib/assets/serve";
 import { assembleVideo, type OverlayInput, type VisualInput } from "@/lib/ffmpeg/assemble";
 import type { TextOverlaySpec } from "@/lib/ffmpeg/args";
 import { resolveEncoder, resolveHwDecode } from "@/lib/system/capabilities";
-import { type VideoCodec, isVideoCodec } from "@/lib/ffmpeg/encoder";
+import { type VideoCodec, encoderProfile, isVideoCodec } from "@/lib/ffmpeg/encoder";
 import { type CaptionStyle, buildAss } from "@/lib/render/ass";
 import { aspectLabel, resolutionLabel } from "@/lib/ffmpeg/args";
 import { frameSize } from "@/config/frame-sizes";
@@ -405,7 +405,8 @@ async function synthVoJob(payload: { projectId: string }): Promise<void> {
 // ---------------------------------------------------------------------------
 // ASSEMBLE_FINAL
 // ---------------------------------------------------------------------------
-async function assembleFinalJob(payload: { projectId: string }): Promise<void> {
+async function assembleFinalJob(payload: { projectId: string; draft?: boolean }): Promise<void> {
+  const draft = payload.draft === true;
   const project = await prisma.project.findUnique({
     where: { id: payload.projectId },
     include: {
@@ -497,11 +498,19 @@ async function assembleFinalJob(payload: { projectId: string }): Promise<void> {
       volume: o.volume,
     }));
 
-  const { w, h } = frameSize(project);
+  const full = frameSize(project);
+  // Draft preview: fit inside 640×360 (even dims), H.264 at a fast/low-quality
+  // profile on whichever backend validated — seconds instead of minutes.
+  const draftScale = draft ? Math.min(1, 640 / full.w, 360 / full.h) : 1;
+  const even = (n: number) => Math.max(2, Math.round(n / 2) * 2);
+  const { w, h } = draft ? { w: even(full.w * draftScale), h: even(full.h * draftScale) } : full;
   // Export format (codec + container) chosen in the Export dialog; the encoder
   // backend (GPU or CPU) is resolved per host below.
-  const codec: VideoCodec = isVideoCodec(project.exportCodec) ? project.exportCodec : "h264";
-  const encoder = await resolveEncoder(codec);
+  const codec: VideoCodec = draft ? "h264" : isVideoCodec(project.exportCodec) ? project.exportCodec : "h264";
+  const resolved = await resolveEncoder(codec);
+  const encoder = draft
+    ? encoderProfile(resolved.kind, { codec, x264Preset: "ultrafast", quality: 30 })
+    : resolved;
   const hwDecode = await resolveHwDecode();
   await ensureProjectTmp(project.id);
   // Bundle projects render into their own folder; legacy under ASSET_ROOT/<id>.
@@ -510,10 +519,11 @@ async function assembleFinalJob(payload: { projectId: string }): Promise<void> {
     : projectDir(project.id);
   const tmpDir = path.join(assetBase, "tmp");
   await mkdir(tmpDir, { recursive: true });
-  const tmpPath = path.join(tmpDir, `final.${encoder.ext}`);
+  const outName = draft ? "draft" : "final";
+  const tmpPath = path.join(tmpDir, `${outName}.${encoder.ext}`);
   const finalDir = path.join(assetBase, "final");
   await mkdir(finalDir, { recursive: true });
-  const finalPath = path.join(finalDir, `final.${encoder.ext}`);
+  const finalPath = path.join(finalDir, `${outName}.${encoder.ext}`);
 
   // Optional user .cube LUT applied to every clip after the built-in color look.
   const lutPath = project.lutAsset ? absolutePath(project.lutAsset.path) : undefined;
@@ -581,7 +591,7 @@ async function assembleFinalJob(payload: { projectId: string }): Promise<void> {
 
   const fxCount = project.segments.reduce((a, s) => a + asEffects(s.effects).filter((e) => e.enabled).length, 0);
   console.log(
-    `[assemble] ${project.id} ${w}x${h} ${encoder.codec}/${encoder.kind} (${encoder.label}) → .${encoder.ext}` +
+    `[assemble] ${project.id}${draft ? " DRAFT" : ""} ${w}x${h} ${encoder.codec}/${encoder.kind} (${encoder.label}) → .${encoder.ext}` +
       ` · lut=${lutPath ? "yes" : "no"} · captions=${captionsAss ? project.captionStyle : "off"} · effects=${fxCount}`,
   );
   if (hwDecode) console.log(`[assemble] ${project.id} decode: ${hwDecode.backend} for ${hwDecode.codecs.join("/")} sources`);
@@ -636,6 +646,31 @@ async function assembleFinalJob(payload: { projectId: string }): Promise<void> {
   // Bundle projects store the final render's absolute path; legacy store relative.
   const relativePath = project.bundlePath ? finalPath : path.relative(ASSET_ROOT, finalPath);
   const st = await stat(finalPath);
+  if (draft) {
+    // Replace the previous draft asset row (same file path) so the bucket
+    // doesn't accumulate one row per preview.
+    const prev = await prisma.finalRender.findUnique({ where: { projectId: project.id } });
+    const asset = await prisma.asset.create({
+      data: {
+        projectId: project.id,
+        kind: "DRAFT_MP4",
+        path: relativePath,
+        mime: encoder.mime,
+        sizeBytes: st.size,
+      },
+    });
+    await prisma.finalRender.update({
+      where: { projectId: project.id },
+      data: { draftAssetId: asset.id, draftUpdatedAt: new Date(), progress: 100 },
+    });
+    if (prev?.draftAssetId) {
+      await prisma.asset.deleteMany({ where: { id: prev.draftAssetId, kind: "DRAFT_MP4" } });
+    }
+    await cleanupTmp(project.id);
+    await setProjectStatus(project.id, prev?.assetId ? "DONE" : "DRAFT");
+    emitProgress(project.id, { type: "draft.ready", assetId: asset.id, durationS });
+    return;
+  }
   const asset = await prisma.asset.create({
     data: {
       projectId: project.id,
@@ -689,6 +724,6 @@ export const handlers: Record<JobType, Handler> = {
   IMPORT_YOUTUBE: (p) => importYoutubeJob(p as { segmentId: string }),
   IMPORT_AUDIO: (p) => importAudioJob(p as { overlayId: string }),
   SYNTH_VO: (p) => synthVoJob(p as { projectId: string }),
-  ASSEMBLE_FINAL: (p) => assembleFinalJob(p as { projectId: string }),
+  ASSEMBLE_FINAL: (p) => assembleFinalJob(p as { projectId: string; draft?: boolean }),
   CLEANUP: () => cleanupJob(),
 };

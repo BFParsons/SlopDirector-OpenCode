@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 import type { ProjectSnapshot } from "@/lib/projects/serialize";
-import { api } from "@/lib/api";
+import { api, CLIENT_ID } from "@/lib/api";
 import { withBase } from "@/lib/basePath";
 
 interface ProgressEvent {
@@ -156,6 +156,16 @@ function reduce(
 
     case "assembly.progress":
       set({ assemblyPercent: Number(event.percent) || 0 });
+      return;
+    case "draft.ready":
+      // A low-res preview finished — the snapshot carries its asset id.
+      void get().refetch();
+      return;
+    case "project.changed":
+      // Someone else (another window, an agent over the API) edited the
+      // project; our own edits echo back with our CLIENT_ID and are skipped.
+      if (event.clientId && event.clientId === CLIENT_ID) return;
+      void get().refetch();
       return;
 
     default:

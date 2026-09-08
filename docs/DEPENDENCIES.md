@@ -253,6 +253,17 @@ What differs from the Debian/Windows notes above:
 
 ---
 
+## 6b. Headless server, API token, eval harness
+
+`pnpm serve:headless` (`scripts/serve-headless.sh`) runs the production bundle without
+Electron on `:38473` (same `.env`, SQLite, in-process worker; `--dev` for `next dev`,
+`PORT=` to move it). With `SLOPSTUDIO_DESKTOP=1` (the default) there is no login; on a
+multi-user server unset it and set `SLOPSTUDIO_API_TOKEN` (+ optional
+`SLOPSTUDIO_API_TOKEN_USER=<email>`) so agents authenticate with
+`Authorization: Bearer <token>`. `pnpm test:eval` runs the scored editing tasks in
+`tests/eval/` against a running app (`BASE_URL` to point elsewhere). The agent-facing route
+reference is [AGENT-API.md](AGENT-API.md).
+
 ## 7. End-to-end tests (Playwright)
 
 `tests/e2e/` drives the real app (the running dev server, the SQLite desktop target, the

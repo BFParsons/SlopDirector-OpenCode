@@ -153,12 +153,36 @@ export async function setScriptGenStatus(
  *    already READY; NONE has no audio row.
  * A final maybeEnqueueAssembly() handles the zero-AI-jobs case (all uploads).
  */
-export async function startRender(projectId: string): Promise<void> {
+export async function startRender(
+  projectId: string,
+  opts: { draft?: boolean } = {},
+): Promise<void> {
   const project = await prisma.project.findUnique({
     where: { id: projectId },
     include: { segments: true, voiceover: true },
   });
   if (!project) throw new Error("project not found");
+  if (opts.draft) {
+    // Draft preview: assemble what exists right now (no AI generation, no TTS;
+    // the route checked those are already in place) at low resolution, into a
+    // separate file. The final render's row keeps its asset; only progress and
+    // the draft columns move.
+    await prisma.finalRender.upsert({
+      where: { projectId },
+      create: { projectId, status: "PENDING", progress: 0 },
+      update: { progress: 0, error: null },
+    });
+    const uploads = project.segments.filter((s) => !isAiSegment(s.source) && !!s.sourceAssetId);
+    if (uploads.length > 0) {
+      await prisma.segment.updateMany({
+        where: { id: { in: uploads.map((s) => s.id) } },
+        data: { status: "READY", error: null },
+      });
+    }
+    await setProjectStatus(projectId, "RENDERING");
+    await enqueue("ASSEMBLE_FINAL", { projectId, draft: true }, { projectId });
+    return;
+  }
 
   // --- Audio track ---
   // Reuse an already-synthesized voiceover so re-rendering doesn't re-run (and

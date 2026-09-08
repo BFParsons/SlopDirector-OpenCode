@@ -4,6 +4,7 @@ import { handleApiError } from "@/lib/http/handleError";
 import { err, ok } from "@/lib/http/response";
 import { getOwnedProject } from "@/lib/projects/access";
 import { projectSnapshot } from "@/lib/projects/serialize";
+import { notifyProjectChanged } from "@/lib/projects/changed";
 
 type Ctx = { params: Promise<{ id: string; segmentId: string }> };
 
@@ -31,6 +32,8 @@ export async function DELETE(_req: Request, { params }: Ctx) {
         await prisma.segment.update({ where: { id: rest[i].id }, data: { index: i } });
       }
     }
+
+    notifyProjectChanged(id, _req);
 
     return ok(await projectSnapshot(id));
   } catch (e) {

@@ -227,6 +227,9 @@ export async function projectSnapshot(projectId: string) {
           durationS: p.finalRender.durationS,
           progress: p.finalRender.progress,
           error: p.finalRender.error,
+          // low-res preview (POST /render { draft: true }); never "the final"
+          draftAssetId: p.finalRender.draftAssetId,
+          draftUpdatedAt: p.finalRender.draftUpdatedAt,
         }
       : null,
   };

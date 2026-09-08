@@ -10,15 +10,26 @@ import { whisperArgv } from "./binaries";
 import { audioProjectDir } from "./workspace";
 import { updateJob } from "./jobs";
 
-export interface TranscriptSegment {
+export interface TranscriptWord {
   startS: number;
   endS: number;
   text: string;
 }
+
+export interface TranscriptSegment {
+  startS: number;
+  endS: number;
+  text: string;
+  /** per-word timings (whisper --word_timestamps) */
+  words?: TranscriptWord[];
+}
+
 export interface TranscribeResult {
   language: string | null;
   text: string;
   segments: TranscriptSegment[];
+  /** every word with its timing, flattened across segments */
+  words: TranscriptWord[];
   srt: string | null;
   vtt: string | null;
 }
@@ -41,7 +52,7 @@ export async function runWhisper(
   const workDir = path.join(projectRoot, `.whisper-${jobId.slice(0, 8)}`);
   await mkdir(workDir, { recursive: true });
 
-  const args = [...whisperArgv(), inputAbs, "--model", model, "--output_dir", workDir, "--output_format", "all", "--verbose", "False"];
+  const args = [...whisperArgv(), inputAbs, "--model", model, "--output_dir", workDir, "--output_format", "all", "--verbose", "False", "--word_timestamps", "True"];
   if (opts.language) args.push("--language", opts.language);
 
   updateJob(jobId, { message: `Transcribing with “${model}” model…` });
@@ -81,16 +92,27 @@ export async function runWhisper(
       const j = JSON.parse(jsonRaw) as {
         language?: string;
         text?: string;
-        segments?: { start: number; end: number; text: string }[];
+        segments?: {
+          start: number;
+          end: number;
+          text: string;
+          words?: { word: string; start: number; end: number }[];
+        }[];
       };
       language = j.language ?? null;
       text = (j.text ?? "").trim();
-      segments = (j.segments ?? []).map((s) => ({ startS: s.start, endS: s.end, text: s.text.trim() }));
+      segments = (j.segments ?? []).map((s) => ({
+        startS: s.start,
+        endS: s.end,
+        text: s.text.trim(),
+        words: (s.words ?? []).map((w) => ({ startS: w.start, endS: w.end, text: w.word.trim() })),
+      }));
     } catch {
       /* leave defaults */
     }
   }
 
   await rm(workDir, { recursive: true, force: true });
-  return { language, text, segments, srt, vtt };
+  const words = segments.flatMap((s) => s.words ?? []);
+  return { language, text, segments, words, srt, vtt };
 }

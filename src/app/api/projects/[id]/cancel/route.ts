@@ -4,6 +4,7 @@ import { handleApiError } from "@/lib/http/handleError";
 import { err, ok } from "@/lib/http/response";
 import { setProjectStatus } from "@/lib/jobs/orchestrator";
 import { getOwnedProject } from "@/lib/projects/access";
+import { notifyProjectChanged } from "@/lib/projects/changed";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -24,6 +25,7 @@ export async function POST(_req: Request, { params }: Ctx) {
       data: { status: "PENDING", progress: 0, error: null, assetId: null },
     });
     await setProjectStatus(id, "DRAFT");
+    notifyProjectChanged(id, _req);
     return ok({ ok: true });
   } catch (e) {
     return handleApiError(e);

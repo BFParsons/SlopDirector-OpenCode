@@ -4,6 +4,7 @@ import { err, ok } from "@/lib/http/response";
 import { setScriptGenStatus } from "@/lib/jobs/orchestrator";
 import { enqueue } from "@/lib/jobs/queue";
 import { getOwnedProject } from "@/lib/projects/access";
+import { notifyProjectChanged } from "@/lib/projects/changed";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -20,6 +21,7 @@ export async function POST(_req: Request, { params }: Ctx) {
     }
     await setScriptGenStatus(id, "RUNNING");
     await enqueue("GEN_SCRIPT", { projectId: id }, { projectId: id });
+    notifyProjectChanged(id, _req);
     return ok({ ok: true });
   } catch (e) {
     return handleApiError(e);

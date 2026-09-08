@@ -14,6 +14,8 @@ export interface ProgressEvent {
     | "vo.status"
     | "assembly.progress"
     | "final.ready"
+    | "draft.ready"
+    | "project.changed"
     | "error";
   [key: string]: unknown;
 }

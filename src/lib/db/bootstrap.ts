@@ -63,6 +63,9 @@ export async function ensureDesktopDb(): Promise<void> {
     { table: "Project", column: "exportCodec", ddl: "TEXT NOT NULL DEFAULT 'h264'" },
     { table: "Project", column: "lutAssetId", ddl: "TEXT" },
     { table: "Project", column: "captionStyle", ddl: "TEXT NOT NULL DEFAULT 'OUTLINE'" },
+    // Draft (low-res preview) renders.
+    { table: "FinalRender", column: "draftAssetId", ddl: "TEXT" },
+    { table: "FinalRender", column: "draftUpdatedAt", ddl: "DATETIME" },
   ];
   const columnCache = new Map<string, Set<string>>();
   for (const m of migrations) {
@@ -76,6 +79,25 @@ export async function ensureDesktopDb(): Promise<void> {
     await prisma.$executeRawUnsafe(`ALTER TABLE "${m.table}" ADD COLUMN "${m.column}" ${m.ddl}`);
     cols.add(m.column);
     console.log(`[desktop] added column ${m.table}.${m.column}`);
+  }
+
+  // Tables introduced after the initial DDL (same idea as the columns above).
+  const tables: { name: string; ddl: string[] }[] = [
+    {
+      name: "ProjectCheckpoint",
+      ddl: [
+        `CREATE TABLE "ProjectCheckpoint" ("id" TEXT NOT NULL PRIMARY KEY, "projectId" TEXT NOT NULL, "label" TEXT, "data" JSONB NOT NULL, "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, CONSTRAINT "ProjectCheckpoint_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "Project" ("id") ON DELETE CASCADE ON UPDATE CASCADE)`,
+        `CREATE INDEX "ProjectCheckpoint_projectId_createdAt_idx" ON "ProjectCheckpoint"("projectId", "createdAt")`,
+      ],
+    },
+  ];
+  for (const t of tables) {
+    const found = await prisma.$queryRawUnsafe<{ name: string }[]>(
+      `SELECT name FROM sqlite_master WHERE type='table' AND name='${t.name}'`,
+    );
+    if (found.length > 0) continue;
+    for (const stmt of t.ddl) await prisma.$executeRawUnsafe(stmt);
+    console.log(`[desktop] created table ${t.name}`);
   }
 
   // Seed a first admin if the DB has no users.

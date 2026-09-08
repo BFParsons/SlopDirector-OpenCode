@@ -67,3 +67,6 @@ qa-*.py
 # Playwright
 /test-results
 /playwright-report
+
+# eval harness scratch media
+tests/eval/.tmp/

@@ -486,6 +486,11 @@ export async function assembleVideo(
     primaryLabel = "amain";
   }
 
+  // NOTE on `adelay … ,asetpts=N/SR/TB`: since ffmpeg 7 adelay keeps the input's
+  // timestamps and the padding lands "before" them, so a later timestamp-based
+  // atrim=0:dur would drop the delay and shift the clip to t=0 (heard as: the
+  // clip's audio plays early, then silence). Re-numbering the samples right
+  // after adelay keeps every later trim sample-based. Regressed with ffmpeg 9.
   // Unmuted video segments: mix each clip's own audio in, retimed by its speed
   // and delayed to its timeline start offset (transition-aware).
   const segAudioLabels: string[] = [];
@@ -498,7 +503,7 @@ export async function assembleVideo(
         trimStartS > 0 ? `atrim=start=${trimStartS.toFixed(3)},asetpts=N/SR/TB,` : "";
       const tempo = speed !== 1 ? `atempo=${speed},` : "";
       const offsetMs = Math.round(startOffset[i] * 1000);
-      const delayPart = offsetMs > 0 ? `adelay=${offsetMs}:all=1,` : "";
+      const delayPart = offsetMs > 0 ? `adelay=${offsetMs}:all=1,asetpts=N/SR/TB,` : "";
       const lbl = `sa${i}`;
       filters.push(
         `[${i}:a]${srcTrim}${tempo}atrim=0:${effDur[i].toFixed(3)},asetpts=N/SR/TB,${delayPart}apad,atrim=0:${dur},asetpts=N/SR/TB[${lbl}]`,
@@ -521,7 +526,7 @@ export async function assembleVideo(
     const srcTrim = trimStartS > 0 ? `atrim=start=${trimStartS.toFixed(3)},asetpts=N/SR/TB,` : "";
     const tempo = speed !== 1 ? `atempo=${speed},` : "";
     const offsetMs = Math.max(0, Math.round(m.offsetS * 1000));
-    const delayPart = offsetMs > 0 ? `adelay=${offsetMs}:all=1,` : "";
+    const delayPart = offsetMs > 0 ? `adelay=${offsetMs}:all=1,asetpts=N/SR/TB,` : "";
     const lbl = `pa${j}`;
     filters.push(
       `[${nV1 + j}:a]${srcTrim}${tempo}atrim=0:${m.dur.toFixed(3)},asetpts=N/SR/TB,${delayPart}apad,atrim=0:${dur},asetpts=N/SR/TB[${lbl}]`,
@@ -536,7 +541,7 @@ export async function assembleVideo(
     const ov = overlays[i];
     const vol = Math.min(1, Math.max(0, ov.volume));
     const offsetMs = Math.max(0, Math.round(ov.offsetS * 1000));
-    const delayPart = offsetMs > 0 ? `adelay=${offsetMs}:all=1,` : "";
+    const delayPart = offsetMs > 0 ? `adelay=${offsetMs}:all=1,asetpts=N/SR/TB,` : "";
     const lbl = `ov${i}`;
     filters.push(
       `[${overlayBaseIdx + i}:a]volume=${vol},${delayPart}apad,atrim=0:${dur},asetpts=N/SR/TB[${lbl}]`,
@@ -554,7 +559,7 @@ export async function assembleVideo(
     const srcTrim = trimStartS > 0 ? `atrim=start=${trimStartS.toFixed(3)},asetpts=N/SR/TB,` : "";
     const tempo = speed !== 1 ? `atempo=${speed},` : "";
     const offsetMs = Math.max(0, Math.round(ac.offsetS * 1000));
-    const delayPart = offsetMs > 0 ? `adelay=${offsetMs}:all=1,` : "";
+    const delayPart = offsetMs > 0 ? `adelay=${offsetMs}:all=1,asetpts=N/SR/TB,` : "";
     const lbl = `ac${i}`;
     filters.push(
       `[${audioClipBaseIdx + i}:a]${srcTrim}${tempo}atrim=0:${clipDur.toFixed(3)},asetpts=N/SR/TB,${delayPart}apad,atrim=0:${dur},asetpts=N/SR/TB[${lbl}]`,

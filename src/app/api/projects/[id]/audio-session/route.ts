@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db/client";
 import { handleApiError } from "@/lib/http/handleError";
 import { parseJsonBody } from "@/lib/http/parseJsonBody";
 import { ok } from "@/lib/http/response";
+import { notifyProjectChanged } from "@/lib/projects/changed";
 
 export const dynamic = "force-dynamic";
 
@@ -45,6 +46,7 @@ export async function PUT(request: Request, { params }: Ctx) {
           : null,
       },
     });
+    notifyProjectChanged(id, request);
     return ok({ ok: true });
   } catch (e) {
     return handleApiError(e);

@@ -6,6 +6,7 @@ import { handleApiError } from "@/lib/http/handleError";
 import { err, ok } from "@/lib/http/response";
 import { getOwnedProject } from "@/lib/projects/access";
 import { projectSnapshot } from "@/lib/projects/serialize";
+import { notifyProjectChanged } from "@/lib/projects/changed";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -50,6 +51,8 @@ export async function POST(request: Request, { params }: Ctx) {
       data: { watermarkAssetId: asset.id },
     });
 
+    notifyProjectChanged(id, request);
+
     return ok(await projectSnapshot(id));
   } catch (e) {
     return handleApiError(e);
@@ -66,6 +69,7 @@ export async function DELETE(_req: Request, { params }: Ctx) {
       return err("Cannot edit a project while it is RENDERING", 409);
     }
     await prisma.project.update({ where: { id }, data: { watermarkAssetId: null } });
+    notifyProjectChanged(id, _req);
     return ok(await projectSnapshot(id));
   } catch (e) {
     return handleApiError(e);

@@ -5,6 +5,7 @@ import { err, ok } from "@/lib/http/response";
 import { isAiSegment, setProjectStatus, setSegmentStatus } from "@/lib/jobs/orchestrator";
 import { enqueue } from "@/lib/jobs/queue";
 import { getOwnedProject } from "@/lib/projects/access";
+import { notifyProjectChanged } from "@/lib/projects/changed";
 
 type Ctx = { params: Promise<{ id: string; segmentId: string }> };
 
@@ -27,6 +28,7 @@ export async function POST(_req: Request, { params }: Ctx) {
         sourceAssetId: null,
       });
       await enqueue("IMPORT_YOUTUBE", { segmentId }, { projectId: id });
+      notifyProjectChanged(id, _req);
       return ok({ ok: true });
     }
 
@@ -46,6 +48,8 @@ export async function POST(_req: Request, { params }: Ctx) {
     });
     await setProjectStatus(id, "RENDERING");
     await enqueue("SUBMIT_SHOT", { segmentId }, { projectId: id });
+
+    notifyProjectChanged(id, _req);
 
     return ok({ ok: true });
   } catch (e) {

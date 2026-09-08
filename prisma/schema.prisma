@@ -205,6 +205,7 @@ model Project {
   finalRender     FinalRender?
   assets          Asset[]
   jobs            Job[]
+  checkpoints     ProjectCheckpoint[]
 
   @@index([userId, status])
 }
@@ -433,6 +434,10 @@ model FinalRender {
   status    SimpleStatus @default(PENDING)
   progress  Int          @default(0) // 0..100 from ffmpeg
   error     String?
+  // Low-res draft preview (agent / quick review): kept separately from the
+  // final so a draft never clobbers a finished export.
+  draftAssetId   String?
+  draftUpdatedAt DateTime?
   updatedAt DateTime     @updatedAt
 }
 
@@ -446,6 +451,7 @@ enum AssetKind {
   SHOT_CLIP
   VO_AUDIO
   FINAL_MP4
+  DRAFT_MP4 // low-res preview render (see FinalRender.draftAssetId)
 }
 
 model Asset {
@@ -498,6 +504,20 @@ model TextOverlay {
   updatedAt  DateTime        @updatedAt
 
   @@index([projectId])
+}
+
+/// Server-side edit checkpoint: a JSON capture of the editable project state
+/// (settings, segments, overlays) that can be restored later. Lets an agent
+/// (or a person) try an edit and roll back without a browser undo stack.
+model ProjectCheckpoint {
+  id        String   @id @default(cuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  label     String?
+  data      Json
+  createdAt DateTime @default(now())
+
+  @@index([projectId, createdAt])
 }
 
 // Reusable storyboard building blocks with a PERSISTENT visual identity, so the
