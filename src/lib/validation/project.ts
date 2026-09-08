@@ -84,6 +84,14 @@ const pipSchema = z.object({
 // Float (0.1s precision) so timeline trims can be fine-grained.
 const segmentDurationS = z.number().min(0.1).max(600);
 
+// Custom frame side (px): even (yuv420p) and within 16..4320 (admits DCI / vertical 4K).
+const frameSide = z
+  .number()
+  .int()
+  .min(16)
+  .max(4320)
+  .refine((v) => v % 2 === 0, { message: "must be an even number of pixels" });
+
 export const createProjectSchema = z.object({
   title: z.string().min(1).max(120),
   // Brief is optional — AI generation is opt-in per track.
@@ -93,6 +101,9 @@ export const createProjectSchema = z.object({
   targetLengthS: z.number().int().min(5).max(CAPS.maxTotalDurationS),
   aspectRatio: aspectRatioEnum,
   resolution: resolutionEnum,
+  // Optional custom frame size; both or neither. Overrides the preset for render/preview.
+  frameWidth: frameSide.optional(),
+  frameHeight: frameSide.optional(),
   shotCount: z.number().int().min(CAPS.minShots).max(CAPS.maxShots),
   audioMode: audioModeEnum.optional(),
   llmModel: z.string().min(1).max(120),
@@ -108,6 +119,9 @@ export type CreateProjectInput = z.infer<typeof createProjectSchema>;
 
 export const patchProjectSchema = z.object({
   title: z.string().min(1).max(120).optional(),
+  // frame size (null clears the custom size → back to the aspect/resolution preset)
+  frameWidth: frameSide.nullable().optional(),
+  frameHeight: frameSide.nullable().optional(),
   // brief
   goal: z.string().max(2000).nullable().optional(),
   subject: z.string().max(500).nullable().optional(),

@@ -45,6 +45,8 @@ export async function PATCH(request: Request, { params }: Ctx) {
         where: { id },
         data: {
           title: body.title,
+          frameWidth: body.frameWidth,
+          frameHeight: body.frameHeight,
           goal: body.goal,
           subject: body.subject,
           tone: body.tone,

@@ -1,33 +1,9 @@
-import Link from "next/link";
 import { NewAssemblyCard } from "@/components/NewAssemblyCard";
 import { NewAudioStudioCard } from "@/components/NewAudioStudioCard";
 import { requirePageUser } from "@/lib/auth/rbac";
 import { withBase } from "@/lib/basePath";
 
 export const dynamic = "force-dynamic";
-
-interface Mode {
-  href: string;
-  glyph: string;
-  img?: string;
-  title: string;
-  blurb: string;
-  detail: string;
-  accent: string;
-  primary?: boolean;
-}
-
-const MODES: Mode[] = [
-  {
-    href: "/dashboard",
-    glyph: "◳",
-    img: "/slop/oldslop.png",
-    title: "Open project",
-    blurb: "Pick up where you left off.",
-    detail: "Reopen any of your existing projects to keep editing or re-render.",
-    accent: "#e0a93f",
-  },
-];
 
 export default async function StartPage() {
   await requirePageUser();
@@ -64,43 +40,9 @@ export default async function StartPage() {
           </div>
         </div>
 
-        <div className="grid shrink-0 grid-cols-3 gap-4 short:gap-3">
+        <div className="grid shrink-0 grid-cols-2 gap-4 short:gap-3">
           <NewAssemblyCard accent="#2ec5c5" />
           <NewAudioStudioCard accent="#b07cff" />
-          {MODES.map((m) => (
-            <Link
-              key={m.href}
-              href={m.href}
-              className="squish-card group relative flex flex-col items-center overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-6 text-center short:p-4"
-              style={{ ["--mode-accent" as string]: m.accent }}
-            >
-              <span
-                aria-hidden
-                className="squish-bar pointer-events-none absolute inset-x-0 top-0 h-1"
-                style={{ background: m.accent, opacity: m.primary ? 1 : 0.6 }}
-              />
-              {m.img ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={withBase(m.img)}
-                  alt=""
-                  aria-hidden
-                  className="squish-icon mb-3 h-20 w-auto object-contain drop-shadow short:mb-2 short:h-14"
-                />
-              ) : (
-                <span
-                  className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl text-2xl"
-                  style={{
-                    color: m.accent,
-                    background: `color-mix(in srgb, ${m.accent} 14%, transparent)`,
-                  }}
-                >
-                  {m.glyph}
-                </span>
-              )}
-              <h2 className="squish-title text-lg font-semibold short:text-base">{m.title}</h2>
-            </Link>
-          ))}
         </div>
       </main>
     </>

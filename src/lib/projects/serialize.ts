@@ -63,6 +63,8 @@ export async function projectSnapshot(projectId: string) {
     targetLengthS: p.targetLengthS,
     aspectRatio: p.aspectRatio,
     resolution: p.resolution,
+    frameWidth: p.frameWidth,
+    frameHeight: p.frameHeight,
     audioFitMode: p.audioFitMode,
     shotCount: p.shotCount,
     stylePrompt: p.stylePrompt,

@@ -131,6 +131,11 @@ model Project {
   targetLengthS Int          @default(30)
   aspectRatio   AspectRatio  @default(R16_9)
   resolution    Resolution   @default(R720P)
+  // Custom frame size in px (even numbers). When both are set they override the
+  // aspectRatio/resolution preset for preview + render; aspectRatio/resolution
+  // are kept as the closest presets for AI providers and legacy code.
+  frameWidth    Int?
+  frameHeight   Int?
   audioFitMode  AudioFitMode @default(PAD_VIDEO)
   shotCount     Int          @default(5) // hint for AI storyboard generation
   // storyboard mode: style anchor applied to every keyframe (continuity)

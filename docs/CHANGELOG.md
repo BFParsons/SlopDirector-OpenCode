@@ -5,6 +5,18 @@ Notable changes, newest first. See [DEPENDENCIES.md](DEPENDENCIES.md) for setup 
 
 ## 2026-09 — no-storyboard fork
 
+- **Assembly dialog: New / Open + any frame size.** The Assembly card's dialog now has
+  two tabs. *New project* offers a dropdown of popular sizes by medium — YouTube/web
+  16:9 up to 4K UHD, DCI 2K/4K, vertical 9:16 up to 4K, square, 4:5 portrait, ultrawide,
+  4:3 — plus width × height inputs for a custom size (even pixels, up to 4320 per side).
+  *Open project* lists your projects (search, frame size, status; audio compositions open
+  in the Audio Studio) and replaces the "Open project" card, so the start screen is
+  Assembly + Audio Studio. New `Project.frameWidth`/`frameHeight` (Postgres migration
+  `20260908140000_custom_frame_size`; SQLite forward-migration in bootstrap) override the
+  aspect/resolution preset in `frameSize()` (`src/config/frame-sizes.ts`) for both the
+  live preview and the final render; aspect/resolution are kept as the closest presets
+  for AI video providers.
+
 - **Storyboard mode removed.** Gone: the `/storyboard/[id]` board (`StoryboardWorkspace`),
   the start-screen card, the Visual panel's "Generate storyboard (AI)" button, the
   `generate-storyboard` API and `GEN_STORYBOARD` job, the storyboard LLM prompt/schema,

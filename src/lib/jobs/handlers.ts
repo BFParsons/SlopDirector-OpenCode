@@ -22,7 +22,8 @@ import { fileToDataUri } from "@/lib/assets/serve";
 import { assembleVideo, type OverlayInput, type VisualInput } from "@/lib/ffmpeg/assemble";
 import type { TextOverlaySpec } from "@/lib/ffmpeg/args";
 import { resolveEncoder } from "@/lib/system/capabilities";
-import { aspectLabel, frameDimensions, resolutionLabel } from "@/lib/ffmpeg/args";
+import { aspectLabel, resolutionLabel } from "@/lib/ffmpeg/args";
+import { frameSize } from "@/config/frame-sizes";
 import { probeDuration } from "@/lib/ffmpeg/probe";
 import { generateScript } from "@/lib/llm/expand";
 import type { BriefInput } from "@/lib/llm/prompts";
@@ -493,7 +494,7 @@ async function assembleFinalJob(payload: { projectId: string }): Promise<void> {
       volume: o.volume,
     }));
 
-  const { w, h } = frameDimensions(project.aspectRatio, project.resolution);
+  const { w, h } = frameSize(project);
   await ensureProjectTmp(project.id);
   // Bundle projects render into their own folder; legacy under ASSET_ROOT/<id>.
   const assetBase = project.bundlePath

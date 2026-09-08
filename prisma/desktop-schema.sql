@@ -52,6 +52,8 @@ CREATE TABLE "Project" (
     "targetLengthS" INTEGER NOT NULL DEFAULT 30,
     "aspectRatio" TEXT NOT NULL DEFAULT 'R16_9',
     "resolution" TEXT NOT NULL DEFAULT 'R720P',
+    "frameWidth" INTEGER,
+    "frameHeight" INTEGER,
     "audioFitMode" TEXT NOT NULL DEFAULT 'PAD_VIDEO',
     "shotCount" INTEGER NOT NULL DEFAULT 5,
     "stylePrompt" TEXT,
@@ -300,7 +302,7 @@ CREATE TABLE "Job" (
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
-CREATE INDEX "WorkspaceLayout_userId_idx" ON "WorkspaceLayout"("userId");
+CREATE INDEX "WorkspaceLayout_userId_section_idx" ON "WorkspaceLayout"("userId", "section");
 
 -- CreateIndex
 CREATE INDEX "Session_userId_idx" ON "Session"("userId");

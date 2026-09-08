@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useUndoable } from "./useUndoable";
-import { FRAME_DIMENSIONS } from "@/config/models";
+import { frameSize } from "@/config/frame-sizes";
 import { api } from "@/lib/api";
 import { type Draft, draftCost, seed } from "@/lib/projects/draft";
 import type { ProjectSnapshot } from "@/lib/projects/serialize";
@@ -164,7 +164,7 @@ export function ProjectEditorProvider({
   }, [undo, redo]);
 
   const previewSpec = useMemo(() => {
-    const dims = FRAME_DIMENSIONS[snapshot.aspectRatio][snapshot.resolution];
+    const dims = frameSize(snapshot);
     return buildRenderSpec({
       segments: draft.segments,
       width: dims.w,

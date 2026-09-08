@@ -43,6 +43,9 @@ export async function ensureDesktopDb(): Promise<void> {
     'ALTER TABLE "User" ADD COLUMN "defaultProjectFolder" TEXT',
     // Audio Studio editable multitrack session (JSON), for reopening/re-editing.
     'ALTER TABLE "Project" ADD COLUMN "audioSession" TEXT',
+    // Custom frame size (px); null = aspectRatio/resolution preset.
+    'ALTER TABLE "Project" ADD COLUMN "frameWidth" INTEGER',
+    'ALTER TABLE "Project" ADD COLUMN "frameHeight" INTEGER',
   ];
   for (const stmt of migrations) {
     try {

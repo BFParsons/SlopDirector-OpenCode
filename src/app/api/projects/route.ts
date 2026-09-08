@@ -21,6 +21,13 @@ export async function GET() {
         subject: p.subject,
         status: p.status,
         createdAt: p.createdAt,
+        updatedAt: p.updatedAt,
+        aspectRatio: p.aspectRatio,
+        resolution: p.resolution,
+        frameWidth: p.frameWidth,
+        frameHeight: p.frameHeight,
+        // Opened in the Audio Studio suite when it carries an audio arrangement.
+        hasAudioSession: !!p.audioSession,
         finalAssetId: p.finalRender?.assetId ?? null,
       })),
     );
@@ -63,6 +70,8 @@ export async function POST(request: Request) {
         targetLengthS: body.targetLengthS,
         aspectRatio: body.aspectRatio,
         resolution: body.resolution,
+        frameWidth: body.frameWidth ?? null,
+        frameHeight: body.frameHeight ?? null,
         shotCount: body.shotCount,
         audioMode: body.audioMode ?? "TTS_FROM_SCRIPT",
         llmModel: body.llmModel,

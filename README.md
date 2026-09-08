@@ -4,7 +4,8 @@ SlopStudio Pro for **Omarchy** (Arch Linux + Hyprland) — the desktop NLE fork 
 
 > **This fork removes the Storyboard mode** (the AI concept → shot-list board, its
 > story-element library and keyframe image generation via fal.ai). The start screen
-> offers **Assembly**, **Audio Studio** and **Open project**; single AI shots, script /
+> offers **Assembly** and **Audio Studio** (existing projects open from the Assembly
+> dialog); single AI shots, script /
 > voiceover generation, and everything else are unchanged. Mentions of storyboards
 > below are historical. See `docs/CHANGELOG.md`.
 
