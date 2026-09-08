@@ -1,0 +1,178 @@
+import { expect, type APIRequestContext, type Page } from "@playwright/test";
+import { execFileSync } from "node:child_process";
+import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
+
+export const MODELS = {
+  llmModel: "google/gemini-3.5-flash",
+  videoModel: "alibaba/wan-2.7",
+  ttsModel: "x-ai/grok-voice-tts-1.0",
+};
+
+/** Create a project through the API (frameWidth/Height optional). */
+export async function createProject(
+  request: APIRequestContext,
+  opts: { title?: string; frameWidth?: number; frameHeight?: number } = {},
+): Promise<string> {
+  const res = await request.post("/api/projects", {
+    data: {
+      title: opts.title ?? "e2e (pw)",
+      targetLengthS: 30,
+      aspectRatio: "R16_9",
+      resolution: "R480P",
+      frameWidth: opts.frameWidth ?? 640,
+      frameHeight: opts.frameHeight ?? 360,
+      shotCount: 5,
+      audioMode: "NONE",
+      ...MODELS,
+    },
+  });
+  expect(res.ok(), await res.text()).toBeTruthy();
+  const json = await res.json();
+  return json.data.id as string;
+}
+
+export async function deleteProject(request: APIRequestContext, id: string) {
+  await request.delete(`/api/projects/${id}`).catch(() => {});
+}
+
+/** Upload the bundled sample still and add it as a 3 s segment. */
+export async function addStillSegment(request: APIRequestContext, projectId: string): Promise<string> {
+  const up = await request.post("/api/uploads", {
+    multipart: {
+      projectId,
+      file: { name: "oldslop.png", mimeType: "image/png", buffer: readPublic("slop/oldslop.png") },
+    },
+  });
+  expect(up.ok(), await up.text()).toBeTruthy();
+  const assetId = (await up.json()).data.id as string;
+  const seg = await request.post(`/api/projects/${projectId}/segments`, {
+    data: { source: "UPLOAD_IMAGE_STILL", sourceAssetId: assetId, durationS: 3, imageMotion: "NONE" },
+  });
+  expect(seg.ok(), await seg.text()).toBeTruthy();
+  const snap = await (await request.get(`/api/projects/${projectId}`)).json();
+  return snap.data.segments[0].id as string;
+}
+
+export async function snapshot(request: APIRequestContext, projectId: string) {
+  const res = await request.get(`/api/projects/${projectId}`);
+  expect(res.ok()).toBeTruthy();
+  return (await res.json()).data;
+}
+
+/** Poll until the project's final render is READY (or FAILED). */
+export async function waitForRender(request: APIRequestContext, projectId: string, timeoutMs = 90_000) {
+  const t0 = Date.now();
+  for (;;) {
+    const s = await snapshot(request, projectId);
+    const st = s.finalRender?.status;
+    if (s.status === "DONE" && st === "READY") return s;
+    if (s.status === "FAILED" || st === "FAILED") throw new Error(`render failed: ${s.finalRender?.error ?? s.error}`);
+    if (Date.now() - t0 > timeoutMs) throw new Error("render timed out");
+    await new Promise((r) => setTimeout(r, 1500));
+  }
+}
+
+/** Absolute path of a legacy (non-bundle) project's final render on disk. */
+export function finalRenderPath(projectId: string): string {
+  const dir = path.join(process.cwd(), ".data", "assets", projectId, "final");
+  const f = execFileSync("ls", [dir]).toString().trim().split("\n").find((n) => n.startsWith("final."));
+  if (!f) throw new Error(`no final render in ${dir}`);
+  return path.join(dir, f);
+}
+
+/** ffprobe the first video + audio stream: codec names, tag, pix_fmt, size. */
+export function probe(file: string): { video: string[]; audio: string[] } {
+  const out = (sel: string, entries: string) =>
+    execFileSync("ffprobe", ["-v", "error", "-select_streams", sel, "-show_entries", entries, "-of", "csv=p=0", file])
+      .toString()
+      .trim()
+      .split("\n")[0]
+      .split(",")
+      .filter(Boolean);
+  return {
+    // Fields come back in the stream's own order (codec_name, codec_tag_string, pix_fmt).
+    video: out("v:0", "stream=codec_name,codec_tag_string,pix_fmt"),
+    audio: (() => {
+      try {
+        return out("a:0", "stream=codec_name");
+      } catch {
+        return [];
+      }
+    })(),
+  };
+}
+
+export function readPublic(rel: string): Buffer {
+  return execFileSync("cat", [path.join(process.cwd(), "public", rel)]);
+}
+
+/** Attach the test wav as the project's music bed (so renders carry an audio stream). */
+export async function addMusicBed(request: APIRequestContext, projectId: string) {
+  const res = await request.post(`/api/projects/${projectId}/music`, {
+    multipart: { file: { name: "bed.wav", mimeType: "audio/wav", buffer: readFileSync(testWavPath()) } },
+  });
+  expect(res.ok(), await res.text()).toBeTruthy();
+}
+
+/** A tiny identity 3D LUT (.cube) written to a temp file. */
+export function identityCubePath(): string {
+  const dir = mkdtempSync(path.join(tmpdir(), "slop-lut-"));
+  const p = path.join(dir, "identity.cube");
+  writeFileSync(p, 'TITLE "identity"\nLUT_3D_SIZE 2\n0 0 0\n1 0 0\n0 1 0\n1 1 0\n0 0 1\n1 0 1\n0 1 1\n1 1 1\n');
+  return p;
+}
+
+/** A 4 s test tone with a little noise (wav) generated by ffmpeg. */
+export function testWavPath(): string {
+  const dir = mkdtempSync(path.join(tmpdir(), "slop-wav-"));
+  const p = path.join(dir, "voice.wav");
+  execFileSync("ffmpeg", [
+    "-hide_banner", "-loglevel", "error", "-y",
+    "-f", "lavfi", "-i", "sine=frequency=330:sample_rate=48000",
+    "-f", "lavfi", "-i", "anoisesrc=color=white:amplitude=0.05:sample_rate=48000",
+    "-filter_complex", "[0:a][1:a]amix=inputs=2:normalize=0[a]", "-map", "[a]",
+    "-t", "4", "-c:a", "pcm_s16le", p,
+  ]);
+  return p;
+}
+
+/** Open the editor for a project and wait for its panels to mount. */
+export async function openEditor(page: Page, projectId: string, query = "") {
+  await page.goto(`/projects/${projectId}${query}`);
+  await expect(page.locator(".react-draggable").first()).toBeVisible();
+  await expect(page.getByText("Loading workspace…")).toHaveCount(0);
+  await expect(page.getByText("Loading…")).toHaveCount(0, { timeout: 30_000 });
+}
+
+/** Open a panel from the toolbar's "+ Panel" launcher. */
+export async function openPanel(page: Page, title: string) {
+  await page.getByRole("button", { name: /^\+ ?Panel$|^\+$/ }).first().click();
+  // Menu rows are "<icon> <title>", so match on the trailing title.
+  await page.locator("div.absolute").getByRole("button", { name: new RegExp(`${title.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`) }).click();
+}
+
+/** Every panel's box must lie inside the workspace container. */
+export async function expectPanelsInside(page: Page) {
+  const boxes = await page.evaluate(() => {
+    const cont = document.querySelector(".react-draggable")?.parentElement;
+    if (!cont) return null;
+    const c = cont.getBoundingClientRect();
+    return {
+      c: { l: c.left, t: c.top, r: c.right, b: c.bottom },
+      panels: [...document.querySelectorAll(".react-draggable")].map((e) => {
+        const r = e.getBoundingClientRect();
+        return { l: r.left, t: r.top, r: r.right, b: r.bottom };
+      }),
+    };
+  });
+  expect(boxes).not.toBeNull();
+  for (const p of boxes!.panels) {
+    expect(p.l).toBeGreaterThanOrEqual(boxes!.c.l - 1);
+    expect(p.t).toBeGreaterThanOrEqual(boxes!.c.t - 1);
+    expect(p.r).toBeLessThanOrEqual(boxes!.c.r + 1);
+    expect(p.b).toBeLessThanOrEqual(boxes!.c.b + 1);
+  }
+  return boxes!;
+}

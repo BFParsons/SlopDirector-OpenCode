@@ -5,6 +5,15 @@ Notable changes, newest first. See [DEPENDENCIES.md](DEPENDENCIES.md) for setup 
 
 ## 2026-09 — no-storyboard fork
 
+- **Render quota only for AI-billed renders.** The monthly quota (20/user) used to cap *every*
+  export, deleted projects included; a local re-assembly of your own clips now bills nothing
+  and isn't counted. Found by the e2e suite after ~20 test renders.
+- **Playwright end-to-end suite** (`tests/e2e/`, `pnpm test:e2e`): 19 tests against the
+  running app and the system Chromium — start screen + Assembly dialog, layout/menus/resize
+  round-trip, all five export formats (real renders probed with ffprobe), Polish LUT +
+  captions, the effect stack, the Audio Studio tools and mixdown formats, MKV import, and the
+  leave guard. See DEPENDENCIES.md §7.
+
 - **ffmpeg 9 feature drop** (everything from [UPGRADES-2026-09.md](UPGRADES-2026-09.md) §2
   that isn't a sprint-scale architecture project):
   - **Export formats.** The Export dialog now opens on a settings step: frame readout + a

@@ -228,6 +228,26 @@ What differs from the Debian/Windows notes above:
 
 ---
 
+## 7. End-to-end tests (Playwright)
+
+`tests/e2e/` drives the real app (the running dev server, the SQLite desktop target, the
+system ffmpeg) with **Playwright** + the system Chromium at this laptop's logical viewport
+(936×490). It covers the start screen and Assembly dialog (presets, custom sizes, Open
+tab), workspace layout/menus/resize round-trip, every export format (real renders with LUT
++ libass captions + effects, probed with ffprobe), the Polish LUT/caption controls, the
+effect stack, the Audio Studio tools (RNN denoise, leveler, stretch, audiogram, FLAC
+mixdown), the MKV import path and the leave guard.
+
+```bash
+pnpm dev                      # or the desktop launcher — tests reuse a running :3000
+pnpm test:e2e                 # ~2–3 min; creates and deletes "(pw)" projects
+pnpm test:e2e:ui              # Playwright UI mode
+PW_CHROMIUM=/path/to/chromium pnpm test:e2e   # if Chromium isn't at /usr/bin/chromium
+```
+
+`playwright.config.ts` runs one worker (renders share the GPU) and keeps traces and
+screenshots for failures under `test-results/` (gitignored).
+
 ## Windows setup
 
 The codebase is portable Node/TypeScript and runs on Windows, **but a few pieces are

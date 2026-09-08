@@ -69,6 +69,7 @@ export async function GET(_req: Request, { params }: Ctx) {
     const usedThisMonth = await prisma.project.count({
       where: {
         userId: user.id,
+        deletedAt: null,
         status: { in: ["RENDERING", "DONE"] },
         updatedAt: { gte: startOfMonth() },
       },
@@ -144,20 +145,6 @@ export async function POST(_req: Request, { params }: Ctx) {
       }
     }
 
-    const usedThisMonth = await prisma.project.count({
-      where: {
-        userId: user.id,
-        status: { in: ["RENDERING", "DONE"] },
-        updatedAt: { gte: startOfMonth() },
-      },
-    });
-    if (usedThisMonth >= user.quotaAdsMonth) {
-      return err(
-        `Monthly video quota reached (${usedThisMonth}/${user.quotaAdsMonth})`,
-        429,
-      );
-    }
-
     const cost = estimateCost({
       ttsModel: project.ttsModel,
       shots: aiToRender.map((s) => ({
@@ -168,6 +155,27 @@ export async function POST(_req: Request, { params }: Ctx) {
         ? ttsCharsFor(project)
         : 0,
     });
+
+    // The monthly quota is a cost guard for AI generation. A local ffmpeg
+    // re-assembly of the user's own clips bills nothing, so it isn't capped —
+    // this is a desktop NLE, not a metered ad generator. (Deleted projects no
+    // longer count either.)
+    if (cost.totalCents > 0) {
+      const usedThisMonth = await prisma.project.count({
+        where: {
+          userId: user.id,
+          deletedAt: null,
+          status: { in: ["RENDERING", "DONE"] },
+          updatedAt: { gte: startOfMonth() },
+        },
+      });
+      if (usedThisMonth >= user.quotaAdsMonth) {
+        return err(
+          `Monthly AI video quota reached (${usedThisMonth}/${user.quotaAdsMonth})`,
+          429,
+        );
+      }
+    }
     await prisma.project.update({
       where: { id },
       data: { estCostCents: cost.totalCents },

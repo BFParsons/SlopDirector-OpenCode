@@ -63,3 +63,7 @@ qa-*.py
 # Bundled static ffmpeg/ffprobe for the desktop AppImage (fetched via scripts/fetch-ffmpeg.sh)
 /vendor/ffmpeg/ffmpeg
 /vendor/ffmpeg/ffprobe
+
+# Playwright
+/test-results
+/playwright-report
