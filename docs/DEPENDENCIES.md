@@ -32,7 +32,7 @@ pnpm install             # installs all JS deps
 JS dependencies of note (full list in `package.json`): **Next.js 16**, **React 19**,
 **Prisma 6** (dual client — see below), **PixiJS 8 + pixi-filters** (WebGL preview
 compositor), **wavesurfer.js** (audio waveforms), **Zustand 5**, **Tailwind 4**,
-**Electron 33 + electron-builder** (desktop), **@node-rs/argon2** (password hashing —
+**Electron 44 + electron-builder 26** (desktop; Chromium 152, embedded Node 24), **@node-rs/argon2** (password hashing —
 a native module).
 
 ---
@@ -79,14 +79,16 @@ Used for the final render/assembly and probing. Resolution order
 3. the system `ffmpeg` / `ffprobe` on **PATH** ← web/dev path
 
 - **Dev/web:** install ffmpeg and have it on PATH (here: ffmpeg 7.1.4).
-- **Desktop AppImage:** a static ffmpeg+ffprobe (johnvansickle 7.0.2) is **bundled**
-  into `resources/ffmpeg`. It's fetched into `vendor/ffmpeg/` at build time by
-  `scripts/fetch-ffmpeg.sh` (run automatically by `pnpm desktop:build`). The binaries
-  are gitignored (~153 MB).
+- **Desktop AppImage:** a static ffmpeg+ffprobe (**BtbN release-9.0 GPL build**, ffmpeg
+  9.0.x) is **bundled** into `resources/ffmpeg`. It's fetched into `vendor/ffmpeg/` at
+  build time by `scripts/fetch-ffmpeg.sh` (run automatically by `pnpm desktop:build`).
+  The binaries are gitignored (~280 MB). This build has VAAPI/QSV/Vulkan hardware
+  encode, libplacebo, libx265, SVT-AV1, libvidstab, librubberband, libass and lut3d —
+  see `docs/UPGRADES-2026-09.md` for what that unlocks. (Until 2026-09 this was a
+  johnvansickle 7.0.2 build from 2024 with no VAAPI.)
 - **Encoder selection** is probed at runtime against the *resolved* ffmpeg
   (`src/lib/system/capabilities.ts`): hardware (NVENC/QSV/VAAPI) if both listed *and*
-  validated, else **libx264 software**. The bundled static ffmpeg has no VAAPI, so the
-  desktop app uses x264 — which is why the probe must use the same binary the render
+  validated, else **libx264 software**. The probe must use the same binary the render
   does.
 
 ---

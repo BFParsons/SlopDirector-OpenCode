@@ -5,6 +5,16 @@ Notable changes, newest first. See [DEPENDENCIES.md](DEPENDENCIES.md) for setup 
 
 ## 2026-09 — no-storyboard fork
 
+- **Dependency audit + upgrades** (see [UPGRADES-2026-09.md](UPGRADES-2026-09.md) for the
+  full table and the feature opportunities). Electron 33 → **44** (Chromium 152, Node 24),
+  electron-builder 25 → 26, Next 16.2.6 → **16.3.4** (security), React 19.2.8, PixiJS 8.20,
+  and all other minors; same-major security floors in `pnpm-workspace.yaml` take
+  `pnpm audit` from 2 critical / 44 high to **zero**. Held: Prisma 7, TypeScript 7,
+  ESLint 10 (Next's React plugin isn't ready). The AppImage's bundled ffmpeg moves from a
+  2024 static 7.0.2 (no VAAPI) to **BtbN's 9.0 build** with VAAPI/QSV/Vulkan, libplacebo,
+  x265, SVT-AV1, vidstab, rubberband and libass (`scripts/fetch-ffmpeg.sh`), so the
+  packaged app gets hardware export too.
+
 - **Assembly dialog: New / Open + any frame size.** The Assembly card's dialog now has
   two tabs. *New project* offers a dropdown of popular sizes by medium — YouTube/web
   16:9 up to 4K UHD, DCI 2K/4K, vertical 9:16 up to 4K, square, 4:5 portrait, ultrawide,
