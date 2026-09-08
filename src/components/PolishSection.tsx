@@ -3,6 +3,9 @@
 import { Input, Label, Select } from "@/components/ui";
 import type { Draft } from "@/lib/projects/draft";
 import { WatermarkControl } from "./WatermarkControl";
+import { LutControl } from "./LutControl";
+import { OVERLAY_POSITIONS } from "./TextOverlaySection";
+import { CAPTION_STYLES } from "@/lib/render/ass";
 
 // Short labels on purpose: a closed <select> shows only ~12 characters in a
 // narrow panel, so parenthetical descriptions were just truncated noise.
@@ -39,6 +42,7 @@ export function PolishSection({
   setPolish,
   projectId,
   watermarkAssetId,
+  lutAssetId,
   save,
   refetch,
 }: {
@@ -47,6 +51,7 @@ export function PolishSection({
   setPolish: (patch: Partial<Draft>) => void;
   projectId: string;
   watermarkAssetId: string | null;
+  lutAssetId: string | null;
   save: () => Promise<boolean>;
   refetch: () => Promise<void>;
 }) {
@@ -150,6 +155,54 @@ export function PolishSection({
           save={save}
           refetch={refetch}
         />
+      </div>
+
+      <LutControl projectId={projectId} lutAssetId={lutAssetId} readOnly={readOnly} save={save} refetch={refetch} />
+
+      {/* Burned-in captions (libass): auto-timed from the voiceover script. */}
+      <div className="space-y-2 border-t border-[var(--color-border)] pt-3">
+        <label className="flex items-center gap-2 text-xs">
+          <input
+            type="checkbox"
+            checked={draft.captionsEnabled}
+            disabled={readOnly}
+            className="accent-[var(--color-accent)]"
+            onChange={(e) => setPolish({ captionsEnabled: e.target.checked })}
+          />
+          Burn in captions from the voiceover script
+        </label>
+        {draft.captionsEnabled ? (
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <Label hint={CAPTION_STYLES.find((s) => s.value === draft.captionStyle)?.blurb}>Style</Label>
+              <Select value={draft.captionStyle} disabled={readOnly} onChange={(e) => setPolish({ captionStyle: e.target.value })}>
+                {CAPTION_STYLES.map((s) => (
+                  <option key={s.value} value={s.value}>{s.label}</option>
+                ))}
+              </Select>
+            </div>
+            <div>
+              <Label>Position</Label>
+              <Select value={draft.captionPosition} disabled={readOnly} onChange={(e) => setPolish({ captionPosition: e.target.value })}>
+                {OVERLAY_POSITIONS.map((p) => (
+                  <option key={p.value} value={p.value}>{p.label}</option>
+                ))}
+              </Select>
+            </div>
+            <div>
+              <Label hint="% of frame height">Size</Label>
+              <Input
+                type="number"
+                min={2}
+                max={20}
+                step={1}
+                value={draft.captionSizePct}
+                disabled={readOnly}
+                onChange={(e) => setPolish({ captionSizePct: Math.min(20, Math.max(2, Math.round(Number(e.target.value) || 6))) })}
+              />
+            </div>
+          </div>
+        ) : null}
       </div>
 
       <div className="space-y-2 border-t border-[var(--color-border)] pt-3">

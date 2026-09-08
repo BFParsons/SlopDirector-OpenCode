@@ -87,7 +87,7 @@ export default function AudioMultitrackPanel({ windowControls, panelId }: PanelP
   const [bucketDrop, setBucketDrop] = useState(false);
 
   // Mixdown / export
-  const [mixFmt, setMixFmt] = useState<"wav" | "mp3">("wav");
+  const [mixFmt, setMixFmt] = useState<"wav" | "mp3" | "flac" | "opus" | "m4a">("wav");
   const [mixing, setMixing] = useState(false);
   const [mixMsg, setMixMsg] = useState("");
   const [mixErr, setMixErr] = useState<string | null>(null);
@@ -774,12 +774,15 @@ export default function AudioMultitrackPanel({ windowControls, panelId }: PanelP
             <span className="text-[var(--color-muted)]">Mix down</span>
             <select
               value={mixFmt}
-              onChange={(e) => setMixFmt(e.target.value === "mp3" ? "mp3" : "wav")}
+              onChange={(e) => setMixFmt(e.target.value as "wav" | "mp3" | "flac" | "opus" | "m4a")}
               className="rounded border border-[var(--color-border)] bg-[var(--color-card)] px-1.5 py-0.5"
               title="Export format"
             >
               <option value="wav">WAV</option>
               <option value="mp3">MP3</option>
+              <option value="flac">FLAC</option>
+              <option value="opus">Opus</option>
+              <option value="m4a">AAC (M4A)</option>
             </select>
             <button
               type="button"

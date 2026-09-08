@@ -339,7 +339,7 @@ export default function MediaBucketPanel({ windowControls }: PanelProps) {
           <input
             ref={fileRef}
             type="file"
-            accept="video/mp4,video/quicktime,video/webm,image/png,image/jpeg,image/webp,audio/mpeg,audio/mp3,audio/wav,audio/x-wav,audio/mp4,audio/x-m4a,audio/aac,audio/ogg,audio/flac"
+            accept="video/mp4,video/quicktime,video/webm,video/x-matroska,video/x-msvideo,video/mpeg,video/mp2t,video/x-m4v,video/3gpp,.mkv,.avi,.mpg,.mpeg,.ts,.mts,.m2ts,.m4v,.3gp,image/png,image/jpeg,image/webp,audio/mpeg,audio/mp3,audio/wav,audio/x-wav,audio/mp4,audio/x-m4a,audio/aac,audio/ogg,audio/flac"
             hidden
             onChange={(e) => {
               const f = e.target.files?.[0];

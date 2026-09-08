@@ -13,7 +13,7 @@ useful part — which **product features** the newer versions make possible.
 | yt-dlp | 2026.08.19 | 2026.08.19 | 2026.08.19 | Current (pacman). |
 | Deno (yt-dlp challenge solver) | 2.9.5 | 2.9.5 | 2.9.6 | Pacman will pick it up. |
 | Python audio stack | torch 2.14 / torchaudio 2.11 / torchcodec 0.16 / demucs 4.1 / whisper 20250625 | same | same | Current (CPU wheels). |
-| Node (dev, `mise.toml`) | 22.23.2 LTS | 22.23.2 | 24.20 LTS | Electron 44 embeds Node 24.18, so the *packaged* server already runs on 24. Moving dev to 24 is a one-line change once Electron's installer is confirmed on it (Node 26 broke it). |
+| Node (dev, `mise.toml`) | 22.23.2 LTS | **24.20 LTS** | 24.20 LTS | Electron 44 embeds Node 24.18, so the *packaged* server already runs on 24. Moving dev to 24 is a one-line change once Electron's installer is confirmed on it (Node 26 broke it). |
 | Electron | 33.4.11 | **44.2.0** | 44.2.0 | Chromium 152, Node 24.18. No breaking change touches this app (removed: Unity DE, macOS 12, 32-bit builds). Fixes 7 audit highs. |
 | electron-builder | 25.1.8 | **26.15.3** | 26.15.3 | Fixes the electron-updater advisories. |
 | Next.js | 16.2.6 | **16.3.4** | 16.3.4 | Fixes 4 highs (SSRF in rewrites/Server Actions, middleware bypass, DoS). |
@@ -27,6 +27,11 @@ useful part — which **product features** the newer versions make possible.
 | `pnpm audit` | 2 critical · 44 high · 43 moderate · 7 low | **0 / 0 / 0 / 0** | | Via the bumps above + same-major floors in `pnpm-workspace.yaml` overrides. |
 
 ## 2. What the updates unlock — feature candidates
+
+> **Status (2026-09-08, same day):** items 1–12 and 14–18 are **implemented** (see the
+> changelog); 24 (Node 24) is done. Left for later as sprint-scale architecture work: 13
+> (GPU filter-graph compositing), 19 (WebGPU compositor), 20 (WebCodecs preview); 22
+> (Prisma 7) and 23 (TypeScript 7) stay held as described in §3.
 
 Effort: **S** = a day or less, **M** = a few days, **L** = a sprint. "Both builds" means the
 filter/encoder exists in Omarchy's system ffmpeg *and* the new bundled static build, so
@@ -95,6 +100,8 @@ it works in dev and in the AppImage.
 ### Not available here (checked)
 - ffmpeg's **`whisper` filter** (whisper.cpp) is not compiled into Arch's or BtbN's
   builds — keep the Python Whisper path for captions.
+- zimg's `zscale` rejects the `tin=`/`pin=` input overrides on this build; the HDR → SDR
+  effect stamps the source colour params with `setparams` instead (verified on both builds).
 - **QSV** fails on this laptop (Gen9.5 UHD 620 isn't supported by the oneVPL runtime)
   and **AV1 hardware encode** needs Gen12+/Arc — VAAPI H.264/HEVC is the path here.
 

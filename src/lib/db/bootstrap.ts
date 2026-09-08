@@ -46,6 +46,10 @@ export async function ensureDesktopDb(): Promise<void> {
     // Custom frame size (px); null = aspectRatio/resolution preset.
     'ALTER TABLE "Project" ADD COLUMN "frameWidth" INTEGER',
     'ALTER TABLE "Project" ADD COLUMN "frameHeight" INTEGER',
+    // Export format / custom LUT / libass caption style.
+    `ALTER TABLE "Project" ADD COLUMN "exportCodec" TEXT NOT NULL DEFAULT 'h264'`,
+    'ALTER TABLE "Project" ADD COLUMN "lutAssetId" TEXT',
+    `ALTER TABLE "Project" ADD COLUMN "captionStyle" TEXT NOT NULL DEFAULT 'OUTLINE'`,
   ];
   for (const stmt of migrations) {
     try {

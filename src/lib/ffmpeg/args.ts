@@ -15,6 +15,13 @@ export const TARGET_FPS = 30;
 /** Bundled font for burned-in text. Lives in public/ so the standalone runner
  *  (which copies public/) always has it at process.cwd()/public/fonts. */
 export const FONT_BOLD = path.join(process.cwd(), "public", "fonts", "DejaVuSans-Bold.ttf");
+/** Directory of the bundled fonts (libass `fontsdir` for burned-in captions). */
+export const FONTS_DIR = path.join(process.cwd(), "public", "fonts");
+
+/** Quote a filesystem path as a filtergraph option value (single quotes; embedded quotes escaped). */
+export function ffQuote(p: string): string {
+  return `'${p.replace(/'/g, "'\\''")}'`;
+}
 
 const BLUR_FILL_SIGMA = 24; // gaussian blur on the enlarged background fill
 

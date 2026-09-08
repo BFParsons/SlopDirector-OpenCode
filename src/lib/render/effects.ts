@@ -14,7 +14,15 @@ export type EffectKind =
   | "mirror"
   | "rotate"
   | "pixelate"
-  | "sharpen";
+  | "sharpen"
+  // Export-only additions (ffmpeg 9 filters present in both the system and bundled builds):
+  | "denoise"
+  | "detail"
+  | "deinterlace"
+  | "deshake"
+  | "stabilize"
+  | "smoothSlowmo"
+  | "tonemap";
 
 export interface EffectSpec {
   id: string;
@@ -31,6 +39,13 @@ export const EFFECT_KINDS: readonly EffectKind[] = [
   "rotate",
   "pixelate",
   "sharpen",
+  "denoise",
+  "detail",
+  "deinterlace",
+  "deshake",
+  "stabilize",
+  "smoothSlowmo",
+  "tonemap",
 ];
 
 const KIND_SET = new Set<string>(EFFECT_KINDS);

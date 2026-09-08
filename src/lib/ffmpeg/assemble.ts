@@ -1,26 +1,29 @@
 import { spawn } from "node:child_process";
 import { rename } from "node:fs/promises";
+import path from "node:path";
 import { ffmpegPath } from "./binary";
 import type { ColorLook, FillMode, ImageMotion, Transition } from "@/lib/db/enums";
 import {
-  type TextOverlaySpec,
-  TARGET_FPS,
   blurFillStatements,
   colorLookFilter,
   drawtextFilter,
   eqFilter,
+  ffQuote,
+  FONTS_DIR,
   grainFilter,
   imageMotionFilter,
   normalizeFilter,
   positionXY,
   stillFilter,
+  TARGET_FPS,
+  type TextOverlaySpec,
   vignetteFilter,
   xfadeName,
 } from "./args";
 import { type EncoderProfile, encoderProfile } from "./encoder";
 import { hasAudioStream, probeDuration } from "./probe";
 import { type ClipTransform, zoompanTransformFilter } from "@/lib/render/transform";
-import { effectsFfmpeg } from "@/config/effects";
+import { effectsFfmpeg, stabilizeDetectFilter } from "@/config/effects";
 import type { EffectSpec } from "@/lib/render/effects";
 import type { PipPlacement } from "@/lib/render/pip";
 
@@ -108,6 +111,8 @@ export interface AssembleOpts {
   watermark?: WatermarkSpec; // optional logo composited over the whole video
   textOverlays?: TextOverlaySpec[]; // burned-in text (lower-thirds, disclaimers)
   encoder?: EncoderProfile; // video encoder (default CPU x264; GPU when available)
+  lutPath?: string; // optional 3D LUT (.cube) applied to every clip after the color look
+  captionsAss?: string; // optional libass subtitle file (.ass) burned in after text overlays
   outPath: string; // absolute final destination
   tmpPath: string; // absolute scratch output, renamed to outPath on success
   onProgress?: (percent: number) => void;
@@ -135,7 +140,34 @@ export async function assembleVideo(
   const w = opts.width;
   const h = opts.height;
   const fillMode: FillMode = opts.fillMode ?? "LETTERBOX";
-  const colorBase = colorLookFilter(opts.colorLook ?? "NONE");
+  // Project-wide grade: the built-in look, then an optional user .cube LUT.
+  const colorBase =
+    [
+      colorLookFilter(opts.colorLook ?? "NONE"),
+      opts.lutPath ? `lut3d=file=${ffQuote(opts.lutPath)}:interp=tetrahedral` : null,
+    ]
+      .filter(Boolean)
+      .join(",") || null;
+
+  // Stabilization is two-pass: a detection pass per clip writes a .trf that the
+  // main graph's vidstabtransform reads. Run those now, keyed by input index.
+  const trfPaths = new Map<number, string>();
+  {
+    const targets: { idx: number; file: string; effects?: EffectSpec[] }[] = [];
+    opts.inputs.forEach((inp, i) => {
+      if (inp.kind === "video") targets.push({ idx: i, file: inp.path, effects: inp.effects });
+    });
+    (opts.overlayClips ?? []).forEach((pc, j) => {
+      if (pc.kind === "video") targets.push({ idx: n + j, file: pc.path, effects: pc.effects });
+    });
+    for (const t of targets) {
+      const trf = path.join(path.dirname(opts.tmpPath), `stab-${t.idx}.trf`);
+      const detect = stabilizeDetectFilter(t.effects, trf);
+      if (!detect) continue;
+      await runFfmpeg(["-y", "-i", t.file, "-vf", detect, "-an", "-f", "null", "-"], 1);
+      trfPaths.set(t.idx, trf);
+    }
+  }
 
   // Normalized-PTS tail: trim to the segment's on-screen length (so a trimmed
   // clip is actually cut), ending in `fps` so the link reports a constant frame
@@ -204,28 +236,36 @@ export async function assembleVideo(
       effDur.push(dur);
       const sourceTrim =
         trimStartS > 0 ? `trim=start=${trimStartS.toFixed(3)},setpts=PTS-STARTPTS,` : "";
+      // Source-stage effects (deinterlace / stabilize / deshake / HDR tone-map)
+      // run on the raw decoded frames, before the in-point trim and normalize.
+      const fxSrc = effectsFfmpeg(inp.effects, { ...fxCtx, trfPath: trfPaths.get(i) }, "source");
+      const fxSrcLead = fxSrc ? `${fxSrc},` : "";
       const retime = speed !== 1 ? `setpts=(PTS-STARTPTS)/${speed}` : "";
+      // Retime-stage effects (motion-interpolated slow motion) only make sense
+      // when the clip is slowed down.
+      const fxRetime = speed < 1 ? effectsFfmpeg(inp.effects, fxCtx, "retime") : "";
 
       if (fillMode === "BLUR_FILL") {
-        // Trim the source first (if needed), blur-fill, then retime + color.
+        // Source effects + trim first (if any), blur-fill, then retime + color.
         let src = `${i}:v`;
         let pre = "";
-        if (sourceTrim) {
-          pre = `[${i}:v]${sourceTrim.replace(/,$/, "")}[vt${i}];`;
+        const preChain = `${fxSrcLead}${sourceTrim}`.replace(/,$/, "");
+        if (preChain) {
+          pre = `[${i}:v]${preChain}[vt${i}];`;
           src = `vt${i}`;
         }
         const sub = blurFillStatements(src, `bfo${i}`, w, h, String(i));
-        const lead = [retime, colorEq].filter(Boolean).join(",");
+        const lead = [retime, fxRetime, colorEq].filter(Boolean).join(",");
         const leadComma = lead ? `${lead},` : "";
         const tf = zoompanTransformFilter(inp.transform, w, h, dur, TARGET_FPS);
         const tfLead = tf ? `${tf},` : "";
         segGraphs.push(`${pre}${sub};[bfo${i}]${leadComma}${fxGeomLead}${tfLead}${fxFiltLead}${segTail(dur)}[v${i}]`);
       } else {
-        const retimeTrail = retime ? `,${retime}` : "";
+        const retimeTrail = [retime, fxRetime].filter(Boolean).map((f) => `,${f}`).join("");
         const tf = zoompanTransformFilter(inp.transform, w, h, dur, TARGET_FPS);
         const tfPart = tf ? `,${tf}` : "";
         segGraphs.push(
-          `[${i}:v]${sourceTrim}${normalizeFilter(w, h)}${retimeTrail}${colorEqTrail}${fxGeomTrail}${tfPart}${fxFiltTrail},${segTail(dur)}[v${i}]`,
+          `[${i}:v]${fxSrcLead}${sourceTrim}${normalizeFilter(w, h)}${retimeTrail}${colorEqTrail}${fxGeomTrail}${tfPart}${fxFiltTrail},${segTail(dur)}[v${i}]`,
         );
       }
     }
@@ -261,10 +301,14 @@ export async function assembleVideo(
       const fullDur = Math.max(0, (probed - trimStartS) / speed);
       dur = pc.durationS != null ? Math.min(pc.durationS, fullDur) : fullDur;
       const sourceTrim = trimStartS > 0 ? `trim=start=${trimStartS.toFixed(3)},setpts=PTS-STARTPTS,` : "";
+      const fx2Src = effectsFfmpeg(pc.effects, { w, h, fps: TARGET_FPS, trfPath: trfPaths.get(idx) }, "source");
+      const fx2SrcLead = fx2Src ? `${fx2Src},` : "";
       const retime = speed !== 1 ? `,setpts=(PTS-STARTPTS)/${speed}` : "";
+      const fx2Retime = speed < 1 ? effectsFfmpeg(pc.effects, { w, h, fps: TARGET_FPS }, "retime") : "";
+      const fx2RetimeTrail = fx2Retime ? `,${fx2Retime}` : "";
       const tf = zoompanTransformFilter(pc.transform, w, h, dur, TARGET_FPS);
       const tfPart = tf ? `,${tf}` : "";
-      segGraphs.push(`[${idx}:v]${sourceTrim}${normalizeFilter(w, h)}${retime}${color2Trail}${fx2GeomTrail}${tfPart}${fx2FiltTrail},${segTail(dur)}[ovf${j}]`);
+      segGraphs.push(`[${idx}:v]${fx2SrcLead}${sourceTrim}${normalizeFilter(w, h)}${retime}${fx2RetimeTrail}${color2Trail}${fx2GeomTrail}${tfPart}${fx2FiltTrail},${segTail(dur)}[ovf${j}]`);
     }
     pipMeta.push({ label: `ovf${j}`, offsetS: Math.max(0, pc.offsetS), dur, pip: pc.pip });
   }
@@ -381,6 +425,13 @@ export async function assembleVideo(
     const chain = texts.map((t) => drawtextFilter(t, h)).join(",");
     filters.push(`[${videoLabel}]${chain}[vtext]`);
     videoLabel = "vtext";
+  }
+
+  // Burned-in captions rendered by libass (styled: outline / box / pop), from
+  // the .ass file the job wrote. fontsdir points at the bundled DejaVu faces.
+  if (opts.captionsAss) {
+    filters.push(`[${videoLabel}]ass=filename=${ffQuote(opts.captionsAss)}:fontsdir=${ffQuote(FONTS_DIR)}[vcap]`);
+    videoLabel = "vcap";
   }
 
   const dur = outDur.toFixed(3);
@@ -547,8 +598,8 @@ export async function assembleVideo(
   if (audioLabel) args.push("-map", `[${audioLabel}]`);
 
   args.push(...enc.outputArgs, "-r", String(TARGET_FPS));
-  if (audioLabel) args.push("-c:a", "aac", "-b:a", "192k");
-  args.push("-movflags", "+faststart", "-progress", "pipe:1", "-nostats");
+  if (audioLabel) args.push(...enc.audioArgs);
+  args.push(...enc.containerArgs, "-progress", "pipe:1", "-nostats");
   args.push(opts.tmpPath);
 
   await runFfmpeg(args, outDur || 1, opts.onProgress);

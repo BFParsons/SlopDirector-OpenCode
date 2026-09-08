@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { withBase } from "@/lib/basePath";
+import { describeFrame, frameSize } from "@/config/frame-sizes";
 
 /**
  * The "Export" experience: a floating, borderless white window. It fires the real
@@ -91,14 +92,89 @@ function nextLine(prev: string): string {
   return line;
 }
 
+interface FormatInfo {
+  codec: string;
+  label: string;
+  container: string;
+  ext: string;
+  blurb: string;
+  available: boolean;
+  hardware: string | null;
+}
+
+interface RenderPreview {
+  cost: { totalCents: number; videoSeconds: number };
+  quota: { used: number; limit: number };
+  formats: FormatInfo[];
+  exportCodec: string;
+}
+
+type Phase = "settings" | "rendering" | "done";
+
 export function ExportWindow({ projectId, onClose }: { projectId: string; onClose: () => void }) {
-  const [ready, setReady] = useState(false);
+  const [phase, setPhase] = useState<Phase>("settings");
   const [line, setLine] = useState("Warming up the render farm…");
   const [assetId, setAssetId] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [failed, setFailed] = useState(false);
 
+  // --- settings step -------------------------------------------------------
+  const [preview, setPreview] = useState<RenderPreview | null>(null);
+  const [frame, setFrame] = useState<string>("");
+  const [codec, setCodec] = useState<string>("h264");
+  const [settingsError, setSettingsError] = useState<string | null>(null);
+  const [starting, setStarting] = useState(false);
+  const ext = preview?.formats.find((f) => f.codec === codec)?.ext ?? "mp4";
+
   useEffect(() => {
+    let alive = true;
+    api<RenderPreview>(`/api/projects/${projectId}/render`)
+      .then((p) => {
+        if (!alive) return;
+        setPreview(p);
+        const wanted = p.formats.find((f) => f.codec === p.exportCodec);
+        setCodec(wanted?.available ? wanted.codec : "h264");
+      })
+      .catch((e: Error) => {
+        if (alive) setSettingsError(e.message);
+      });
+    api<{
+      aspectRatio: "R16_9" | "R9_16" | "R1_1";
+      resolution: "R480P" | "R720P" | "R1080P";
+      frameWidth: number | null;
+      frameHeight: number | null;
+      title?: string;
+    }>(`/api/projects/${projectId}`)
+      .then((snap) => {
+        if (!alive) return;
+        const f = frameSize(snap);
+        setFrame(`${f.w} × ${f.h} · ${describeFrame(f.w, f.h)}`);
+        if (snap.title) setTitle(snap.title);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [projectId]);
+
+  async function startExport() {
+    if (starting) return;
+    setStarting(true);
+    setSettingsError(null);
+    try {
+      if (preview && codec !== preview.exportCodec) {
+        await api(`/api/projects/${projectId}`, { method: "PATCH", body: JSON.stringify({ exportCodec: codec }) });
+      }
+      setPhase("rendering");
+    } catch (e) {
+      setSettingsError((e as Error).message);
+      setStarting(false);
+    }
+  }
+
+  // --- rendering step ------------------------------------------------------
+  useEffect(() => {
+    if (phase !== "rendering") return;
     let alive = true;
     const startedAt = Date.now();
     // Fire the real render. The preview shown on completion is the playful
@@ -129,7 +205,7 @@ export function ExportWindow({ projectId, onClose }: { projectId: string; onClos
         /* keep waiting */
       }
       if (alive && ((finished && elapsed >= MIN_MS) || elapsed >= MAX_MS)) {
-        setReady(true);
+        setPhase("done");
         window.clearInterval(tick);
         window.clearInterval(poll);
       }
@@ -140,7 +216,7 @@ export function ExportWindow({ projectId, onClose }: { projectId: string; onClos
       window.clearInterval(tick);
       window.clearInterval(poll);
     };
-  }, [projectId]);
+  }, [projectId, phase]);
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
@@ -154,7 +230,82 @@ export function ExportWindow({ projectId, onClose }: { projectId: string; onClos
           ✕
         </button>
 
-        {!ready ? (
+        {phase === "settings" ? (
+          <div className="px-8 py-8">
+            <p className="text-lg font-semibold">Export settings</p>
+            <p className="mt-1 text-sm text-neutral-500">{frame || "…"}</p>
+
+            <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-neutral-400">Format</p>
+            {!preview && !settingsError ? (
+              <p className="mt-2 text-sm text-neutral-500">Checking the encoders on this machine…</p>
+            ) : null}
+            <div className="mt-2 max-h-[38dvh] space-y-1.5 overflow-y-auto pr-1" role="radiogroup" aria-label="Export format">
+              {(preview?.formats ?? []).map((f) => {
+                const selected = f.codec === codec;
+                return (
+                  <label
+                    key={f.codec}
+                    className={`flex cursor-pointer items-start gap-3 rounded-lg border px-3 py-2 transition ${
+                      selected ? "border-neutral-900 bg-neutral-50" : "border-neutral-200 hover:border-neutral-400"
+                    } ${f.available ? "" : "cursor-not-allowed opacity-50"}`}
+                  >
+                    <input
+                      type="radio"
+                      name="export-format"
+                      value={f.codec}
+                      checked={selected}
+                      disabled={!f.available}
+                      onChange={() => setCodec(f.codec)}
+                      className="mt-1 accent-neutral-900"
+                    />
+                    <span className="min-w-0 flex-1">
+                      <span className="flex items-center gap-2">
+                        <span className="text-sm font-medium">{f.label}</span>
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
+                            !f.available
+                              ? "bg-neutral-100 text-neutral-400"
+                              : f.hardware
+                                ? "bg-emerald-100 text-emerald-700"
+                                : "bg-neutral-100 text-neutral-600"
+                          }`}
+                        >
+                          {!f.available ? "not available" : f.hardware ? `GPU · ${f.hardware}` : "CPU"}
+                        </span>
+                      </span>
+                      <span className="block text-xs text-neutral-500">{f.blurb}</span>
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+
+            {preview && preview.cost.totalCents > 0 ? (
+              <p className="mt-3 text-xs text-neutral-500">
+                Estimated AI cost for this render: ${(preview.cost.totalCents / 100).toFixed(2)} · quota {preview.quota.used}/{preview.quota.limit}
+              </p>
+            ) : null}
+            {settingsError ? <p className="mt-3 text-sm text-red-600">{settingsError}</p> : null}
+
+            <div className="mt-6 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={onClose}
+                className="rounded-lg px-4 py-2 text-sm text-neutral-500 transition-colors hover:text-neutral-800"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={!preview || starting}
+                onClick={startExport}
+                className="rounded-lg bg-neutral-900 px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-neutral-700 disabled:opacity-50"
+              >
+                {starting ? "Starting…" : `Export .${ext} →`}
+              </button>
+            </div>
+          </div>
+        ) : phase === "rendering" ? (
           <div className="flex flex-col items-center gap-6 px-8 py-14 text-center">
             <span className="h-10 w-10 animate-spin rounded-full border-[3px] border-neutral-200 border-t-neutral-800" />
             <p className="min-h-[3.5rem] text-lg font-medium leading-snug">{line}</p>
@@ -175,12 +326,12 @@ export function ExportWindow({ projectId, onClose }: { projectId: string; onClos
               <>
                 <a
                   href={withBase(`/api/assets/${assetId}`)}
-                  download={`${(title || "export").replace(/[^\w.-]+/g, "_")}.mp4`}
+                  download={`${(title || "export").replace(/[^\w.-]+/g, "_")}.${ext}`}
                   className="rounded-lg bg-neutral-900 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-neutral-700"
                 >
                   ⬇ Save to your computer
                 </a>
-                <p className="text-xs text-neutral-400">{`${(title || "export").replace(/[^\w.-]+/g, "_")}.mp4`}</p>
+                <p className="text-xs text-neutral-400">{`${(title || "export").replace(/[^\w.-]+/g, "_")}.${ext}`}</p>
               </>
             ) : (
               <p className="text-sm text-neutral-500">

@@ -20,7 +20,7 @@ app runs fine without it).
 
 | Tool | Version used here | Notes |
 |---|---|---|
-| **Node.js** | v22 (works on 20 or 22; **not 26** — see Omarchy section) | LTS; pinned in `mise.toml` |
+| **Node.js** | v24 LTS (works on 20–24; **not 26** — see Omarchy section) | pinned in `mise.toml`; same major Electron 44 embeds |
 | **pnpm** | 10.33.0 | `packageManager` is pinned in `package.json`; use `corepack enable` to get the exact version |
 | **Git** | any | |
 
@@ -92,6 +92,13 @@ Used for the final render/assembly and probing. Resolution order
   does.
 
 ---
+
+### RNNoise models (bundled)
+
+The Processing Rack's *Noise suppression (RNN)* module uses ffmpeg's `arnndn` filter with
+the RNNoise models in `public/rnnoise/` (`bd.rnnn` default, `sh.rnnn`), from
+https://github.com/GregorR/rnnoise-models — no Python involved. They ship with the
+standalone build because they live under `public/`.
 
 ## 4. Audio Studio — Python / ML stack (optional, heavy)
 
@@ -183,7 +190,7 @@ pnpm db:generate       # IMPORTANT: restore the Postgres client afterwards for w
 Dev moved to an **Omarchy** laptop (Arch Linux + Hyprland, Intel iGPU) in 2026-09.
 What differs from the Debian/Windows notes above:
 
-- **Toolchain via mise.** `mise.toml` pins **Node 22** + pnpm 10.33.0 and mise
+- **Toolchain via mise.** `mise.toml` pins **Node 24** + pnpm 10.33.0 and mise
   activates them on `cd` (on a fresh clone: `mise trust && mise install`). Do **not**
   use Node ≥ 26: Electron's postinstall (extract-zip/yauzl) silently fails to unpack
   the binary, `node_modules/electron/dist` ends up holding only `locales/`, and launch

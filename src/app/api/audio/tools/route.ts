@@ -13,7 +13,7 @@ import {
   newAudioFilename,
   resolveAudioFile,
 } from "@/lib/audio/workspace";
-import { duckMusicUnderVoice, trimSilence } from "@/lib/audio/dsp";
+import { duckMusicUnderVoice, renderAudiogram, stretchAudio, trimSilence } from "@/lib/audio/dsp";
 
 export const dynamic = "force-dynamic";
 
@@ -32,9 +32,28 @@ const schema = z.discriminatedUnion("op", [
     thresholdDb: z.number().min(-90).max(-10).optional(),
     minSilenceS: z.number().min(0.1).max(5).optional(),
   }),
+  // Pitch-preserving tempo change and/or pitch shift (Rubber Band).
+  z.object({
+    op: z.literal("stretch"),
+    projectId: z.string().min(1),
+    path: z.string().min(1),
+    tempo: z.number().min(0.25).max(4).optional(),
+    pitchSemitones: z.number().min(-24).max(24).optional(),
+  }),
+  // Waveform / spectrum video of a track (podcast & social clips).
+  z.object({
+    op: z.literal("audiogram"),
+    projectId: z.string().min(1),
+    path: z.string().min(1),
+    style: z.enum(["waves", "spectrum", "bars"]).optional(),
+    width: z.number().int().min(160).max(4096).optional(),
+    height: z.number().int().min(90).max(4096).optional(),
+    color: z.string().regex(/^#?[0-9a-fA-F]{6}$/).optional(),
+    background: z.string().regex(/^#?[0-9a-fA-F]{6}$/).optional(),
+  }),
 ]);
 
-/** Standalone transforms that produce a brand-new track: ducking + silence-trim. */
+/** Standalone transforms that produce a brand-new track (or, for audiogram, a video). */
 export async function POST(request: Request) {
   try {
     const { user } = await requireApiUser();
@@ -53,6 +72,26 @@ export async function POST(request: Request) {
       outName = newAudioFilename("ducked-mix.wav", "wav");
       label = "Ducked mix";
       await duckMusicUnderVoice(musicAbs, voiceAbs, outAbsOf(outName), { reductionDb: body.reductionDb });
+    } else if (body.op === "stretch") {
+      const inputAbs = resolveAudioFile(body.projectId, body.path);
+      if (!inputAbs) return err("Invalid audio path", 400);
+      outName = newAudioFilename("stretched.wav", "wav");
+      const t = body.tempo ?? 1;
+      const st = body.pitchSemitones ?? 0;
+      label = `Stretched ${t.toFixed(2)}×${st ? ` · ${st > 0 ? "+" : ""}${st} st` : ""}`;
+      await stretchAudio(inputAbs, outAbsOf(outName), { tempo: t, pitchSemitones: st });
+    } else if (body.op === "audiogram") {
+      const inputAbs = resolveAudioFile(body.projectId, body.path);
+      if (!inputAbs) return err("Invalid audio path", 400);
+      outName = newAudioFilename("audiogram.mp4", "mp4");
+      label = `Audiogram (${body.style ?? "waves"})`;
+      await renderAudiogram(inputAbs, outAbsOf(outName), {
+        style: body.style,
+        width: body.width,
+        height: body.height,
+        color: body.color,
+        background: body.background,
+      });
     } else {
       const inputAbs = resolveAudioFile(body.projectId, body.path);
       if (!inputAbs) return err("Invalid audio path", 400);
@@ -70,6 +109,7 @@ export async function POST(request: Request) {
       relPath,
       name: label,
       durationS,
+      isVideo: body.op === "audiogram",
       url: `/api/audio/file?projectId=${encodeURIComponent(body.projectId)}&p=${encodeURIComponent(relPath)}`,
     });
   } catch (e) {

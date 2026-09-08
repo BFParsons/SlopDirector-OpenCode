@@ -54,6 +54,7 @@ CREATE TABLE "Project" (
     "resolution" TEXT NOT NULL DEFAULT 'R720P',
     "frameWidth" INTEGER,
     "frameHeight" INTEGER,
+    "exportCodec" TEXT NOT NULL DEFAULT 'h264',
     "audioFitMode" TEXT NOT NULL DEFAULT 'PAD_VIDEO',
     "shotCount" INTEGER NOT NULL DEFAULT 5,
     "stylePrompt" TEXT,
@@ -71,11 +72,13 @@ CREATE TABLE "Project" (
     "captionsEnabled" BOOLEAN NOT NULL DEFAULT false,
     "captionPosition" TEXT NOT NULL DEFAULT 'BOTTOM_CENTER',
     "captionSizePct" INTEGER NOT NULL DEFAULT 6,
+    "captionStyle" TEXT NOT NULL DEFAULT 'OUTLINE',
     "watermarkAssetId" TEXT,
     "watermarkPosition" TEXT NOT NULL DEFAULT 'BOTTOM_RIGHT',
     "watermarkScale" REAL NOT NULL DEFAULT 0.15,
     "watermarkOpacity" REAL NOT NULL DEFAULT 0.85,
     "watermarkMargin" INTEGER NOT NULL DEFAULT 24,
+    "lutAssetId" TEXT,
     "audioMode" TEXT NOT NULL DEFAULT 'TTS_FROM_SCRIPT',
     "voScript" TEXT,
     "voVerbatim" TEXT,
@@ -104,6 +107,7 @@ CREATE TABLE "Project" (
     CONSTRAINT "Project_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT "Project_styleAnchorAssetId_fkey" FOREIGN KEY ("styleAnchorAssetId") REFERENCES "Asset" ("id") ON DELETE SET NULL ON UPDATE CASCADE,
     CONSTRAINT "Project_watermarkAssetId_fkey" FOREIGN KEY ("watermarkAssetId") REFERENCES "Asset" ("id") ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT "Project_lutAssetId_fkey" FOREIGN KEY ("lutAssetId") REFERENCES "Asset" ("id") ON DELETE SET NULL ON UPDATE CASCADE,
     CONSTRAINT "Project_musicAssetId_fkey" FOREIGN KEY ("musicAssetId") REFERENCES "Asset" ("id") ON DELETE SET NULL ON UPDATE CASCADE
 );
 

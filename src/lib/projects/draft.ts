@@ -24,6 +24,7 @@ export interface Draft extends AudioDraft {
   captionsEnabled: boolean;
   captionPosition: string;
   captionSizePct: number;
+  captionStyle: string;
   textOverlays: TextOverlayView[];
 }
 
@@ -74,6 +75,7 @@ export function seed(s: ProjectSnapshot): Draft {
     captionsEnabled: s.captionsEnabled,
     captionPosition: s.captionPosition,
     captionSizePct: s.captionSizePct,
+    captionStyle: s.captionStyle,
     textOverlays: s.textOverlays as TextOverlayView[],
     segments: s.segments as SegmentView[],
   };

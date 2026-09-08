@@ -22,6 +22,8 @@ import { fileToDataUri } from "@/lib/assets/serve";
 import { assembleVideo, type OverlayInput, type VisualInput } from "@/lib/ffmpeg/assemble";
 import type { TextOverlaySpec } from "@/lib/ffmpeg/args";
 import { resolveEncoder } from "@/lib/system/capabilities";
+import { type VideoCodec, isVideoCodec } from "@/lib/ffmpeg/encoder";
+import { type CaptionStyle, buildAss } from "@/lib/render/ass";
 import { aspectLabel, resolutionLabel } from "@/lib/ffmpeg/args";
 import { frameSize } from "@/config/frame-sizes";
 import { probeDuration } from "@/lib/ffmpeg/probe";
@@ -414,6 +416,7 @@ async function assembleFinalJob(payload: { projectId: string }): Promise<void> {
       voiceover: { include: { asset: true } },
       musicAsset: true,
       watermarkAsset: true,
+      lutAsset: true,
       audioOverlays: { include: { asset: true }, orderBy: { index: "asc" } },
       textOverlays: { orderBy: { index: "asc" } },
     },
@@ -495,6 +498,10 @@ async function assembleFinalJob(payload: { projectId: string }): Promise<void> {
     }));
 
   const { w, h } = frameSize(project);
+  // Export format (codec + container) chosen in the Export dialog; the encoder
+  // backend (GPU or CPU) is resolved per host below.
+  const codec: VideoCodec = isVideoCodec(project.exportCodec) ? project.exportCodec : "h264";
+  const encoder = await resolveEncoder(codec);
   await ensureProjectTmp(project.id);
   // Bundle projects render into their own folder; legacy under ASSET_ROOT/<id>.
   const assetBase = project.bundlePath
@@ -502,10 +509,13 @@ async function assembleFinalJob(payload: { projectId: string }): Promise<void> {
     : projectDir(project.id);
   const tmpDir = path.join(assetBase, "tmp");
   await mkdir(tmpDir, { recursive: true });
-  const tmpPath = path.join(tmpDir, "final.mp4");
+  const tmpPath = path.join(tmpDir, `final.${encoder.ext}`);
   const finalDir = path.join(assetBase, "final");
   await mkdir(finalDir, { recursive: true });
-  const finalPath = path.join(finalDir, "final.mp4");
+  const finalPath = path.join(finalDir, `final.${encoder.ext}`);
+
+  // Optional user .cube LUT applied to every clip after the built-in color look.
+  const lutPath = project.lutAsset ? absolutePath(project.lutAsset.path) : undefined;
 
   // Optional logo/watermark composited over the whole video.
   const watermark = project.watermarkAsset
@@ -542,6 +552,8 @@ async function assembleFinalJob(payload: { projectId: string }): Promise<void> {
 
   // Burned-in captions auto-generated from the voiceover script, timed across
   // the VO (falling back to the total visual duration when there's no VO).
+  // Rendered by libass from an .ass file (styled outline / box / pop).
+  let captionsAss: string | undefined;
   if (project.captionsEnabled) {
     const captionText =
       project.audioMode === "TTS_VERBATIM"
@@ -557,28 +569,20 @@ async function assembleFinalJob(payload: { projectId: string }): Promise<void> {
       sizePct: project.captionSizePct,
       marginPx: 40,
     });
-    for (let i = 0; i < cues.length; i++) {
-      const c = cues[i];
-      const textfile = path.join(tmpDir, `caption-${i}.txt`);
-      await writeFile(textfile, c.text, "utf8");
-      textOverlays.push({
-        textfile,
-        position: c.position as TextOverlaySpec["position"],
-        sizePct: c.sizePct,
-        color: c.color,
-        boxEnabled: c.boxEnabled,
-        boxColor: c.boxColor,
-        boxOpacity: c.boxOpacity,
-        marginPx: c.marginPx,
-        startS: c.startS,
-        endS: c.endS,
-        animation: c.animation,
-      });
+    if (cues.length) {
+      const style = (["OUTLINE", "BOX", "POP"] as const).includes(project.captionStyle as CaptionStyle)
+        ? (project.captionStyle as CaptionStyle)
+        : "OUTLINE";
+      captionsAss = path.join(tmpDir, "captions.ass");
+      await writeFile(captionsAss, buildAss(cues, { width: w, height: h, style }), "utf8");
     }
   }
 
-  // Pick the encoder for this host (validated GPU encode if available, else x264).
-  const encoder = await resolveEncoder();
+  const fxCount = project.segments.reduce((a, s) => a + asEffects(s.effects).filter((e) => e.enabled).length, 0);
+  console.log(
+    `[assemble] ${project.id} ${w}x${h} ${encoder.codec}/${encoder.kind} (${encoder.label}) → .${encoder.ext}` +
+      ` · lut=${lutPath ? "yes" : "no"} · captions=${captionsAss ? project.captionStyle : "off"} · effects=${fxCount}`,
+  );
 
   let lastPct = -5;
   const { durationS } = await assembleVideo({
@@ -603,6 +607,8 @@ async function assembleFinalJob(payload: { projectId: string }): Promise<void> {
     audioFadeOutS: project.audioFadeOutS,
     watermark,
     textOverlays,
+    lutPath,
+    captionsAss,
     width: w,
     height: h,
     audioFitMode: project.audioFitMode,
@@ -627,7 +633,7 @@ async function assembleFinalJob(payload: { projectId: string }): Promise<void> {
       projectId: project.id,
       kind: "FINAL_MP4",
       path: relativePath,
-      mime: "video/mp4",
+      mime: encoder.mime,
       sizeBytes: st.size,
     },
   });

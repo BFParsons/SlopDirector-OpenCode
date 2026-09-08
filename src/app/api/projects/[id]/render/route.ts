@@ -10,6 +10,7 @@ import {
   voNeedsSynth,
 } from "@/lib/jobs/orchestrator";
 import { getOwnedProject } from "@/lib/projects/access";
+import { exportFormats } from "@/lib/system/capabilities";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -79,6 +80,9 @@ export async function GET(_req: Request, { params }: Ctx) {
       videoModelInfo: preview.videoModelInfo,
       adminOnlyModel: preview.adminOnly,
       quota: { used: usedThisMonth, limit: user.quotaAdsMonth },
+      // Which codecs this host can encode (and whether a GPU backend validated).
+      formats: await exportFormats(),
+      exportCodec: preview.project.exportCodec,
     });
   } catch (e) {
     return handleApiError(e);

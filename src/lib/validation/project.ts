@@ -159,6 +159,9 @@ export const patchProjectSchema = z.object({
   captionsEnabled: z.boolean().optional(),
   captionPosition: overlayPositionEnum.optional(),
   captionSizePct: z.number().int().min(1).max(40).optional(),
+  captionStyle: z.enum(["OUTLINE", "BOX", "POP"]).optional(),
+  // export format (codec + container)
+  exportCodec: z.enum(["h264", "hevc", "av1", "vp9", "prores"]).optional(),
   // watermark mix settings (the image is uploaded via /watermark)
   watermarkPosition: overlayPositionEnum.optional(),
   watermarkScale: z.number().min(0.02).max(1).optional(),

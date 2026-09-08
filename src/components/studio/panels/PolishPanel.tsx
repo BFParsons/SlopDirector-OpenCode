@@ -16,6 +16,7 @@ export default function PolishPanel({ windowControls }: PanelProps) {
           setPolish={setPolish}
           projectId={snapshot.id}
           watermarkAssetId={snapshot.watermarkAssetId}
+          lutAssetId={snapshot.lutAssetId}
           save={save}
           refetch={refetch}
         />

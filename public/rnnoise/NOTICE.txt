@@ -1,0 +1,9 @@
+RNNoise models bundled for the Audio Studio's "Noise suppression (RNN)" module
+(ffmpeg `arnndn` filter).
+
+  bd.rnnn — "beguiling drafter" (general purpose, recommended)
+  sh.rnnn — "somnolent hogwash"
+
+Source: https://github.com/GregorR/rnnoise-models (Gregor Richards). See that
+repository for the models' license terms; RNNoise itself is BSD-3-Clause
+(https://github.com/xiph/rnnoise).

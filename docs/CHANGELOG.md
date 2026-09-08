@@ -5,6 +5,36 @@ Notable changes, newest first. See [DEPENDENCIES.md](DEPENDENCIES.md) for setup 
 
 ## 2026-09 — no-storyboard fork
 
+- **ffmpeg 9 feature drop** (everything from [UPGRADES-2026-09.md](UPGRADES-2026-09.md) §2
+  that isn't a sprint-scale architecture project):
+  - **Export formats.** The Export dialog now opens on a settings step: frame readout + a
+    format picker — H.264 · MP4, HEVC · MP4 (`hvc1`), AV1 · MP4, VP9 · WebM (Opus), ProRes
+    422 HQ · MOV (PCM) — each badged GPU / CPU / not available for *this* host
+    (`exportFormats()` validates every codec × backend once). `Project.exportCodec` persists
+    the choice; `encoder.ts` is codec-aware, `assemble.ts` emits the matching audio codec and
+    container flags, the final asset gets the right extension/MIME.
+  - **More importable video.** MKV, AVI, MPEG/TS/MTS, M4V, 3GP (AV1 via dav1d and H.266/VVC
+    decode already worked), with an extension fallback when the browser sends no MIME.
+  - **Effect stack, export-only:** Denoise (hqdn3d / nlmeans), Detail (CAS), Deinterlace
+    (bwdif), Deshake, Stabilize (two-pass vidstab: a detect pass per clip, then
+    vidstabtransform), Smooth Slow Motion (minterpolate when speed < 1×), HDR → SDR
+    (HLG/PQ → BT.709 via zscale + tonemap). New "source" and "retime" filter stages.
+  - **Custom LUT.** Polish → upload a `.cube` (`/api/projects/[id]/lut`, `Project.lutAssetId`,
+    AssetKind `LUT`); applied with `lut3d` after the color look on every clip.
+  - **Styled captions via libass.** Captions are written as an `.ass` file
+    (`src/lib/render/ass.ts`) and burned in with the `ass` filter using the bundled DejaVu
+    fonts; styles Outline / Box / Pop (`Project.captionStyle`). Polish gains the captions
+    controls (the PATCH route had never persisted `captionsEnabled` — fixed).
+  - **Audio Studio.** Processing Rack: *Noise suppression (RNN)* (`arnndn`, bundled RNNoise
+    models under `public/rnnoise/`) and *Speech leveler* (`speechnorm`). Audio Tools:
+    *Stretch* (Rubber Band tempo / pitch, pitch-preserving) and *Audiogram* (waveform /
+    spectrum / bars video, → Media Bucket via a now video-aware `to-asset`). Mixdown adds
+    FLAC, Opus and AAC/M4A.
+  - **Node 24** for dev (`mise.toml`) — the same major Electron 44 embeds; Electron's
+    installer verified on it.
+  - Render diagnostics: one `[assemble] …` line per export (codec/backend, LUT, captions,
+    effect count).
+
 - **Dependency audit + upgrades** (see [UPGRADES-2026-09.md](UPGRADES-2026-09.md) for the
   full table and the feature opportunities). Electron 33 → **44** (Chromium 152, Node 24),
   electron-builder 25 → 26, Next 16.2.6 → **16.3.4** (security), React 19.2.8, PixiJS 8.20,

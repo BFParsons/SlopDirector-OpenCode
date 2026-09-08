@@ -22,7 +22,7 @@ const trackSchema = z.object({
 const schema = z.object({
   projectId: z.string().min(1),
   tracks: z.array(trackSchema).min(1),
-  format: z.enum(["wav", "mp3"]).optional(),
+  format: z.enum(["wav", "mp3", "flac", "opus", "m4a"]).optional(),
   name: z.string().max(80).optional(),
   normalize: z.boolean().optional(),
 });

@@ -20,6 +20,10 @@ import { ffmpegPath } from "@/lib/ffmpeg/binary";
 import {
   type EncoderKind,
   type EncoderProfile,
+  type VideoCodec,
+  VIDEO_CODECS,
+  VIDEO_CODEC_IDS,
+  encoderName,
   encoderProfile,
 } from "@/lib/ffmpeg/encoder";
 
@@ -34,6 +38,8 @@ export interface Capabilities {
   totalMemGB: number;
   /** which h264 encoders ffmpeg lists (build-time availability) */
   encoders: Record<EncoderKind, boolean>;
+  /** every video encoder name ffmpeg lists (for the other codecs) */
+  encoderNames: string[];
   /** best hardware encoder that ACTUALLY works on this host (probe-validated) */
   validated: EncoderKind | null;
   hwaccels: string[];
@@ -69,13 +75,17 @@ function run(cmd: string, args: string[], timeoutMs = 8000): Promise<{ code: num
   });
 }
 
-async function listEncoders(): Promise<Record<EncoderKind, boolean>> {
+async function listEncoders(): Promise<{ h264: Record<EncoderKind, boolean>; names: string[] }> {
   const { out } = await run(ffmpegPath(), ["-hide_banner", "-encoders"]);
+  // Lines look like " V....D libx264              libx264 H.264 / AVC ..."; take the name.
+  const names = out
+    .split("\n")
+    .map((l) => /^\s*[VAS][.A-Z]{5}\s+(\S+)/.exec(l)?.[1])
+    .filter((n): n is string => !!n);
+  const has = (n: string) => names.includes(n);
   return {
-    x264: /\blibx264\b/.test(out),
-    vaapi: /\bh264_vaapi\b/.test(out),
-    nvenc: /\bh264_nvenc\b/.test(out),
-    qsv: /\bh264_qsv\b/.test(out),
+    h264: { x264: has("libx264"), vaapi: has("h264_vaapi"), nvenc: has("h264_nvenc"), qsv: has("h264_qsv") },
+    names,
   };
 }
 
@@ -123,9 +133,10 @@ async function detectGpu(): Promise<GpuInfo | null> {
  * listed encoder that can't open its device (headless box, missing driver, no
  * render node) fails here and we fall back to CPU.
  */
-async function validateEncoder(kind: EncoderKind): Promise<boolean> {
+async function validateEncoder(kind: EncoderKind, codec: VideoCodec = "h264"): Promise<boolean> {
   if (kind === "x264") return true;
-  const prof = encoderProfile(kind);
+  if (!encoderName(codec, kind)) return false;
+  const prof = encoderProfile(kind, { codec });
   if (kind === "vaapi") {
     const dev = prof.deviceArgs[1];
     if (!dev || !existsSync(dev)) return false;
@@ -151,6 +162,18 @@ async function validateEncoder(kind: EncoderKind): Promise<boolean> {
   return code === 0;
 }
 
+// Each (codec, backend) pair is validated at most once per process.
+const validationCache = new Map<string, Promise<boolean>>();
+function validated(kind: EncoderKind, codec: VideoCodec): Promise<boolean> {
+  const key = `${codec}/${kind}`;
+  let p = validationCache.get(key);
+  if (!p) {
+    p = validateEncoder(kind, codec);
+    validationCache.set(key, p);
+  }
+  return p;
+}
+
 let cached: Promise<Capabilities> | null = null;
 
 /** Detect (and cache) host capabilities for this process. */
@@ -162,11 +185,12 @@ export function getCapabilities(): Promise<Capabilities> {
 async function detect(): Promise<Capabilities> {
   const cores = os.cpus().length || 1;
   const totalMemGB = Math.max(1, Math.round(os.totalmem() / 1024 ** 3));
-  const [encoders, hwaccels, gpu] = await Promise.all([
+  const [enc, hwaccels, gpu] = await Promise.all([
     listEncoders(),
     listHwaccels(),
     detectGpu(),
   ]);
+  const encoders = enc.h264;
 
   // Validate hardware encoders in preference order; first that works wins.
   const order: EncoderKind[] = ["nvenc", "qsv", "vaapi"];
@@ -181,7 +205,7 @@ async function detect(): Promise<Capabilities> {
   let tier: 0 | 1 | 2 = validated ? 1 : 0;
   if (gpu?.vendor === "nvidia" && (gpu.vramGB ?? 0) >= 6) tier = 2;
 
-  return { cores, totalMemGB, encoders, validated, hwaccels, gpu, tier };
+  return { cores, totalMemGB, encoders, encoderNames: enc.names, validated, hwaccels, gpu, tier };
 }
 
 // ---------------------------------------------------------------------------
@@ -195,20 +219,78 @@ function clamp(v: number, lo: number, hi: number): number {
 }
 
 /**
- * Resolve the encoder to use: `VIDEO_ENCODER` env override if set and it
- * validates, otherwise the auto-detected best (hardware if available, else x264).
+ * Resolve the encoder for `codec`: the `VIDEO_ENCODER` backend override if it
+ * validates for this codec, else the best validated hardware backend (the one
+ * that already passed for H.264 is tried first), else the CPU encoder. Throws
+ * when this ffmpeg build has no encoder for the codec at all.
  */
-export async function resolveEncoder(): Promise<EncoderProfile> {
+export async function resolveEncoder(codec: VideoCodec = "h264"): Promise<EncoderProfile> {
   const choice = ((env.VIDEO_ENCODER as EncoderChoice) || "auto").toLowerCase() as EncoderChoice;
   const caps = await getCapabilities();
-  const opts = { x264Preset: env.X264_PRESET, quality: env.RENDER_QUALITY };
+  const opts = { x264Preset: env.X264_PRESET, quality: env.RENDER_QUALITY, codec };
+  const listed = (k: EncoderKind) => {
+    const n = encoderName(codec, k);
+    return !!n && caps.encoderNames.includes(n);
+  };
+  const hwOk = async (k: EncoderKind) => k !== "x264" && listed(k) && (await validated(k, codec));
 
   if (choice !== "auto") {
-    if (choice === "x264") return encoderProfile("x264", opts);
-    const ok = caps.encoders[choice] && (await validateEncoder(choice));
-    return encoderProfile(ok ? choice : "x264", opts);
+    if (choice === "x264") {
+      if (listed("x264")) return encoderProfile("x264", opts);
+    } else if (await hwOk(choice)) {
+      return encoderProfile(choice, opts);
+    }
+    // Override can't do this codec → fall through to auto.
   }
-  return encoderProfile(caps.validated ?? "x264", opts);
+  const order = [...(caps.validated ? [caps.validated] : []), "nvenc", "qsv", "vaapi"] as EncoderKind[];
+  for (const k of order.filter((k, i, a) => a.indexOf(k) === i)) {
+    if (await hwOk(k)) return encoderProfile(k, opts);
+  }
+  if (listed("x264")) return encoderProfile("x264", opts);
+  throw new Error(`This ffmpeg build has no encoder for ${VIDEO_CODECS[codec].label}`);
+}
+
+export interface ExportFormatInfo {
+  codec: VideoCodec;
+  label: string;
+  container: string;
+  ext: string;
+  blurb: string;
+  /** some encoder (CPU or GPU) can produce it on this host */
+  available: boolean;
+  /** the validated hardware backend, if any */
+  hardware: EncoderKind | null;
+}
+
+/** Per-codec availability on this host (drives the Export dialog's format picker). */
+export async function exportFormats(): Promise<ExportFormatInfo[]> {
+  const caps = await getCapabilities();
+  const out: ExportFormatInfo[] = [];
+  for (const codec of VIDEO_CODEC_IDS) {
+    const info = VIDEO_CODECS[codec];
+    const listed = (k: EncoderKind) => {
+      const n = encoderName(codec, k);
+      return !!n && caps.encoderNames.includes(n);
+    };
+    let hardware: EncoderKind | null = null;
+    const order = [...(caps.validated ? [caps.validated] : []), "nvenc", "qsv", "vaapi"] as EncoderKind[];
+    for (const k of order.filter((k, i, a) => a.indexOf(k) === i)) {
+      if (listed(k) && (await validated(k, codec))) {
+        hardware = k;
+        break;
+      }
+    }
+    out.push({
+      codec,
+      label: info.label,
+      container: info.container,
+      ext: info.ext,
+      blurb: info.blurb,
+      available: hardware !== null || listed("x264"),
+      hardware,
+    });
+  }
+  return out;
 }
 
 /**

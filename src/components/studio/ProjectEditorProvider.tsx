@@ -288,6 +288,7 @@ export function ProjectEditorProvider({
           captionsEnabled: draft.captionsEnabled,
           captionPosition: draft.captionPosition,
           captionSizePct: draft.captionSizePct,
+          captionStyle: draft.captionStyle,
           textOverlays: draft.textOverlays.map((t) => ({
             id: t.id,
             text: t.text,

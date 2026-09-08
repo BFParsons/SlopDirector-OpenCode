@@ -79,6 +79,7 @@ const AUDIO_MIME: Record<string, string> = {
   flac: "audio/flac",
   weba: "audio/webm",
   webm: "audio/webm",
+  mp4: "video/mp4", // audiogram renders live in the audio workspace too
 };
 
 export function audioMimeForPath(p: string): string {

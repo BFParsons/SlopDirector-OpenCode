@@ -1,10 +1,11 @@
 # Toolchain pin for SlopStudio Pro (picked up automatically by mise when you
 # cd into the project; the desktop launcher activates it explicitly).
 #
-# Node 22 LTS, not newer: Electron's postinstall (extract-zip/yauzl) silently
-# fails to unpack the Electron binary under Node 26, leaving `dist/` empty and
-# "Electron failed to install correctly" at launch. Next 16 / Prisma 6 are
-# also only validated on 20/22.
+# Node 24 LTS — the same major Electron 44 embeds, so the dev server and the
+# packaged app run on one runtime. NOT Node 26: Electron's postinstall
+# (extract-zip/yauzl) silently fails to unpack the binary there, leaving `dist/`
+# empty and "Electron failed to install correctly" at launch. (Node 24 verified
+# to unpack Electron 44 correctly on 2026-09-08.)
 [tools]
-node = "22"
+node = "24"
 "npm:pnpm" = "10.33.0"

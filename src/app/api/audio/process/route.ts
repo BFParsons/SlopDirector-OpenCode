@@ -26,6 +26,8 @@ const effectSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("gain"), db: z.number() }),
   z.object({ type: z.literal("fade"), inS: z.number(), outS: z.number(), durationS: z.number() }),
   z.object({ type: z.literal("rolloff"), highpassHz: z.number(), lowpassHz: z.number() }),
+  z.object({ type: z.literal("rnnoise"), mix: z.number().min(0).max(1), model: z.enum(["bd", "sh"]).optional() }),
+  z.object({ type: z.literal("speechnorm"), strength: z.number().min(0).max(1) }),
 ]);
 
 const schema = z.object({

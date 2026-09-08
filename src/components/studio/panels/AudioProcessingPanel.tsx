@@ -75,6 +75,8 @@ export default function AudioProcessingPanel({ windowControls }: PanelProps) {
 
   // Effect enables + params.
   const [noise, setNoise] = useState({ on: false, strength: 0.5 });
+  const [rnn, setRnn] = useState({ on: false, mix: 0.9 });
+  const [leveler, setLeveler] = useState({ on: false, strength: 0.5 });
   const [eq, setEq] = useState({ on: false, bassDb: 0, midDb: 0, trebleDb: 0 });
   const [rolloff, setRolloff] = useState({ on: false, highpassHz: 80, lowpassHz: 0 });
   const [deesser, setDeesser] = useState({ on: false, intensity: 0.5 });
@@ -90,9 +92,11 @@ export default function AudioProcessingPanel({ windowControls }: PanelProps) {
     const fx: Record<string, unknown>[] = [];
     if (rolloff.on) fx.push({ type: "rolloff", highpassHz: rolloff.highpassHz, lowpassHz: rolloff.lowpassHz });
     if (noise.on) fx.push({ type: "noise", strength: noise.strength });
+    if (rnn.on) fx.push({ type: "rnnoise", mix: rnn.mix });
     if (eq.on) fx.push({ type: "eq", bassDb: eq.bassDb, midDb: eq.midDb, trebleDb: eq.trebleDb });
     if (deesser.on) fx.push({ type: "deesser", intensity: deesser.intensity });
     if (comp.on) fx.push({ type: "compressor", thresholdDb: comp.thresholdDb, ratio: comp.ratio });
+    if (leveler.on) fx.push({ type: "speechnorm", strength: leveler.strength });
     if (gain.on) fx.push({ type: "gain", db: gain.db });
     if (fade.on) fx.push({ type: "fade", inS: fade.inS, outS: fade.outS, durationS: selected?.durationS ?? 0 });
     // Loudness normalization goes last so it accounts for everything above.
@@ -146,6 +150,14 @@ export default function AudioProcessingPanel({ windowControls }: PanelProps) {
 
           <Module name="Noise reduction" enabled={noise.on} onToggle={(v) => setNoise({ ...noise, on: v })}>
             <Slider label="Strength" value={noise.strength} min={0} max={1} step={0.05} unit="" onChange={(v) => setNoise({ ...noise, strength: v })} />
+          </Module>
+
+          <Module name="Noise suppression (RNN)" enabled={rnn.on} onToggle={(v) => setRnn({ ...rnn, on: v })}>
+            <Slider label="Mix" value={rnn.mix} min={0} max={1} step={0.05} unit="" onChange={(v) => setRnn({ ...rnn, mix: v })} />
+          </Module>
+
+          <Module name="Speech leveler" enabled={leveler.on} onToggle={(v) => setLeveler({ ...leveler, on: v })}>
+            <Slider label="Strength" value={leveler.strength} min={0} max={1} step={0.05} unit="" onChange={(v) => setLeveler({ ...leveler, strength: v })} />
           </Module>
 
           <Module name="Equalizer" enabled={eq.on} onToggle={(v) => setEq({ ...eq, on: v })}>

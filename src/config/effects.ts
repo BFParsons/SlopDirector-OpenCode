@@ -24,6 +24,8 @@ export interface EffectCtx {
   w: number;
   h: number;
   fps: number;
+  /** vidstab transforms file for this clip (set by assemble.ts after the detect pass). */
+  trfPath?: string;
 }
 
 export interface EffectDef {
@@ -155,24 +157,200 @@ export const EFFECTS: Record<EffectKind, EffectDef> = {
     params: [{ key: "amount", label: "Amount", type: "range", min: 0, max: 3, step: 0.05, default: 1 }],
     ffmpeg: (p) => `unsharp=5:5:${num(p.amount, 1).toFixed(2)}:5:5:0`,
   },
+
+  // ---- Export-only effects (ffmpeg 9) ---------------------------------------
+  denoise: {
+    kind: "denoise",
+    label: "Denoise",
+    icon: "🧹",
+    preview: "export",
+    blurb: "Remove sensor noise / grain. Fast = hqdn3d; Quality = nlmeans (slow, best for low light).",
+    params: [
+      { key: "strength", label: "Strength", type: "range", min: 0, max: 10, step: 0.5, default: 3 },
+      {
+        key: "method",
+        label: "Method",
+        type: "select",
+        default: "fast",
+        options: [
+          { value: "fast", label: "Fast (hqdn3d)" },
+          { value: "quality", label: "Quality (nlmeans, slow)" },
+        ],
+      },
+    ],
+    ffmpeg: (p) => {
+      const s = num(p.strength, 3);
+      if (s <= 0) return "";
+      if (str(p.method, "fast") === "quality") return `nlmeans=s=${(s * 0.6).toFixed(2)}:p=7:r=15`;
+      return `hqdn3d=${s.toFixed(2)}:${(s * 0.75).toFixed(2)}:${(s * 1.5).toFixed(2)}:${(s * 1.125).toFixed(2)}`;
+    },
+  },
+  detail: {
+    kind: "detail",
+    label: "Detail (CAS)",
+    icon: "✨",
+    preview: "export",
+    blurb: "Contrast-adaptive sharpening — crisper edges without halos (AMD FidelityFX CAS).",
+    params: [{ key: "strength", label: "Strength", type: "range", min: 0, max: 1, step: 0.05, default: 0.5 }],
+    ffmpeg: (p) => `cas=strength=${num(p.strength, 0.5).toFixed(2)}`,
+  },
+  deinterlace: {
+    kind: "deinterlace",
+    label: "Deinterlace",
+    icon: "📼",
+    preview: "export",
+    blurb: "Remove comb lines from interlaced (camcorder / broadcast) footage.",
+    params: [
+      {
+        key: "mode",
+        label: "Mode",
+        type: "select",
+        default: "frame",
+        options: [
+          { value: "frame", label: "One frame per frame" },
+          { value: "field", label: "One frame per field (2× fps)" },
+        ],
+      },
+    ],
+    ffmpeg: (p) => `bwdif=mode=${str(p.mode, "frame") === "field" ? "send_field" : "send_frame"}:parity=auto:deint=all`,
+  },
+  deshake: {
+    kind: "deshake",
+    label: "Deshake",
+    icon: "🤝",
+    preview: "export",
+    blurb: "Quick single-pass shake reduction. For serious shake use Stabilize.",
+    params: [{ key: "range", label: "Search range", type: "range", min: 8, max: 64, step: 4, suffix: "px", default: 16 }],
+    ffmpeg: (p) => {
+      const r = Math.round(num(p.range, 16));
+      return `deshake=rx=${r}:ry=${r}:edge=mirror:blocksize=8:contrast=125`;
+    },
+  },
+  stabilize: {
+    kind: "stabilize",
+    label: "Stabilize",
+    icon: "🎯",
+    preview: "export",
+    blurb: "Two-pass stabilization (vidstab): analyzes the clip's motion, then smooths it.",
+    params: [
+      { key: "shakiness", label: "Shakiness", type: "range", min: 1, max: 10, step: 1, default: 5 },
+      { key: "smoothing", label: "Smoothing", type: "range", min: 0, max: 60, step: 1, default: 15 },
+      { key: "zoom", label: "Zoom-in", type: "range", min: 0, max: 20, step: 1, suffix: "%", default: 0 },
+    ],
+    ffmpeg: (p, c) => {
+      if (!c.trfPath) return ""; // no detect pass ran (e.g. a still) → no-op
+      const smoothing = Math.round(num(p.smoothing, 15));
+      const zoom = num(p.zoom, 0);
+      return `vidstabtransform=input=${ffQuote(c.trfPath)}:smoothing=${smoothing}:zoom=${zoom}:optzoom=1:interpol=bicubic`;
+    },
+  },
+  smoothSlowmo: {
+    kind: "smoothSlowmo",
+    label: "Smooth Slow Motion",
+    icon: "🐢",
+    preview: "export",
+    blurb: "Synthesizes in-between frames when the clip is slowed down (speed < 1×) instead of repeating frames.",
+    params: [
+      {
+        key: "mode",
+        label: "Method",
+        type: "select",
+        default: "mci",
+        options: [
+          { value: "mci", label: "Motion compensated (best)" },
+          { value: "blend", label: "Blend (fast)" },
+        ],
+      },
+    ],
+    ffmpeg: (p, c) =>
+      str(p.mode, "mci") === "blend"
+        ? `minterpolate=fps=${c.fps}:mi_mode=blend`
+        : `minterpolate=fps=${c.fps}:mi_mode=mci:mc_mode=aobmc:me_mode=bidir:vsbmc=1`,
+  },
+  tonemap: {
+    kind: "tonemap",
+    label: "HDR → SDR",
+    icon: "🌗",
+    preview: "export",
+    blurb: "Tone-map HDR (HLG / PQ) phone footage to SDR so it isn't washed out on an SDR timeline.",
+    params: [
+      {
+        key: "source",
+        label: "Source HDR",
+        type: "select",
+        default: "hlg",
+        options: [
+          { value: "hlg", label: "HLG (iPhone / Android default)" },
+          { value: "pq", label: "HDR10 / PQ (Dolby Vision 8.x)" },
+        ],
+      },
+      {
+        key: "algo",
+        label: "Curve",
+        type: "select",
+        default: "hable",
+        options: [
+          { value: "hable", label: "Hable (filmic)" },
+          { value: "mobius", label: "Möbius (bright)" },
+          { value: "reinhard", label: "Reinhard (soft)" },
+        ],
+      },
+      { key: "desat", label: "Desaturate highlights", type: "range", min: 0, max: 2, step: 0.1, default: 0.5 },
+    ],
+    // The source transfer/primaries are stamped explicitly with `setparams`
+    // (phone clips often carry incomplete metadata; zimg rejects tin/pin
+    // overrides on this build): BT.2020 + PQ or HLG → linear → tone-map →
+    // BT.709 SDR. 10-bit YUV in, so an 8-bit/RGB source is up-converted first.
+    ffmpeg: (p) => {
+      const trc = str(p.source, "hlg") === "pq" ? "smpte2084" : "arib-std-b67";
+      return (
+        `format=yuv420p10le,setparams=color_primaries=bt2020:color_trc=${trc}:colorspace=bt2020nc,` +
+        `zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,` +
+        `tonemap=tonemap=${str(p.algo, "hable")}:desat=${num(p.desat, 0.5).toFixed(2)},` +
+        `zscale=t=bt709:m=bt709:r=tv,format=yuv420p`
+      );
+    },
+  },
 };
 
 /**
- * Effects split into two render stages so the export matches the GL preview:
+ * Effects split into render stages so the export matches the GL preview:
+ *   - "source" (deinterlace / stabilize / deshake / tone-map) run on the raw
+ *     decoded frames, before the in-point trim and the frame normalize — a
+ *     stabilizer's transforms are per source frame, a deinterlacer needs fields.
+ *   - "retime" (smooth slow motion) runs right after the speed change.
  *   - "geom" (crop / mirror / rotate) operate on the CLIP and must run BEFORE the
  *     keyframed transform (zoom/pan/shrink) — otherwise a shrunk clip gets its
  *     black padding cropped instead of its content.
- *   - "filter" (blur / chroma / pixelate / sharpen) are screen-space and run
- *     AFTER the transform, matching PixiJS filters which act at display scale.
+ *   - "filter" (blur / chroma / pixelate / sharpen / denoise / detail) are
+ *     screen-space and run AFTER the transform, matching PixiJS filters which
+ *     act at display scale.
  */
+export type EffectStage = "source" | "retime" | "geom" | "filter";
+const SOURCE_KINDS = new Set<EffectKind>(["deinterlace", "stabilize", "deshake", "tonemap"]);
+const RETIME_KINDS = new Set<EffectKind>(["smoothSlowmo"]);
 const GEOM_KINDS = new Set<EffectKind>(["crop", "mirror", "rotate"]);
-const stageOf = (k: EffectKind): "geom" | "filter" => (GEOM_KINDS.has(k) ? "geom" : "filter");
+const stageOf = (k: EffectKind): EffectStage =>
+  SOURCE_KINDS.has(k) ? "source" : RETIME_KINDS.has(k) ? "retime" : GEOM_KINDS.has(k) ? "geom" : "filter";
+
+/** Quote a path as a filter option value (single quotes; embedded quotes escaped). */
+function ffQuote(p: string): string {
+  return `'${p.replace(/'/g, "'\\''")}'`;
+}
+
+/** The vidstabdetect pass for a clip whose stack enables Stabilize (null otherwise). */
+export function stabilizeDetectFilter(effects: EffectSpec[] | undefined, trfPath: string): string | null {
+  const e = effects?.find((x) => x.enabled && x.kind === "stabilize");
+  if (!e) return null;
+  const shakiness = Math.max(1, Math.min(10, Math.round(num(e.params.shakiness, 5))));
+  return `vidstabdetect=shakiness=${shakiness}:accuracy=15:result=${ffQuote(trfPath)}`;
+}
 
 /** ffmpeg filterchain segment for a clip's enabled effects (comma-joined). */
 export function effectsFfmpeg(
   effects: EffectSpec[] | undefined,
   ctx: EffectCtx,
-  stage?: "geom" | "filter",
+  stage?: EffectStage,
 ): string {
   if (!effects?.length) return "";
   return effects

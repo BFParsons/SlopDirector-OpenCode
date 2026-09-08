@@ -12,9 +12,20 @@
  *   gain       → volume
  *   fade       → afade in + afade out
  *   highpass   → highpass / lowpass roll-offs (rumble + hiss)
+ *   rnnoise    → arnndn   (RNNoise neural noise suppression, bundled model)
+ *   speechnorm → speechnorm (speech leveler: raises quiet passages, tames loud)
+ * Plus standalone transforms: rubberband stretch (tempo / pitch, pitch-preserving)
+ * and the audiogram renderer (waveform / spectrum video from a track).
  */
 import { spawn } from "node:child_process";
+import path from "node:path";
 import { ffmpegPath } from "@/lib/ffmpeg/binary";
+import { ffQuote } from "@/lib/ffmpeg/args";
+
+/** Bundled RNNoise model (public/ so it ships in the standalone build). */
+export function rnnoiseModelPath(model: "bd" | "sh" = "bd"): string {
+  return path.join(process.cwd(), "public", "rnnoise", `${model}.rnnn`);
+}
 
 export interface NoiseEffect {
   type: "noise";
@@ -58,6 +69,18 @@ export interface RollOffEffect {
   lowpassHz: number; // 0 = off (hiss cut)
 }
 
+export interface RnnoiseEffect {
+  type: "rnnoise";
+  /** 0..1 — how much of the denoised signal to use (1 = fully denoised). */
+  mix: number;
+  model?: "bd" | "sh";
+}
+export interface SpeechNormEffect {
+  type: "speechnorm";
+  /** 0..1 — how aggressively quiet speech is lifted. */
+  strength: number;
+}
+
 export type AudioEffect =
   | NoiseEffect
   | LoudnessEffect
@@ -66,7 +89,9 @@ export type AudioEffect =
   | CompressorEffect
   | GainEffect
   | FadeEffect
-  | RollOffEffect;
+  | RollOffEffect
+  | RnnoiseEffect
+  | SpeechNormEffect;
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
 
@@ -117,6 +142,16 @@ export function effectToFilter(fx: AudioEffect): string | null {
       if (fx.highpassHz > 0) parts.push(`highpass=f=${clamp(fx.highpassHz, 20, 2000).toFixed(0)}`);
       if (fx.lowpassHz > 0) parts.push(`lowpass=f=${clamp(fx.lowpassHz, 1000, 20000).toFixed(0)}`);
       return parts.length ? parts.join(",") : null;
+    }
+    case "rnnoise": {
+      // RNNoise wants 48 kHz mono-ish input; resample around it, keep layout.
+      const mix = clamp(fx.mix, 0, 1).toFixed(2);
+      return `aresample=48000,arnndn=m=${ffQuote(rnnoiseModelPath(fx.model ?? "bd"))}:mix=${mix}`;
+    }
+    case "speechnorm": {
+      // expansion 3 (gentle) … 25 (aggressive); slow raise so it doesn't pump.
+      const e = (3 + clamp(fx.strength, 0, 1) * 22).toFixed(1);
+      return `speechnorm=e=${e}:r=0.0005:l=1`;
     }
     default:
       return null;
@@ -195,5 +230,73 @@ export function trimSilence(
     proc.stderr.on("data", (d) => (stderr += d.toString()));
     proc.on("error", reject);
     proc.on("close", (code) => (code === 0 ? resolve() : reject(new Error(`ffmpeg silence-trim failed (${code}): ${stderr.slice(-500)}`))));
+  });
+}
+
+/**
+ * Pitch-preserving time stretch and/or pitch shift with Rubber Band. tempo 2.0
+ * = twice as fast (half as long); pitchSemitones shifts pitch without changing
+ * speed. Writes a new PCM wav.
+ */
+export function stretchAudio(
+  inputAbs: string,
+  outputAbs: string,
+  opts: { tempo?: number; pitchSemitones?: number },
+): Promise<void> {
+  const tempo = clamp(opts.tempo ?? 1, 0.25, 4);
+  const semis = clamp(opts.pitchSemitones ?? 0, -24, 24);
+  const pitch = Math.pow(2, semis / 12);
+  const filter = `rubberband=tempo=${tempo.toFixed(4)}:pitch=${pitch.toFixed(4)}:transients=crisp`;
+  const args = ["-y", "-i", inputAbs, "-af", filter, "-c:a", "pcm_s16le", outputAbs];
+  return new Promise((resolve, reject) => {
+    const proc = spawn(ffmpegPath(), args);
+    let stderr = "";
+    proc.stderr.on("data", (d) => (stderr += d.toString()));
+    proc.on("error", reject);
+    proc.on("close", (code) => (code === 0 ? resolve() : reject(new Error(`ffmpeg stretch failed (${code}): ${stderr.slice(-500)}`))));
+  });
+}
+
+export type AudiogramStyle = "waves" | "spectrum" | "bars";
+
+/**
+ * Render an "audiogram": the track's waveform / spectrum / frequency bars drawn
+ * over a flat background, as an H.264 MP4 the length of the audio. Made for
+ * podcast and social clips; the result can be pushed to the Media Bucket.
+ */
+export function renderAudiogram(
+  inputAbs: string,
+  outputAbs: string,
+  opts: { style?: AudiogramStyle; width?: number; height?: number; color?: string; background?: string },
+): Promise<void> {
+  const w = Math.round(clamp(opts.width ?? 1280, 160, 4096) / 2) * 2;
+  const h = Math.round(clamp(opts.height ?? 720, 90, 4096) / 2) * 2;
+  const hex = (v: string | undefined, d: string) => (v && /^#?[0-9a-fA-F]{6}$/.test(v) ? `0x${v.replace("#", "")}` : d);
+  const color = hex(opts.color, "0x2ec5c5");
+  const bg = hex(opts.background, "0x0b0d12");
+  const size = `${w}x${h}`;
+  const viz =
+    opts.style === "spectrum"
+      ? `showspectrum=s=${size}:mode=combined:color=intensity:scale=log:slide=scroll:legend=0`
+      : opts.style === "bars"
+        ? `showfreqs=s=${size}:mode=bar:colors=${color}:fscale=log`
+        : `showwaves=s=${size}:mode=cline:colors=${color}:rate=30:scale=sqrt`;
+  const graph = `[0:a]${viz}[viz];[1:v][viz]overlay=format=auto:shortest=1[v]`;
+  const args = [
+    "-y",
+    "-i", inputAbs,
+    "-f", "lavfi", "-i", `color=c=${bg}:s=${size}:r=30`,
+    "-filter_complex", graph,
+    "-map", "[v]", "-map", "0:a",
+    "-c:v", "libx264", "-preset", "veryfast", "-crf", "20", "-pix_fmt", "yuv420p",
+    "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", "-shortest",
+    outputAbs,
+  ];
+  return new Promise((resolve, reject) => {
+    const proc = spawn(ffmpegPath(), args);
+    let stderr = "";
+    proc.stderr.on("data", (d) => (stderr += d.toString()));
+    proc.on("error", reject);
+    proc.on("close", (code) => (code === 0 ? resolve() : reject(new Error(`ffmpeg audiogram failed (${code}): ${stderr.slice(-500)}`))));
   });
 }

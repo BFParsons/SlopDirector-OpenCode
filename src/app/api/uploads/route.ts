@@ -18,6 +18,28 @@ const VIDEO_EXT = new Map<string, string>([
   ["video/mp4", "mp4"],
   ["video/quicktime", "mov"],
   ["video/webm", "webm"],
+  // Containers ffmpeg 9 decodes natively (incl. AV1 via dav1d and H.266/VVC):
+  ["video/x-matroska", "mkv"],
+  ["video/x-msvideo", "avi"],
+  ["video/mpeg", "mpg"],
+  ["video/mp2t", "ts"],
+  ["video/x-m4v", "m4v"],
+  ["video/3gpp", "3gp"],
+]);
+// Browsers often report no MIME type for .mkv/.ts/.mts — fall back to the extension.
+const VIDEO_BY_EXT = new Map<string, string>([
+  ["mp4", "video/mp4"],
+  ["mov", "video/quicktime"],
+  ["webm", "video/webm"],
+  ["mkv", "video/x-matroska"],
+  ["avi", "video/x-msvideo"],
+  ["mpg", "video/mpeg"],
+  ["mpeg", "video/mpeg"],
+  ["ts", "video/mp2t"],
+  ["mts", "video/mp2t"],
+  ["m2ts", "video/mp2t"],
+  ["m4v", "video/x-m4v"],
+  ["3gp", "video/3gpp"],
 ]);
 const MAX_AUDIO_BYTES = 50 * 1024 * 1024; // 50 MB
 const AUDIO_EXT = new Map<string, string>([
@@ -46,7 +68,11 @@ export async function POST(request: Request) {
     if (!(file instanceof File)) return err("file is required", 400);
 
     const imageExt = IMAGE_EXT.get(file.type);
-    const videoExt = VIDEO_EXT.get(file.type);
+    // Resolve the video type from the MIME, else from the filename extension.
+    const extGuess = /\.([a-z0-9]+)$/i.exec(file.name)?.[1]?.toLowerCase();
+    const videoMime =
+      VIDEO_EXT.has(file.type) ? file.type : extGuess && VIDEO_BY_EXT.has(extGuess) ? VIDEO_BY_EXT.get(extGuess)! : null;
+    const videoExt = videoMime ? VIDEO_EXT.get(videoMime) : undefined;
     const audioExt = AUDIO_EXT.get(file.type);
 
     if (imageExt) {
@@ -72,7 +98,7 @@ export async function POST(request: Request) {
         sub: "uploads",
         filename: `${randomUUID()}.${videoExt}`,
         data: buf,
-        mime: file.type,
+        mime: videoMime!,
       });
       const durationS = await probeDuration(absolutePath(asset.path));
       return ok({

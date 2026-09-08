@@ -3,7 +3,7 @@
  * ffmpeg: each track is delayed to its timeline offset and scaled by its lane
  * volume, then everything is summed with `amix`. Solo overrides mute (matching
  * the Multitrack panel's audibleSet). Output lands in the project's audio-studio
- * folder as WAV (pcm_s16le) or MP3 (libmp3lame 320k).
+ * folder as WAV (pcm_s16le), MP3 (libmp3lame 320k), FLAC, Opus (160k) or AAC/M4A (256k).
  */
 import { spawn } from "node:child_process";
 import { mkdir } from "node:fs/promises";
@@ -26,8 +26,11 @@ export interface MixTrackInput {
   durationS?: number;
 }
 
+export type MixFormat = "wav" | "mp3" | "flac" | "opus" | "m4a";
+export const MIX_FORMATS: MixFormat[] = ["wav", "mp3", "flac", "opus", "m4a"];
+
 export interface MixOptions {
-  format?: "wav" | "mp3";
+  format?: MixFormat;
   /** Friendly base name for the output + the new track. */
   name?: string;
   /** Loudness-normalize the mix to −14 LUFS. */
@@ -66,7 +69,7 @@ export async function runMix(
   opts: MixOptions,
   jobId: string,
 ): Promise<MixResult> {
-  const format = opts.format === "mp3" ? "mp3" : "wav";
+  const format: MixFormat = opts.format && MIX_FORMATS.includes(opts.format) ? opts.format : "wav";
 
   // Solo overrides mute, mirroring the Multitrack panel's audibleSet().
   const soloed = tracks.filter((t) => t.solo);
@@ -111,14 +114,19 @@ export async function runMix(
     outLabel = "[out]";
   }
 
-  const codecArgs =
-    format === "mp3" ? ["-c:a", "libmp3lame", "-b:a", "320k"] : ["-c:a", "pcm_s16le"];
+  const codecArgs: Record<MixFormat, string[]> = {
+    wav: ["-c:a", "pcm_s16le"],
+    mp3: ["-c:a", "libmp3lame", "-b:a", "320k"],
+    flac: ["-c:a", "flac"],
+    opus: ["-c:a", "libopus", "-b:a", "160k"],
+    m4a: ["-c:a", "aac", "-b:a", "256k"],
+  };
   const args = [
     "-hide_banner", "-nostats", "-y",
     ...resolved.flatMap(({ abs }) => ["-i", abs]),
     "-filter_complex", filters.join(";"),
     "-map", outLabel,
-    ...codecArgs,
+    ...codecArgs[format],
     outAbs,
   ];
 
