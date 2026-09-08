@@ -365,6 +365,29 @@ export function registerVerifyTools(server: McpServer) {
   );
 
   server.registerTool(
+    "check_mix_levels",
+    {
+      title: "Check voice-vs-music levels",
+      description:
+        "Measures a rendered file (the latest draft by default) the way a mixer reads it: short-term loudness in the speech windows (narration clips / voiceover) vs the music-only stretches, the gap between them, and the estimated speech-to-music ratio under speech. Targets (guide Part II §7 'Levels', ch.29): speech windows −14…−16 LUFS for a −14 program, music-only stretches 4–8 LU under the speech, ratio under speech ≥ 12 LU (≥ 8 for music-driven pieces). Run after render_draft; fix with balance_music.",
+      inputSchema: { projectId: z.string(), assetId: z.string().optional().describe("a draft or final asset; default: the latest draft"), musicDriven: z.boolean().default(false) },
+      annotations: { readOnlyHint: true },
+    },
+    guarded(async ({ projectId, assetId, musicDriven }) => text(await mixLevels(projectId, assetId, musicDriven))),
+  );
+
+  server.registerTool(
+    "balance_music",
+    {
+      title: "Balance the music under the voice",
+      description:
+        "Sets musicVolume from measured loudness so the bed sits `gapLu` (default 6) below the narration in the stretches where the music plays alone (with ducking it drops a further ~10 LU under speech). Measures the narration sources (audio-only clips / voiceover) and the music asset; reports the numbers it used. Then render_draft and check_mix_levels.",
+      inputSchema: { projectId: z.string(), gapLu: z.number().min(0).max(30).default(6) },
+    },
+    guarded(async ({ projectId, gapLu }) => text(await balanceMusic(projectId, gapLu))),
+  );
+
+  server.registerTool(
     "compare_versions",
     {
       title: "Compare versions (change list)",
@@ -511,5 +534,115 @@ export async function soundtrackReport(projectId: string) {
     map: cells,
     findings,
     pass: !findings.some((f) => f.severity === "error"),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Voice vs music levels (Part II §7 "Levels", ch.29)
+// ---------------------------------------------------------------------------
+const median = (xs: number[]) => {
+  if (!xs.length) return null;
+  const a = [...xs].sort((x, y) => x - y);
+  return +(a.length % 2 ? a[(a.length - 1) / 2] : (a[a.length / 2 - 1] + a[a.length / 2]) / 2).toFixed(1);
+};
+const pct = (xs: number[], p: number) => (xs.length ? +[...xs].sort((x, y) => x - y)[Math.min(xs.length - 1, Math.floor(xs.length * p))].toFixed(1) : null);
+
+/** Estimated gain reduction of the bed's sidechain compressor (threshold ≈ −34 dBFS, ratio 8) for a voice at `voiceLufs`. */
+const duckDepthLu = (voiceLufs: number) => +Math.max(0, Math.min(20, (voiceLufs - -34) * (7 / 8))).toFixed(1);
+
+async function speechWindows(s: Snapshot): Promise<{ startS: number; endS: number }[]> {
+  const wins: { startS: number; endS: number }[] = s.segments.filter((x) => x.audioOnly && !x.library).map((x) => ({ startS: x.offsetS, endS: +(x.offsetS + x.durationS).toFixed(3) }));
+  if (s.audioMode !== "NONE" && s.voiceover?.assetId) {
+    try {
+      const sp = await api.get<{ speech: { startS: number; endS: number }[] }>(`/api/assets/${s.voiceover.assetId}/silences?noise=-35&min=0.4`);
+      wins.push(...sp.speech);
+    } catch {
+      /* no speech ranges */
+    }
+  }
+  return wins;
+}
+
+export async function mixLevels(projectId: string, assetId?: string, musicDriven = false) {
+  const s = await snapshot(projectId);
+  const id = assetId ?? s.finalRender?.draftAssetId ?? s.finalRender?.assetId ?? null;
+  if (!id) throw new Error("no rendered file yet — render_draft first (or pass assetId)");
+  const a = await api.get<{ hasAudio: boolean; timeline: { t: number; m: number; s: number }[] | null; loudness: { integratedLufs: number | null; truePeakDb: number | null } | null }>(`/api/assets/${id}/analyze?kinds=timeline,loudness,probe`);
+  if (!a.hasAudio || !a.timeline?.length) throw new Error("the file has no audio");
+  const wins = await speechWindows(s);
+  const end = a.timeline[a.timeline.length - 1].t;
+  // Short-term loudness (3 s window) needs room; on a short file or short
+  // speech windows read the 400 ms momentary meter instead.
+  const shortest = Math.min(end, ...wins.map((w) => w.endS - w.startS));
+  const metric: "s" | "m" = end < 12 || shortest < 4 ? "m" : "s";
+  const edge = metric === "m" ? 0.3 : 1.5;
+  const inSpeech = (t: number) => wins.some((w) => t >= w.startS + edge && t <= w.endS - 0.2);
+  const nearSpeech = (t: number) => wins.some((w) => t >= w.startS - 0.5 && t <= w.endS + edge);
+  const val = (p: { m: number; s: number }) => (metric === "m" ? p.m : p.s);
+  const speech = a.timeline.filter((p) => inSpeech(p.t) && val(p) > -70).map(val);
+  const musicOnly = a.timeline.filter((p) => !nearSpeech(p.t) && p.t > edge && p.t < end - edge - 1 && val(p) > -70).map(val);
+  const hasMusic = !!s.musicAssetId && !s.musicMuted && s.musicVolume > 0;
+  const speechMed = median(speech);
+  const musicMed = median(musicOnly);
+  const gap = speechMed != null && musicMed != null ? +(speechMed - musicMed).toFixed(1) : null;
+  // Ducking depth depends on the voice level the compressor actually sees
+  // (the source, pre-normalization), not on the normalized mix.
+  let voiceSourceLufs: number | null = null;
+  if (hasMusic && s.musicDucking) {
+    const voices = [...new Set(s.segments.filter((x) => x.audioOnly && !x.library).map((x) => x.sourceAssetId).filter((x): x is string => !!x))];
+    if (s.audioMode !== "NONE" && s.voiceover?.assetId) voices.push(s.voiceover.assetId);
+    const lv = (await Promise.all(voices.map(async (vid) => (await api.post<{ loudness: { integratedLufs: number | null } | null }>(`/api/audio/analyze`, { projectId, assetId: vid, kinds: ["loudness"] }).catch(() => null))?.loudness?.integratedLufs ?? null))).filter((x): x is number => x != null);
+    if (lv.length) voiceSourceLufs = +(lv.reduce((a, b) => a + b, 0) / lv.length).toFixed(1);
+  }
+  const duck = hasMusic && s.musicDucking ? duckDepthLu(voiceSourceLufs ?? speechMed ?? -20) : 0;
+  const smr = gap != null ? +(gap + duck).toFixed(1) : null;
+  const findings: Finding[] = [];
+  const minSmr = musicDriven ? 8 : 12;
+  if (!wins.length) findings.push({ severity: "info", rule: "§7 Levels", message: "no narration / voiceover on the timeline — nothing to balance against" });
+  if (speechMed != null && speechMed < -17) findings.push({ severity: "warn", rule: "§7 Levels: speech is the anchor (−14…−16 LUFS short-term in a −14 program)", message: `speech windows sit at ${speechMed} LUFS`, fix: "the voice is quiet: lower musicVolume so loudnorm lifts the voice, or raise voVolume (voiceover track)" });
+  if (hasMusic && gap != null && gap < 4) findings.push({ severity: gap < 0 ? "error" : "warn", rule: "§7 Levels: music-only stretches 4–8 LU under the speech", message: `music-only stretches (${musicMed} LUFS) are ${gap >= 0 ? `only ${gap}` : `${-gap} LU ABOVE`} ${gap >= 0 ? "LU under" : ""} the speech windows (${speechMed} LUFS)`, fix: "balance_music (gapLu 6), then re-render" });
+  if (hasMusic && gap != null && gap > 12) findings.push({ severity: "info", rule: "§7 Levels", message: `music-only stretches are ${gap} LU under the speech — the bed may be inaudible between lines`, fix: "balance_music with a smaller gapLu (4)" });
+  if (hasMusic && smr != null && smr < minSmr) findings.push({ severity: smr < 6 ? "error" : "warn", rule: `§7 Levels: speech-to-music ratio under speech ≥ ${minSmr} LU`, message: `estimated ${smr} LU (gap ${gap} + ducking ≈ ${duck})`, fix: "balance_music; keep musicDucking on" });
+  if (a.loudness?.truePeakDb != null && a.loudness.truePeakDb > -1) findings.push({ severity: "warn", rule: "ch29 true peak ≤ −1 dBTP", message: `true peak ${a.loudness.truePeakDb} dBTP` });
+  return {
+    assetId: id,
+    program: { integratedLufs: a.loudness?.integratedLufs ?? null, truePeakDb: a.loudness?.truePeakDb ?? null },
+    speechWindows: wins,
+    meter: metric === "m" ? "momentary (400 ms)" : "short-term (3 s)",
+    speech: { medianLufs: speechMed, p10: pct(speech, 0.1), p90: pct(speech, 0.9), samples: speech.length },
+    musicOnly: { medianLufs: musicMed, p10: pct(musicOnly, 0.1), p90: pct(musicOnly, 0.9), samples: musicOnly.length },
+    gapLu: gap,
+    voiceSourceLufs,
+    duckingEstimateLu: duck,
+    speechToMusicUnderSpeechLu: smr,
+    targets: { speechLufs: "−14…−16", musicOnlyGapLu: "4–8", smrLu: `≥ ${minSmr}` },
+    findings,
+    pass: !findings.some((f) => f.severity === "error"),
+  };
+}
+
+export async function balanceMusic(projectId: string, gapLu: number) {
+  const s = await snapshot(projectId);
+  if (!s.musicAssetId) throw new Error("no music bed: set_music first");
+  const voices = [...new Set(s.segments.filter((x) => x.audioOnly && !x.library).map((x) => x.sourceAssetId).filter((x): x is string => !!x))];
+  if (s.audioMode !== "NONE" && s.voiceover?.assetId) voices.push(s.voiceover.assetId);
+  if (!voices.length) throw new Error("no narration / voiceover to balance against — add the narration first");
+  const lufs = async (id: string) => (await api.post<{ loudness: { integratedLufs: number | null } | null }>(`/api/audio/analyze`, { projectId, assetId: id, kinds: ["loudness"] })).loudness?.integratedLufs ?? null;
+  const voiceLevels = (await Promise.all(voices.map(lufs))).filter((x): x is number => x != null);
+  const musicLufs = await lufs(s.musicAssetId);
+  if (!voiceLevels.length || musicLufs == null) throw new Error("could not measure the sources");
+  const voice = +(voiceLevels.reduce((a, b) => a + b, 0) / voiceLevels.length).toFixed(1);
+  const gainDb = voice - gapLu - musicLufs;
+  const volume = +Math.min(1, Math.max(0.02, 10 ** (gainDb / 20))).toFixed(3);
+  await api.patch(`/api/projects/${projectId}`, { musicVolume: volume, musicDucking: true });
+  const duck = duckDepthLu(voice);
+  return {
+    voiceIntegratedLufs: voice,
+    musicIntegratedLufs: musicLufs,
+    gapLu,
+    musicVolume: volume,
+    gainDb: +gainDb.toFixed(1),
+    expected: { musicOnlyLufs: +(voice - gapLu).toFixed(1), musicUnderSpeechLufs: +(voice - gapLu - duck).toFixed(1), speechToMusicUnderSpeechLu: +(gapLu + duck).toFixed(1) },
+    note: "levels are pre-loudnorm; audioNormalize lifts the whole mix to −14 LUFS keeping this balance. render_draft, then check_mix_levels.",
   };
 }

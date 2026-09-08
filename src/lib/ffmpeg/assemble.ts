@@ -103,7 +103,7 @@ export interface AssembleOpts {
   colorLook?: ColorLook; // color grade applied to every visual (default NONE)
   transition?: Transition; // between-segment style (default NONE = hard cut)
   transitionMs?: number; // transition duration (default 500)
-  audioNormalize?: boolean; // EBU R128 loudnorm on the final mix (default false)
+  audioNormalize?: boolean; // kept for callers; normalization is a linear post-pass (lib/ffmpeg/normalize.ts)
   fillMode?: FillMode; // off-aspect fill: LETTERBOX (default) or BLUR_FILL
   vignette?: boolean; // edge-darkening vignette over the whole video
   grain?: number; // film-grain strength 0..100 (0 = off)
@@ -613,13 +613,12 @@ export async function assembleVideo(
     audioLabel = "aout";
   }
 
-  // EBU R128 loudness normalization on the final mix (broadcast/social-ready).
-  if (audioLabel && (opts.audioNormalize ?? false)) {
-    filters.push(`[${audioLabel}]loudnorm=I=-14:TP=-1.5:LRA=11[anorm]`);
-    audioLabel = "anorm";
-  }
+  // Loudness normalization is NOT done here: single-pass `loudnorm` is a
+  // dynamic processor that lifts the quiet stretches (music between lines)
+  // and squeezes the voice-vs-music balance. The render handler measures the
+  // finished mix and applies one linear gain instead (lib/ffmpeg/normalize.ts).
 
-  // Master fade in/out on the final mix (after loudnorm, so it isn't undone).
+  // Master fade in/out on the final mix.
   const fadeIn = Math.max(0, opts.audioFadeInS ?? 0);
   const fadeOut = Math.max(0, opts.audioFadeOutS ?? 0);
   if (audioLabel && (fadeIn > 0 || fadeOut > 0)) {

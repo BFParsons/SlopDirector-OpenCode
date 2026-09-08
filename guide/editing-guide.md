@@ -530,6 +530,22 @@ Picture and sound are decided separately. A shot on the timeline is silent or no
 
 *Mechanical check:* `check_soundtrack` (unmuted shots whose source has speech under narration or the bed; overlapping narration; bed + overlay together; ducking off; no fade; silence). `[TOOL: check_soundtrack]`
 
+### Levels: how loud the voice, how loud the music
+
+Loudness is measured in LUFS (short-term = a 3 s window). The mix's *integrated* level is set by the platform (ch.29: web/social −14, broadcast −23, streaming −24…−27) and `audioNormalize` puts the whole mix there. What the platform does not set — and what the ear notices first — is the balance *inside* the mix.
+
+**Rule: Speech is the anchor.** In a −14 LUFS program the narration windows sit at −14…−16 LUFS short-term. Nothing recurring is louder than the voice.
+
+**Rule: Music alone sits 4–8 LU under the speech; under the speech it sits ≥ 12 LU below it** (≥ 8 LU in a music-driven piece where the music is a co-star; below 6 LU intelligibility suffers, and accessibility guidance asks for at least 4 LU of separation for any background sound). The bed "breathes" up between lines and drops under them: that drop is the ducking (`musicDucking`, ≈ 10 LU at these levels).
+
+**Rule: Set the bed from measured numbers, not by ear alone.** `musicVolume` is a linear gain: `volume = 10^((voice_LUFS − gap − music_LUFS) / 20)`. Example from the first job: narration −21 LUFS, a hot music track at −9 LUFS with +2 dBTP peaks — 0.3 (−10.5 dB) left the music *above* the voice; a 6 LU gap needs −18 dB, i.e. 0.12. `balance_music` does this arithmetic and sets the value; `check_mix_levels` reads the rendered file back: speech windows, music-only stretches, the gap, and the estimated speech-to-music ratio under speech.
+
+**Rule: True peak ≤ −1 dBTP; a source that already clips (+2 dBTP) is attenuated, never trusted.**
+
+Reference points (approximate, practice-derived; verify against each platform's current spec): EBU R128 / ATSC A/85 for the program level; BBC guidance on background sound ≥ 4 LU under speech for accessibility; Netflix dialogue-anchored delivery (dialogue-gated −27 LKFS ±2); common mixing practice of 12–20 dB of music under narration in documentary and 8–12 dB in promos and trailers.
+
+*Mechanical check:* `check_mix_levels` on a draft (speech vs music-only short-term loudness, gap, ratio under speech, true peak); `balance_music` to set `musicVolume` from the measured sources. `[TOOL: check_mix_levels / balance_music]`
+
 ## 8\. Verifying Your Work
 
 - Frame grabs: `get_frame {assetId, t}` — on a source, a draft or a final. Look at both sides of a cut (t = out-point − 1 frame on the outgoing source, in-point on the incoming).
@@ -538,7 +554,7 @@ Picture and sound are decided separately. A shot on the timeline is silent or no
 - Scopes: *not available*; judge exposure and colour on `get_frame`.
 - Timeline diffs: `compare_versions` (checkpoint → now, or checkpoint → checkpoint).
 - Playback for a person: `render_draft` and tell them the path, or point them at the open editor.
-- Automated checks: `check_soundtrack` (the audio map and its clashes), `check_cuts` (flash frames, mid-word cuts, kept dead air, lone jump cuts, overlays across cuts, transition use), `pacing_report`, `check_beat_alignment`, `verify_export` (duration to the frame, black and frozen picture, silence, loudness vs platform).
+- Automated checks: `check_soundtrack` (the audio map and its clashes), `check_mix_levels` (voice vs music on a draft), `check_cuts` (flash frames, mid-word cuts, kept dead air, lone jump cuts, overlays across cuts, transition use), `pacing_report`, `check_beat_alignment`, `verify_export` (duration to the frame, black and frozen picture, silence, loudness vs platform).
 
 ## 9\. Transactions, Undo, and Safe Batch Operations
 
@@ -1672,7 +1688,7 @@ Approximate targets (verify against the current spec for each platform):
 
 **Rule: Check integrated loudness and true peak on every review export.** A review copy that's 6 dB hot gives false confidence about impact.
 
-*Mechanical check:* measure integrated LUFS, short-term LUFS range, and true peak for the timeline or a range; compare against a named platform target. `[TOOL: `analyze_audio` (kinds: loudness) or `verify_export` with a platform target]`
+*Mechanical check:* measure integrated LUFS, short-term LUFS range, and true peak for the timeline or a range; compare against a named platform target. `[TOOL: `analyze_audio` (kinds: loudness) or `verify_export` with a platform target; voice-vs-music balance: `check_mix_levels` / `balance_music`]`
 
 ### Ducking and automation
 

@@ -243,3 +243,25 @@ export async function detectFrozen(abs: string, minS = 1, noiseDb = -60): Promis
   if (start != null && durationS - start > minS) frozen.push({ startS: +start.toFixed(3), endS: +durationS.toFixed(3), durationS: +(durationS - start).toFixed(3) });
   return { durationS, frozen };
 }
+
+export interface LoudnessPoint {
+  t: number;
+  /** momentary loudness (400 ms window), LUFS */
+  m: number;
+  /** short-term loudness (3 s window), LUFS */
+  s: number;
+}
+
+/** Short-term loudness over time (ffmpeg ebur128, one sample per 100 ms). */
+export async function loudnessTimeline(abs: string): Promise<LoudnessPoint[]> {
+  const { code, stderr } = await run(["-i", abs, "-vn", "-af", "ebur128=peak=true", "-f", "null", "-"]);
+  if (code !== 0) throw new Error(`loudness timeline failed: ${stderr.slice(-400)}`);
+  const points: LoudnessPoint[] = [];
+  for (const m of stderr.matchAll(/t:\s*([0-9.]+)\s+TARGET:[^M]*M:\s*(-?[0-9.]+)\s+S:\s*(-?[0-9.]+)/g)) {
+    const t = Number(m[1]);
+    const mm = Number(m[2]);
+    const ss = Number(m[3]);
+    if (Number.isFinite(t) && Number.isFinite(mm) && Number.isFinite(ss)) points.push({ t: +t.toFixed(2), m: mm, s: ss });
+  }
+  return points;
+}

@@ -173,6 +173,21 @@ async function main() {
     const { execFileSync } = await import("node:child_process");
     execFileSync("ffmpeg", ["-hide_banner", "-loglevel", "error", "-y", "-f", "lavfi", "-i", "aevalsrc=if(lt(mod(t\\,0.5)\\,0.03)\\,sin(2*PI*1000*t)\\,0):s=48000", "-t", "12", click]);
     await call("set_music", { projectId: p2.json.id, path: click, volume: 0.5 });
+    // voice-vs-music: balance the bed from measured levels, render, read it back
+    const nar = await call<{ segments: { id: string; audioOnly: boolean }[] }>("add_segment", { projectId: p2.json.id, assetId: tone2.json.id, audioOnly: true, trimStartS: 0, durationS: 2.5, offsetS: 0 });
+    const narId = nar.json.segments.filter((x) => x.audioOnly).at(-1)!.id;
+    const bal = await call<{ musicVolume: number; voiceIntegratedLufs: number; musicIntegratedLufs: number; gainDb: number }>("balance_music", { projectId: p2.json.id, gapLu: 6 });
+    check("balance_music sets a measured musicVolume", bal.json.musicVolume > 0 && bal.json.musicVolume <= 1 && Number.isFinite(bal.json.voiceIntegratedLufs), `voice=${bal.json.voiceIntegratedLufs} music=${bal.json.musicIntegratedLufs} → volume ${bal.json.musicVolume} (${bal.json.gainDb} dB)`);
+    const d3 = await call<{ draftAssetId?: string; stillRendering?: boolean }>("render_draft", { projectId: p2.json.id });
+    let draft3 = d3.json.draftAssetId;
+    for (let i = 0; i < 60 && !draft3; i++) {
+      await new Promise((r) => setTimeout(r, 2000));
+      const rs = await call<{ status: string }>("render_status", { projectId: p2.json.id });
+      if (rs.json.status !== "RENDERING") draft3 = (await call<{ draftAssetId: string }>("draft_result", { projectId: p2.json.id })).json.draftAssetId;
+    }
+    const lv = await call<{ speech: { medianLufs: number | null }; musicOnly: { medianLufs: number | null }; gapLu: number | null; speechToMusicUnderSpeechLu: number | null; findings: { severity: string }[] }>("check_mix_levels", { projectId: p2.json.id, assetId: draft3 });
+    check("check_mix_levels reads speech vs music from the draft", lv.json.speech.medianLufs != null && lv.json.musicOnly.medianLufs != null && lv.json.gapLu != null, `speech=${lv.json.speech.medianLufs} music=${lv.json.musicOnly.medianLufs} gap=${lv.json.gapLu} smr=${lv.json.speechToMusicUnderSpeechLu}`);
+    await call("delete_segment", { projectId: p2.json.id, segmentId: narId });
     const beat = await call<{ bpm: number | null; total: number; onGrid: number; onGridPct: number | null }>("check_beat_alignment", { projectId: p2.json.id, toleranceFrames: 2 });
     check("check_beat_alignment: 120 BPM click, cuts at 2/4 s on grid", beat.json.total === 2 && beat.json.onGrid === 2 && (beat.json.bpm ?? 0) > 100 && (beat.json.bpm ?? 0) < 140, `bpm=${beat.json.bpm} onGrid=${beat.json.onGrid}/${beat.json.total}`);
   } finally {

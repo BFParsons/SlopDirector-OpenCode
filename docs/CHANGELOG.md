@@ -5,6 +5,21 @@ Notable changes, newest first. See [DEPENDENCIES.md](DEPENDENCIES.md) for setup 
 
 ## 2026-09 — no-storyboard fork
 
+- **Voice-vs-music levels, measured.** After the re-cut the narration still sat slightly under
+  the bed (music-only stretches −12.5 LUFS vs speech −14). Now: guide Part II §7 "Levels"
+  (speech is the anchor at −14…−16 LUFS short-term; music 4–8 LU under it alone and ≥ 12 LU
+  under it while the voice speaks, ≥ 8 for music-driven pieces; the `musicVolume` formula;
+  reference points) and RULES.md 31. Tools: `balance_music` sets `musicVolume` from the
+  measured integrated loudness of the narration sources and the music asset (the LEGO bed:
+  −9 LUFS with +2 dBTP peaks vs a −21 LUFS narrator → 0.125, not 0.3); `check_mix_levels`
+  reads a rendered file back (short-term loudness in the speech windows vs the music-only
+  stretches, gap, ducking estimate from the source voice level, speech-to-music ratio, true
+  peak) via the new `timeline` kind of `GET /api/assets/:id/analyze`. Engine: the in-graph
+  single-pass `loudnorm` was a *dynamic* processor that lifted the quiet music between lines
+  and squeezed the balance (a 6 LU gap became 2.5); normalization is now a linear post-pass
+  (`lib/ffmpeg/normalize.ts`: measure the mix, one gain, true-peak limiter with 1 dB
+  inter-sample headroom, video stream copied).
+
 - **Audio composition, taught to the harness.** Watching the first job showed every shot's
   own sound bleeding under the music and narrator: the raw API keeps an uploaded clip's
   sound (`muted:false`), the tool said otherwise, and nothing checked the soundtrack.

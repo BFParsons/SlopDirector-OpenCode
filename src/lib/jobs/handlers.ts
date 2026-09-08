@@ -23,6 +23,7 @@ import { assembleVideo, type OverlayInput, type VisualInput } from "@/lib/ffmpeg
 import type { TextOverlaySpec } from "@/lib/ffmpeg/args";
 import { resolveEncoder, resolveHwDecode } from "@/lib/system/capabilities";
 import { type VideoCodec, encoderProfile, isVideoCodec } from "@/lib/ffmpeg/encoder";
+import { normalizeLoudnessLinear } from "@/lib/ffmpeg/normalize";
 import { type CaptionStyle, buildAss } from "@/lib/render/ass";
 import { aspectLabel, resolutionLabel } from "@/lib/ffmpeg/args";
 import { frameSize } from "@/config/frame-sizes";
@@ -642,6 +643,16 @@ async function assembleFinalJob(payload: { projectId: string; draft?: boolean })
     `[assemble] ${project.id} done in ${((Date.now() - assembleStart) / 1000).toFixed(1)}s` +
       (hwDecode ? ` · ${hwDecoded} input(s) GPU-decoded` : ""),
   );
+  // Linear loudness normalization (one gain + true-peak limit) so the mix's
+  // internal balance survives; a dynamic loudnorm would squeeze it.
+  if (project.audioNormalize) {
+    try {
+      const n = await normalizeLoudnessLinear(finalPath, encoder, { targetLufs: -14, truePeakDb: -1.5 });
+      console.log(`[assemble] ${project.id} loudness: measured ${n.measuredLufs?.toFixed(1)} LUFS / ${n.measuredTruePeakDb?.toFixed(1)} dBTP → ${n.applied ? `${n.gainDb > 0 ? "+" : ""}${n.gainDb} dB${n.limited ? " + limiter" : ""}` : "unchanged"}`);
+    } catch (e) {
+      console.warn(`[assemble] ${project.id} loudness normalization skipped: ${e instanceof Error ? e.message : String(e)}`);
+    }
+  }
 
   // Bundle projects store the final render's absolute path; legacy store relative.
   const relativePath = project.bundlePath ? finalPath : path.relative(ASSET_ROOT, finalPath);
