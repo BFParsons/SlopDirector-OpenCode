@@ -15,6 +15,17 @@ export async function ensureDesktopDb(): Promise<void> {
   if (process.env.SLOPSTUDIO_DB !== "sqlite") return;
   const { prisma } = await import("./client");
 
+  // Performance pragmas. WAL is persistent (stored in the DB file): readers no
+  // longer block on writers and each timeline edit stops rewriting the journal.
+  // synchronous=NORMAL is safe with WAL (durable at checkpoint, not per write).
+  try {
+    await prisma.$queryRawUnsafe("PRAGMA journal_mode=WAL");
+    await prisma.$executeRawUnsafe("PRAGMA synchronous=NORMAL");
+    await prisma.$executeRawUnsafe("PRAGMA busy_timeout=5000");
+  } catch (e) {
+    console.warn("[desktop] sqlite pragmas:", (e as Error).message);
+  }
+
   // Fresh DB? (no `User` table yet) -> run the shipped CREATE TABLE/INDEX DDL.
   const existing = await prisma.$queryRawUnsafe<{ name: string }[]>(
     "SELECT name FROM sqlite_master WHERE type='table' AND name='User'",

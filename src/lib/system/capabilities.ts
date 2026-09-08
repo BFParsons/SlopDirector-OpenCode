@@ -308,7 +308,10 @@ export async function resolveConcurrency(): Promise<{
   const hw = !!caps.validated;
 
   const suggestedAssembly = clamp(Math.floor(caps.cores / (hw ? 3 : 4)), 1, hw ? 6 : 4);
-  const ramGate = Math.max(1, Math.floor(caps.totalMemGB / 2));
+  // Each assembly wants ~1–2 GB; the desktop shell (Electron + Chromium + this
+  // server) needs ~4 GB of its own, so budget renders from what's left. An
+  // 8 GB laptop renders one at a time; 16 GB allows a few in parallel.
+  const ramGate = Math.max(1, Math.floor((caps.totalMemGB - 4) / 2));
   const assembly = envInt("MAX_CONCURRENT_ASSEMBLY") ?? Math.min(suggestedAssembly, ramGate);
   const video = envInt("MAX_CONCURRENT_VIDEO") ?? clamp(Math.floor(caps.cores / 2), 2, 8);
   const overall = Math.max(6, assembly + video + 2);

@@ -5,6 +5,15 @@ Notable changes, newest first. See [DEPENDENCIES.md](DEPENDENCIES.md) for setup 
 
 ## 2026-09 — no-storyboard fork
 
+- **Speed on Linux.** (1) **Production run mode**: `scripts/launch-desktop.sh --prod` /
+  `pnpm desktop:prod` builds the standalone bundle (when sources changed) and has Electron
+  spawn it — precompiled routes, React production mode, no HMR; the app-menu entry now uses
+  it. (2) **SQLite WAL** + `synchronous=NORMAL` + `busy_timeout` on the desktop DB at
+  bootstrap. (3) **RAM-aware render concurrency**: assemblies are budgeted from memory left
+  after ~4 GB for the desktop shell (an 8 GB laptop renders one at a time). (4) Hardware
+  video decode in the renderer was checked and is already on by default in Electron 44 on
+  Wayland/VA-API — documented in `electron/main.js`, no switches added.
+
 - **Render quota only for AI-billed renders.** The monthly quota (20/user) used to cap *every*
   export, deleted projects included; a local re-assembly of your own clips now bills nothing
   and isn't counted. Found by the e2e suite after ~20 test renders.

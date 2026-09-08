@@ -21,6 +21,12 @@ const crypto = require("node:crypto");
 const { spawn } = require("node:child_process");
 
 const DEV = process.env.ELECTRON_DEV === "1";
+
+// Linux GPU video decode: checked on 2026-09-08 with Electron 44 (Chromium 152)
+// on Hyprland/Wayland + Intel UHD 620 — `app.getGPUFeatureStatus().video_decode`
+// is already "enabled" by default (VA-API), so no `enable-features` switches
+// are needed. If a future Electron regresses this, the switches to try are
+// VaapiVideoDecodeLinuxGL + AcceleratedVideoDecodeLinuxGL (before app.ready).
 const HOST = "127.0.0.1";
 const PORT = Number(process.env.SLOPSTUDIO_PORT || 38473);
 const DEV_URL = "http://localhost:3000";

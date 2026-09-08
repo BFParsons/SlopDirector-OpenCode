@@ -218,7 +218,11 @@ What differs from the Debian/Windows notes above:
   ~2.2 GB. Wired via `SLOPSTUDIO_PYTHON` in `.env`. Verified: torch 2.14 / torchaudio
   2.11 / torchcodec 0.16 / demucs 4.1 / openai-whisper.
 - **Launcher** — `scripts/launch-desktop.sh` (Linux port of `launch-desktop.ps1`)
-  activates mise, clears a stale :3000 server, and runs `pnpm desktop:dev`.
+  activates mise and runs the app. **`--prod`** (what the app-menu entry uses) builds
+  the standalone production bundle when sources changed and has Electron spawn it —
+  precompiled routes, React production mode, no HMR: much faster and lighter than the
+  dev loop. Without the flag it clears a stale :3000 server and runs `pnpm desktop:dev`.
+  Both use the same `.env` (DB, assets, keys).
   `~/.local/share/applications/slopstudio-pro.desktop` puts **SlopStudio Pro** in the
   Omarchy app menu. Electron opens a native Wayland window
   (`ELECTRON_OZONE_PLATFORM_HINT=wayland` is set by Omarchy's Hyprland env).
