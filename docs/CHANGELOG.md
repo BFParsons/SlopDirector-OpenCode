@@ -62,8 +62,12 @@ Notable changes, newest first. See [DEPENDENCIES.md](DEPENDENCIES.md) for setup 
   (`devIndicators: false`).
 - **Electron: reload/close no longer silently ignored.** The editor's `beforeunload`
   guard (unsaved/unnamed project) made Electron cancel reloads, navigations and window
-  closes with no prompt at all; `electron/main.js` now handles `will-prevent-unload`
-  with a native Leave/Stay dialog.
+  closes with no prompt at all. `electron/main.js` now handles `will-prevent-unload` by
+  handing the blocked close/reload to the page (`slop:unload-blocked` → the in-app
+  "Save this project?" dialog via `useLeaveGuard`), which then finishes the action with
+  its guard bypassed (`slop:unload-action`). No native modal: a `showMessageBoxSync`
+  blocked the main process and, on Hyprland, could land on another workspace where it
+  couldn't be dismissed.
 - **Narrow windows.** Below the `md` breakpoint (a half-width Hyprland tile) the
   toolbar collapses button labels to icons and hides the title so it fits without
   overlapping itself. Container resizes re-fit the layout from the last loaded/applied

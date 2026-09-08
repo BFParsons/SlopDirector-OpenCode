@@ -163,18 +163,23 @@ async function createWindow() {
   // The editor installs a `beforeunload` guard (useLeaveGuard) for unsaved /
   // unnamed projects. A browser shows a "Leave site?" prompt for that; Electron
   // shows NOTHING and silently cancels the reload / navigation / window close
-  // unless the app handles `will-prevent-unload`. Ask the user natively instead.
-  mainWindow.webContents.on("will-prevent-unload", (event) => {
-    const choice = dialog.showMessageBoxSync(mainWindow, {
-      type: "question",
-      buttons: ["Leave", "Stay"],
-      defaultId: 1,
-      cancelId: 1,
-      title: "Project not saved",
-      message: "This project hasn't been named and saved yet.",
-      detail: "Leave anyway? Use the app's Home button to name and save it first.",
-    });
-    if (choice === 0) event.preventDefault(); // ignore the guard → proceed
+  // unless the app handles `will-prevent-unload`.
+  //
+  // We deliberately do NOT use a native modal here (dialog.showMessageBoxSync):
+  // it blocks the main process, and on Wayland tiling compositors (Hyprland) the
+  // modal can land on another workspace and be impossible to dismiss. Instead
+  // the page is kept (no preventDefault) and told to show its own save/discard
+  // dialog; once resolved it asks us to finish the close/reload (slop:unload-action)
+  // with its guard bypassed.
+  let closing = false;
+  mainWindow.on("close", () => {
+    closing = true; // beforeunload runs after this; if it blocks, we learn the kind
+    setTimeout(() => (closing = false), 1000);
+  });
+  mainWindow.webContents.on("will-prevent-unload", () => {
+    const kind = closing ? "close" : "reload";
+    closing = false;
+    mainWindow.webContents.send("slop:unload-blocked", { kind });
   });
 
   const url = DEV ? DEV_URL : PROD_URL;
@@ -186,6 +191,15 @@ async function createWindow() {
     mainWindow = null;
   });
 }
+
+// The page finished its save/discard flow for a blocked unload: do what the
+// user originally asked for (see will-prevent-unload above).
+ipcMain.handle("slop:unload-action", (_evt, kind) => {
+  if (!mainWindow) return false;
+  if (kind === "close") mainWindow.close();
+  else mainWindow.webContents.reload();
+  return true;
+});
 
 // Native "choose a folder" dialog for project-save locations. Returns the
 // selected absolute path, or null if the user cancels.

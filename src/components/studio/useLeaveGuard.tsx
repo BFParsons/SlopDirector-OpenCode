@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
+import { desktop } from "@/lib/desktop";
 import { ExitSaveDialog } from "./ExitSaveDialog";
 
 /**
@@ -14,7 +15,11 @@ import { ExitSaveDialog } from "./ExitSaveDialog";
  *  - `guardedLeave(go)` — call instead of navigating directly; runs `go` now if
  *    safe, else opens the dialog and runs it after save/discard.
  *  - `dialog` — render this in your tree (null when not prompting).
- *  - also installs a `beforeunload` warning for hard tab/window closes.
+ *  - also installs a `beforeunload` warning for hard tab/window closes. In the
+ *    desktop shell that warning can't be a native prompt (Electron shows none, and
+ *    a modal would block the main process), so Electron routes the blocked
+ *    close/reload back here (`onUnloadBlocked`) → the same dialog → then the
+ *    close/reload is finished with the guard bypassed (`finishUnload`).
  */
 export function useLeaveGuard(opts: {
   shouldGuard: boolean;
@@ -44,15 +49,31 @@ export function useLeaveGuard(opts: {
   }, []);
 
   // Native warning for hard closes / reloads (can't run a custom dialog there).
+  // `bypassRef` lets a deliberate follow-through (after save/discard) unload.
+  const bypassRef = useRef(false);
   useEffect(() => {
     const onBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (!guardRef.current) return;
+      if (!guardRef.current || bypassRef.current) return;
       e.preventDefault();
       e.returnValue = "";
     };
     window.addEventListener("beforeunload", onBeforeUnload);
     return () => window.removeEventListener("beforeunload", onBeforeUnload);
   }, []);
+
+  // Desktop shell: a blocked window close / reload comes back here instead of a
+  // native modal. Show the save/discard dialog; on save/discard, finish the
+  // original action with the guard bypassed. Cancel simply keeps the window.
+  useEffect(() => {
+    const d = desktop();
+    if (!d?.onUnloadBlocked) return;
+    return d.onUnloadBlocked(({ kind }) => {
+      guardedLeave(() => {
+        bypassRef.current = true;
+        void d.finishUnload?.(kind);
+      });
+    });
+  }, [guardedLeave]);
 
   const run = (go: (() => void) | null) => (go ?? (() => router.push("/start")))();
 

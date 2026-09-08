@@ -18,4 +18,16 @@ contextBridge.exposeInMainWorld("slopstudioDesktop", {
   pickFolder: (opts) => ipcRenderer.invoke("slop:pick-folder", opts),
   /** Reveal a file/folder in the OS file manager. */
   reveal: (target) => ipcRenderer.invoke("slop:reveal", target),
+  /**
+   * A window close / reload was blocked by the page's beforeunload guard. The
+   * page shows its own save/discard dialog, then calls finishUnload(kind).
+   * Returns an unsubscribe function.
+   */
+  onUnloadBlocked: (cb) => {
+    const handler = (_evt, payload) => cb(payload);
+    ipcRenderer.on("slop:unload-blocked", handler);
+    return () => ipcRenderer.removeListener("slop:unload-blocked", handler);
+  },
+  /** Finish a previously blocked close/reload (the page bypasses its guard first). */
+  finishUnload: (kind) => ipcRenderer.invoke("slop:unload-action", kind),
 });
