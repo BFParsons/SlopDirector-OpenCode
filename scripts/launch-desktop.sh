@@ -44,6 +44,9 @@ if [ "$MODE" = "prod" ]; then
   fi
   echo "Starting SlopStudio Pro (production) from $PROJ …"
   # ELECTRON_ARGS: extra Chromium/Electron switches (e.g. --remote-debugging-port=9222)
+  # Call the Electron binary directly when present (skips pnpm's own startup).
+  # shellcheck disable=SC2086
+  if [ -x node_modules/.bin/electron ]; then exec node_modules/.bin/electron electron/main.js ${ELECTRON_ARGS:-}; fi
   # shellcheck disable=SC2086
   exec pnpm exec electron electron/main.js ${ELECTRON_ARGS:-}
 fi

@@ -1,6 +1,7 @@
 import { Prisma, type Job } from "@prisma/client";
 import type { JobType } from "@/lib/db/enums";
 import { prisma } from "@/lib/db/client";
+import { wakeWorker } from "./signal";
 
 export async function enqueue(
   type: JobType,
@@ -11,7 +12,7 @@ export async function enqueue(
     maxAttempts?: number;
   } = {},
 ): Promise<Job> {
-  return prisma.job.create({
+  const job = await prisma.job.create({
     data: {
       type,
       payload,
@@ -20,6 +21,9 @@ export async function enqueue(
       availableAt: new Date(Date.now() + (opts.availableInMs ?? 0)),
     },
   });
+  // Same-process worker: start now instead of on the next poll tick.
+  wakeWorker(opts.availableInMs ?? 0);
+  return job;
 }
 
 /**
@@ -86,6 +90,7 @@ export async function requeue(id: string, delayMs: number): Promise<void> {
       availableAt: new Date(Date.now() + delayMs),
     },
   });
+  wakeWorker(delayMs);
 }
 
 /** Mark a job failed, or re-queue it with backoff if attempts remain. */
@@ -116,6 +121,7 @@ export async function failOrRetry(job: Job, error: string): Promise<boolean> {
       lockedBy: null,
     },
   });
+  wakeWorker(backoff);
   return true;
 }
 

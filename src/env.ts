@@ -58,6 +58,13 @@ const schema = z.object({
   VIDEO_ENCODER: z.string().optional(),
   VAAPI_DEVICE: z.string().default("/dev/dri/renderD128"),
   X264_PRESET: z.string().optional(), // ultrafast … veryslow (desktop can go slower)
+  //   HW_DECODE: auto | on | off — VA-API decode of H.264/HEVC sources during
+  //   export (auto = only when the startup probe validated it on this host)
+  HW_DECODE: z.string().optional(),
+  // Where the host capability probe caches its result (default: next to the
+  // SQLite DB, else the OS temp dir). SLOPSTUDIO_CAPS_CACHE=false disables it.
+  SLOPSTUDIO_CACHE_DIR: z.string().optional(),
+  SLOPSTUDIO_CAPS_CACHE: z.string().optional(),
   RENDER_QUALITY: z
     .string()
     .optional()

@@ -226,6 +226,27 @@ What differs from the Debian/Windows notes above:
   `~/.local/share/applications/slopstudio-pro.desktop` puts **SlopStudio Pro** in the
   Omarchy app menu. Electron opens a native Wayland window
   (`ELECTRON_OZONE_PLATFORM_HINT=wayland` is set by Omarchy's Hyprland env).
+- **Startup + render latency (2026-09).** The first page no longer waits for the
+  worker's ffmpeg/GPU probe: it runs in the background and its result is cached in
+  `capabilities-cache.json` next to the SQLite DB (keyed on the ffmpeg build + render node,
+  one-week TTL). `SLOPSTUDIO_CACHE_DIR=<dir>` relocates it, `SLOPSTUDIO_CAPS_CACHE=false`
+  disables it (the probe then runs on every launch, ~4 s). Electron shows a splash while
+  the server boots. Jobs enqueued from the app wake the in-process worker immediately
+  instead of waiting for the next `WORKER_POLL_MS` tick. Measured cold start on the UHD 620
+  laptop: window at 2.4 s, usable page at 4.9 s (was 3.3 s / 8.5 s).
+- **VA-API decode for exports** (`HW_DECODE=auto|on|off`, default auto). At startup the
+  probe does a real test decode of H.264, HEVC and HEVC Main10 samples with
+  `-hwaccel_output_format vaapi`. During export a 4:2:0 source clip is decoded on the GPU
+  when (a) its codec/bit-depth validated, (b) it is 10-bit HEVC **or** has at least 1.5×
+  the export frame's pixels, and (c) it carries no source-stage effect (deinterlace /
+  stabilize / HDR tone-map). The frames are downscaled on the GPU (`scale_vaapi`) *before*
+  being downloaded, then the normal CPU filter graph runs. Why so narrow: on this iGPU the
+  GPU decodes 8-bit 4K HEVC 3.5× faster than the CPU, but downloading full-size 4K frames
+  costs as much as the decode saved, and at 1080p the round-trip is a net loss — the gain
+  needs the GPU to shrink the frames first (4K → 1080p export: 4.5 s vs 8.4 s for a 6 s
+  clip). 10-bit is different: the CPU decodes an 80 Mbps 4K Main10 clip at ~10 fps, so the
+  GPU wins even at full size (4 s clip, 4K → 4K: 10.1 s vs 15.6 s; 4K → 1080p: 3.9 s vs
+  13.5 s). Cached in `capabilities-cache.json` as `hwDecode: ["h264","hevc","hevc10"]`.
 - **`.npmrc`** — the Windows-only `script-shell=C:\PROGRA~1\Git\bin\bash.exe` line was
   removed from the repo (it made every `pnpm <script>` fail on Linux with ENOENT).
   Windows devs set it in their **user** `%USERPROFILE%\.npmrc` instead — see Option B.

@@ -5,6 +5,22 @@ Notable changes, newest first. See [DEPENDENCIES.md](DEPENDENCIES.md) for setup 
 
 ## 2026-09 — no-storyboard fork
 
+- **Speed, round two.** (1) **Instant first page**: the server no longer waits for the
+  worker's ffmpeg/GPU probe before answering — the probe runs in the background and its
+  result is cached on disk (`capabilities-cache.json` next to the SQLite DB, keyed on the
+  ffmpeg build + render node, one-week TTL; `SLOPSTUDIO_CAPS_CACHE=false` disables,
+  `SLOPSTUDIO_CACHE_DIR` relocates). Electron shows a splash while the server boots and the
+  launcher calls the Electron binary directly. (2) **Wake-on-enqueue**: the API and the
+  worker share a process on the desktop, so `enqueue()` now rings the worker instead of
+  leaving a render to wait for the next 2.5 s poll (retries/re-queues arm a timed wake; the
+  poll stays as a safety net). (3) **VA-API decode for exports** (`HW_DECODE=auto|on|off`):
+  H.264/HEVC sources that are 10-bit or much larger than the export frame are decoded on
+  the GPU and downscaled there before the CPU filter graph (LUT, captions, effects,
+  transitions) runs unchanged. Validated once per host with real test decodes (incl. HEVC
+  Main10). On the UHD 620 laptop a 4K → 1080p export runs 1.85× faster (8-bit) and 3.4×
+  faster (10-bit); sources that would not gain keep the CPU path, because the GPU → CPU
+  frame copy otherwise eats the saving. Numbers in DEPENDENCIES.md § Omarchy.
+
 - **Speed on Linux.** (1) **Production run mode**: `scripts/launch-desktop.sh --prod` /
   `pnpm desktop:prod` builds the standalone bundle (when sources changed) and has Electron
   spawn it — precompiled routes, React production mode, no HMR; the app-menu entry now uses

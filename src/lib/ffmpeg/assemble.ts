@@ -21,7 +21,8 @@ import {
   xfadeName,
 } from "./args";
 import { type EncoderProfile, encoderProfile } from "./encoder";
-import { hasAudioStream, probeDuration } from "./probe";
+import { type HwDecodeConfig, planHwDecode } from "./hwdecode";
+import { hasAudioStream, probeDuration, probeVideoStream } from "./probe";
 import { type ClipTransform, zoompanTransformFilter } from "@/lib/render/transform";
 import { effectsFfmpeg, stabilizeDetectFilter } from "@/config/effects";
 import type { EffectSpec } from "@/lib/render/effects";
@@ -111,6 +112,7 @@ export interface AssembleOpts {
   watermark?: WatermarkSpec; // optional logo composited over the whole video
   textOverlays?: TextOverlaySpec[]; // burned-in text (lower-thirds, disclaimers)
   encoder?: EncoderProfile; // video encoder (default CPU x264; GPU when available)
+  hwDecode?: HwDecodeConfig | null; // VA-API decode for H.264/HEVC inputs (lib/ffmpeg/hwdecode.ts)
   lutPath?: string; // optional 3D LUT (.cube) applied to every clip after the color look
   captionsAss?: string; // optional libass subtitle file (.ass) burned in after text overlays
   outPath: string; // absolute final destination
@@ -133,7 +135,7 @@ function clampSpeed(s?: number): number {
 
 export async function assembleVideo(
   opts: AssembleOpts,
-): Promise<{ durationS: number }> {
+): Promise<{ durationS: number; hwDecoded: number }> {
   if (opts.inputs.length === 0) throw new Error("No visual segments to assemble");
 
   const n = opts.inputs.length;
@@ -175,6 +177,17 @@ export async function assembleVideo(
   const segTail = (dur: number) =>
     `setpts=PTS-STARTPTS,trim=0:${dur.toFixed(3)},setpts=PTS-STARTPTS,fps=${TARGET_FPS}`;
 
+  // GPU decode plan per video input (lib/ffmpeg/hwdecode.ts): only for sources
+  // much larger than the frame and without source-stage effects; the frames
+  // come back to the CPU graph as nv12 under the `hd<N>` label.
+  let hwDecoded = 0;
+  const planFor = async (file: string, effects: EffectSpec[] | undefined, idx: number) => {
+    if (!opts.hwDecode) return null;
+    const sourceFx = !!effectsFfmpeg(effects, { w, h, fps: TARGET_FPS, trfPath: trfPaths.get(idx) }, "source");
+    const plan = planHwDecode(opts.hwDecode, await probeVideoStream(file), { w, h }, { sourceEffects: sourceFx });
+    if (plan) hwDecoded++;
+    return plan;
+  };
   // Per-input ffmpeg args, effective (post-speed) durations, and full v-subgraph.
   const inputArgs: string[] = ["-y"];
   const effDur: number[] = [];
@@ -226,7 +239,10 @@ export async function assembleVideo(
         segGraphs.push(`[${i}:v]${stillFilter(w, h)}${colorEqTrail}${fxGeomTrail}${tfPart}${fxFiltTrail},${segTail(dur)}[v${i}]`);
       }
     } else {
-      inputArgs.push("-i", inp.path);
+      const plan = await planFor(inp.path, inp.effects, i);
+      inputArgs.push(...(plan?.inputArgs ?? []), "-i", inp.path);
+      const hdPre = plan ? `[${i}:v]${plan.filterPrefix}[hd${i}];` : "";
+      const srcIn = plan ? `hd${i}` : `${i}:v`;
       const speed = clampSpeed(inp.speed);
       // Premiere-style in-point: skip the first `trimStartS` source seconds.
       const trimStartS = Math.max(0, inp.trimStartS ?? 0);
@@ -247,11 +263,11 @@ export async function assembleVideo(
 
       if (fillMode === "BLUR_FILL") {
         // Source effects + trim first (if any), blur-fill, then retime + color.
-        let src = `${i}:v`;
-        let pre = "";
+        let src = srcIn;
+        let pre = hdPre;
         const preChain = `${fxSrcLead}${sourceTrim}`.replace(/,$/, "");
         if (preChain) {
-          pre = `[${i}:v]${preChain}[vt${i}];`;
+          pre += `[${srcIn}]${preChain}[vt${i}];`;
           src = `vt${i}`;
         }
         const sub = blurFillStatements(src, `bfo${i}`, w, h, String(i));
@@ -265,7 +281,7 @@ export async function assembleVideo(
         const tf = zoompanTransformFilter(inp.transform, w, h, dur, TARGET_FPS);
         const tfPart = tf ? `,${tf}` : "";
         segGraphs.push(
-          `[${i}:v]${fxSrcLead}${sourceTrim}${normalizeFilter(w, h)}${retimeTrail}${colorEqTrail}${fxGeomTrail}${tfPart}${fxFiltTrail},${segTail(dur)}[v${i}]`,
+          `${hdPre}[${srcIn}]${fxSrcLead}${sourceTrim}${normalizeFilter(w, h)}${retimeTrail}${colorEqTrail}${fxGeomTrail}${tfPart}${fxFiltTrail},${segTail(dur)}[v${i}]`,
         );
       }
     }
@@ -294,7 +310,10 @@ export async function assembleVideo(
       const tfPart = tf ? `,${tf}` : "";
       segGraphs.push(`[${idx}:v]${stillFilter(w, h)}${color2Trail}${fx2GeomTrail}${tfPart}${fx2FiltTrail},${segTail(dur)}[ovf${j}]`);
     } else {
-      inputArgs.push("-i", pc.path);
+      const plan = await planFor(pc.path, pc.effects, idx);
+      inputArgs.push(...(plan?.inputArgs ?? []), "-i", pc.path);
+      const hdPre = plan ? `[${idx}:v]${plan.filterPrefix}[hd${idx}];` : "";
+      const srcIn = plan ? `hd${idx}` : `${idx}:v`;
       const speed = clampSpeed(pc.speed);
       const trimStartS = Math.max(0, pc.trimStartS ?? 0);
       const probed = await probeDuration(pc.path);
@@ -308,7 +327,7 @@ export async function assembleVideo(
       const fx2RetimeTrail = fx2Retime ? `,${fx2Retime}` : "";
       const tf = zoompanTransformFilter(pc.transform, w, h, dur, TARGET_FPS);
       const tfPart = tf ? `,${tf}` : "";
-      segGraphs.push(`[${idx}:v]${fx2SrcLead}${sourceTrim}${normalizeFilter(w, h)}${retime}${fx2RetimeTrail}${color2Trail}${fx2GeomTrail}${tfPart}${fx2FiltTrail},${segTail(dur)}[ovf${j}]`);
+      segGraphs.push(`${hdPre}[${srcIn}]${fx2SrcLead}${sourceTrim}${normalizeFilter(w, h)}${retime}${fx2RetimeTrail}${color2Trail}${fx2GeomTrail}${tfPart}${fx2FiltTrail},${segTail(dur)}[ovf${j}]`);
     }
     pipMeta.push({ label: `ovf${j}`, offsetS: Math.max(0, pc.offsetS), dur, pip: pc.pip });
   }
@@ -604,7 +623,7 @@ export async function assembleVideo(
 
   await runFfmpeg(args, outDur || 1, opts.onProgress);
   await rename(opts.tmpPath, opts.outPath);
-  return { durationS: outDur };
+  return { durationS: outDur, hwDecoded };
 }
 
 function runFfmpeg(

@@ -189,6 +189,9 @@ async function createWindow() {
   });
 
   const url = DEV ? DEV_URL : PROD_URL;
+  // Something on screen at once: the embedded server takes a couple of seconds
+  // to boot, and a blank dark window reads as "hung".
+  mainWindow.loadFile(path.join(__dirname, "splash.html")).catch(() => {});
   if (!DEV) startServer();
   await waitForServer(url).catch((e) => console.error(e));
   await mainWindow.loadURL(url);

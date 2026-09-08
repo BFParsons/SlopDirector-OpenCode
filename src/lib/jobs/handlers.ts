@@ -21,7 +21,7 @@ import {
 import { fileToDataUri } from "@/lib/assets/serve";
 import { assembleVideo, type OverlayInput, type VisualInput } from "@/lib/ffmpeg/assemble";
 import type { TextOverlaySpec } from "@/lib/ffmpeg/args";
-import { resolveEncoder } from "@/lib/system/capabilities";
+import { resolveEncoder, resolveHwDecode } from "@/lib/system/capabilities";
 import { type VideoCodec, isVideoCodec } from "@/lib/ffmpeg/encoder";
 import { type CaptionStyle, buildAss } from "@/lib/render/ass";
 import { aspectLabel, resolutionLabel } from "@/lib/ffmpeg/args";
@@ -502,6 +502,7 @@ async function assembleFinalJob(payload: { projectId: string }): Promise<void> {
   // backend (GPU or CPU) is resolved per host below.
   const codec: VideoCodec = isVideoCodec(project.exportCodec) ? project.exportCodec : "h264";
   const encoder = await resolveEncoder(codec);
+  const hwDecode = await resolveHwDecode();
   await ensureProjectTmp(project.id);
   // Bundle projects render into their own folder; legacy under ASSET_ROOT/<id>.
   const assetBase = project.bundlePath
@@ -583,13 +584,16 @@ async function assembleFinalJob(payload: { projectId: string }): Promise<void> {
     `[assemble] ${project.id} ${w}x${h} ${encoder.codec}/${encoder.kind} (${encoder.label}) → .${encoder.ext}` +
       ` · lut=${lutPath ? "yes" : "no"} · captions=${captionsAss ? project.captionStyle : "off"} · effects=${fxCount}`,
   );
+  if (hwDecode) console.log(`[assemble] ${project.id} decode: ${hwDecode.backend} for ${hwDecode.codecs.join("/")} sources`);
 
   let lastPct = -5;
-  const { durationS } = await assembleVideo({
+  const assembleStart = Date.now();
+  const { durationS, hwDecoded } = await assembleVideo({
     inputs,
     overlayClips,
     audioClips,
     encoder,
+    hwDecode,
     voPath,
     voVolume: project.voMuted ? 0 : project.voVolume,
     musicPath,
@@ -624,6 +628,10 @@ async function assembleFinalJob(payload: { projectId: string }): Promise<void> {
       }
     },
   });
+  console.log(
+    `[assemble] ${project.id} done in ${((Date.now() - assembleStart) / 1000).toFixed(1)}s` +
+      (hwDecode ? ` · ${hwDecoded} input(s) GPU-decoded` : ""),
+  );
 
   // Bundle projects store the final render's absolute path; legacy store relative.
   const relativePath = project.bundlePath ? finalPath : path.relative(ASSET_ROOT, finalPath);

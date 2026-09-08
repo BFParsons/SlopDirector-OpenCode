@@ -3,6 +3,7 @@ import { env } from "@/env";
 import { OpenRouterError } from "@/lib/openrouter/client";
 import { getCapabilities, resolveConcurrency, resolveEncoder } from "@/lib/system/capabilities";
 import { handlers } from "./handlers";
+import { onJobWake } from "./signal";
 import { markJobFailure } from "./orchestrator";
 import {
   claimBatch,
@@ -84,6 +85,28 @@ async function runJob(job: Job): Promise<void> {
     if (isAssembly) activeAssembly--;
     if (isDownload) activeDownloads--;
     if (isYtImport) activeYtImports--;
+    // Capacity just freed up — see if anything is waiting.
+    void kick();
+  }
+}
+
+// Coalesced tick: a wake that lands mid-tick runs ONE more tick afterwards
+// instead of overlapping claims (the poll timer and enqueue wakes both land here).
+let ticking = false;
+let tickPending = false;
+async function kick(): Promise<void> {
+  if (ticking) {
+    tickPending = true;
+    return;
+  }
+  ticking = true;
+  try {
+    do {
+      tickPending = false;
+      await tick();
+    } while (tickPending && !shuttingDown);
+  } finally {
+    ticking = false;
   }
 }
 
@@ -134,7 +157,7 @@ export async function startWorker(opts: { standalone?: boolean } = {}): Promise<
     console.log(
       `[worker] host: ${caps.cores} cores / ${caps.totalMemGB}GB · tier ${caps.tier} · ` +
         `gpu ${caps.gpu ? `${caps.gpu.vendor}${caps.gpu.vramGB ? ` ${caps.gpu.vramGB}GB` : ""}` : "none"} · ` +
-        `encode ${enc.label}`,
+        `encode ${enc.label} · decode ${caps.hwDecode.length ? `VAAPI (${caps.hwDecode.join("/")})` : "CPU"}`,
     );
   } catch (e) {
     console.warn("[worker] capability probe failed, using defaults:", e);
@@ -144,15 +167,20 @@ export async function startWorker(opts: { standalone?: boolean } = {}): Promise<
   if (recovered) console.log(`[worker] recovered ${recovered} stale job(s)`);
 
   console.log(
-    `[worker] started (${env.WORKER_ID}), poll ${env.WORKER_POLL_MS}ms, ` +
+    `[worker] started (${env.WORKER_ID}), poll ${env.WORKER_POLL_MS}ms + wake on enqueue, ` +
       `concurrency ${overallConcurrency} (assembly ${assemblyCap}, video ${videoCap})`,
   );
 
-  timer = setInterval(() => void tick(), env.WORKER_POLL_MS);
+  timer = setInterval(() => void kick(), env.WORKER_POLL_MS);
   if (!opts.standalone && typeof timer.unref === "function") timer.unref();
+  // Jobs enqueued from this process (API routes, chained stages) start at once.
+  const unsubscribe = onJobWake(() => void kick());
+  // Anything enqueued while we were probing the host.
+  void kick();
 
   const shutdown = () => {
     shuttingDown = true;
+    unsubscribe();
     if (timer) clearInterval(timer);
     console.log(
       `[worker] draining; ${inFlight.size} job(s) in flight, ${activeAssembly} assembling`,
