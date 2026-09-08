@@ -177,9 +177,9 @@ export async function startRender(projectId: string): Promise<void> {
       },
     });
   } else if (project.audioMode === "NONE") {
-    await prisma.voiceoverAsset
-      .delete({ where: { projectId } })
-      .catch(() => {}); // no row -> fine
+    // deleteMany: no row is not an error (a bare delete() makes Prisma log
+    // "prisma:error … No record was found" even though we'd swallow it).
+    await prisma.voiceoverAsset.deleteMany({ where: { projectId } });
   }
   // UPLOAD_AUDIO: the VoiceoverAsset is already READY (set at upload time).
 
