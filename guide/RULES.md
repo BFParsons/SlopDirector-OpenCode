@@ -32,6 +32,14 @@ Numbers are for 30 fps. "ch." = chapter of guide/editing-guide.md (read_guide).
 19. Music ducks under speech (musicDucking). No true silence in a dialogue track (fill with room tone as an audioOnly clip).
 20. Loudness: web/social −14 LUFS, broadcast −23, streaming −24 to −27; true peak ≤ −1 dBTP (verify_export; audioNormalize=true).
 
+**Soundtrack composition (Part II §7 "Sound")**
+25. Decide the sound design before the first cut: which layer carries the story — sync sound, narration, or music — and write it down.
+26. Every video shot's own sound is a decision (`muted`). B-roll under narration or music is muted. Imported clips carry their source's narration and music; unmuted, they bleed through.
+27. Keep a shot's sound only where the sound is the point (a machine, a laugh, a line to camera), and only from sources with no music or narration of their own.
+28. Narration is an audio-only clip (or the voiceover track), never an unmuted shot. One narrator at a time.
+29. One music source: the bed via `set_music` (ducks under narration and voiceover, fades out); a YouTube import is an overlay until it is made the bed.
+30. `check_soundtrack` before every `render_draft`; `verify_export` for loudness after.
+
 **Short-form (ch.36)**
 21. The first second shows what it is; the first three give a reason to stay. Something changes every 1–3 s. Open on the strongest frame.
 22. Vertical is reframed, not cropped: subject in the middle third; replace wides. Burned-in captions, phrase by phrase.

@@ -503,6 +503,33 @@ The vocabulary of a traditional NLE maps onto segment operations:
 
 **Rule: Express a multi-step cut as one `apply_edit_list`.** It checkpoints first, applies the ops in order, lets you reference new segments as `$1`, `$2`…, and rolls back on failure.
 
+### Sound: how SlopStudio builds the mix
+
+Picture and sound are decided separately. A shot on the timeline is silent or not; the soundtrack is assembled from layers that each have a switch:
+
+| Layer | Where it comes from | Switch / level | Ducks the music? |
+|---|---|---|---|
+| A shot's own sound | the source file's audio (an imported YouTube clip carries its narrator and its music) | segment `muted` — the raw API keeps an upload's sound (`muted:false`); the MCP `add_segment` mutes video by default | no |
+| Audio-only clip | `add_segment audioOnly:true` at `offsetS` — narration, room tone, a sound bridge | always audible; `trimStartS`/`durationS` | yes |
+| Voiceover track | `audioMode` UPLOAD_AUDIO / TTS: one master narration from t = 0 | `voVolume`, `voMuted` | yes |
+| Music bed | `set_music` — looped or trimmed to the picture, 0.75 s fade built in | `musicVolume` (0–1), `musicDucking`, `musicMuted`, `audioFadeOutS` | it *is* what ducks |
+| Audio overlay | `import_youtube kind=audio` — mixed on top at `offsetS` | `volume`, `included` | no, and nothing ducks it |
+| Master | the mix of all of the above | `audioNormalize` (−14 LUFS), `audioFadeInS/OutS` | — |
+
+**Rule: Decide the sound design before cutting and state it: sync sound, narration, or music carries the story.** Everything else is muted or absent.
+
+**Rule: B-roll under narration or music is muted.** The first real job through this harness put 21 unmuted factory clips under a music bed and a narrator; every clip's own narrator and music bled through. The default that suits a person dragging one clip in (keep its sound) is wrong for an agent assembling a montage — hence the tool's silent default. Say `muted:false` when you mean it.
+
+**Rule: Keep a shot's sound only where the sound is the point** — a machine, a crowd, a laugh, a line delivered to camera — and only from a source that has no music or narration of its own (`transcribe` and `detect_silences` on the source tell you).
+
+**Rule: Narration is an audio-only clip or the voiceover track, never an unmuted shot.** Cut it on word boundaries (`check_cuts` verifies), one narrator at a time, and keep it inside the picture's length.
+
+**Rule: One music source.** An imported track is an *overlay* (no ducking) until `set_music` makes it the bed; then switch the overlay off. Set `musicVolume` around 0.25–0.35 under narration, give the cue a reason to end (`audioFadeOutS` 2–3 s or a trim that lands on picture).
+
+**Rule: `check_soundtrack` before every draft.** It draws the audio map (which layers sound in every 2 s cell) and flags the clashes; `verify_export` measures the loudness after.
+
+*Mechanical check:* `check_soundtrack` (unmuted shots whose source has speech under narration or the bed; overlapping narration; bed + overlay together; ducking off; no fade; silence). `[TOOL: check_soundtrack]`
+
 ## 8\. Verifying Your Work
 
 - Frame grabs: `get_frame {assetId, t}` — on a source, a draft or a final. Look at both sides of a cut (t = out-point − 1 frame on the outgoing source, in-point on the incoming).
@@ -511,7 +538,7 @@ The vocabulary of a traditional NLE maps onto segment operations:
 - Scopes: *not available*; judge exposure and colour on `get_frame`.
 - Timeline diffs: `compare_versions` (checkpoint → now, or checkpoint → checkpoint).
 - Playback for a person: `render_draft` and tell them the path, or point them at the open editor.
-- Automated checks: `check_cuts` (flash frames, mid-word cuts, kept dead air, lone jump cuts, overlays across cuts, transition use), `pacing_report`, `check_beat_alignment`, `verify_export` (duration to the frame, black and frozen picture, silence, loudness vs platform).
+- Automated checks: `check_soundtrack` (the audio map and its clashes), `check_cuts` (flash frames, mid-word cuts, kept dead air, lone jump cuts, overlays across cuts, transition use), `pacing_report`, `check_beat_alignment`, `verify_export` (duration to the frame, black and frozen picture, silence, loudness vs platform).
 
 ## 9\. Transactions, Undo, and Safe Batch Operations
 

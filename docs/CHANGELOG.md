@@ -5,6 +5,20 @@ Notable changes, newest first. See [DEPENDENCIES.md](DEPENDENCIES.md) for setup 
 
 ## 2026-09 — no-storyboard fork
 
+- **Audio composition, taught to the harness.** Watching the first job showed every shot's
+  own sound bleeding under the music and narrator: the raw API keeps an uploaded clip's
+  sound (`muted:false`), the tool said otherwise, and nothing checked the soundtrack.
+  Now: the MCP `add_segment` / edit-list op mute video by default (audio-only clips are
+  always audible; say `muted:false` when the clip's sound is the content); a new
+  `check_soundtrack` tool draws the audio map (music / voiceover / narration / shot audio /
+  overlays per 2 s) and flags unmuted shots whose source has speech under narration or the
+  bed, overlapping narration, bed + overlay together, ducking off, no fade, or a silent
+  film; the guide gained "Sound: how SlopStudio builds the mix" (Part II §7, a layer table
+  and rules), `RULES.md` rules 25–30, and every playbook states its sound design; the
+  render engine now ducks the music bed under narration cut as audio-only clips, not only
+  under the voiceover track; `/analyze` and `/info` report `hasAudio` instead of failing on
+  a silent file, and `verify_export` flags a missing audio stream.
+
 - **First real job through the harness (a 60 s LEGO documentary preview from eight
   Creative Commons YouTube clips) and what it fixed.** (1) MCP clients time a request out at
   ~60 s: `render_draft` / `render_final` / `transcribe` now hand back within 50 s with

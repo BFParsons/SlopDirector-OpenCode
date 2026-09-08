@@ -2,7 +2,7 @@ import { stat } from "node:fs/promises";
 import { requireApiUser } from "@/lib/auth/rbac";
 import { getOwnedAsset } from "@/lib/assets/access";
 import { absolutePath } from "@/lib/assets/storage";
-import { probeDuration, probeVideoStream } from "@/lib/ffmpeg/probe";
+import { hasAudioStream, probeDuration, probeVideoStream } from "@/lib/ffmpeg/probe";
 import { handleApiError } from "@/lib/http/handleError";
 import { ok } from "@/lib/http/response";
 
@@ -19,10 +19,11 @@ export async function GET(_req: Request, { params }: Ctx) {
     const { assetId } = await params;
     const asset = await getOwnedAsset(assetId, user);
     const abs = absolutePath(asset.path);
-    const [durationS, video, st] = await Promise.all([
+    const [durationS, video, st, hasAudio] = await Promise.all([
       probeDuration(abs),
       probeVideoStream(abs).catch(() => null),
       stat(abs).catch(() => null),
+      hasAudioStream(abs),
     ]);
     return ok({
       id: asset.id,
@@ -32,6 +33,7 @@ export async function GET(_req: Request, { params }: Ctx) {
       sizeBytes: st?.size ?? asset.sizeBytes,
       durationS,
       video: video ? { codec: video.codec, width: video.width, height: video.height, pixFmt: video.pixFmt } : null,
+      hasAudio,
       path: abs,
       createdAt: asset.createdAt,
     });

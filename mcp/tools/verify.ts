@@ -320,7 +320,7 @@ export function registerVerifyTools(server: McpServer) {
     },
     guarded(async ({ assetId, target, expectedDurationS, expectedWidth, expectedHeight, toleranceFrames }) => {
       const info = await assetInfo(assetId);
-      const a = await api.get<{ black: { startS: number; endS: number; durationS: number }[] | null; frozen: { startS: number; endS: number; durationS: number }[] | null; loudness: { integratedLufs: number | null; truePeakDb: number | null; loudnessRange: number | null } | { error: string } | null; silences: { startS: number; endS: number; durationS: number }[] | null }>(`/api/assets/${assetId}/analyze`);
+      const a = await api.get<{ hasAudio: boolean; black: { startS: number; endS: number; durationS: number }[] | null; frozen: { startS: number; endS: number; durationS: number }[] | null; loudness: { integratedLufs: number | null; truePeakDb: number | null; loudnessRange: number | null } | { error: string } | null; silences: { startS: number; endS: number; durationS: number }[] | null }>(`/api/assets/${assetId}/analyze`);
       const findings: Finding[] = [];
       const dur = info.durationS;
       if (expectedDurationS != null && Math.abs(dur - expectedDurationS) > toleranceFrames * FRAME)
@@ -328,6 +328,7 @@ export function registerVerifyTools(server: McpServer) {
       if (expectedWidth && expectedHeight && info.video && (info.video.width !== expectedWidth || info.video.height !== expectedHeight))
         findings.push({ severity: "error", rule: "ch32 resolution per spec", message: `${info.video.width}x${info.video.height} vs expected ${expectedWidth}x${expectedHeight}` });
       if (!info.video) findings.push({ severity: "error", rule: "ch32", message: "no video stream" });
+      if (a.hasAudio === false) findings.push({ severity: target === "none" ? "warn" : "error", rule: "ch32 verify technically: audio channels", message: "the file has NO audio stream (every shot muted, no music, no narration?) — see check_soundtrack" });
       for (const b of a.black ?? []) {
         const edge = b.startS < 0.5 || b.endS > dur - 0.5;
         findings.push({ severity: edge ? "info" : "error", rule: "ch32 detect black frames", atS: b.startS, message: `${b.durationS.toFixed(2)} s of black at ${b.startS.toFixed(2)}s${edge ? " (head/tail — a fade?)" : ""}` });
@@ -349,6 +350,18 @@ export function registerVerifyTools(server: McpServer) {
       const errors = findings.filter((f) => f.severity === "error").length;
       return text({ pass: errors === 0, errors, warnings: findings.filter((f) => f.severity === "warn").length, file: { path: info.path, durationS: dur, sizeBytes: info.sizeBytes, video: info.video }, loudness: lo, target: tgt.note, findings });
     }),
+  );
+
+  server.registerTool(
+    "check_soundtrack",
+    {
+      title: "Check the soundtrack",
+      description:
+        "The audio map of the timeline (guide ch.27–29 and Part II §7 'Sound'): which layers sound when — unmuted shot audio, narration / audio-only clips, the voiceover, the music bed (volume, ducking, fade), audio overlays — and findings: source narration or music bleeding through unmuted shots under the bed or narration (the classic clash), narration clips overlapping, two music sources at once, music that never ducks or never ends, clips past the end, or a silent film. Run before every render_draft.",
+      inputSchema: { projectId: z.string() },
+      annotations: { readOnlyHint: true },
+    },
+    guarded(async ({ projectId }) => text(await soundtrackReport(projectId))),
   );
 
   server.registerTool(
@@ -398,4 +411,105 @@ export function registerVerifyTools(server: McpServer) {
       return text({ from: { id: from.id, label: from.label, createdAt: from.createdAt, runtimeS: runtime(from.data.segments), segments: from.data.segments.length }, to: { label: toLabel, runtimeS: runtime(toSegs), segments: toSegs.length }, added, removed, changed, settings, untouched: from.data.segments.length - removed.length - changed.length });
     }),
   );
+}
+
+// ---------------------------------------------------------------------------
+// Soundtrack map + findings (Part II §7 "Sound: how SlopStudio builds the mix")
+// ---------------------------------------------------------------------------
+type Range = { startS: number; endS: number };
+const overlaps = (a: Range, b: Range) => a.startS < b.endS - 0.05 && b.startS < a.endS - 0.05;
+
+export async function soundtrackReport(projectId: string) {
+  const s = await snapshot(projectId);
+  const main = mainSequence(s);
+  let t = 0;
+  const shots = main.map((x, i) => {
+    const r = { index: i, id: x.id, startS: +t.toFixed(3), endS: +(t + x.durationS).toFixed(3), muted: x.muted, sourceAssetId: x.sourceAssetId, source: sourceRange(x) };
+    t += x.durationS;
+    return r;
+  });
+  const timelineS = +t.toFixed(3);
+  const narration = s.segments.filter((x) => x.audioOnly && !x.library).map((x) => ({ id: x.id, startS: x.offsetS, endS: +(x.offsetS + x.durationS).toFixed(3), sourceAssetId: x.sourceAssetId }));
+  const overlaysOn = s.audioOverlays.filter((o) => o.included && o.status === "READY");
+  const music = s.musicAssetId ? { assetId: s.musicAssetId, volume: s.musicVolume, ducking: s.musicDucking, muted: s.musicMuted } : null;
+  const vo = s.audioMode !== "NONE" ? { mode: s.audioMode, ready: !!s.voiceover?.assetId, durationS: s.voiceover?.durationS ?? null } : null;
+  const findings: Finding[] = [];
+
+  // What is in the unmuted shots' source audio?
+  const audible = shots.filter((x) => !x.muted && x.sourceAssetId);
+  const cache = new Map<string, { speech: Range[]; words: { startS: number; endS: number; text: string }[] | null }>();
+  for (const x of audible) {
+    const id = x.sourceAssetId!;
+    if (cache.has(id)) continue;
+    let speech: Range[] = [];
+    let words: { startS: number; endS: number; text: string }[] | null = null;
+    try {
+      speech = (await api.get<{ speech: Range[] }>(`/api/assets/${id}/silences?noise=-35&min=0.5`)).speech;
+    } catch {
+      /* no audio stream */
+    }
+    for (const m of ["small", "base", "medium", "tiny", "large-v3"]) {
+      try {
+        words = (await api.get<{ words: { startS: number; endS: number; text: string }[] }>(`/api/assets/${id}/transcribe?model=${m}`)).words.filter((w) => /[\p{L}\p{N}]/u.test(w.text));
+        break;
+      } catch {
+        /* not cached */
+      }
+    }
+    cache.set(id, { speech, words });
+  }
+  const shotAudio = audible.map((x) => {
+    const c = cache.get(x.sourceAssetId!)!;
+    const src = { startS: x.source.inS, endS: x.source.outS };
+    const hasSound = c.speech.some((r) => overlaps(r, src));
+    const spokenWords = c.words ? c.words.filter((w) => w.startS < src.endS && w.endS > src.startS).length : null;
+    return { ...x, hasSound, spokenWords };
+  });
+
+  const underBed = !!music && !music.muted && (music.volume ?? 0) > 0;
+  for (const x of shotAudio) {
+    if (!x.hasSound) continue;
+    const underNarration = narration.some((n) => overlaps(n, x)) || (vo?.ready ?? false);
+    if (x.spokenWords && x.spokenWords > 0 && (underNarration || underBed)) {
+      findings.push({ severity: "error", rule: "§7 Sound: B-roll under narration or music is muted", segmentId: x.id, index: x.index, atS: x.startS, message: `shot ${x.index} (${x.startS}–${x.endS}s) is unmuted and its source has speech (${x.spokenWords} words) ${underNarration ? "under the narration" : "under the music bed"} — two voices / the source's narration bleeds through`, fix: "update_segments muted:true (keep sound only where the sound is the point)" });
+    } else if (underNarration) {
+      findings.push({ severity: "warn", rule: "§7 Sound: sync sound under narration", segmentId: x.id, index: x.index, atS: x.startS, message: `shot ${x.index} (${x.startS}–${x.endS}s) is unmuted with sound in its source while narration plays`, fix: "mute it, or lower it — the narration must stay intelligible (rule 20)" });
+    } else if (underBed && x.spokenWords == null) {
+      findings.push({ severity: "warn", rule: "§7 Sound: unmuted shot under the music bed", segmentId: x.id, index: x.index, atS: x.startS, message: `shot ${x.index} (${x.startS}–${x.endS}s) is unmuted under the music bed and its source has sound (no transcript — could be the source's own music or narration)`, fix: "transcribe the source, or mute unless the sync sound is wanted" });
+    }
+  }
+  // Narration overlaps / runs past the end.
+  for (let i = 0; i < narration.length; i++) {
+    for (let j = i + 1; j < narration.length; j++) {
+      if (overlaps(narration[i], narration[j])) findings.push({ severity: "error", rule: "§7 Sound: one narrator at a time", atS: Math.max(narration[i].startS, narration[j].startS), message: `narration clips overlap (${narration[i].startS}–${narration[i].endS}s and ${narration[j].startS}–${narration[j].endS}s)` });
+    }
+    if (narration[i].endS > timelineS + 0.05) findings.push({ severity: "error", rule: "§7 Sound: audio must fit the picture", atS: narration[i].startS, message: `narration clip ends at ${narration[i].endS}s but the picture ends at ${timelineS}s` });
+  }
+  // Music bed vs overlays, ducking, fade.
+  if (underBed && overlaysOn.length) findings.push({ severity: "warn", rule: "§7 Sound: one music source", message: `the music bed and ${overlaysOn.length} audio overlay(s) play together (an imported YouTube track is an overlay until set_music makes it the bed) — overlays do not duck`, fix: "set_music with the overlay's file (probe_asset gives the path) and update_project audioOverlays:[{id, included:false}]" });
+  if (underBed && !music!.ducking && (narration.length || vo?.ready)) findings.push({ severity: "warn", rule: "ch29 music ducks under speech", message: "music ducking is off while narration plays", fix: "update_project musicDucking:true" });
+  if (underBed && (s.audioFadeOutS ?? 0) === 0) findings.push({ severity: "info", rule: "ch28 a cue has a reason to stop", message: "the music bed runs to the last frame with only the built-in 0.75 s fade", fix: "update_project audioFadeOutS (2–3 s) so the cue resolves on picture" });
+  const anySound = underBed || overlaysOn.length > 0 || narration.length > 0 || (vo?.ready ?? false) || shotAudio.some((x) => x.hasSound);
+  if (!anySound) findings.push({ severity: "warn", rule: "§7 Sound", message: "nothing on the timeline makes a sound (every shot muted, no music, no narration)" });
+
+  // The map: what sounds when (2-second cells).
+  const cells: string[] = [];
+  for (let c = 0; c < timelineS; c += 2) {
+    const r = { startS: c, endS: Math.min(c + 2, timelineS) };
+    const layers: string[] = [];
+    if (underBed) layers.push("music");
+    if (vo?.ready) layers.push("VO");
+    if (narration.some((n) => overlaps(n, r))) layers.push("narration");
+    const live = shotAudio.filter((x) => x.hasSound && overlaps(x, r));
+    if (live.length) layers.push(`shot-audio(${live.map((x) => x.index).join(",")})`);
+    if (overlaysOn.some((o) => overlaps({ startS: o.offsetS, endS: o.offsetS + (o.durationS ?? 9999) }, r))) layers.push("overlay");
+    cells.push(`${String(c).padStart(4)}s ${layers.join(" + ") || "—"}`);
+  }
+  return {
+    timelineS,
+    layers: { music, voiceover: vo, narrationClips: narration, audioOverlaysOn: overlaysOn.length, unmutedShots: audible.length, unmutedShotsWithSound: shotAudio.filter((x) => x.hasSound).map((x) => ({ index: x.index, startS: x.startS, endS: x.endS, spokenWords: x.spokenWords })), audioNormalize: s.audioNormalize, fadeOutS: s.audioFadeOutS },
+    map: cells,
+    findings,
+    pass: !findings.some((f) => f.severity === "error"),
+  };
 }

@@ -32,7 +32,7 @@ const addSegmentInput = {
   track: z.number().int().min(0).max(31).default(0).describe("0 = main sequence (appended in order); >=1 = positioned overlay"),
   offsetS: z.number().min(0).optional(),
   audioOnly: z.boolean().default(false),
-  muted: z.boolean().optional().describe("video clips default to muted=true; pass false to keep the clip's sound"),
+  muted: z.boolean().optional().describe("SOUND DECISION for a video clip: true (default here) = silent B-roll under music/narration; false = keep the clip's own sound (dialogue, sync sound). Note the raw API keeps sound by default; this tool mutes by default. Ignored for audioOnly clips (always audible)."),
   imageMotion: z.string().optional(),
 };
 
@@ -57,7 +57,10 @@ async function addSegment(a: {
   if (a.trimStartS != null) body.trimStartS = a.trimStartS;
   if (a.durationS != null) body.durationS = a.durationS;
   if (a.offsetS != null) body.offsetS = a.offsetS;
-  if (a.muted != null) body.muted = a.muted;
+  // Sound is a decision, not an accident: video shots are silent unless asked
+  // (the raw API keeps an upload's sound by default — every imported YouTube
+  // clip carries its own narration and music). Audio-only clips are audible.
+  body.muted = a.audioOnly ? false : (a.muted ?? true);
   if (a.imageMotion) body.imageMotion = a.imageMotion;
   return api.post<Snapshot>(`/api/projects/${a.projectId}/segments`, body);
 }
@@ -68,7 +71,7 @@ export function registerTimelineTools(server: McpServer) {
     {
       title: "Add a clip to the timeline",
       description:
-        "Place an imported asset on the timeline. Track 0 appends to the main sequence; the same asset can be added several times with different trimStartS/durationS to make sub-clips (that is how you cut). Returns the updated project.",
+        "Place an imported asset on the timeline. Track 0 appends to the main sequence; the same asset can be added several times with different trimStartS/durationS to make sub-clips (that is how you cut). The clip's OWN SOUND is off unless muted:false (see check_soundtrack). Returns the updated project.",
       inputSchema: addSegmentInput,
     },
     guarded(async (a) => text(summarize(await addSegment(a)))),
@@ -185,7 +188,7 @@ export function registerTimelineTools(server: McpServer) {
       title: "Apply an edit list",
       description:
         "Run a sequence of timeline operations as one unit: a checkpoint is taken first and, if any step fails, the project is rolled back to it. " +
-        "Ops: add_segment {assetId, trimStartS?, durationS?, track?, offsetS?, muted?}, update_segment {id, …fields}, delete_segment {id}, split_segment {id, atS}, reorder {orderedIds}, clear_timeline. " +
+        "Ops: add_segment {assetId, trimStartS?, durationS?, track?, offsetS?, muted? (video is SILENT unless muted:false), audioOnly?}, update_segment {id, …fields}, delete_segment {id}, split_segment {id, atS}, reorder {orderedIds}, clear_timeline. " +
         "Ids created by earlier add_segment ops can be referenced as \"$1\", \"$2\", … (1-based index of the add op).",
       inputSchema: { projectId: z.string(), ops: z.array(op).min(1).max(200), label: z.string().max(200).optional() },
     },

@@ -86,7 +86,7 @@ async function main() {
     const a2 = await call<{ id: string }>("import_media", { projectId: p2.json.id, path: scenes });
     const sc = await call<{ shots: { startS: number; endS: number }[]; cuts: number[] }>("detect_scenes", { assetId: a2.json.id, threshold: 0.3 });
     check("detect_scenes finds 4 shots", sc.json.shots.length === 4, `cuts=${sc.json.cuts.join("/")}`);
-    for (const sh of sc.json.shots) await call("add_segment", { projectId: p2.json.id, assetId: a2.json.id, trimStartS: sh.startS, durationS: Math.min(2, +(sh.endS - sh.startS).toFixed(3)) });
+    for (const sh of sc.json.shots) await call("add_segment", { projectId: p2.json.id, assetId: a2.json.id, trimStartS: sh.startS, durationS: Math.min(2, +(sh.endS - sh.startS).toFixed(3)), muted: false });
     const cp = await call<{ id: string; segments: number }>("create_checkpoint", { projectId: p2.json.id, label: "4 shots" });
     check("create_checkpoint captured 4 segments", cp.json.segments === 4);
     const before = await call<{ segments: { id: string }[] }>("get_project", { projectId: p2.json.id });
@@ -146,6 +146,28 @@ async function main() {
     check("compare_versions: one segment removed, runtime 8 → 6", diff.json.removed.length === 1 && diff.json.added.length === 0 && diff.json.from.runtimeS === 8 && diff.json.to.runtimeS === 6, `runtime ${diff.json.from.runtimeS}→${diff.json.to.runtimeS}`);
     const au = await call<{ loudness: { integratedLufs: number | null } | null; tempo: { bpm: number | null; beatsS: number[] } | null }>("analyze_audio", { assetId: a2.json.id, kinds: ["loudness", "tempo"] });
     check("analyze_audio returns loudness + a beat grid", au.json.loudness?.integratedLufs != null && Array.isArray(au.json.tempo?.beatsS), `lufs=${au.json.loudness?.integratedLufs} beats=${au.json.tempo?.beatsS.length}`);
+    // --- soundtrack: video is silent by default; a clash is caught before rendering
+    const addedQuiet = await call<{ segments: { id: string; muted: boolean; audioOnly: boolean }[] }>("add_segment", { projectId: p2.json.id, assetId: a2.json.id, trimStartS: 0, durationS: 1 });
+    const quiet = addedQuiet.json.segments.filter((x) => !x.audioOnly).at(-1)!;
+    check("add_segment mutes video by default", quiet.muted === true);
+    await call("delete_segment", { projectId: p2.json.id, segmentId: quiet.id });
+    // narration clip from the tone clip (it has a fake transcript with words) + an unmuted shot with "speech" under it
+    const tone2 = await call<{ id: string }>("import_media", { projectId: p2.json.id, path: tone });
+    const cacheDir2 = path.join(path.dirname(path.dirname(info.json.path)), "cache");
+    writeFileSync(path.join(cacheDir2, `transcript-${tone2.json.id}-base.json`), JSON.stringify({ language: "en", text: "one two", segments: [], words: [{ startS: 0.2, endS: 0.6, text: "one" }, { startS: 1.0, endS: 1.4, text: "two" }], srt: null, vtt: null }));
+    const loud = await call<{ segments: { id: string; muted: boolean; audioOnly: boolean; track: number; durationS: number; index: number }[] }>("add_segment", { projectId: p2.json.id, assetId: tone2.json.id, trimStartS: 0, durationS: 1.5, muted: false });
+    const loudShot = loud.json.segments.filter((x) => !x.audioOnly).at(-1)!;
+    // the narration must sit UNDER the seeded shot (it is appended after the highlight's shots)
+    const loudStart = loud.json.segments.filter((x) => x.track === 0 && !x.audioOnly && x.index < loudShot.index).reduce((a, x) => a + x.durationS, 0);
+    await call("add_segment", { projectId: p2.json.id, assetId: tone2.json.id, audioOnly: true, trimStartS: 0, durationS: 1.5, offsetS: +loudStart.toFixed(3) });
+    const st = await call<{ pass: boolean; findings: { severity: string; rule: string }[]; map: string[]; layers: { narrationClips: unknown[] } }>("check_soundtrack", { projectId: p2.json.id });
+    check("check_soundtrack flags speech bleeding through under narration", !st.json.pass && st.json.findings.some((f) => f.severity === "error" && /B-roll/.test(f.rule)) && st.json.layers.narrationClips.length === 1, st.json.findings.map((f) => f.rule).join(" | "));
+    await call("update_segments", { projectId: p2.json.id, edits: [{ id: loudShot.id, muted: true }] });
+    const st2 = await call<{ pass: boolean; findings: { severity: string }[] }>("check_soundtrack", { projectId: p2.json.id });
+    check("check_soundtrack passes once the shot is muted", st2.json.pass, `${st2.json.findings.length} non-error findings`);
+    await call("delete_segment", { projectId: p2.json.id, segmentId: loudShot.id });
+    for (const n of (await call<{ segments: { id: string; audioOnly: boolean }[] }>("get_project", { projectId: p2.json.id })).json.segments.filter((x) => x.audioOnly)) await call("delete_segment", { projectId: p2.json.id, segmentId: n.id });
+
     // click track at 120 BPM as the music bed: 2 s shots cut on beats
     const click = path.join(TMP, "click-120.wav");
     const { execFileSync } = await import("node:child_process");

@@ -458,32 +458,21 @@ export async function assembleVideo(
   const voVol = Math.max(0, opts.voVolume ?? 1).toFixed(3);
   const fadeStart = Math.max(0, outDur - 0.75).toFixed(3);
 
-  // Primary track: VO and/or music bed (with optional sidechain ducking) -> [amain].
-  let primaryLabel: string | null = null;
-  if (hasVo && hasMusic) {
+  // Primary track inputs: the VO and the music bed, each fitted to the final
+  // length. Ducking (music under speech) is wired further down, once the
+  // audio-only clips exist: since narration is often cut as audio-only clips
+  // (audioMode NONE), they key the sidechain together with the VO.
+  let voLabel: string | null = null;
+  let musicLabel: string | null = null;
+  if (hasVo) {
     filters.push(`[${voIdx}:a]volume=${voVol},apad,atrim=0:${dur},asetpts=N/SR/TB[vofit]`);
+    voLabel = "vofit";
+  }
+  if (hasMusic) {
     filters.push(
       `[${musicIdx}:a]volume=${vol},atrim=0:${dur},afade=t=out:st=${fadeStart}:d=0.75,asetpts=N/SR/TB[mfit]`,
     );
-    if (opts.musicDucking ?? true) {
-      // Split the VO: one copy mixes in, the other keys the sidechain.
-      filters.push(`[vofit]asplit=2[vomix][vokey]`);
-      filters.push(
-        `[mfit][vokey]sidechaincompress=threshold=0.02:ratio=8:attack=15:release=300[mduck]`,
-      );
-      filters.push(`[vomix][mduck]amix=inputs=2:duration=longest:normalize=0[amain]`);
-    } else {
-      filters.push(`[vofit][mfit]amix=inputs=2:duration=longest:normalize=0[amain]`);
-    }
-    primaryLabel = "amain";
-  } else if (hasVo) {
-    filters.push(`[${voIdx}:a]volume=${voVol},apad,atrim=0:${dur},asetpts=N/SR/TB[amain]`);
-    primaryLabel = "amain";
-  } else if (hasMusic) {
-    filters.push(
-      `[${musicIdx}:a]volume=${vol},atrim=0:${dur},afade=t=out:st=${fadeStart}:d=0.75,asetpts=N/SR/TB[amain]`,
-    );
-    primaryLabel = "amain";
+    musicLabel = "mfit";
   }
 
   // NOTE on `adelay … ,asetpts=N/SR/TB`: since ffmpeg 7 adelay keeps the input's
@@ -565,6 +554,44 @@ export async function assembleVideo(
       `[${audioClipBaseIdx + i}:a]${srcTrim}${tempo}atrim=0:${clipDur.toFixed(3)},asetpts=N/SR/TB,${delayPart}apad,atrim=0:${dur},asetpts=N/SR/TB[${lbl}]`,
     );
     audioClipLabels.push(lbl);
+  }
+
+  // Ducking: the music bed compresses under the VO and under every audio-only
+  // clip (narration, dialogue bridges). Unmuted shot audio and PiP audio do
+  // NOT key it — sync sound under music should not pump the bed.
+  let primaryLabel: string | null = null;
+  {
+    const duckKeys: string[] = [];
+    let voMix = voLabel;
+    if ((opts.musicDucking ?? true) && musicLabel) {
+      if (voLabel) {
+        filters.push(`[${voLabel}]asplit=2[vomix][vokey]`);
+        voMix = "vomix";
+        duckKeys.push("vokey");
+      }
+      for (let i = 0; i < audioClipLabels.length; i++) {
+        const l = audioClipLabels[i];
+        filters.push(`[${l}]asplit=2[${l}m][${l}k]`);
+        audioClipLabels[i] = `${l}m`;
+        duckKeys.push(`${l}k`);
+      }
+    }
+    let musicOut = musicLabel;
+    if (musicLabel && duckKeys.length) {
+      let key = duckKeys[0];
+      if (duckKeys.length > 1) {
+        filters.push(`${duckKeys.map((k) => `[${k}]`).join("")}amix=inputs=${duckKeys.length}:duration=longest:normalize=0[duckkey]`);
+        key = "duckkey";
+      }
+      filters.push(`[${musicLabel}][${key}]sidechaincompress=threshold=0.02:ratio=8:attack=15:release=300[mduck]`);
+      musicOut = "mduck";
+    }
+    const primary = [voMix, musicOut].filter((x): x is string => !!x);
+    if (primary.length === 1) primaryLabel = primary[0];
+    else if (primary.length === 2) {
+      filters.push(`[${primary[0]}][${primary[1]}]amix=inputs=2:duration=longest:normalize=0[amain]`);
+      primaryLabel = "amain";
+    }
   }
 
   // Final audio = primary track plus any unmuted clip audios plus overlays plus

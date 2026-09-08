@@ -129,6 +129,13 @@ export interface Snapshot {
   lutAssetId: string | null;
   musicAssetId: string | null;
   musicVolume: number;
+  musicDucking: boolean;
+  musicMuted: boolean;
+  voVolume: number;
+  voMuted: boolean;
+  audioNormalize: boolean;
+  audioFadeInS: number;
+  audioFadeOutS: number;
   voScript: string | null;
   segments: Segment[];
   textOverlays: { id: string; text: string; position: string; startS: number; endS: number | null }[];
@@ -170,7 +177,8 @@ export function summarize(p: Snapshot) {
     audioMode: p.audioMode,
     look: { colorLook: p.colorLook, lutAssetId: p.lutAssetId, transition: p.transition, transitionMs: p.transitionMs, fillMode: p.fillMode },
     captions: { enabled: p.captionsEnabled, style: p.captionStyle },
-    music: p.musicAssetId ? { assetId: p.musicAssetId, volume: p.musicVolume } : null,
+    music: p.musicAssetId ? { assetId: p.musicAssetId, volume: p.musicVolume, ducking: p.musicDucking, muted: p.musicMuted } : null,
+    mix: { audioNormalize: p.audioNormalize, fadeInS: p.audioFadeInS, fadeOutS: p.audioFadeOutS, voVolume: p.voVolume, voMuted: p.voMuted },
     voiceover: p.voiceover,
     timelineDurationS: timelineS,
     segments: p.segments.map((s) => ({
@@ -211,6 +219,7 @@ export interface AssetInfo {
   sizeBytes: number;
   durationS: number;
   video: { codec: string; width: number; height: number; pixFmt: string } | null;
+  hasAudio: boolean;
   path: string;
 }
 export const assetInfo = (id: string) => api.get<AssetInfo>(`/api/assets/${id}/info`);
