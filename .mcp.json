@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "slopstudio": {
+      "command": "node_modules/.bin/tsx",
+      "args": ["mcp/server.ts"],
+      "env": {
+        "SLOPSTUDIO_URL": "http://127.0.0.1:38473"
+      }
+    }
+  }
+}

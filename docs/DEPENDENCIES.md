@@ -262,7 +262,8 @@ multi-user server unset it and set `SLOPSTUDIO_API_TOKEN` (+ optional
 `SLOPSTUDIO_API_TOKEN_USER=<email>`) so agents authenticate with
 `Authorization: Bearer <token>`. `pnpm test:eval` runs the scored editing tasks in
 `tests/eval/` against a running app (`BASE_URL` to point elsewhere). The agent-facing route
-reference is [AGENT-API.md](AGENT-API.md).
+reference is [AGENT-API.md](AGENT-API.md); the MCP server that wraps it for Claude / Codex is
+`pnpm mcp` (`mcp/README.md`, acceptance test `pnpm test:mcp`).
 
 ## 7. End-to-end tests (Playwright)
 

@@ -5,6 +5,17 @@ Notable changes, newest first. See [DEPENDENCIES.md](DEPENDENCIES.md) for setup 
 
 ## 2026-09 — no-storyboard fork
 
+- **MCP server** (`mcp/`, `pnpm mcp`, see [mcp/README.md](../mcp/README.md)). 32 tools over the
+  HTTP API for Claude Code / Claude Desktop / Codex: project (create with frame presets, get
+  compact view, update, delete), media (import file / YouTube, list, probe incl. file path,
+  music, LUT), inspect (frame + contact sheet as images, scenes, silences, transcript with
+  word timings), timeline (add / edit / split / reorder / delete segments, text overlays,
+  checkpoints, `apply_edit_list` = checkpointed batch with rollback and `$n` refs), render
+  (draft, final, status, cancel, formats). Resources `slopstudio://projects[/{id}]`, prompt
+  `edit_video`. `.mcp.json` registers it for Claude Code inside the repo. `pnpm test:mcp`
+  drives it through the MCP client SDK and solves the eval tasks with the tools (26 checks).
+  New route `GET /api/assets/:id/info` (duration, video stream, size, absolute path).
+
 - **Fix: trimmed clip audio played early, then silence (ffmpeg 9 regression).** Every
   delayed audio chain (unmuted clip audio, overlay clip audio, audio-only clips, audio
   overlays) used `adelay … apad,atrim=0:dur`; since ffmpeg 7 `adelay` keeps the input

@@ -2,8 +2,8 @@
 
 SlopStudio's editor is a JSON API with a UI on top. Everything the timeline can
 do is a route under `/api`, the render engine is a job queue over ffmpeg, and
-the open editor live-updates when something else edits the project. This is
-the surface an MCP server (or any agent harness) builds on.
+the open editor live-updates when something else edits the project. This is the surface the MCP server in [`mcp/`](../mcp/README.md) (`pnpm mcp`) builds on;
+use that with Claude / Codex, and this document when you need the raw routes.
 
 ## Running it for an agent
 
@@ -41,7 +41,7 @@ renders). **Text overlays** and **audio overlays** sit on top.
 ### Media
 - `POST /api/uploads` (multipart `projectId`, `file`) → asset. Video, image, audio; MKV/AVI/TS accepted.
 - `POST /api/projects/:id/youtube` — import a URL (with `startS`/`endS`).
-- `GET /api/assets/:id` — the file (Range supported).
+- `GET /api/assets/:id` — the file (Range supported). `GET /api/assets/:id/info` — duration, video stream, size, absolute path.
 
 ### Inspect (perception)
 - `GET /api/assets/:id/frame?t=12.5&w=640` → JPEG of that instant.
