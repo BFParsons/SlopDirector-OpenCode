@@ -1,4 +1,6 @@
-# SlopStudio Pro — no-storyboard fork
+# SlopStudio-Omarchy
+
+SlopStudio Pro for **Omarchy** (Arch Linux + Hyprland) — the desktop NLE fork **without the Storyboard mode**, fitted to a 1080p laptop at 2× scale. Upstream: `BFParsons/slopstudio-pro`.
 
 > **This fork removes the Storyboard mode** (the AI concept → shot-list board, its
 > story-element library and keyframe image generation via fal.ai). The start screen

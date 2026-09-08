@@ -1,8 +1,8 @@
 {
-  "name": "slopstudio-pro",
+  "name": "slopstudio-omarchy",
   "version": "0.1.0",
   "private": true,
-  "description": "Desktop-class, high-performance NLE with built-in AI generation.",
+  "description": "SlopStudio Pro for Omarchy: desktop-class NLE with built-in AI generation, without the Storyboard mode.",
   "main": "electron/main.js",
   "packageManager": "pnpm@10.33.0",
   "scripts": {
