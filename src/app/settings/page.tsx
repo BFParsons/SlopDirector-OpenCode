@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { FalKeySettings } from "@/components/FalKeySettings";
 import { OpenRouterKeySettings } from "@/components/OpenRouterKeySettings";
 import { ProjectFolderSettings } from "@/components/ProjectFolderSettings";
 import { requirePageUser } from "@/lib/auth/rbac";
@@ -21,7 +20,6 @@ export default async function SettingsPage() {
         <div className="space-y-4">
           <ProjectFolderSettings initialFolder={user.defaultProjectFolder} />
           <OpenRouterKeySettings initialHint={user.openrouterKeyHint} />
-          <FalKeySettings initialHint={user.falKeyHint} />
         </div>
       </main>
     </>

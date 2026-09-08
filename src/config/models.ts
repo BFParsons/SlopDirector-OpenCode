@@ -96,119 +96,6 @@ export function getVideoModel(id: string): VideoModelInfo | undefined {
   return VIDEO_MODELS.find((m) => m.id === id);
 }
 
-// ----------------------------------------------------------------------------
-// Image models (fal.ai) for storyboard generation — scenes, characters,
-// objects, keyframes. `i2i` is the image-to-image endpoint used when generating
-// from a reference (style anchor, variant, camera angle); models without one
-// fall back to Flux dev img2img. Prices are USD per image (~1MP) and
-// best-effort — confirm against your fal dashboard; flux/dev is verified.
-
-export interface ImageModelInfo {
-  id: string; // text->image slug
-  i2i?: string; // image->image slug (single reference)
-  i2iMulti?: string; // multi-reference slug (e.g. Kontext multi) for 2+ refs
-  provider?: "fal" | "openrouter"; // default "fal"
-  label: string;
-  pricePerImageUsd: number;
-  note?: string;
-}
-
-export const IMAGE_MODELS: ImageModelInfo[] = [
-  {
-    id: "fal-ai/flux/dev",
-    i2i: "fal-ai/flux/dev/image-to-image",
-    label: "Flux.1 [dev]",
-    pricePerImageUsd: 0.025,
-    note: "Balanced quality and price. Good default.",
-  },
-  {
-    id: "fal-ai/flux/schnell",
-    label: "Flux.1 [schnell]",
-    pricePerImageUsd: 0.003,
-    note: "Fastest and cheapest; lower detail. Great for rough drafts.",
-  },
-  {
-    id: "fal-ai/flux-pro/v1.1",
-    label: "Flux 1.1 [pro]",
-    pricePerImageUsd: 0.04,
-    note: "Sharper, more coherent than dev.",
-  },
-  {
-    id: "fal-ai/flux-pro/v1.1-ultra",
-    label: "Flux 1.1 [pro] Ultra",
-    pricePerImageUsd: 0.06,
-    note: "Maximum detail and resolution.",
-  },
-  {
-    id: "fal-ai/recraft-v3",
-    label: "Recraft V3",
-    pricePerImageUsd: 0.04,
-    note: "Strong art styles and legible text-in-image.",
-  },
-  {
-    // Runs through OpenRouter's image output API (your OpenRouter key), not fal.
-    id: "google/gemini-3-pro-image-preview",
-    provider: "openrouter",
-    label: "Gemini 3 Pro Image (Nano Banana Pro)",
-    pricePerImageUsd: 0.13,
-    note: "Highest-quality subject/character consistency + reference editing. Google-moderated (great for archetypal scenes/characters).",
-  },
-  {
-    id: "google/gemini-2.5-flash-image",
-    provider: "openrouter",
-    label: "Gemini 2.5 Flash Image (Nano Banana)",
-    pricePerImageUsd: 0.039,
-    note: "Strong consistency + editing, cheaper & faster than Pro. Google-moderated.",
-  },
-  {
-    id: "fal-ai/bytedance/seedream/v4/text-to-image",
-    i2i: "fal-ai/bytedance/seedream/v4/edit",
-    label: "Seedream 4 (ByteDance)",
-    pricePerImageUsd: 0.03,
-    note: "High quality + editing, light guardrails.",
-  },
-  {
-    id: "fal-ai/imagen4/preview/ultra",
-    label: "Imagen 4 Ultra (Google)",
-    pricePerImageUsd: 0.06,
-    note: "Top-tier photorealism. Google-moderated; text-to-image only.",
-  },
-  {
-    // Identity-preserving edits (keep the subject, change X) + multi-reference
-    // composition. The open Flux answer to Nano Banana; lighter guardrails.
-    id: "fal-ai/flux-pro/kontext/text-to-image",
-    i2i: "fal-ai/flux-pro/kontext",
-    i2iMulti: "fal-ai/flux-pro/kontext/multi",
-    label: "Flux Kontext [pro]",
-    pricePerImageUsd: 0.04,
-    note: "Keeps a subject's identity across outfits/angles; fuses multiple references for composed shots.",
-  },
-  {
-    id: "fal-ai/flux-pro/kontext/max/text-to-image",
-    i2i: "fal-ai/flux-pro/kontext/max",
-    i2iMulti: "fal-ai/flux-pro/kontext/max/multi",
-    label: "Flux Kontext [max]",
-    pricePerImageUsd: 0.08,
-    note: "Highest-quality Kontext — best identity preservation + composition.",
-  },
-];
-
-export const DEFAULT_IMAGE_MODEL = "fal-ai/flux/dev";
-
-export function getImageModel(id: string): ImageModelInfo | undefined {
-  return IMAGE_MODELS.find((m) => m.id === id);
-}
-
-/**
- * True for reference-EDITING models (Flux Kontext, Gemini/Nano Banana) that keep
- * a subject's identity and take the prompt as an instruction. For these, variant
- * / camera-angle prompts should be the *change* only, not a re-description.
- */
-export function isRefEditorModel(id: string): boolean {
-  const m = getImageModel(id);
-  if (!m) return false;
-  return m.id.includes("kontext") || m.provider === "openrouter";
-}
 
 // ----------------------------------------------------------------------------
 
@@ -219,7 +106,7 @@ export interface ChatModelInfo {
 }
 
 /**
- * Chat models for script/storyboard generation. The default should be a
+ * Chat models for script generation. The default should be a
  * permissive, instruction-following model that will name and critique real
  * politicians for legitimate campaign-video copywriting without refusing.
  */
@@ -282,7 +169,7 @@ export function ttsVoices(id: string): string[] {
 // Product caps (enforced in Zod schemas AND the LLM output schema)
 
 export const CAPS = {
-  maxShots: 8, // max AI-generated shots per storyboard generation (cost guard)
+  maxShots: 8, // max AI-generated shots per project (cost guard)
   maxSegments: 30, // max total visual segments (AI + uploaded clips/photos)
   maxAudioOverlays: 8, // max audio overlays mixed over the final
   maxTextOverlays: 12, // max burned-in text overlays

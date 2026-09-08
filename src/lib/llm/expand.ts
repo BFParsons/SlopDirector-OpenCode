@@ -1,19 +1,10 @@
 import { chatCompletion, jsonSchemaFormat } from "@/lib/openrouter/chat";
 import type { ChatMessage } from "@/lib/openrouter/chat";
-import {
-  scriptJsonSchema,
-  scriptOutputSchema,
-  storyboardJsonSchema,
-  storyboardOutputSchema,
-  type ScriptOutput,
-  type StoryboardOutput,
-} from "./adSchema";
+import { scriptJsonSchema, scriptOutputSchema, type ScriptOutput } from "./adSchema";
 import {
   buildRepairPrompt,
   buildScriptSystemPrompt,
   buildScriptUserPrompt,
-  buildStoryboardSystemPrompt,
-  buildStoryboardUserPrompt,
   type BriefInput,
 } from "./prompts";
 import type { ZodType } from "zod";
@@ -48,7 +39,7 @@ function tryParse<T>(
 
 /**
  * One structured LLM call with a single repair retry on schema-validation
- * failure. Shared by the storyboard and script generators.
+ * failure.
  */
 async function runStructured<T>(opts: {
   model: string;
@@ -94,29 +85,6 @@ async function runStructured<T>(opts: {
     }
   }
   return parsed.data;
-}
-
-/** Generate the visual storyboard (concept + shots). Visual track only. */
-export async function generateStoryboard(
-  model: string,
-  brief: BriefInput,
-  apiKey?: string,
-): Promise<StoryboardOutput> {
-  const data = await runStructured({
-    model,
-    schemaName: "ad_storyboard",
-    system: buildStoryboardSystemPrompt(),
-    user: buildStoryboardUserPrompt(brief),
-    jsonSchema: storyboardJsonSchema,
-    zodSchema: storyboardOutputSchema,
-    apiKey,
-  });
-  // Normalize shot indices to a clean 0..N-1 ordering.
-  data.shots.sort((a, b) => a.index - b.index);
-  data.shots.forEach((s, i) => {
-    s.index = i;
-  });
-  return data;
 }
 
 /** Generate the script + voiceover narration. Audio track only. */

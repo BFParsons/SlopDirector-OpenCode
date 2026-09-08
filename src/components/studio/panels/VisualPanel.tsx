@@ -15,7 +15,6 @@ export default function VisualPanel({ windowControls }: PanelProps) {
           projectId={snapshot.id}
           segments={draft.segments}
           concept={snapshot.concept}
-          visualGenStatus={snapshot.visualGenStatus}
           voiceoverDurationS={snapshot.voiceover?.durationS ?? null}
           isAdmin={isAdmin}
           projectVideoModel={snapshot.videoModel}

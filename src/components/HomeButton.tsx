@@ -14,8 +14,7 @@ export function HomeButton() {
     pathname === "/" ||
     pathname === "/start" ||
     pathname.startsWith("/login") ||
-    pathname.startsWith("/projects/") ||
-    pathname.startsWith("/storyboard/");
+    pathname.startsWith("/projects/");
   if (hide) return null;
 
   return (

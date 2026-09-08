@@ -1,5 +1,10 @@
 # SpotForge — CLAUDE.md
 
+> **no-storyboard fork:** Storyboard mode, story elements (`/api/projects/[id]/elements`),
+> keyframe image generation (`src/lib/images`, `GEN_IMAGE`, fal.ai key) and the
+> `GEN_STORYBOARD` job are removed. `src/lib/llm` keeps only script generation. The
+> Prisma schema is unchanged (unused tables/columns/enum values remain).
+
 Prototype **political ad generator**. One OpenRouter key drives the whole AI
 pipeline: LLM script/storyboard → per-shot video → TTS voiceover → ffmpeg
 stitches a final MP4. Multi-user with auth. Single Hetzner box via Docker.

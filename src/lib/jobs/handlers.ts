@@ -1,16 +1,14 @@
 import { mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { Project } from "@prisma/client";
-import type { AspectRatio, JobType, RefRole } from "@/lib/db/enums";
-import { parseRefIds } from "@/lib/db/reflist";
+import type { JobType } from "@/lib/db/enums";
 import { env } from "@/env";
-import { DEFAULT_IMAGE_MODEL, getImageModel, getTtsModel } from "@/config/models";
+import { getTtsModel } from "@/config/models";
 import { prisma } from "@/lib/db/client";
 import { buildCaptions } from "@/lib/render/captions";
 import { asEffects } from "@/lib/render/effects";
 import { asPip } from "@/lib/render/pip";
 import { asTransform } from "@/lib/render/transform";
-import { generateImageAsset } from "@/lib/images";
 import {
   ASSET_ROOT,
   absolutePath,
@@ -26,7 +24,7 @@ import type { TextOverlaySpec } from "@/lib/ffmpeg/args";
 import { resolveEncoder } from "@/lib/system/capabilities";
 import { aspectLabel, frameDimensions, resolutionLabel } from "@/lib/ffmpeg/args";
 import { probeDuration } from "@/lib/ffmpeg/probe";
-import { generateScript, generateStoryboard } from "@/lib/llm/expand";
+import { generateScript } from "@/lib/llm/expand";
 import type { BriefInput } from "@/lib/llm/prompts";
 import { downloadYouTubeAudio, downloadYouTubeClip } from "@/lib/youtube/import";
 import { parseYouTubeId } from "@/lib/youtube/url";
@@ -46,7 +44,6 @@ import {
   setProjectStatus,
   setScriptGenStatus,
   setSegmentStatus,
-  setVisualGenStatus,
   setVoStatus,
   touchProject,
 } from "./orchestrator";
@@ -64,56 +61,6 @@ function briefFromProject(p: Project): BriefInput {
     aspectRatio: aspectLabel(p.aspectRatio),
     shotCount: p.shotCount,
   };
-}
-
-// ---------------------------------------------------------------------------
-// GEN_STORYBOARD — visual track: concept + AI segments (uploads preserved)
-// ---------------------------------------------------------------------------
-async function genStoryboardJob(payload: { projectId: string }): Promise<void> {
-  const project = await prisma.project.findUnique({
-    where: { id: payload.projectId },
-  });
-  if (!project) throw new Error("project not found");
-
-  const apiKey = await keyForProject(project.id);
-  const result = await generateStoryboard(project.llmModel, briefFromProject(project), apiKey);
-
-  await prisma.$transaction(async (tx) => {
-    // Replace AI segments; keep user-uploaded ones.
-    await tx.segment.deleteMany({
-      where: { projectId: project.id, source: "AI_GENERATED" },
-    });
-    // Compact the kept (upload) segments to 0..k-1 (ascending = collision-free).
-    const kept = await tx.segment.findMany({
-      where: { projectId: project.id },
-      orderBy: { index: "asc" },
-    });
-    for (let i = 0; i < kept.length; i++) {
-      if (kept[i].index !== i) {
-        await tx.segment.update({ where: { id: kept[i].id }, data: { index: i } });
-      }
-    }
-    // Append the generated AI segments after the uploads.
-    const base = kept.length;
-    for (const s of result.shots) {
-      await tx.segment.create({
-        data: {
-          projectId: project.id,
-          index: base + s.index,
-          title: s.title,
-          source: "AI_GENERATED",
-          prompt: s.videoPrompt,
-          durationS: s.durationS,
-        },
-      });
-    }
-    await tx.project.update({
-      where: { id: project.id },
-      data: { concept: result.concept, error: null },
-    });
-  });
-
-  await setVisualGenStatus(project.id, "READY");
 }
 
 // ---------------------------------------------------------------------------
@@ -142,120 +89,12 @@ async function genScriptJob(payload: { projectId: string }): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
-// GEN_IMAGE — storyboard keyframe via the image-provider seam (fal.ai/ComfyUI)
+// GEN_STORYBOARD / GEN_IMAGE — removed in this fork (Storyboard mode and its
+// keyframe image generation). The JobType enum still lists them (DB schema is
+// unchanged), so a stale queued job fails loudly instead of silently vanishing.
 // ---------------------------------------------------------------------------
-interface GenImagePayload {
-  projectId: string;
-  prompt: string;
-  aspect?: AspectRatio;
-  seed?: number;
-  styleStrength?: number;
-  styleRefAssetId?: string; // style anchor → continuity
-  characterRefAssetId?: string;
-  targetSegmentId?: string; // attach the keyframe to this segment...
-  targetRole?: RefRole; // ...as this reference role (default FIRST_FRAME)
-  targetElementId?: string; // ...OR set a story element's identity image
-  targetVariantId?: string; // ...OR set a variant's image
-  editFromAssetId?: string; // edit-in-place: use ONLY this image as the reference
-}
-
-async function genImageJob(payload: GenImagePayload): Promise<void> {
-  const project = await prisma.project.findUnique({ where: { id: payload.projectId } });
-  if (!project) throw new Error("project not found");
-  if (!payload.prompt?.trim()) throw new Error("image prompt is empty");
-
-  // Resolve owned reference assets to data URIs the provider can ingest.
-  const refUri = async (assetId?: string): Promise<string | undefined> => {
-    if (!assetId) return undefined;
-    const a = await prisma.asset.findFirst({ where: { id: assetId, projectId: project.id } });
-    return a ? fileToDataUri(a.path, a.mime) : undefined;
-  };
-
-  // Reference images. Edit-in-place wins: condition ONLY on the given image (the
-  // shot's current keyframe) so the prompt is applied as an edit, preserving the
-  // rest. Otherwise: an element's uploaded refs, or a shot's composed elements.
-  let uploadedRefs: string[] = [];
-  if (payload.editFromAssetId) {
-    const u = await refUri(payload.editFromAssetId);
-    if (u) uploadedRefs = [u];
-  } else if (payload.targetElementId) {
-    const el = await prisma.storyElement.findFirst({
-      where: { id: payload.targetElementId, projectId: project.id },
-      select: { refImageIds: true },
-    });
-    const refIds = parseRefIds(el?.refImageIds);
-    if (refIds.length) {
-      uploadedRefs = (await Promise.all(refIds.map((rid) => refUri(rid)))).filter(
-        (u): u is string => !!u,
-      );
-    }
-  } else if (payload.targetSegmentId) {
-    const refs = await prisma.segmentElementRef.findMany({
-      where: { segmentId: payload.targetSegmentId, segment: { projectId: project.id } },
-      orderBy: { index: "asc" },
-      include: { element: { select: { assetId: true, variants: { select: { id: true, assetId: true } } } } },
-    });
-    const assetIds = refs
-      .map((r) => {
-        const v = r.variantId ? r.element.variants.find((x) => x.id === r.variantId) : null;
-        return v?.assetId ?? r.element.assetId;
-      })
-      .filter((x): x is string => !!x);
-    uploadedRefs = (await Promise.all(assetIds.map(refUri))).filter((u): u is string => !!u);
-  }
-
-  const modelInfo = getImageModel(project.imageModel) ?? getImageModel(DEFAULT_IMAGE_MODEL);
-
-  const asset = await generateImageAsset({
-    projectId: project.id,
-    providerId: modelInfo?.provider ?? "fal",
-    params: {
-      prompt: payload.prompt,
-      aspect: payload.aspect ?? project.aspectRatio,
-      seed: payload.seed,
-      styleStrength: payload.styleStrength,
-      styleRef: await refUri(payload.styleRefAssetId),
-      characterRef: await refUri(payload.characterRefAssetId),
-      refs: uploadedRefs,
-      model: modelInfo?.id ?? project.imageModel,
-      i2iModel: modelInfo?.i2i,
-      i2iMultiModel: modelInfo?.i2iMulti,
-    },
-  });
-
-  // Cost of this one image (cents), accumulated onto the owning story element.
-  const costCents = (modelInfo?.pricePerImageUsd ?? 0.025) * 100;
-
-  // Attach the generated image to its target: a segment's reference image
-  // (FIRST_FRAME, seeds image-to-video), or a story element / variant's image.
-  if (payload.targetSegmentId) {
-    await prisma.segment.updateMany({
-      where: { id: payload.targetSegmentId, projectId: project.id },
-      data: { refImageId: asset.id, refRole: payload.targetRole ?? "FIRST_FRAME", error: null },
-    });
-  } else if (payload.targetElementId) {
-    await prisma.storyElement.updateMany({
-      where: { id: payload.targetElementId, projectId: project.id },
-      data: { assetId: asset.id, error: null, costCents: { increment: costCents } },
-    });
-  } else if (payload.targetVariantId) {
-    await prisma.storyElementVariant.updateMany({
-      where: { id: payload.targetVariantId, element: { projectId: project.id } },
-      data: { assetId: asset.id, error: null },
-    });
-    // Roll the variant's cost up to its parent element.
-    const variant = await prisma.storyElementVariant.findUnique({
-      where: { id: payload.targetVariantId },
-      select: { elementId: true },
-    });
-    if (variant) {
-      await prisma.storyElement.update({
-        where: { id: variant.elementId },
-        data: { costCents: { increment: costCents } },
-      });
-    }
-  }
-  await touchProject(project.id);
+function removedJob(type: string): never {
+  throw new Error(`${type} jobs were removed in this fork (Storyboard mode)`);
 }
 
 // ---------------------------------------------------------------------------
@@ -825,9 +664,9 @@ async function cleanupJob(): Promise<void> {
 type Handler = (payload: Record<string, unknown>) => Promise<void>;
 
 export const handlers: Record<JobType, Handler> = {
-  GEN_STORYBOARD: (p) => genStoryboardJob(p as { projectId: string }),
+  GEN_STORYBOARD: () => removedJob("GEN_STORYBOARD"),
   GEN_SCRIPT: (p) => genScriptJob(p as { projectId: string }),
-  GEN_IMAGE: (p) => genImageJob(p as unknown as GenImagePayload),
+  GEN_IMAGE: () => removedJob("GEN_IMAGE"),
   SUBMIT_SHOT: (p) => submitShotJob(p as { segmentId: string }),
   RECONCILE_VIDEO: (p) =>
     reconcileVideoJob(p as { segmentId: string; polls?: number }),

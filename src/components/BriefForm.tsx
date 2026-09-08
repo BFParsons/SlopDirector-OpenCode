@@ -120,7 +120,7 @@ export function BriefForm({
             <Input value={form.tone} onChange={(e) => set("tone", e.target.value)} />
           </div>
           <div>
-            <Label hint={`${CAPS.minShots}–${CAPS.maxShots}, for AI storyboards`}>Shots</Label>
+            <Label hint={`${CAPS.minShots}–${CAPS.maxShots} AI shots`}>Shots</Label>
             <Input
               type="number"
               min={CAPS.minShots}

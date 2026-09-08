@@ -3,6 +3,20 @@
 Notable changes, newest first. See [DEPENDENCIES.md](DEPENDENCIES.md) for setup and
 [AUDIO_STUDIO.md](AUDIO_STUDIO.md) for the audio workspace.
 
+## 2026-09 — no-storyboard fork
+
+- **Storyboard mode removed.** Gone: the `/storyboard/[id]` board (`StoryboardWorkspace`),
+  the start-screen card, the Visual panel's "Generate storyboard (AI)" button, the
+  `generate-storyboard` API and `GEN_STORYBOARD` job, the storyboard LLM prompt/schema,
+  the story-element APIs (`/elements`, segment element refs), keyframe image generation
+  (`/images` API, `GEN_IMAGE` job, `src/lib/images` provider seam, image-model catalogue),
+  and the fal.ai key setting + `FAL_*` / `IMAGE_PROVIDER` env vars.
+- **Kept:** single AI shots (Visual panel → AI, Video Generator panel), script + voiceover
+  generation (`GEN_SCRIPT`), and all editing/audio features.
+- **Schema unchanged** on purpose (no migration): `StoryElement*` tables, `Project.concept`
+  / `imageModel` / `visualGenStatus`, `User.falKey*`, and the `GEN_STORYBOARD` /
+  `GEN_IMAGE` enum values remain; those job types now fail loudly if ever queued.
+
 ## 2026-09 — Omarchy (Arch + Hyprland) dev setup
 
 - **Dev box moved to Omarchy.** Repo ported to run on Arch/Hyprland; details in

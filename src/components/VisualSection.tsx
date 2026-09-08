@@ -19,7 +19,6 @@ import {
 import { CAPS } from "@/config/models";
 import { api } from "@/lib/api";
 import { withBase } from "@/lib/basePath";
-import { Button } from "@/components/ui";
 import { ClipGallery } from "./ClipGallery";
 import { type SegmentPatch, type SegmentView } from "./SegmentCard";
 import { SortableSegment } from "./SortableSegment";
@@ -31,7 +30,6 @@ export function VisualSection({
   projectId,
   segments,
   concept,
-  visualGenStatus,
   voiceoverDurationS,
   isAdmin,
   projectVideoModel,
@@ -44,7 +42,6 @@ export function VisualSection({
   projectId: string;
   segments: SegmentView[];
   concept: string | null;
-  visualGenStatus: string | null;
   voiceoverDurationS: number | null;
   isAdmin: boolean;
   projectVideoModel: string;
@@ -60,7 +57,6 @@ export function VisualSection({
   const [showYouTube, setShowYouTube] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const pendingKind = useRef<UploadKind | null>(null);
-  const generating = visualGenStatus === "RUNNING";
   const atMax = segments.length >= CAPS.maxSegments;
 
   const sensors = useSensors(
@@ -204,16 +200,6 @@ export function VisualSection({
             </p>
           ) : null}
         </div>
-        {!readOnly ? (
-          <Button
-            variant="ghost"
-            className="px-3 py-1.5 text-xs"
-            disabled={busy || generating}
-            onClick={() => void run(() => api(`/api/projects/${projectId}/generate-storyboard`, { method: "POST", body: "{}" }))}
-          >
-            {generating ? "Generating…" : "✨ Generate storyboard (AI)"}
-          </Button>
-        ) : null}
       </div>
 
       {concept ? (
@@ -225,7 +211,7 @@ export function VisualSection({
 
       {segments.length === 0 ? (
         <p className="text-sm text-[var(--color-muted)]">
-          No segments yet. Generate a storyboard with AI, or add your own clips and photos below.
+          No segments yet. Add clips, photos, or AI shots below.
         </p>
       ) : (
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>

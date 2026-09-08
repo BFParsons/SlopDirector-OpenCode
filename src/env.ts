@@ -18,14 +18,6 @@ const schema = z.object({
   OPENROUTER_BASE_URL: z.string().default("https://openrouter.ai/api/v1"),
   OPENROUTER_WEBHOOK_SECRET: z.string().optional(),
 
-  // Image generation (storyboard keyframes). Provider seam: fal.ai now, local
-  // ComfyUI on tier-2 GPU machines later. IMAGE_PROVIDER: auto | fal | comfyui.
-  IMAGE_PROVIDER: z.string().default("auto"),
-  FAL_KEY: z.string().optional(), // fal.ai API key ("Key <id>:<secret>" value)
-  FAL_IMAGE_MODEL: z.string().default("fal-ai/flux/dev"), // text -> image
-  // style/character continuity (img2img/redux/ip-adapter); tune per fal's schema
-  FAL_STYLE_MODEL: z.string().default("fal-ai/flux/dev/image-to-image"),
-
   // Auth / crypto
   AUTH_SECRET: z.string().optional(),
 

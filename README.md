@@ -1,3 +1,11 @@
+# SlopStudio Pro — no-storyboard fork
+
+> **This fork removes the Storyboard mode** (the AI concept → shot-list board, its
+> story-element library and keyframe image generation via fal.ai). The start screen
+> offers **Assembly**, **Audio Studio** and **Open project**; single AI shots, script /
+> voiceover generation, and everything else are unchanged. Mentions of storyboards
+> below are historical. See `docs/CHANGELOG.md`.
+
 # SlopStudio (formerly SpotForge)
 
 A browser-based, **Premiere-style non-linear video editor** with built-in AI generation:

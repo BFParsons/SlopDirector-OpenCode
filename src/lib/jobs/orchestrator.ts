@@ -281,31 +281,9 @@ export async function markJobFailure(
   const p = (job.payload ?? {}) as { projectId?: string; segmentId?: string };
   try {
     switch (job.type) {
-      case "GEN_STORYBOARD":
-        if (p.projectId) await setVisualGenStatus(p.projectId, "FAILED", error);
-        break;
       case "GEN_SCRIPT":
         if (p.projectId) await setScriptGenStatus(p.projectId, "FAILED", error);
         break;
-      case "GEN_IMAGE": {
-        // Surface image-gen failure on whichever target was set (error field only,
-        // so the storyboard board / element library can show it).
-        const tg = job.payload as {
-          targetSegmentId?: string;
-          targetElementId?: string;
-          targetVariantId?: string;
-        };
-        const msg = error.slice(0, 2000);
-        if (tg.targetSegmentId) {
-          await prisma.segment.updateMany({ where: { id: tg.targetSegmentId }, data: { error: msg } }).catch(() => {});
-        } else if (tg.targetElementId) {
-          await prisma.storyElement.updateMany({ where: { id: tg.targetElementId }, data: { error: msg } }).catch(() => {});
-        } else if (tg.targetVariantId) {
-          await prisma.storyElementVariant.updateMany({ where: { id: tg.targetVariantId }, data: { error: msg } }).catch(() => {});
-        }
-        if (p.projectId) await touchProject(p.projectId);
-        break;
-      }
       case "SYNTH_VO":
         if (p.projectId) await setVoStatus(p.projectId, "FAILED", { error });
         break;

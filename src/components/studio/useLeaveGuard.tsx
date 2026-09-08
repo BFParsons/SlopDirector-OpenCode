@@ -6,7 +6,7 @@ import { api } from "@/lib/api";
 import { ExitSaveDialog } from "./ExitSaveDialog";
 
 /**
- * Guards leaving an editor (Assembly / Audio Studio / Storyboard): when the
+ * Guards leaving an editor (Assembly / Audio Studio): when the
  * project still looks like a throwaway (`shouldGuard`), an attempt to navigate
  * away pops the {@link ExitSaveDialog} forcing the user to name+save or discard
  * (delete) the project — so empty/unsaved projects don't accumulate.

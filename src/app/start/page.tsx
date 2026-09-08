@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { NewAssemblyCard } from "@/components/NewAssemblyCard";
 import { NewAudioStudioCard } from "@/components/NewAudioStudioCard";
-import { NewStoryboardCard } from "@/components/NewStoryboardCard";
 import { requirePageUser } from "@/lib/auth/rbac";
 import { withBase } from "@/lib/basePath";
 
@@ -65,8 +64,7 @@ export default async function StartPage() {
           </div>
         </div>
 
-        <div className="grid shrink-0 grid-cols-2 gap-4 md:grid-cols-4 short:gap-3">
-          <NewStoryboardCard accent="var(--color-accent)" />
+        <div className="grid shrink-0 grid-cols-3 gap-4 short:gap-3">
           <NewAssemblyCard accent="#2ec5c5" />
           <NewAudioStudioCard accent="#b07cff" />
           {MODES.map((m) => (
