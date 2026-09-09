@@ -211,7 +211,7 @@ export function SegmentCard({
   const badge = position ?? segment.index + 1;
 
   return (
-    <div className={rootClass} style={inList ? ({ "--edge": hue } as CSSProperties) : undefined}>
+    <div data-clip-id={segment.id} className={rootClass} style={inList ? ({ "--edge": hue } as CSSProperties) : undefined}>
       {inList ? (
         <span
           aria-hidden

@@ -42,6 +42,10 @@ env = { SLOPSTUDIO_URL = "http://127.0.0.1:38473" }
 Against a multi-user server (desktop auth off) add `SLOPSTUDIO_API_TOKEN` to
 `env`; see `docs/AGENT-API.md`.
 
+## Watching it work
+
+Open the project in the app and add the **Agent** panel (Panel → Viewer → Agent): every tool call this server makes shows up there as it happens — arguments, result, the contact sheets it looked at — and the clips it changes flash on the timeline. `SLOPSTUDIO_AGENT_FEED=0` in this server's environment turns the reporting off. To see the panel without running a job: `pnpm exec tsx scripts/agent-lane-demo.ts <projectId>` replays a short scripted session into it (`--screenshot out.png` captures the editor headlessly).
+
 ## Tools
 
 Pre-production first for a new piece: `set_brief` (after the `interview` prompt), `set_plan` / `check_plan` / `plan_document` / `approve_plan` / `plan_tasks`, then sourcing in parallel (`search_youtube`, `source_clips`, `add_ai_shot` / `generate_ai_shots`, `generate_narration`, `list_video_models`) and `storyboard_sheet` to review a cut. Sub-agent definitions for Claude Code live in `.claude/agents/` (clip-scout, narrator, shot-picker).

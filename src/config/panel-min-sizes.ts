@@ -29,6 +29,7 @@ export const PANEL_MIN_SIZE: Partial<Record<PanelType, WindowSize>> = {
   "loudness-meter": { width: 150, height: 150 },
   "audio-tools": { width: 160, height: 150 },
   "media-bucket": { width: 220, height: 180 },
+  agent: { width: 260, height: 200 },
   "youtube-importer": { width: 260, height: 180 },
 };
 

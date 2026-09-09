@@ -10,17 +10,86 @@ interface ProgressEvent {
   [k: string]: unknown;
 }
 
+/** One MCP tool call as the agent lane shows it (start, then merged with its end). */
+export interface ActivityItem {
+  callId: string;
+  tool: string;
+  agent?: string;
+  args?: Record<string, unknown>;
+  summary?: string;
+  ok?: boolean;
+  ms?: number;
+  phase: "start" | "end";
+  at: number;
+  projectId: string;
+}
+export type AgentFeedMode = "off" | "changes" | "full";
+
+/** Tools that only look; "changes" mode hides them. */
+const LOOK_TOOLS = /^(get_|detect_|transcribe$|probe_asset$|list_|search_|check_|pacing_report$|verify_export$|read_guide$|get_playbook$|render_status$|draft_result$|final_result$|compare_versions$|analyze_audio$|storyboard_sheet$|plan_document$|plan_tasks$)/;
+export const isLookTool = (tool: string) => LOOK_TOOLS.test(tool);
+
+const FEED_KEY = "slop.agentFeed";
+const FOLLOW_KEY = "slop.agentFollow";
+const readPref = <T,>(key: string, fallback: T): T => {
+  try {
+    const v = typeof window !== "undefined" ? window.localStorage.getItem(key) : null;
+    return v == null ? fallback : (JSON.parse(v) as T);
+  } catch {
+    return fallback;
+  }
+};
+const writePref = (key: string, value: unknown) => {
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    /* private mode etc. */
+  }
+};
+
+const CHANGE_FIELDS = ["index", "track", "trimStartS", "durationS", "speed", "muted", "volume", "offsetS", "audioOnly", "status"] as const;
+/** Segments added or edited between two snapshots — what the agent lane flashes. */
+function changedSegmentIds(prev: ProjectSnapshot | null, next: ProjectSnapshot): string[] {
+  if (!prev) return [];
+  const before = new Map(prev.segments.map((s) => [s.id, s]));
+  const out: string[] = [];
+  for (const s of next.segments) {
+    const b = before.get(s.id);
+    if (!b) {
+      out.push(s.id);
+      continue;
+    }
+    const a = s as unknown as Record<string, unknown>;
+    const bb = b as unknown as Record<string, unknown>;
+    if (CHANGE_FIELDS.some((k) => a[k] !== bb[k])) out.push(s.id);
+  }
+  return out;
+}
+
 interface ProjectState {
   snapshot: ProjectSnapshot | null;
   connected: boolean;
   assemblyPercent: number;
+  /** the agent lane */
+  activity: ActivityItem[];
+  agentFeed: AgentFeedMode;
+  follow: boolean;
+  /** segment ids the agent just changed → expiry timestamp (ms) */
+  flashIds: Record<string, number>;
   _es: EventSource | null;
   _poll: ReturnType<typeof setInterval> | null;
   _projectId: string | null;
+  _refetchTimer: ReturnType<typeof setTimeout> | null;
   setSnapshot: (s: ProjectSnapshot | null) => void;
   refetch: () => Promise<void>;
+  /** coalesce a burst of change events (an edit list fires one per op) into one refetch */
+  refetchSoon: () => void;
   connect: (id: string) => void;
   disconnect: () => void;
+  setAgentFeed: (m: AgentFeedMode) => void;
+  setFollow: (on: boolean) => void;
+  loadActivity: () => Promise<void>;
+  clearActivity: () => void;
 }
 
 // Whether the project is doing background work we should poll for. The worker
@@ -51,9 +120,14 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   snapshot: null,
   connected: false,
   assemblyPercent: 0,
+  activity: [],
+  agentFeed: readPref<AgentFeedMode>(FEED_KEY, "full"),
+  follow: readPref<boolean>(FOLLOW_KEY, true),
+  flashIds: {},
   _es: null,
   _poll: null,
   _projectId: null,
+  _refetchTimer: null,
 
   setSnapshot: (s) => set({ snapshot: s }),
 
@@ -62,11 +136,53 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
     if (!id) return;
     try {
       const snap = await api<ProjectSnapshot>(`/api/projects/${id}`);
-      set({ snapshot: snap });
+      const prev = get().snapshot;
+      const changed = get().agentFeed === "off" ? [] : changedSegmentIds(prev, snap);
+      const flashIds = { ...get().flashIds };
+      const now = Date.now();
+      for (const k of Object.keys(flashIds)) if (flashIds[k] < now) delete flashIds[k];
+      for (const cid of changed) flashIds[cid] = now + 2500;
+      set({ snapshot: snap, flashIds });
+      if (changed.length) setTimeout(() => {
+        const cur = { ...get().flashIds };
+        const t = Date.now();
+        for (const k of Object.keys(cur)) if (cur[k] <= t) delete cur[k];
+        set({ flashIds: cur });
+      }, 2600);
     } catch {
       /* ignore transient errors */
     }
   },
+
+  refetchSoon: () => {
+    const t = get()._refetchTimer;
+    if (t) clearTimeout(t);
+    set({ _refetchTimer: setTimeout(() => {
+      set({ _refetchTimer: null });
+      void get().refetch();
+    }, 150) });
+  },
+
+  setAgentFeed: (m) => {
+    writePref(FEED_KEY, m);
+    set({ agentFeed: m });
+    if (m !== "off" && !get().activity.length) void get().loadActivity();
+  },
+  setFollow: (on) => {
+    writePref(FOLLOW_KEY, on);
+    set({ follow: on });
+  },
+  loadActivity: async () => {
+    const id = get()._projectId;
+    if (!id || get().agentFeed === "off") return;
+    try {
+      const r = await api<{ activity: ActivityItem[] }>(`/api/projects/${id}/activity?limit=150`);
+      set({ activity: mergeActivity([], r.activity) });
+    } catch {
+      /* no feed */
+    }
+  },
+  clearActivity: () => set({ activity: [] }),
 
   connect: (id) => {
     get().disconnect();
@@ -75,7 +191,8 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
     const poll = setInterval(() => {
       if (isActive(get().snapshot)) void get().refetch();
     }, 2500);
-    set({ _es: es, _poll: poll, _projectId: id });
+    set({ _es: es, _poll: poll, _projectId: id, activity: [], flashIds: {} });
+    void get().loadActivity();
 
     es.onopen = () => set({ connected: true });
     es.onerror = () => {
@@ -94,12 +211,25 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   },
 
   disconnect: () => {
-    const { _es, _poll } = get();
+    const { _es, _poll, _refetchTimer } = get();
     if (_es) _es.close();
     if (_poll) clearInterval(_poll);
-    set({ _es: null, _poll: null, connected: false });
+    if (_refetchTimer) clearTimeout(_refetchTimer);
+    set({ _es: null, _poll: null, _refetchTimer: null, connected: false });
   },
 }));
+
+const MAX_ACTIVITY = 200;
+/** Merge events by callId (an end event completes its start), newest last. */
+function mergeActivity(list: ActivityItem[], incoming: ActivityItem[]): ActivityItem[] {
+  const out = [...list];
+  for (const ev of incoming) {
+    const i = out.findIndex((x) => x.callId === ev.callId);
+    if (i >= 0) out[i] = { ...out[i], ...ev, args: ev.args ?? out[i].args };
+    else out.push(ev);
+  }
+  return out.length > MAX_ACTIVITY ? out.slice(out.length - MAX_ACTIVITY) : out;
+}
 
 function reduce(
   event: ProgressEvent,
@@ -164,9 +294,16 @@ function reduce(
     case "project.changed":
       // Someone else (another window, an agent over the API) edited the
       // project; our own edits echo back with our CLIENT_ID and are skipped.
+      // Coalesced: an agent's edit list fires one event per operation.
       if (event.clientId && event.clientId === CLIENT_ID) return;
-      void get().refetch();
+      get().refetchSoon();
       return;
+    case "agent.activity": {
+      if (get().agentFeed === "off") return;
+      const ev = event as unknown as ActivityItem;
+      set({ activity: mergeActivity(get().activity, [ev]) });
+      return;
+    }
 
     default:
       return;

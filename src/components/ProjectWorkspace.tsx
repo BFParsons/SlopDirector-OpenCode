@@ -12,6 +12,8 @@ import { ProgressTimeline } from "./ProgressTimeline";
 import { SegmentCard, type SegmentView } from "./SegmentCard";
 import { ExportWindow } from "./studio/ExportWindow";
 import { StudioRoot } from "./studio/StudioRoot";
+import { AgentFollow } from "./studio/AgentFollow";
+import { AgentLane } from "./AgentLane";
 
 /**
  * Project view. While RENDERING, shows a full-screen progress view. Otherwise
@@ -99,6 +101,10 @@ export function ProjectWorkspace({
             </Button>
           </div>
           <ProgressTimeline snapshot={snap} assemblyPercent={assemblyPercent} />
+          <div className="max-h-64 overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-card)]">
+            <AgentLane compact />
+          </div>
+          <AgentFollow />
           <div className="grid gap-3 sm:grid-cols-2">
             {snap.segments.map((s) => (
               <SegmentCard
@@ -127,6 +133,7 @@ export function ProjectWorkspace({
   return (
     <>
       {exportOverlay}
+      <AgentFollow />
       <div className="flex h-full flex-col">
         {snap.status === "FAILED" && snap.error ? (
           <div className="shrink-0 border-b border-[var(--color-border)] bg-[var(--color-danger)]/10 px-4 py-2 text-xs text-[var(--color-danger)]">

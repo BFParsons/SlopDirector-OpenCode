@@ -5,6 +5,23 @@ Notable changes, newest first. See [DEPENDENCIES.md](DEPENDENCIES.md) for setup 
 
 ## 2026-09 — no-storyboard fork
 
+- **Watch the agent work: the Agent panel.** An agent drives the app through the API, so
+  the open editor only ever saw the results appear. Now every MCP tool call is reported to
+  the app (`POST /api/activity`, one fire-and-forget request per call from the MCP server's
+  `installActivityFeed`; `GET /api/projects/:id/activity` for the recent history; the
+  `agent.activity` event on the project's SSE stream) and a new **Agent** panel in the
+  Studio (Viewer group, also shown in the rendering view) lists them live: time, tool,
+  arguments, duration, result, and the picture when the agent looked at one (contact
+  sheets, frames, the storyboard sheet load from the app's cache). A toolbar pill shows the
+  running tool. Clips the agent just changed flash amber on the timeline (`data-clip-id`
+  on clip blocks and segment cards, diffed on each refresh). Per-user toggle in the panel:
+  **off** (events ignored) / **changes** (edits, imports, renders only) / **everything**,
+  and **follow** (opens the panel when an agent starts, scrolls the changed clip into view)
+  — saved in the browser. `SLOPSTUDIO_AGENT_FEED=0` on the MCP server side stops the
+  reports altogether; `SLOPSTUDIO_AGENT_NAME` labels them. Cost: about a millisecond per
+  tool call; the agent never waits on it. Also: a burst of `project.changed` events (an
+  edit list fires one per operation) is now coalesced into one refetch (150 ms).
+
 - **Pre-production: interview → brief → plan → approval → fan-out.** Both real jobs started
   at "clips exist"; the part where the brief gets pinned down was a chat. Now it is a
   protocol. The `interview` prompt asks one round (standalone piece or a scene of a longer

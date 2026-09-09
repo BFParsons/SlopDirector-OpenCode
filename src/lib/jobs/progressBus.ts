@@ -16,6 +16,7 @@ export interface ProgressEvent {
     | "final.ready"
     | "draft.ready"
     | "project.changed"
+    | "agent.activity"
     | "error";
   [key: string]: unknown;
 }

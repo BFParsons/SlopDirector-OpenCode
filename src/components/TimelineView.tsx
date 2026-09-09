@@ -822,7 +822,7 @@ const ClipBlock = memo(function ClipBlock({
   }
 
   return (
-    <div
+    <div data-clip-id={segment.id}
       ref={setRefs}
       {...attributes}
       {...(readOnly ? {} : listeners)}

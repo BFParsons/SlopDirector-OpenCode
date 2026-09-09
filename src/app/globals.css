@@ -426,3 +426,13 @@ a.bg-\[var\(--color-control\)\]:hover {
   40% { transform: scale(1.16) rotate(-1.5deg); }
   70% { transform: scale(0.95); }
 }
+
+/* The agent lane flashes a clip the agent just changed (see AgentFollow). */
+@keyframes agent-flash {
+  0% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.9); }
+  30% { box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.55); }
+  100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0); }
+}
+.agent-flash {
+  animation: agent-flash 2.4s ease-out;
+}

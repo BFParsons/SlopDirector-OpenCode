@@ -247,6 +247,11 @@ What differs from the Debian/Windows notes above:
   clip). 10-bit is different: the CPU decodes an 80 Mbps 4K Main10 clip at ~10 fps, so the
   GPU wins even at full size (4 s clip, 4K → 4K: 10.1 s vs 15.6 s; 4K → 1080p: 3.9 s vs
   13.5 s). Cached in `capabilities-cache.json` as `hwDecode: ["h264","hevc","hevc10"]`.
+- **Agent panel (2026-09).** The MCP server reports every tool call to the app so the open
+  editor can show what the agent is doing (Studio → Panel → Agent; also in the rendering
+  view). `SLOPSTUDIO_AGENT_FEED=0` in the MCP server's environment turns the reports off,
+  `SLOPSTUDIO_AGENT_NAME=<label>` names the agent in the feed. The panel's own toggle
+  (off / changes / everything, follow) is saved in the browser's localStorage.
 - **Analysis cache (2026-09, speed loops).** Scene cuts, silences, loudness, black/frozen
   frames, loudness timelines, Whisper transcripts and the 16 kHz wav they read are cached
   under `<ASSET_ROOT>/_cache/<fingerprint>/` (fingerprint = sha1 of the file, memoized per

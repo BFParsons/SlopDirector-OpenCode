@@ -14,6 +14,7 @@ export const PANEL_TYPES = [
   "audio-mixer",
   "polish",
   "text-overlays",
+  "agent", // the agent lane: what an MCP agent is doing, live
   // Audio Studio panels (the dedicated audio workspace).
   "audio-multitrack",
   "audio-visualizer",

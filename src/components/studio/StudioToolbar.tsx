@@ -12,6 +12,7 @@ import type { PanelGroup } from "@/types/panel";
 import { getAllPanels } from "./PanelRegistry";
 import { useProjectEditor } from "./ProjectEditorProvider";
 import { SaveMenu } from "./SaveMenu";
+import { AgentPill } from "./AgentPill";
 
 const GROUP_ORDER: PanelGroup[] = ["Viewer", "Edit", "Audio", "Finish", "Library"];
 
@@ -166,6 +167,7 @@ export function StudioToolbar() {
               ↷
             </button>
           </div>
+          <AgentPill />
           <PanelLauncher />
           <button
             type="button"

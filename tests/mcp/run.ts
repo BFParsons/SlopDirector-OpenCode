@@ -252,6 +252,15 @@ async function main() {
     const sb = await call<unknown>("storyboard_sheet", { projectId: p2.json.id, cols: 4, width: 320 });
     const sbText = sb.content.find((c) => c.type === "text")?.text ?? "";
     check("storyboard_sheet returns one captioned frame per shot", sb.content.some((c) => c.type === "image") && /Shots left/.test(sbText), sbText.slice(0, 60));
+    // --- the agent lane: every tool call above was reported to the app
+    {
+      const base = process.env.SLOPSTUDIO_URL ?? "http://127.0.0.1:38473";
+      const tok = process.env.SLOPSTUDIO_API_TOKEN;
+      const res = await fetch(`${base}/api/projects/${p2.json.id}/activity?limit=50`, { headers: tok ? { Authorization: `Bearer ${tok}` } : {} });
+      const feed = ((await res.json()) as { data?: { activity: { tool: string; phase: string; ok?: boolean; ms?: number }[] } }).data?.activity ?? [];
+      const tools = new Set(feed.map((f) => f.tool));
+      check("agent activity feed records the tool calls (start/end, timing)", tools.has("set_plan") && tools.has("approve_plan") && feed.some((f) => f.phase === "end" && f.ok === true && typeof f.ms === "number"), [...tools].slice(0, 8).join(","));
+    }
     const vm = await call<{ video: { id: string; durationsS?: number[] }[] }>("list_video_models", {});
     check("list_video_models lists the video models with clip lengths", vm.json.video.length >= 3 && vm.json.video.every((m) => Array.isArray(m.durationsS)));
     if (process.env.MCP_TEST_NETWORK === "1") {

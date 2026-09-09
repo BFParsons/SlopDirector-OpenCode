@@ -33,6 +33,9 @@ renders). **Text overlays** and **audio overlays** sit on top.
 
 ## Endpoints an agent uses
 
+### Watching the agent (the Agent panel)
+- `POST /api/activity {projectId | assetId, callId, phase: start|end, tool, args?, summary?, ok?, ms?, agent?}` — an agent reports a tool call; the MCP server does this for every tool automatically (`SLOPSTUDIO_AGENT_FEED=0` disables). Broadcast as `agent.activity` on `GET /api/projects/:id/events`; `GET /api/projects/:id/activity?limit=100` returns the recent history. The editor's Agent panel renders them.
+
 ### Pre-production
 - `GET/PUT /api/projects/:id/brief` — the interview's outcome (`src/lib/validation/brief.ts`: deliverable standalone|scene, length, aspect; scripted + genre; sources; premise; tone; audience; narration/music/text; must-include/avoid).
 - `GET /api/projects/:id/plan?view=json|document|check|tasks` · `PUT …/plan` (validated, versioned, status proposed, writes `plan-v<N>.md` next to the assets) · `POST …/plan/approve`. The plan: beats, script lines with times, shots (source youtube+clipId | ai+prompt | upload | card; sound sync|muted|vo), clipList, aiShots, music, narration. `check` = length vs brief, pacing norm, sources, narration density/overlaps, caps, AI cost; `tasks` = the dependency graph to fan out.

@@ -36,6 +36,7 @@ export function buildServer(): McpServer {
     },
   );
 
+  installActivityFeed(server);
   registerProjectTools(server);
   registerMediaTools(server);
   registerInspectTools(server);
@@ -146,6 +147,52 @@ export function buildServer(): McpServer {
   );
 
   return server;
+}
+
+/**
+ * The agent lane: report every tool call (start / end) to the app so an open
+ * editor can show what the agent is doing. Fire-and-forget, one tiny POST per
+ * call; SLOPSTUDIO_AGENT_FEED=0 turns it off. The project is taken from the
+ * call's projectId (or assetId, resolved server-side).
+ */
+function installActivityFeed(server: McpServer) {
+  if (process.env.SLOPSTUDIO_AGENT_FEED === "0" || process.env.SLOPSTUDIO_AGENT_FEED === "false") return;
+  const agent = process.env.SLOPSTUDIO_AGENT_NAME ?? "agent";
+  const brief = (v: unknown): unknown => {
+    if (typeof v === "string") return v.length > 80 ? v.slice(0, 77) + "…" : v;
+    if (Array.isArray(v)) return v.length > 6 ? `[${v.length} items]` : v.map(brief);
+    if (v && typeof v === "object") {
+      const o = v as Record<string, unknown>;
+      const keys = Object.keys(o);
+      if (keys.length > 12) return `{${keys.length} fields}`;
+      return Object.fromEntries(keys.map((k) => [k, brief(o[k])]));
+    }
+    return v;
+  };
+  const post = (body: Record<string, unknown>) => void api.post("/api/activity", body).catch(() => null);
+  const summarize = (r: { content?: { type: string; text?: string }[]; isError?: boolean }): string => {
+    const t = r.content?.find((c) => c.type === "text")?.text ?? (r.content?.some((c) => c.type === "image") ? "(image)" : "");
+    const line = t.replace(/\s+/g, " ").trim();
+    return line.length > 240 ? line.slice(0, 237) + "…" : line;
+  };
+  type Cb = (args: Record<string, unknown>, extra: unknown) => Promise<{ content?: { type: string; text?: string }[]; isError?: boolean }>;
+  const orig = server.registerTool.bind(server) as unknown as (name: string, config: unknown, cb: Cb) => unknown;
+  (server as unknown as { registerTool: unknown }).registerTool = (name: string, config: unknown, cb: Cb) =>
+    orig(name, config, async (args, extra) => {
+      const a = (args ?? {}) as Record<string, unknown>;
+      const ids = { projectId: typeof a.projectId === "string" ? a.projectId : undefined, assetId: typeof a.assetId === "string" ? a.assetId : undefined };
+      const callId = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+      const t0 = Date.now();
+      if (ids.projectId || ids.assetId) post({ ...ids, callId, phase: "start", tool: name, args: brief(a), agent });
+      try {
+        const r = await cb(args, extra);
+        if (ids.projectId || ids.assetId) post({ ...ids, callId, phase: "end", tool: name, ok: !r.isError, ms: Date.now() - t0, summary: summarize(r), agent });
+        return r;
+      } catch (e) {
+        if (ids.projectId || ids.assetId) post({ ...ids, callId, phase: "end", tool: name, ok: false, ms: Date.now() - t0, summary: e instanceof Error ? e.message : String(e), agent });
+        throw e;
+      }
+    });
 }
 
 async function main() {

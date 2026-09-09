@@ -20,6 +20,7 @@ const StemSeparationPanel = lazy(() => import("./panels/StemSeparationPanel"));
 const AudioProcessingPanel = lazy(() => import("./panels/AudioProcessingPanel"));
 const LoudnessMeterPanel = lazy(() => import("./panels/LoudnessMeterPanel"));
 const AudioToolsPanel = lazy(() => import("./panels/AudioToolsPanel"));
+const AgentLanePanel = lazy(() => import("./panels/AgentLanePanel"));
 
 const REGISTRY = new Map<PanelType, PanelRegistryEntry>();
 
@@ -49,6 +50,7 @@ registerPanel({ type: "audio-processing", title: "Processing Rack", icon: "◆",
 registerPanel({ type: "loudness-meter", title: "Loudness Meter", icon: "📈", group: "Audio", component: LoudnessMeterPanel });
 registerPanel({ type: "audio-tools", title: "Audio Tools", icon: "🧰", group: "Audio", component: AudioToolsPanel });
 registerPanel({ type: "media-bucket", title: "Media Bucket", icon: "🗂", group: "Library", component: MediaBucketPanel });
+registerPanel({ type: "agent", title: "Agent", icon: "🤖", group: "Viewer", component: AgentLanePanel });
 registerPanel({ type: "youtube-importer", title: "YouTube Importer", icon: "▶", group: "Library", component: makeComingSoonPanel("YouTube Importer", "▶") });
 
 export function getPanel(type: PanelType): PanelRegistryEntry | undefined {
