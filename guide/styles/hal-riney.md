@@ -40,6 +40,20 @@ A soft, grainy morning: a fishing boat, a wedding, a paperboy, a flag going up, 
 - No music with a beat; no sting; no on-screen statistics.
 - No sentence longer than 15 words in the narration.
 
+## Type
+
+**The signature.** A warm serif card for the name and the line, soft white, a slow fade.
+
+**Stand-ins.** EB Garamond for a warm serif. Faces: EB Garamond 400, EB Garamond 700. Case: sentence. Colour #FFF6E8 on #000000. Entrance: fade.
+
+**Roles** (`add_text_overlay {role}` with this style in the brief):
+
+- **card (default)** — the name and the line at the end. EB Garamond Bold · 5 % · hold 4 s.
+
+**Never:** lower-third, caption, callout, citation, label, intertitle.
+
+**Survey note.** Assumption: the closing card ('President Reagan: Leadership That's Working') is set in a serif; the exact face was not documented.
+
 ## Harness parameters
 
 asl 4–6 s · min shot 2 s · transitions dissolves · narration required, warm third person, 70–100 wpm · music required, score (strings) · sync muted · text sparse · interviews none · beat-cut no

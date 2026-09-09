@@ -42,6 +42,22 @@ One presenter, one place, one idea, one take. He stands in front of the thing (a
 - No claim without a source in the description or on screen.
 - No fake enthusiasm; the interest is in the fact.
 
+## Type
+
+**The signature.** Helvetica Black on a red band for the title, lighter Helvetica for the small text; captions for names and numbers only.
+
+**Stand-ins.** Liberation Sans Bold / Regular for Helvetica Black / Helvetica. Faces: Liberation Sans 700, Liberation Sans 400. Case: sentence. Colour #FFFFFF on #C8102E. Entrance: none.
+
+**Roles** (`add_text_overlay {role}` with this style in the brief):
+
+- **lower-third (default)** — the title on the red band. Liberation Sans Bold · 4.2 % · box · none · hold 3.5 s.
+- **callout** — a name or a number, first time. Liberation Sans · 3 % · none.
+- **citation** — a source or a correction. Liberation Sans.
+
+**Never:** caption, intertitle, quote, card, date, label.
+
+**Survey note.** Surveyed: Helvetica Black for the titles, lighter Helvetica for small text; the red band is his signature.
+
 ## Harness parameters
 
 asl 6–12 s overall (one take 60–180 s, inserts 3–6 s) · min shot 2 s · transitions cuts (inserts only) · narration required as sync speech, presenter to camera, 150–170 wpm · music none (end card only) · sync sync-first · text sparse (captions for names / numbers) · interviews direct-address · beat-cut no

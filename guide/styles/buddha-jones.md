@@ -41,6 +41,22 @@ A pop song slowed and warped until it is a threat; a sound design that ticks, br
 - No dissolves, no lens flares, no warm colour after act 1.
 - No shot that finishes its action; every shot is interrupted by black.
 
+## Type
+
+**The signature.** Extended grotesk capitals for the title (Nope's and Get Out's extended Helvetica), thin condensed single words on black between the shots.
+
+**Stand-ins.** Archivo Expanded Bold for Helvetica Extended; Oswald Light for the thin condensed cards. Faces: Archivo Expanded 700, Oswald 300. Case: upper. Colour #FFFFFF on #000000. Entrance: none.
+
+**Roles** (`add_text_overlay {role}` with this style in the brief):
+
+- **card (default)** — a single word on black ('WATCH.'). Oswald Light · spaced capitals · 5 % · none · hold 1.5 s.
+- **title** — the title, extended capitals, on the hit. Archivo Expanded Bold · capitals · 7 %.
+- **date** — the date on black. Oswald Light · spaced capitals · 3.6 % · center.
+
+**Never:** lower-third, callout, quote, label, citation, intertitle.
+
+**Survey note.** Surveyed: Nope's title (modified Neue Helvetica Extended Bold; Josefin Sans in the cards), Get Out's Neue Helvetica Extended Black.
+
 ## Harness parameters
 
 asl 1.5–3 s (act 3 0.4–1 s with black) · min shot 0.15 s · transitions cuts-and-black · narration none · music required, warped song / pulse cue · sync mixed · text cards (single words) · interviews none · beat-cut yes (act 3 on the hits)

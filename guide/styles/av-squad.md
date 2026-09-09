@@ -41,6 +41,23 @@ A trailer built like a rocket: a quiet cold open with one line, a riser that nev
 - No dialogue line without a hit under its last word; no card over four words.
 - No plot beyond the three cards.
 
+## Type
+
+**The signature.** Condensed grotesk premise cards (the Trade Gothic Bold Condensed / Tungsten register), the title in heavy geometric capitals slamming in on the hit.
+
+**Stand-ins.** Oswald Bold for Trade Gothic Bold Condensed / Tungsten; Montserrat Black for the Gotham-class title. Faces: Oswald 700, Montserrat 900. Case: upper. Colour #FFFFFF on #000000. Entrance: pop.
+
+**Roles** (`add_text_overlay {role}` with this style in the brief):
+
+- **card (default)** — a premise card, one line, on black. Oswald Bold · capitals · 6 % · pop · hold 2.2 s.
+- **title** — the title on the biggest hit. Montserrat Black · spaced capitals · 9 % · pop.
+- **date** — the date card. Oswald Bold · capitals · 4 % · center · pop.
+- **lower-third** — the studio card at the start. Oswald Bold · capitals · 3 % · no box · shadow 4 %.
+
+**Never:** quote, citation, label, intertitle.
+
+**Survey note.** Assumption from the house's trailers: condensed gothic cards and a geometric title; the specific faces are per campaign.
+
 ## Harness parameters
 
 asl 1.5–3 s (act 3 0.5–1 s) · min shot 0.3 s · transitions cuts · narration none · music required, trailer cue · sync sync-first (lines and hits) · text cards · interviews none · beat-cut yes

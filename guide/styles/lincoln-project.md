@@ -43,6 +43,23 @@ The subject's own words, cut against the pictures of what they cost. A grim voic
 - No cheerful music unless it is the borrowed form's, and then it turns.
 - No lower-third of the subject (everyone knows who it is); no still that is not a real frame.
 
+## Type
+
+**The signature.** Bold condensed white capitals landing on the spoken phrase, numbers big, a verdict card on black, sources in small type.
+
+**Stand-ins.** Oswald Bold for the Tungsten / Knockout register; Liberation Sans for the citations. Faces: Oswald 700, Liberation Sans 400. Case: upper. Colour #FFFFFF on #000000. Entrance: pop.
+
+**Roles** (`add_text_overlay {role}` with this style in the brief):
+
+- **caption (default)** — the key phrase as it is spoken, 2–3 words. Oswald Bold · capitals · 6.5 % · outline 4 %.
+- **callout** — a number, big. Oswald Bold · capitals · 9 % · center · outline 4 %.
+- **card** — the verdict on black. Oswald Bold · capitals · 6 % · hold 4 s.
+- **citation** — the source under a claim. Liberation Sans · 2.4 %.
+
+**Never:** lower-third, quote, intertitle, label.
+
+**Survey note.** Surveyed loosely from the spots: condensed bold capitals, white on darkened footage; the exact face was not documented.
+
 ## Harness parameters
 
 asl 2–4 s · min shot 0.7 s · transitions cuts (one cut to black) · narration required, grim third person, 100–130 wpm · music required, cue (dread) · sync sync-first · text kinetic captions · interviews none · beat-cut no

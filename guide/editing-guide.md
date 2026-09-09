@@ -2483,6 +2483,10 @@ Every delivery cuts or covers the edge of the frame: overscan on a television, t
 
 **Rule 12.9 — One thing at a time.** Two texts on screen at once are a layout, not a film. *Mechanical check:* `check_text` overlap.
 
+### The director's type
+
+**Rule 12.10 — The directing style decides the type.** Each style carries a surveyed type system (`src/lib/typography/styleType.ts`, the *Type* section of its file): the faces its titles and credits actually use, the open-licence stand-ins that replace them here (Jost for Futura, Montserrat for Gotham and Avenir, Liberation Sans for Helvetica, Oswald for Trade Gothic Bold Condensed and Tungsten, Cinzel for Trajan, Libre Baskerville for Morris's Baskerville, Libre Franklin for Vox's Balto, Anton and Bebas Neue as MrBeast's real faces, Permanent Marker for Neistat's hand), its case (Curtis in sentence case, Nolan in spaced capitals, Jonze in lower-case), its colour and field, its entrance, and the roles it puts on the frame — a title, a card, an intertitle, a lower-third, a caption, a callout, a citation, a date, a quote, a label, a credit — with the roles it never uses. `add_text_overlay {role}` resolves through it; Herzog, Wiseman, Jennings, Malick and Cunningham are no-text styles and any overlay is a departure to name in notes. *Mechanical check:* `check_text` — text on a no-text style, a face outside the style's family, capitals on a sentence-case style, a role the style does not use. Where the survey found nothing (Burns's PBS faces, Veritasium, Rober, Zhou, Jennings, Guest) the file's survey note says the choice is an assumption; when you know better, change the type system and rerun `scripts/gen-style-type.ts`.
+
 ### Transitions between shots
 
 The cut is the default (ch.15). The project's `transition` (`CROSSFADE`, `DISSOLVE`, `FADE_BLACK`, `WIPE`, `SLIDE`) is a global grammar and belongs to the styles that name one (Ken Burns' dissolves, Hal Riney's, LEMMiNO's). A style that says "cuts" gets `NONE`. Image motion on stills (`imageMotion`: push, pull, pan) is a move with a reason — it starts on something and ends on something (Burns, Vsauce, LEMMiNO).
@@ -2490,7 +2494,7 @@ The cut is the default (ch.15). The project's `transition` (`CROSSFADE`, `DISSOL
 ### Applying it
 
 - `list_typography {projectId}` — the presets, the faces, the project's safe rectangles and the preset its style reaches for first.
-- `add_text_overlay {preset, text, startS}` — the preset fills face, size, place, treatment, entrance and hold for this frame; pass any field to override.
+- `add_text_overlay {role, text, startS}` — the brief's style fills face, case, colour, size, place, treatment, entrance and hold for this frame (`list_typography` → `styleType`); `preset` for the generic version; pass any field to override.
 - `check_text {projectId}` — before `render_final`; `verify_export` repeats it on the file.
 - `update_project {safeArea: "broadcast"}` for television delivery; `"none"` only for a deliberate full-bleed card.
 

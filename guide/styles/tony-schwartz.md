@@ -40,6 +40,20 @@ One image, one sound, one implication. A child counts petals; a voice counts dow
 - No second idea; no cutaway that adds information; no fast cut.
 - No voice that sounds like an announcer in the build.
 
+## Type
+
+**The signature.** One plain card of gothic capitals on black: 'Vote for President Johnson on November 3.'
+
+**Stand-ins.** Libre Franklin for the Franklin / News Gothic of 1964 television. Faces: Libre Franklin 700. Case: upper. Colour #FFFFFF on #000000. Entrance: none.
+
+**Roles** (`add_text_overlay {role}` with this style in the brief):
+
+- **card (default)** — the choice and the date, on black, at the end. Libre Franklin Bold · capitals · 4.6 % · hold 5 s.
+
+**Never:** lower-third, caption, callout, citation, label, intertitle, quote.
+
+**Survey note.** Surveyed: the Daisy spot ends on a plain text card on black; the face is assumed to be a 1960s gothic.
+
 ## Harness parameters
 
 asl 5–10 s (3–6 shots) · min shot 1 s · transitions cuts (one push to black) · narration required at the end only, calm authority, 40–80 wpm in its window · music none (a drone allowed) · sync sync-first · text cards · interviews none · beat-cut no

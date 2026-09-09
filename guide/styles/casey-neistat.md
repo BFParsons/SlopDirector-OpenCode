@@ -42,6 +42,21 @@ A day told like a short film: a wide-angle camera on a tripod with a boom, held 
 - No shot without motion; no vlog without a point.
 - No outro longer than a card.
 
+## Type
+
+**The signature.** Marker handwriting on paper: the day's title drawn by hand, a word scrawled over a shot.
+
+**Stand-ins.** Permanent Marker for the marker hand. Faces: Permanent Marker 400. Case: lower. Colour #111111 on #F4F1EA. Entrance: none.
+
+**Roles** (`add_text_overlay {role}` with this style in the brief):
+
+- **title (default)** — the day's title, marker on paper (a card shot). Permanent Marker · 7 % · #111111 · none · hold 2.5 s.
+- **label** — a word over a shot. Permanent Marker · 3.6 % · #FFFFFF · no box · shadow 5 % · none.
+
+**Never:** lower-third, caption, callout, citation, quote, intertitle, date.
+
+**Survey note.** Surveyed: hand-drawn marker titles and physical chapter markers.
+
 ## Harness parameters
 
 asl 2–4 s · min shot 0.7 s · transitions cuts (jump cuts, smash to time-lapse) · narration required, first-person to camera, 130–160 wpm · music required, track · sync sync-first · text sparse (hand-drawn card) · interviews direct-address · beat-cut yes (the time-lapses)

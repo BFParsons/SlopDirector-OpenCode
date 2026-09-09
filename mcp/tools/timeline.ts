@@ -1,6 +1,6 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { FONT_IDS, TYPE_PRESETS, applyPreset, presetById } from "../../src/lib/typography";
+import { FONT_IDS, TYPE_PRESETS, TYPE_ROLES, applyPreset, applyRole, presetById } from "../../src/lib/typography";
 import { api, type Snapshot, snapshot, summarize, frameOf } from "../client";
 import { guarded, text } from "../format";
 
@@ -140,11 +140,12 @@ export function registerTimelineTools(server: McpServer) {
     {
       title: "Add burned-in text",
       description:
-        "A title / lower-third / caption / card drawn over the video from startS to endS. Give a `preset` (list_typography: lower-third, callout, caption-pop, card-archive, card-editorial, title, intertitle, quote, date-card, map-label, mono-note, citation) and the face, size, placement, box / outline / shadow, entrance and hold are filled in for this frame — any field you pass overrides it. Text anchors to the TITLE-SAFE area of the frame (safe areas by aspect / project.safeArea; marginPx moves it further in), so it is never cut or covered on delivery; check_text verifies. position: TOP_LEFT|TOP_CENTER|TOP_RIGHT|MIDDLE_LEFT|CENTER|MIDDLE_RIGHT|BOTTOM_LEFT|BOTTOM_CENTER|BOTTOM_RIGHT. animation: NONE|FADE|SLIDE_UP|POP.",
+        "A title / lower-third / caption / card drawn over the video from startS to endS. Give a `role` and the brief's directing style decides the face, case, colour, placement and entrance (the director's type — list_typography); or give a `preset` (list_typography: lower-third, callout, caption-pop, card-archive, card-editorial, title, intertitle, quote, date-card, map-label, mono-note, citation) and the face, size, placement, box / outline / shadow, entrance and hold are filled in for this frame — any field you pass overrides it. Text anchors to the TITLE-SAFE area of the frame (safe areas by aspect / project.safeArea; marginPx moves it further in), so it is never cut or covered on delivery; check_text verifies. position: TOP_LEFT|TOP_CENTER|TOP_RIGHT|MIDDLE_LEFT|CENTER|MIDDLE_RIGHT|BOTTOM_LEFT|BOTTOM_CENTER|BOTTOM_RIGHT. animation: NONE|FADE|SLIDE_UP|POP.",
       inputSchema: {
         projectId: z.string(),
         text: z.string().min(1).max(500),
-        preset: z.enum(TYPE_PRESETS.map((p) => p.id) as [string, ...string[]]).optional(),
+        role: z.enum(TYPE_ROLES as [string, ...string[]]).optional().describe("what the text is — title, card, intertitle, lower-third, caption, callout, citation, date, quote, label, credit — resolved through the brief's directing style (its face, case, colour, entrance; list_typography shows the style's roles); without a style, the generic preset for the role"),
+        preset: z.enum(TYPE_PRESETS.map((p) => p.id) as [string, ...string[]]).optional().describe("a generic preset, when no style applies or to override the style's choice"),
         position: z.string().optional(),
         startS: z.number().min(0).default(0),
         endS: z.number().min(0).nullable().optional(),
@@ -160,12 +161,18 @@ export function registerTimelineTools(server: McpServer) {
         animation: z.enum(["NONE", "FADE", "SLIDE_UP", "POP"]).optional(),
       },
     },
-    guarded(async ({ projectId, preset, text: txt, startS, ...rest }) => {
+    guarded(async ({ projectId, role, preset, text: txt, startS, ...rest }) => {
       let body: Record<string, unknown> = { text: txt, startS, ...rest, position: rest.position ?? "BOTTOM_CENTER" };
-      if (preset) {
+      if (role || preset) {
         const s = await snapshot(projectId);
         const { endS, ...overrides } = rest;
-        body = { ...applyPreset(presetById(preset)!, frameOf(s), txt, startS, { ...overrides, ...(endS !== undefined ? { endS } : {}) }) };
+        const ov = { ...overrides, ...(endS !== undefined ? { endS } : {}) };
+        if (role && !preset) {
+          const styleId = await briefStyleId(projectId);
+          body = { ...applyRole(styleId, role as (typeof TYPE_ROLES)[number], frameOf(s), txt, startS, ov) };
+        } else {
+          body = { ...applyPreset(presetById(preset)!, frameOf(s), txt, startS, ov) };
+        }
       }
       return text(summarize(await api.post<Snapshot>(`/api/projects/${projectId}/text-overlays`, body)));
     }),
@@ -265,4 +272,14 @@ export function registerTimelineTools(server: McpServer) {
       return text({ applied: ops.length, checkpointId: cp.id, createdSegmentIds: created, project: summarize(await snapshot(projectId)) });
     }),
   );
+}
+
+/** The brief's directing style id, if any (the text roles resolve through it). */
+async function briefStyleId(projectId: string): Promise<string | null> {
+  try {
+    const b = await api.get<{ brief: { production?: { style?: { id: string } } } | null }>(`/api/projects/${projectId}/brief`);
+    return b.brief?.production?.style?.id ?? null;
+  } catch {
+    return null;
+  }
 }

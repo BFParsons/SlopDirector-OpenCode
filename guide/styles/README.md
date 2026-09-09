@@ -2,7 +2,7 @@
 
 A style is a real filmmaker's (or house's) way of building a piece, written as instructions the harness can follow and check. The brief names one (`production.style.id`, asked in the interview after the genre); the plan is checked against its parameters (`check_plan`), the cut against its pacing (`pacing_report`) and its sound policy (`check_soundtrack`), and the agent reads the file with `get_style` before writing the plan. `src/lib/styles/index.ts` holds the mechanical parameters; each file here holds the prose.
 
-Every file has the same sections: the signature · structure · the cut · narration · sound · picture and text · do not · harness parameters · applying it in SlopStudio.
+Every file has the same sections: the signature · structure · the cut · narration · sound · picture and text · do not · type (generated from `src/lib/typography/styleType.ts` by `scripts/gen-style-type.ts`: the surveyed faces, the stand-ins, the case, the roles) · harness parameters · applying it in SlopStudio.
 
 
 ## Documentary

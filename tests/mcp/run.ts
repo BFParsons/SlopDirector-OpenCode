@@ -281,6 +281,24 @@ async function main() {
       await call("delete_project", { projectId: p5.json.id });
       for (const b of mine) if (b.id) await call("remove_text_overlay", { projectId: p2.json.id, overlayId: b.id });
     }
+    // --- the director's type: a role resolves through the brief's style; check_text holds text to it
+    {
+      const p6 = await call<{ id: string }>("create_project", { title: "mcp-test director-type" });
+      await call("set_brief", { projectId: p6.json.id, brief: { ...brief, production: { ...brief.production, genre: "documentary", style: { id: "adam-curtis" } } } });
+      const ty6 = await call<{ styleType: { style: string; faces: string[]; case: string; roles: Record<string, unknown> } | null }>("list_typography", { projectId: p6.json.id });
+      check("list_typography returns the brief's style type system", ty6.json.styleType?.style === "adam-curtis" && ty6.json.styleType.faces.includes("LiberationSans-Regular") && ty6.json.styleType.case === "sentence" && "card" in ty6.json.styleType.roles, JSON.stringify(ty6.json.styleType?.faces));
+      await call("add_text_overlay", { projectId: p6.json.id, role: "card", text: "Simi Valley, 1992", startS: 2 });
+      const ct6 = await call<{ pass: boolean; boxes: { text: string; font: string; preset: string | null }[]; findings: { severity: string; rule: string }[] }>("check_text", { projectId: p6.json.id });
+      const card = ct6.json.boxes.find((b) => /Simi Valley/.test(b.text));
+      check("a role resolves through the style (Curtis card → Liberation Sans, sentence case, no style warning)", card?.font === "LiberationSans-Regular" && card.preset === "adam-curtis:card" && !ct6.json.findings.some((f) => /type/.test(f.rule)), `${card?.font} ${card?.preset} · ${ct6.json.findings.map((f) => f.rule).join(",") || "clean"}`);
+      await call("add_text_overlay", { projectId: p6.json.id, text: "BREAKING NEWS", preset: "caption-pop", startS: 5 });
+      const ct6b = await call<{ findings: { severity: string; rule: string; message: string }[] }>("check_text", { projectId: p6.json.id });
+      check("check_text flags capitals in a foreign face on a sentence-case style", ct6b.json.findings.some((f) => /type/.test(f.rule) && /capitals/.test(f.message)) && ct6b.json.findings.some((f) => /type/.test(f.rule) && /outside/.test(f.message)), ct6b.json.findings.filter((f) => /type/.test(f.rule)).map((f) => f.message.slice(0, 50)).join(" | "));
+      await call("set_brief", { projectId: p6.json.id, brief: { ...brief, production: { ...brief.production, genre: "observational documentary", style: { id: "frederick-wiseman" } } } });
+      const ct6c = await call<{ findings: { severity: string; rule: string; message: string }[] }>("check_text", { projectId: p6.json.id });
+      check("check_text warns on any text under a no-text style (Wiseman)", ct6c.json.findings.some((f) => /Wiseman type/.test(f.rule) && /no text/.test(f.message)));
+      await call("delete_project", { projectId: p6.json.id });
+    }
     await call("set_plan", { projectId: p2.json.id, plan });
     const tbl = await call<unknown>("plan_document", { projectId: p2.json.id });
     const tblText = tbl.content.find((c) => c.type === "text")?.text ?? "";

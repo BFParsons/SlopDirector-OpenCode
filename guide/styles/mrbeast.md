@@ -43,6 +43,23 @@ The premise in the first sentence, the stakes in the first shot, the payoff prom
 - No number said without being shown; no reveal without a riser and a hit.
 - No shot over 4 s except the reveal hold.
 
+## Type
+
+**The signature.** Anton for the in-video captions, Bebas Neue for the thumbnails — heavy capitals, white with a black outline, popping on the word.
+
+**Stand-ins.** Anton and Bebas Neue are the real faces (both free). Faces: Anton 400, Bebas Neue 400. Case: upper. Colour #FFFFFF on #000000. Entrance: pop.
+
+**Roles** (`add_text_overlay {role}` with this style in the brief):
+
+- **caption (default)** — the key words as they are said. Anton · capitals · 7 % · outline 10 %.
+- **callout** — a number, big, yellow. Anton · capitals · 6.5 % · center · #FFE600 · outline 10 %.
+- **label** — a timer or a stakes counter in a corner. Bebas Neue · capitals · 4 % · box.
+- **title** — a title card. Bebas Neue · capitals · 9 % · outline 6 %.
+
+**Never:** quote, intertitle, citation, date.
+
+**Survey note.** Surveyed: Anton (captions) and Bebas Neue (thumbnails); Komika Axis in older subtitles.
+
 ## Harness parameters
 
 asl 1–3 s · min shot 0.3 s · transitions cuts (snap zooms, whips) · narration required, first-person host, 150–180 wpm · music required, energetic bed + risers / hits · sync sync-first · text kinetic captions · interviews direct-address (host to camera) · beat-cut no (event-cut)

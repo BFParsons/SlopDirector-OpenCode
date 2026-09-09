@@ -43,6 +43,23 @@ The camera looks straight at the wall. People stand in the middle of the frame a
 - No off-centre framing unless it is the joke; no dissolves; no emotional swell in the music at the sad line.
 - No actor who moves their face; the reaction is the cut.
 
+## Type
+
+**The signature.** Futura in every film — title cards, chapter headings, signage, credits — capitals centred on a flat colour field; Archer for Isle of Dogs's credits; a script for Moonrise Kingdom.
+
+**Stand-ins.** Jost for Futura; Zilla Slab for Archer. Faces: Jost 700, Jost 500, Zilla Slab 400. Case: upper. Colour #2B1E1A on #F1D9B5. Entrance: none.
+
+**Roles** (`add_text_overlay {role}` with this style in the brief):
+
+- **intertitle (default)** — a chapter card in Futura capitals on a colour field. Jost Bold · capitals · 6 % · #2B1E1A · hold 3 s.
+- **title** — the title on the field. Jost Bold · capitals · 8 % · #2B1E1A.
+- **label** — a label on an object. Jost Medium · capitals · 3 % · #2B1E1A · box · none.
+- **quote** — a letter read aloud while shown. Zilla Slab · 4 %.
+
+**Never:** caption, lower-third, callout, citation.
+
+**Survey note.** Surveyed: Futura across the filmography; Archer in Isle of Dogs; Tilda in Moonrise Kingdom; Annie Atkins's period faces in The Grand Budapest Hotel.
+
 ## Harness parameters
 
 asl 3–7 s · min shot 1 s · transitions cuts (whips) · narration optional, storybook third person, 60–100 wpm · music required, found · sync sync-first · text cards · interviews none · beat-cut no

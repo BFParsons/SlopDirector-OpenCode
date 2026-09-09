@@ -40,6 +40,22 @@ Three timelines cut against each other, each ticking at its own speed, all arriv
 - No explanation in voiceover of what the cut already shows; no jokes at the convergence.
 - No strand that stops advancing; every return to a strand shows progress.
 
+## Type
+
+**The signature.** Heavy geometric capitals, spaced, white on black: Gotham Bold (Oppenheimer), Avenir Black (Inception), Helvetica Neue Black on the branding; Didot for Interstellar.
+
+**Stand-ins.** Montserrat for Gotham / Avenir / Helvetica Neue Black; Playfair Display for Didot. Faces: Montserrat 600, Montserrat 900, Playfair Display 400. Case: spaced capitals. Colour #FFFFFF on #000000. Entrance: fade.
+
+**Roles** (`add_text_overlay {role}` with this style in the brief):
+
+- **card (default)** — a timeline's clock card ('THE AIR — ONE HOUR'). Montserrat SemiBold · spaced capitals · 4 % · hold 3 s.
+- **title** — the title in heavy spaced capitals. Montserrat Black · spaced capitals · 8 %.
+- **date** — a date on black. Montserrat SemiBold · spaced capitals · 3.4 % · center.
+
+**Never:** lower-third, caption, callout, citation, label, quote.
+
+**Survey note.** Surveyed: Oppenheimer Gotham Bold, Interstellar Linotype Didot, Inception Avenir Black, Helvetica Neue Black on the branding.
+
 ## Harness parameters
 
 asl 3–6 s (converging to 1–2 s) · min shot 0.8 s · transitions cuts · narration optional, third person, 20–50 wpm · music required, score (pulse) · sync sync-first · text cards · interviews none · beat-cut no

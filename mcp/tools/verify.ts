@@ -8,7 +8,7 @@ import { z } from "zod";
 import { api, type Segment, type Snapshot, assetInfo, snapshot, frameOf } from "../client";
 import { guarded, text } from "../format";
 import { styleById } from "../../src/lib/styles";
-import { checkText } from "../../src/lib/typography";
+import { checkText, typeSystemFor } from "../../src/lib/typography";
 
 export const FPS = 30;
 const FRAME = 1 / FPS;
@@ -367,7 +367,7 @@ export function registerVerifyTools(server: McpServer) {
         try {
           const sp = await snapshot(info.projectId);
           const f = frameOf(sp);
-          const tc = checkText(sp.textOverlays, { w: f.w, h: f.h }, sp.safeArea, dur);
+          const tc = checkText(sp.textOverlays, { w: f.w, h: f.h }, sp.safeArea, dur, typeSystemFor((await briefInfo(info.projectId)).styleId) ?? null);
           findings.push(...tc.findings.map((x) => ({ severity: x.severity, rule: x.rule, message: x.message, fix: x.fix })));
           textCheck = { profile: tc.safe.profile, overlays: sp.textOverlays.length, pass: tc.pass };
         } catch {

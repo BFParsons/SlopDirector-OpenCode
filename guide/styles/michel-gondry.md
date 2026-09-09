@@ -39,6 +39,20 @@ The song's structure made visible, by hand. Each instrument is a character; each
 - No dissolves, no lens flares, no colour grade beyond a flat, slightly saturated look.
 - No narrative that needs explaining.
 
+## Type
+
+**The signature.** A small rounded lower-case credit, once, lower-left; nothing else on the frame.
+
+**Stand-ins.** Nunito for the rounded lower-case of the Eternal Sunshine title. Faces: Nunito 400. Case: lower. Colour #FFFFFF on #000000. Entrance: none.
+
+**Roles** (`add_text_overlay {role}` with this style in the brief):
+
+- **credit (default)** — artist · song, small, lower-left, first and last five seconds. Nunito · lower-case · 3 % · no box · shadow 4 % · none · hold 4 s.
+
+**Never:** lower-third, caption, callout, card, intertitle, quote, date, label.
+
+**Survey note.** Surveyed loosely: Eternal Sunshine's title is small, rounded and lower-case.
+
 ## Harness parameters
 
 asl 1–2 s (one bar) · min shot 0.25 s (a beat) · transitions cuts · narration none · music required, the song · sync muted · text none · interviews none · beat-cut yes

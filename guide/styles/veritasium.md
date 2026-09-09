@@ -42,6 +42,23 @@ Start with what everyone believes, let people say it on camera, then take it apa
 - No fast cutting; no music under the demonstration; no cut inside the demonstration.
 - No claim without the demonstration or the expert.
 
+## Type
+
+**The signature.** A bold geometric sans for the belief card and the diagram labels, white, with light boxes; a lower-third for the expert.
+
+**Stand-ins.** Montserrat for the geometric sans. Faces: Montserrat 600, Montserrat 900. Case: sentence. Colour #FFFFFF on #000000. Entrance: fade.
+
+**Roles** (`add_text_overlay {role}` with this style in the brief):
+
+- **card** — 'Everyone thinks: …' on black. Montserrat SemiBold · 4.6 %.
+- **label (default)** — a diagram label drawn on the word. Montserrat SemiBold · 3 %.
+- **callout** — a number or a unit when spoken. Montserrat SemiBold.
+- **lower-third** — the expert's name and institution. Montserrat SemiBold · 3.4 %.
+
+**Never:** intertitle, quote.
+
+**Survey note.** Assumption: the channel's face was not documented; a bold geometric sans is the manner.
+
 ## Harness parameters
 
 asl 3–6 s (demonstrations 8–15 s) · min shot 1.5 s · transitions cuts (diagrams animate in) · narration required, first-person curious host, 130–150 wpm · music required, light bed (out under demos) · sync sync-first · text kinetic (diagrams, callouts, lower-thirds) · interviews produced + street bites · beat-cut no

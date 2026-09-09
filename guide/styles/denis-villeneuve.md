@@ -41,6 +41,21 @@ A human figure tiny against something vast and silent — a canyon, a ship, a wa
 - No explaining dialogue; no reaction shots of faces emoting; no music that has a melody.
 - No cut inside the approach or the leaving.
 
+## Type
+
+**The signature.** Light geometric capitals with wide tracking (Arrival's lightened Gotham, Blade Runner 2049's Brandon Grotesque credits), a monumental extended wordmark (Dune) — cool white, slow.
+
+**Stand-ins.** Montserrat Light with spaced capitals for the light geometrics; Michroma for the extended wordmark. Faces: Montserrat 300, Michroma 400. Case: spaced capitals. Colour #DCE3E8 on #000000. Entrance: fade.
+
+**Roles** (`add_text_overlay {role}` with this style in the brief):
+
+- **title** — the extended, tracked title. Michroma · spaced capitals · 6 % · hold 5 s.
+- **card (default)** — a chapter card, light spaced capitals. Montserrat Light · spaced capitals · 3.4 % · hold 4 s.
+
+**Never:** lower-third, caption, callout, citation, label, intertitle.
+
+**Survey note.** Surveyed: Arrival (modified Gotham Light), Blade Runner 2049 (Brandon Grotesque credits, custom extended wordmark), Dune (custom wide geometric with extreme tracking).
+
 ## Harness parameters
 
 asl 6–15 s · min shot 2 s · transitions cuts · narration optional, quiet present tense, 15–40 wpm · music required, score (drone) · sync mixed · text none · interviews none · beat-cut no

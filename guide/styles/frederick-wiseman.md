@@ -42,6 +42,22 @@ No narrator, no interviews, no music, no titles, no one telling you what to thin
 - No shot under 3 s except a reaction; no dissolves; no black inside the film.
 - No "beautiful" shot for its own sake; the exteriors are plain.
 
+## Type
+
+**The signature.** The film's name in plain white sans on black; nothing else, ever.
+
+**Stand-ins.** Liberation Sans for the plain grotesk. Faces: Liberation Sans 400. Case: sentence. Colour #FFFFFF on #000000. Entrance: none.
+
+**Roles** (`add_text_overlay {role}` with this style in the brief):
+
+- **title (default)** — the title of a standalone film. Liberation Sans · 5 % · none.
+
+**No text.** Beyond a title, this style puts nothing on the frame; `check_text` warns on any overlay.
+
+**Never:** lower-third, caption, callout, citation, label, card, intertitle, quote, date.
+
+**Survey note.** Wiseman's titles are a plain name on black; no captions, no names, no dates inside the film.
+
 ## Harness parameters
 
 asl 8–30 s · min shot 3 s · transitions cuts · narration none · music none · sync sync-first · text none · interviews none

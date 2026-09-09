@@ -40,6 +40,22 @@ Everything is cut to a sound. A kettle click becomes a car door; a cash-register
 - No music that is not in the scene; no montage that does not repeat later.
 - No gag explained by dialogue.
 
+## Type
+
+**The signature.** 1970s poster display capitals in a hot colour with an outline (Baby Driver's Gunplay), text-message bubbles and sound-effect words in the frame.
+
+**Stand-ins.** Anton for the Gunplay-class display; Liberation Sans Bold for the bubbles. Faces: Anton 400, Liberation Sans 700. Case: upper. Colour #FFD23F on #000000. Entrance: pop.
+
+**Roles** (`add_text_overlay {role}` with this style in the brief):
+
+- **title** — the title, hot yellow, outlined. Anton · capitals · 9 % · #FFD23F · outline 6 %.
+- **caption (default)** — a sound-effect word on its cut. Anton · capitals · 6 % · #FFD23F · outline 8 %.
+- **label** — a text message in a bubble. Liberation Sans Bold · 3 % · #111111 · box · pop.
+
+**Never:** lower-third, quote, intertitle, citation, date.
+
+**Survey note.** Surveyed: Baby Driver's title in Gunplay (after The Getaway's poster); the on-screen texts follow the films' in-world graphics.
+
 ## Harness parameters
 
 asl 1–3 s (montages 0.3–0.6 s) · min shot 0.2 s (deliberate) · transitions cuts (whips, wipes, smashes) · narration none · music required, song (diegetic) · sync sync-first · text kinetic · interviews none · beat-cut yes

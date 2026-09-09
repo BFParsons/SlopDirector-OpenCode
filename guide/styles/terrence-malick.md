@@ -42,6 +42,22 @@ Magic hour. A camera that drifts through wheat, water, a kitchen, as if it were 
 - No cut on action; no reaction shot; no music with a beat; no sound effect hit.
 - No shot that completes its own gesture.
 
+## Type
+
+**The signature.** A small, delicate serif title on black, spaced; nothing else, ever.
+
+**Stand-ins.** Cormorant Garamond for the delicate serif. Faces: Cormorant Garamond 400. Case: spaced capitals. Colour #F5F0E6 on #000000. Entrance: fade.
+
+**Roles** (`add_text_overlay {role}` with this style in the brief):
+
+- **title (default)** — the title, small spaced capitals on black. Cormorant Garamond · spaced capitals · 4.6 % · hold 5 s.
+
+**No text.** Beyond a title, this style puts nothing on the frame; `check_text` warns on any overlay.
+
+**Never:** lower-third, caption, callout, citation, label, card, intertitle, quote, date.
+
+**Survey note.** Assumption: The Tree of Life's title face was not documented; the manner (small, delicate, on black, alone) is.
+
 ## Harness parameters
 
 asl 2–5 s (holds 8–12 s) · min shot 1 s · transitions cuts (rare dissolves) · narration required, whispered first person, 20–50 wpm · music required, choral / classical · sync mixed · text none · interviews none · beat-cut no

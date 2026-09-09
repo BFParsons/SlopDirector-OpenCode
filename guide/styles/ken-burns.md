@@ -44,6 +44,24 @@ Photographs that breathe. The camera drifts across a still, finds a face, rests.
 - No image that moves without a reason (a move that starts nowhere and ends nowhere).
 - No still that is cropped so hard it loses its grain and period.
 
+## Type
+
+**The signature.** A book serif in the period's manner: names and dates lower-left under a reading, chapter titles in spaced capitals, ivory on black, slow fades.
+
+**Stand-ins.** EB Garamond for the Garamond-class serifs of the PBS films. Faces: EB Garamond 400, EB Garamond 700. Case: sentence. Colour #F2E9D8 on #000000. Entrance: fade.
+
+**Roles** (`add_text_overlay {role}` with this style in the brief):
+
+- **date (default)** — the writer's name and the date under a reading. EB Garamond · 3.6 % · bottom-left · shadow 3 % · hold 3.5 s.
+- **quote** — a line of a letter over the photograph. EB Garamond · 4.2 %.
+- **card** — a chapter title in spaced capitals on black. EB Garamond · spaced capitals · 4.6 % · hold 4 s.
+- **label** — a talking head's name, once. EB Garamond · 3.2 % · bottom-left · shadow 3 %.
+- **title** — the film's title. EB Garamond Bold · spaced capitals · 7 %.
+
+**Never:** caption, callout, lower-third, intertitle.
+
+**Survey note.** Assumption: the exact faces vary by film and were not documented in the survey; the manner (serif, ivory, lower-left names, spaced capitals for titles) is consistent across the PBS films.
+
 ## Harness parameters
 
 asl 6–12 s · min shot 3 s · transitions dissolves · narration required, third person + readings, 70–105 wpm · music required, period · sync muted · text sparse · stills yes · interviews produced

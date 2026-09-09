@@ -41,6 +41,22 @@ A wartime country shown by its sounds: a Spitfire over a wheat field, a dance ha
 - No shot of a person that is not respectful; no staging that shows.
 - No cut that is not motivated by a sound.
 
+## Type
+
+**The signature.** Crown Film Unit titles: plain capitals, white on black, an opening card and nothing inside the film.
+
+**Stand-ins.** Noto Sans with spaced capitals for the Gill-Sans-class lettering of the 1940s units. Faces: Noto Sans 400. Case: spaced capitals. Colour #FFFFFF on #000000. Entrance: none.
+
+**Roles** (`add_text_overlay {role}` with this style in the brief):
+
+- **title (default)** — the opening title card. Noto Sans · spaced capitals · 5.5 % · none.
+
+**No text.** Beyond a title, this style puts nothing on the frame; `check_text` warns on any overlay.
+
+**Never:** lower-third, caption, callout, citation, label, card, intertitle, quote, date.
+
+**Survey note.** Assumption: the survey did not document the title lettering; the wartime units set titles in plain capitals.
+
 ## Harness parameters
 
 asl 4–8 s · min shot 1.5 s · transitions cuts (sound bridges) · narration none (one opening paragraph allowed) · music optional, found (in the picture) · sync sync-first · text none · interviews none · beat-cut no

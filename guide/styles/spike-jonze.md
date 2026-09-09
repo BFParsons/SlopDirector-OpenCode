@@ -41,6 +41,21 @@ One idea, taken completely seriously, until it is absurd. A lamp is thrown away 
 - No montage of features; no voiceover explaining the idea; no slow motion for beauty.
 - No fantasy environments; the strangeness happens in ordinary places.
 
+## Type
+
+**The signature.** Small, lower-case and unhurried, like the 'her' wordmark; the spot's only text is the deadpan line at the end.
+
+**Stand-ins.** Nunito (rounded humanist) for the soft lower-case of the titles. Faces: Nunito 400. Case: lower. Colour #FFFFFF on #000000. Entrance: fade.
+
+**Roles** (`add_text_overlay {role}` with this style in the brief):
+
+- **card (default)** — the last line, lower-case, on black. Nunito · lower-case · 4.8 %.
+- **title** — a title, lower-case. Nunito · lower-case · 7 %.
+
+**Never:** lower-third, caption, callout, citation, intertitle.
+
+**Survey note.** Assumption: the 'her' title face was not documented; the manner (small, lower-case, light) is.
+
 ## Harness parameters
 
 asl 2–5 s (one long performance take) · min shot 0.7 s · transitions cuts · narration optional, deadpan, 0–30 wpm · music required, song · sync mixed · text sparse · interviews none · beat-cut optional

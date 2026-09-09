@@ -18,7 +18,19 @@ names a directing style, `list_typography` says which preset it reaches for
 (`stylePreset`); the style file's *Picture — sources and text* section says the rest
 (case, colour, where, how long).
 
-## 3. Place text with presets
+## 3. Place text through the style's roles
+
+If the brief names a directing style, `list_typography {projectId}` returns its
+`styleType`: the surveyed signature, the stand-in faces, the case, the colour, the
+entrance and the roles (title, card, intertitle, lower-third, caption, callout,
+citation, date, quote, label, credit) with what each is for. `add_text_overlay
+{projectId, role, text, startS}` fills everything from it — a Curtis card is white
+Helvetica (Liberation Sans) in sentence case on black, cut in; a Nolan card is spaced
+Montserrat capitals; a MrBeast caption is Anton with a black outline popping on the
+word. The roles the style never uses, and the no-text styles (Herzog, Wiseman,
+Jennings, Malick, Cunningham), are departures to name in notes.
+
+## 3b. Or with the generic presets
 
 `add_text_overlay {projectId, preset, text, startS}` — `lower-third` (name / role,
 bottom-left, bar, slides up), `callout` (a fact when it is said, top-left), `caption-pop`

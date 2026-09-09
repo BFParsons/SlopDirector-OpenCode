@@ -11,7 +11,7 @@
 import type { FontId } from "./fonts";
 
 export type TextAnimationId = "NONE" | "FADE" | "SLIDE_UP" | "POP";
-export type Transform = "none" | "upper" | "lower";
+export type Transform = "none" | "upper" | "lower" | "tracked-upper";
 
 export interface TypePreset {
   id: string;
@@ -56,49 +56,6 @@ export const TYPE_PRESETS: TypePreset[] = [
 ];
 export const presetById = (id: string | null | undefined) => TYPE_PRESETS.find((p) => p.id === id);
 
-/** The preset a directing style reaches for first, by style id then by category. */
-const STYLE_PRESET: Record<string, string> = {
-  "adam-curtis": "card-archive",
-  "michael-moore": "lower-third",
-  "errol-morris": "card-editorial",
-  "ken-burns": "date-card",
-  "werner-herzog": "card-editorial",
-  "frederick-wiseman": "card-archive",
-  "humphrey-jennings": "card-archive",
-  lemmino: "card-editorial",
-  "ridley-scott": "title",
-  "spike-jonze": "card-editorial",
-  "jonathan-glazer": "title",
-  "hal-riney": "card-editorial",
-  "hype-williams": "lower-third",
-  "wes-anderson": "intertitle",
-  "christopher-nolan": "title",
-  "edgar-wright": "caption-pop",
-  "frank-capra": "intertitle",
-  "sergei-eisenstein": "intertitle",
-  "tony-schwartz": "card-editorial",
-  "lincoln-project": "caption-pop",
-  "mark-woollen": "card-editorial",
-  "buddha-jones": "title",
-  "av-squad": "title",
-  a24: "card-editorial",
-  "anais-bimpel": "title",
-  "tony-zhou": "citation",
-  "johnny-harris": "map-label",
-  "christopher-guest": "lower-third",
-  mrbeast: "caption-pop",
-  "casey-neistat": "mono-note",
-  mkbhd: "callout",
-  "tom-scott": "callout",
-  veritasium: "callout",
-  vsauce: "card-editorial",
-  "mark-rober": "callout",
-  "emma-chamberlain": "mono-note",
-  "peter-mckinnon": "lower-third",
-};
-const CATEGORY_PRESET: Record<string, string> = { documentary: "card-editorial", advertising: "title", "music-video": "lower-third", drama: "intertitle", political: "caption-pop", trailer: "title", essay: "callout", comedy: "lower-third", youtube: "caption-pop" };
-export const presetForStyle = (styleId: string | null | undefined, category?: string | null): TypePreset => presetById(STYLE_PRESET[styleId ?? ""] ?? CATEGORY_PRESET[category ?? ""] ?? "lower-third")!;
-
 export interface OverlayFields {
   text: string;
   position: string;
@@ -117,7 +74,10 @@ export interface OverlayFields {
   preset: string;
 }
 
-const transform = (t: string, how: Transform) => (how === "upper" ? t.toUpperCase() : how === "lower" ? t.toLowerCase() : t);
+/** tracked-upper: capitals with a space between letters (three between words) — drawtext has no letter-spacing, so the tracking is in the text. */
+export const transformText = (t: string, how: Transform) =>
+  how === "upper" ? t.toUpperCase() : how === "lower" ? t.toLowerCase() : how === "tracked-upper" ? t.toUpperCase().split(/\r?\n/).map((line) => line.split(/\s+/).filter(Boolean).map((w) => [...w].join(" ")).join("   ")).join("\n") : t;
+const transform = transformText;
 
 /** Resolve a preset for a frame into overlay fields; explicit overrides win. */
 export function applyPreset(preset: TypePreset, frame: { w: number; h: number }, text: string, startS: number, overrides: Partial<Omit<OverlayFields, "text" | "preset" | "startS">> & { endS?: number | null } = {}): OverlayFields {

@@ -41,6 +41,22 @@ A trailer that maps the film's mood, not its plot. A choir sings a slow cover of
 - No line of dialogue that gives away the plot; the lines are mood.
 - No card that says what the picture already says.
 
+## Type
+
+**The signature.** Thin sentence-case cards on black between the lines (the Social Network's light Klavika); the title in the film's own face.
+
+**Stand-ins.** Montserrat Light for light Klavika / Gotham Light. Faces: Montserrat 300. Case: sentence. Colour #FFFFFF on #000000. Entrance: fade.
+
+**Roles** (`add_text_overlay {role}` with this style in the brief):
+
+- **card (default)** — a line of dialogue or a phrase, on black, between shots. Montserrat Light · 4.2 % · hold 3 s.
+- **title** — the title when the song breaks. Montserrat Light · spaced capitals · 6.5 % · hold 4 s.
+- **date** — the date on black. Montserrat Light · spaced capitals · 3.4 % · center.
+
+**Never:** lower-third, caption, callout, citation, label, intertitle.
+
+**Survey note.** Surveyed: The Social Network's graphics in Klavika with Futura; the trailer's cards are thin white sans on black.
+
 ## Harness parameters
 
 asl 2–4 s (act 1 holds 4–6 s) · min shot 0.8 s · transitions cuts-and-black · narration none · music required, cover song · sync sync-first (dialogue) · text cards · interviews none · beat-cut no (phrase-cut)

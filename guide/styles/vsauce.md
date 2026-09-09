@@ -40,6 +40,22 @@ Work: Michael Stevens' channel: "What If Everyone JUMPED At Once?", "Is Your Red
 - No dissolves; no lower-thirds on the host; no diagram that explains before the words do.
 - No answer before the tangents.
 
+## Type
+
+**The signature.** DIN Next Rounded (the Pentagram identity) for words and labels; a serif for definitions.
+
+**Stand-ins.** Nunito for DIN Next Rounded; Noto Serif for the definitions. Faces: Nunito 700, Noto Serif 400. Case: sentence. Colour #FFFFFF on #000000. Entrance: none.
+
+**Roles** (`add_text_overlay {role}` with this style in the brief):
+
+- **card (default)** — a definition and its etymology on black. Noto Serif · 4.6 % · hold 3 s.
+- **label** — a word held up. Nunito Bold · 3.4 % · none.
+- **citation** — a source. Nunito Bold.
+
+**Never:** lower-third, caption, intertitle.
+
+**Survey note.** Surveyed: the identity's primary typeface is DIN Next Rounded (previously Alsina); the serif for definitions is an assumption.
+
 ## Harness parameters
 
 asl 2–4 s (host 4–8 s) · min shot 0.7 s · transitions cuts (snap zooms, freezes) · narration required, first-person host, 140–160 wpm · music required, plucked bed · sync sync-first · text cards (definitions) + sparse captions · interviews direct-address (host) · beat-cut no

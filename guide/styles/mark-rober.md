@@ -42,6 +42,22 @@ A problem, a plan, a build, a test that fails, a fix, a test that works, a payof
 - No dissolves; no music under the slow-motion success; no shot of the plan longer than 5 s without a drawing on it.
 - No number without a comparison.
 
+## Type
+
+**The signature.** Heavy geometric capitals for numbers and test cards, semi-bold labels on the drawings, outlined white.
+
+**Stand-ins.** Montserrat for the geometric sans. Faces: Montserrat 900, Montserrat 600. Case: upper. Colour #FFFFFF on #000000. Entrance: pop.
+
+**Roles** (`add_text_overlay {role}` with this style in the brief):
+
+- **label (default)** — a physics label on the whiteboard. Montserrat SemiBold · 3 %.
+- **callout** — a number with its comparison. Montserrat Black · capitals · 5 % · center · no box · outline 8 %.
+- **card** — 'TEST 1' on black. Montserrat Black · capitals · 6 %.
+
+**Never:** quote, intertitle, citation.
+
+**Survey note.** Assumption: the channel's face was not documented; heavy geometric capitals are the manner.
+
 ## Harness parameters
 
 asl 2–4 s (montage 0.8–1.5 s, success 4–8 s) · min shot 0.5 s · transitions cuts (snap zooms, whips) · narration required, first-person engineer, 140–160 wpm · music required, phase beds · sync sync-first · text kinetic (labels, callouts, test cards) · interviews direct-address (host) · beat-cut yes (the build montage)

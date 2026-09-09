@@ -42,6 +42,24 @@ A dark, slow, meticulously researched documentary made from maps, documents and 
 - No still without motion; no document without a highlight; no chapter without a map or a date.
 - No adjective in the narration that judges.
 
+## Type
+
+**The signature.** Sleek squared display capitals for titles and chapter cards, a quiet serif for documents, everything on black with slow fades.
+
+**Stand-ins.** Bebas Neue for the Bebas-like display face viewers identify; Noto Serif for the document serif. Faces: Bebas Neue 400, Noto Serif 400, Noto Sans 400. Case: upper. Colour #E8E8E8 on #0B0B0B. Entrance: fade.
+
+**Roles** (`add_text_overlay {role}` with this style in the brief):
+
+- **title** — the title. Bebas Neue · spaced capitals · 8 %.
+- **card (default)** — a chapter or a date card on black. Bebas Neue · spaced capitals · 5 % · hold 3.5 s.
+- **quote** — the highlighted phrase of a document. Noto Serif · 3.8 %.
+- **label** — a map label. Noto Sans · 2.8 %.
+- **citation** — a source. Noto Sans.
+
+**Never:** lower-third, caption, callout.
+
+**Survey note.** Surveyed: viewers identify the title face as Bebas-like with a squarer finish; the serif and the labels are assumptions.
+
 ## Harness parameters
 
 asl 5–10 s · min shot 2 s · transitions dissolves (black between chapters) · narration required, third-person archivist, 110–130 wpm · music required, ambient score · sync muted · text cards (serif on black) · stills yes · interviews none · beat-cut no

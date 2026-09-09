@@ -229,13 +229,14 @@ Remove a segment from the timeline (the media asset stays in the bucket).
 
 ### `add_text_overlay`
 
-A title / lower-third / caption / card drawn over the video from startS to endS. Give a `preset` (list_typography: lower-third, callout, caption-pop, card-archive, card-editorial, title, intertitle, quote, date-card, map-label, mono-note, citation) and the face, size, placement, box / outline / shadow, entrance and hold are filled in for this frame — any field you pass overrides it. Text anchors to the TITLE-SAFE area of the frame (safe areas by aspect / project.safeArea; marginPx moves it further in), so it is never cut or covered on delivery; check_text verifies. position: TOP_LEFT|TOP_CENTER|TOP_RIGHT|MIDDLE_LEFT|CENTER|MIDDLE_RIGHT|BOTTOM_LEFT|BOTTOM_CENTER|BOTTOM_RIGHT. animation: NONE|FADE|SLIDE_UP|POP.
+A title / lower-third / caption / card drawn over the video from startS to endS. Give a `role` and the brief's directing style decides the face, case, colour, placement and entrance (the director's type — list_typography); or give a `preset` (list_typography: lower-third, callout, caption-pop, card-archive, card-editorial, title, intertitle, quote, date-card, map-label, mono-note, citation) and the face, size, placement, box / outline / shadow, entrance and hold are filled in for this frame — any field you pass overrides it. Text anchors to the TITLE-SAFE area of the frame (safe areas by aspect / project.safeArea; marginPx moves it further in), so it is never cut or covered on delivery; check_text verifies. position: TOP_LEFT|TOP_CENTER|TOP_RIGHT|MIDDLE_LEFT|CENTER|MIDDLE_RIGHT|BOTTOM_LEFT|BOTTOM_CENTER|BOTTOM_RIGHT. animation: NONE|FADE|SLIDE_UP|POP.
 
 | Parameter | Type | Notes |
 |---|---|---|
 | `projectId` | string | required |
 | `text` | string | required |
-| `preset` | lower-third \| callout \| caption-pop \| card-archive \| card-editorial \| title \| intertitle \| quote \| date-card \| map-label \| mono-note \| citation | optional |
+| `role` | title \| card \| intertitle \| lower-third \| caption \| callout \| citation \| date \| quote \| label \| credit | optional; what the text is — title, card, intertitle, lower-third, caption, callout, citation, date, quote, label, credit — resolved through the brief's directing style (its face, case, colour, entrance; list_typography shows the style's roles); without a style, the generic preset for the role |
+| `preset` | lower-third \| callout \| caption-pop \| card-archive \| card-editorial \| title \| intertitle \| quote \| date-card \| map-label \| mono-note \| citation | optional; a generic preset, when no style applies or to override the style's choice |
 | `position` | string | optional |
 | `startS` | number | default 0 |
 | `endS` | object | optional |
@@ -245,7 +246,7 @@ A title / lower-third / caption / card drawn over the video from startS to endS.
 | `boxColor` | string | optional |
 | `boxOpacity` | number | optional |
 | `marginPx` | integer | optional |
-| `font` | DejaVuSans-Bold \| DejaVuSans \| LiberationSans-Bold \| LiberationSans-Regular \| LiberationSerif-Bold \| LiberationSerif-Regular \| LiberationMono-Bold \| LiberationMono-Regular \| NotoSans-Bold \| NotoSans-Regular \| NotoSerif-Bold \| NotoSerif-Regular | optional |
+| `font` | DejaVuSans-Bold \| DejaVuSans \| LiberationSans-Bold \| LiberationSans-Regular \| LiberationSerif-Bold \| LiberationSerif-Regular \| LiberationMono-Bold \| LiberationMono-Regular \| NotoSans-Bold \| NotoSans-Regular \| NotoSerif-Bold \| NotoSerif-Regular \| Jost-Regular \| Jost-Medium \| Jost-Bold \| Montserrat-Light \| Montserrat-SemiBold \| Montserrat-Black \| Oswald-Light \| Oswald-Bold \| BebasNeue-Regular \| Anton-Regular \| Cinzel-Regular \| Cinzel-Bold \| PlayfairDisplay-Regular \| PlayfairDisplay-Bold \| EBGaramond-Regular \| EBGaramond-Bold \| CormorantGaramond-Regular \| CormorantGaramond-SemiBold \| LibreFranklin-Bold \| LibreFranklin-Black \| LibreBaskerville-Regular \| LibreBaskerville-Bold \| CourierPrime-Regular \| CourierPrime-Bold \| ZillaSlab-Regular \| ZillaSlab-Bold \| Michroma-Regular \| Nunito-Regular \| Nunito-Bold \| Archivo-ExpandedBold \| PermanentMarker-Regular | optional |
 | `outlineW` | integer | optional; outline width as % of the font size |
 | `shadow` | integer | optional; drop-shadow offset as % of the font size |
 | `animation` | NONE \| FADE \| SLIDE_UP \| POP | optional |
@@ -596,7 +597,7 @@ The AI video models this build can generate with (id, label, price per second, c
 
 ### `list_typography`
 
-What add_text_overlay can do: the presets (a use resolved to a face, size, placement inside title-safe, treatment and entrance), the bundled faces, the safe-area profiles, and — for a project — its frame's action-safe and title-safe rectangles and the preset its directing style reaches for first.
+What add_text_overlay can do: for a project, its directing style's type system (`styleType`: the surveyed signature, which bundled faces stand in for the real typefaces, the case, the colour, the entrance, and the roles it puts on the frame — pass `role` to add_text_overlay to use it), the frame's action-safe and title-safe rectangles, the generic presets, the bundled faces and the safe-area profiles.
 
 | Parameter | Type | Notes |
 |---|---|---|
@@ -605,7 +606,7 @@ What add_text_overlay can do: the presets (a use resolved to a face, size, place
 
 ### `check_text`
 
-Mechanical typography check (guide §12) on the project's text overlays: every text box inside the title-safe area (error outside action-safe), readable size, line length, three lines at most, reading time against the hold, two texts on top of each other. Runs inside verify_export too.
+Mechanical typography check (guide §12) on the project's text overlays: every text box inside the title-safe area (error outside action-safe), readable size, line length, three lines at most, reading time against the hold, two texts on top of each other — and, when the brief names a directing style, its type: no text on a no-text style, one family, the style's case, the roles it uses. Runs inside verify_export too.
 
 | Parameter | Type | Notes |
 |---|---|---|

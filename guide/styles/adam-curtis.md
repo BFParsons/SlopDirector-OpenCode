@@ -36,7 +36,7 @@ A story about power, told over other people's footage. The narrator is calm and 
 ## Picture — sources and text
 
 - Sources: broadcast archive, newsreels, home movies, corporate films, old television, from many eras. `licence` archives / official channels first; the more obscure the upload, the better the texture.
-- On-screen text: white sans-serif on black, lower-case or small caps, one line, held 3–4 s: a place and a year, or a single sentence of the argument. One or two per scene; never a lower-third over a shot.
+- On-screen text: white Helvetica, sentence case, large, straight over the archive or on black, held 3–4 s, cut in and out: a place and a year, or a single sentence of the argument. No lower-thirds, no boxes. One or two per scene; never a lower-third over a shot.
 
 ## Do not
 
@@ -44,6 +44,22 @@ A story about power, told over other people's footage. The narrator is calm and 
 - No drone shots, no stock footage, no modern graphics, no maps.
 - No music that "matches" the picture; no swell under the climax.
 - No narration that judges ("shockingly", "tragically"); the arrangement judges.
+
+## Type
+
+**The signature.** White Helvetica, sentence case, straight over the image or on black, cut in and out — the caption style Vice and a generation of YouTubers copied.
+
+**Stand-ins.** Liberation Sans (Helvetica's metric twin) for Helvetica. Faces: Liberation Sans 400. Case: sentence. Colour #FFFFFF on #000000. Entrance: none.
+
+**Roles** (`add_text_overlay {role}` with this style in the brief):
+
+- **card (default)** — a place and a year, or one sentence of the argument, on black. Liberation Sans · 5.2 % · center · no box · none · hold 4 s.
+- **caption** — the same sentence, straight over the archive, no box, no outline. Liberation Sans · 4.6 % · center · no box · none · hold 4 s.
+- **date** — a place · a year, top-left, the archive's own timecode left in. Liberation Sans · 3.8 % · top-left · no box · none.
+
+**Never:** lower-third, callout, citation, intertitle.
+
+**Survey note.** Surveyed: HyperNormalisation and Can't Get You Out of My Head set every caption in Helvetica, white, mixed case, large, often centred, with hard cuts; no lower-thirds, no boxes, no animation.
 
 ## Harness parameters (mirror of `src/lib/styles`)
 

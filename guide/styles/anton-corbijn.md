@@ -38,6 +38,21 @@ Black and white, or colour so desaturated it might as well be. Super 8 and 16 mm
 - No smiling, no dancing, no crowd.
 - No performance shot that pretends to be a concert.
 
+## Type
+
+**The signature.** Photobook captions: tiny spaced capitals in a plain grotesk, white, once.
+
+**Stand-ins.** Liberation Sans for the plain grotesk. Faces: Liberation Sans 400. Case: spaced capitals. Colour #FFFFFF on #000000. Entrance: none.
+
+**Roles** (`add_text_overlay {role}` with this style in the brief):
+
+- **credit (default)** — artist · song, tiny spaced capitals, lower-left. Liberation Sans · spaced capitals · 2.6 % · no box · none · hold 4 s.
+- **title** — a title, small. Liberation Sans · spaced capitals · 4 %.
+
+**Never:** lower-third, caption, callout, card, intertitle, quote, date, label.
+
+**Survey note.** Assumption: Control's title face was not documented; the manner follows the photobooks.
+
 ## Harness parameters
 
 asl 3–6 s · min shot 1 s · transitions cuts · narration none · music required, the song · sync muted · text sparse · interviews none · beat-cut optional

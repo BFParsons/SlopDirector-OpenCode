@@ -43,6 +43,22 @@ A film editor explaining one idea about film form, with the films themselves as 
 - No fast cutting for its own sake; no "content" pacing; no jokes without a point.
 - No section that does not return to the thesis.
 
+## Type
+
+**The signature.** A plain humanist sans: a citation under every clip, the thesis and section titles on black, marks over freezes.
+
+**Stand-ins.** Noto Sans for the plain sans. Faces: Noto Sans 400, Noto Sans 700. Case: sentence. Colour #FFFFFF on #000000. Entrance: fade.
+
+**Roles** (`add_text_overlay {role}` with this style in the brief):
+
+- **citation (default)** — film · year under the clip. Noto Sans.
+- **card** — the thesis or a section title on black. Noto Sans Bold · 4.6 % · hold 3 s.
+- **label** — a mark or a counter on a freeze. Noto Sans Bold · 3 %.
+
+**Never:** caption, intertitle, quote.
+
+**Survey note.** Assumption: the essays' face was not documented; a plain sans with the citation grammar is the manner.
+
 ## Harness parameters
 
 asl 3–6 s (clips 6–15 s) · min shot 1 s · transitions cuts (freezes, side-by-sides) · narration required, first-person editor, 110–140 wpm with gaps · music optional, light · sync sync-first (the clips) · text lower-thirds + cards · interviews none · beat-cut no

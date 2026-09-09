@@ -46,6 +46,22 @@ The director narrates in his own voice, slowly, in accented English, and says wh
 - No narration that explains what is in the shot; it says what is not.
 - No cutting away from a person because the silence is awkward.
 
+## Type
+
+**The signature.** A plain serif title on black and nothing else on the frame; the voice does what a caption would.
+
+**Stand-ins.** Liberation Serif for the plain serif of the titles. Faces: Liberation Serif 400. Case: sentence. Colour #FFFFFF on #000000. Entrance: fade.
+
+**Roles** (`add_text_overlay {role}` with this style in the brief):
+
+- **title (default)** — the title of a standalone film, on black. Liberation Serif · 6 %.
+
+**No text.** Beyond a title, this style puts nothing on the frame; `check_text` warns on any overlay.
+
+**Never:** lower-third, caption, callout, citation, label, card, intertitle, quote, date.
+
+**Survey note.** Surveyed loosely: Grizzly Man and Encounters at the End of the World open on plain titles; nothing is superimposed inside the films.
+
 ## Harness parameters
 
 asl 8–20 s · min shot 4 s · transitions cuts · narration required, the director's voice, 30–60 wpm · music required, choral · sync mixed · text none · interviews produced

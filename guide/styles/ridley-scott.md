@@ -40,6 +40,21 @@ A commercial shot like the first two minutes of an epic. Smoke, backlight, shaft
 - No product before the release; no packshot longer than 3 s.
 - No handheld, no natural-light realism, no pop song.
 
+## Type
+
+**The signature.** The closing copy in a Garamond (the 1984 spot's Apple Garamond), the epic title in inscriptional capitals (Gladiator's Trajan), the sci-fi title in disjointed Helvetica Black (Alien).
+
+**Stand-ins.** EB Garamond for Apple Garamond; Cinzel for Trajan; Liberation Sans Bold for Helvetica Black. Faces: EB Garamond 400, Cinzel 400, Liberation Sans 700. Case: sentence. Colour #FFFFFF on #000000. Entrance: fade.
+
+**Roles** (`add_text_overlay {role}` with this style in the brief):
+
+- **card (default)** — the closing copy, one or two sentences on black. EB Garamond · 4.4 % · hold 5 s.
+- **title** — the epic title, spaced capitals. Cinzel · spaced capitals · 8 %.
+
+**Never:** lower-third, caption, callout, citation, label.
+
+**Survey note.** Surveyed: Alien's Helvetica Black title (R/Greenberg), Gladiator's Trajan-class title, Apple's 1984 copy in Apple Garamond.
+
 ## Harness parameters
 
 asl 2–4 s (one hero hold) · min shot 0.7 s · transitions cuts · narration optional, third person, 10–50 wpm · music required, score · sync muted · text sparse · interviews none · beat-cut yes

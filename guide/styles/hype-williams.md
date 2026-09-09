@@ -38,6 +38,20 @@ The fisheye lens, the metallic suit, the tunnel of light. Everything is bigger, 
 - No cut off the beat in the hook; no dissolve.
 - No location that looks like a real place unless it is a mansion or a tarmac.
 
+## Type
+
+**The signature.** The 1990s MTV credit block: bold Helvetica capitals, white, lower-left, three lines — artist, song, director.
+
+**Stand-ins.** Liberation Sans Bold for Helvetica Bold. Faces: Liberation Sans 700. Case: upper. Colour #FFFFFF on #000000. Entrance: none.
+
+**Roles** (`add_text_overlay {role}` with this style in the brief):
+
+- **credit (default)** — ARTIST / SONG / DIRECTOR, lower-left, first and last five seconds. Liberation Sans Bold · capitals · 3.2 % · no box · shadow 6 % · none · hold 5 s.
+
+**Never:** caption, callout, card, intertitle, quote, date, label, citation.
+
+**Survey note.** Assumption: the network's credit block, not the director's; the gloss is in the picture.
+
 ## Harness parameters
 
 asl 0.8–2 s · min shot 0.25 s · transitions cuts · narration none · music required, the song · sync muted · text lower-thirds (title cards) · interviews none · beat-cut yes

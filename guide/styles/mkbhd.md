@@ -41,6 +41,22 @@ A dark studio with one red accent; the product on a matte surface, lit like jewe
 - No spec on screen that is not spoken; no claim without a demo.
 - No music with vocals; no sound effects.
 
+## Type
+
+**The signature.** A clean neo-grotesque (the Helvetica / SF look), white, small, lower-left section titles, specs as callouts; the only colour is the red accent.
+
+**Stand-ins.** Liberation Sans for Helvetica / SF Pro (Roboto appears in some graphics). Faces: Liberation Sans 700, Liberation Sans 400. Case: sentence. Colour #FFFFFF on #0A0A0A. Entrance: fade.
+
+**Roles** (`add_text_overlay {role}` with this style in the brief):
+
+- **lower-third (default)** — a section title, lower-left. Liberation Sans Bold · 3.6 % · no box · fade · hold 2.5 s.
+- **callout** — a spec when it is spoken. Liberation Sans · 3 %.
+- **card** — a comparison table. Liberation Sans · 3.4 %.
+
+**Never:** caption, intertitle, quote, citation.
+
+**Survey note.** Surveyed: a clean neo-grotesque in white; Roboto named for some of the tutorials.
+
 ## Harness parameters
 
 asl 3–6 s · min shot 1 s · transitions cuts (clean title slides) · narration required, first-person reviewer, 130–150 wpm · music required, low-key bed · sync sync-first · text lower-thirds (titles + callouts) · interviews direct-address (host at desk) · beat-cut no

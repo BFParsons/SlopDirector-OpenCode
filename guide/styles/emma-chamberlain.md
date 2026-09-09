@@ -42,6 +42,21 @@ She films herself alone, mid-thought, and then edits herself like a hostile frie
 - No caption that transcribes the speech; the caption argues.
 - No zoom without a reason (the reason is a mistake or a lie).
 
+## Type
+
+**The signature.** A typewriter face (the American Typewriter / Courier register), lower-case, white with a shadow, arguing with her.
+
+**Stand-ins.** Courier Prime for the typewriter. Faces: Courier Prime 700, Courier Prime 400. Case: lower. Colour #FFFFFF on #000000. Entrance: none.
+
+**Roles** (`add_text_overlay {role}` with this style in the brief):
+
+- **caption (default)** — a caption that comments ('she did not do that'). Courier Prime Bold · lower-case · 3.6 % · bottom-center · no box · shadow 5 % · none · hold 1.8 s.
+- **label** — an arrow word. Courier Prime · lower-case · 3.2 % · no box · shadow 5 % · none.
+
+**Never:** lower-third, intertitle, quote, citation, date, card.
+
+**Survey note.** Surveyed loosely: a typewriter face for the captions; American Typewriter is the usual identification.
+
 ## Harness parameters
 
 asl 1.5–3 s · min shot 0.3 s · transitions cuts (jump cuts, snap zooms, freezes) · narration required as sync speech, first person rambling, 150–180 wpm · music required, lo-fi bed (out for bits) · sync sync-first · text kinetic (commenting captions) · interviews direct-address · beat-cut no

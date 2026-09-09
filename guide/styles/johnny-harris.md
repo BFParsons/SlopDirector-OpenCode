@@ -42,6 +42,24 @@ A first-person journalist standing in front of a wall of paper, and then a map: 
 - No archive without a source; no claim without a document or a named source.
 - No animation that does not answer the narration's question.
 
+## Type
+
+**The signature.** Vox's Franklin-class grotesque (Balto): bold points in an accent colour landing on the words, small-caps map labels, serif date cards, a lower-third for a source.
+
+**Stand-ins.** Libre Franklin for Balto / Franklin Gothic. Faces: Libre Franklin 900, Libre Franklin 700, Noto Serif 400. Case: sentence. Colour #FFD400 on #000000. Entrance: slide up.
+
+**Roles** (`add_text_overlay {role}` with this style in the brief):
+
+- **caption (default)** — the point in 2–4 words, accent colour. Libre Franklin Black · 5 % · #FFD400 · no box · slide up · hold 2.2 s.
+- **label** — a map label landing on the word. Libre Franklin Bold · capitals · 2.8 % · #FFFFFF.
+- **date** — a date card in a serif. Noto Serif · 3.6 % · center · #FFFFFF.
+- **lower-third** — a source's name and role. Libre Franklin Bold · 3.4 % · #FFFFFF.
+- **citation** — a source under a document. Libre Franklin Bold · #FFFFFF.
+
+**Never:** intertitle, quote.
+
+**Survey note.** Surveyed: Vox sets in Balto (with Harriet and Roboto Mono); Harris's own channel keeps the bold grotesque and the accent colour.
+
 ## Harness parameters
 
 asl 3–6 s (maps 5–10 s) · min shot 1 s · transitions cuts (map moves) · narration required, first-person journalist, 140–160 wpm · music required, pulse bed · sync mixed · text kinetic (type, labels, date cards, citations) · interviews direct-address (journalist) + produced (sources) · beat-cut no

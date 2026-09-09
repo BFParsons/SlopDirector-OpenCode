@@ -41,6 +41,21 @@ Meaning made by hitting two shots together. A crowd fleeing down steps; a soldie
 - No colour, no dissolve, no camera move beyond a slow pan.
 - No individual psychology; the face is a class.
 
+## Type
+
+**The signature.** Soviet intertitles: heavy grotesque capitals, white on black, two or three words; the constructivist poster is the reference.
+
+**Stand-ins.** Anton for the heavy grotesque. Faces: Anton 400. Case: upper. Colour #FFFFFF on #000000. Entrance: none.
+
+**Roles** (`add_text_overlay {role}` with this style in the brief):
+
+- **intertitle (default)** — an intertitle between sequences. Anton · capitals · 6.5 %.
+- **title** — the title. Anton · capitals · 9 %.
+
+**Never:** lower-third, caption, callout, citation, label, quote, date.
+
+**Survey note.** Assumption from the films: the intertitles are heavy capitals on black; no text is ever superimposed on picture.
+
 ## Harness parameters
 
 asl 1–3 s (collision 0.5–1.5 s) · min shot 0.3 s · transitions cuts · narration none · music required, score (percussive) · sync muted · text cards (intertitles) · interviews none · beat-cut yes

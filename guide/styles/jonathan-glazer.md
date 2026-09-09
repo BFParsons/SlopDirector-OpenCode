@@ -40,6 +40,21 @@ Monochrome or near-monochrome, slow motion, one physical event that becomes a my
 - No smooth dissolves; no orchestral swell (the drum is the swell).
 - No cut that is not on a beat inside the build.
 
+## Type
+
+**The signature.** Small spaced capitals in a plain grotesk, white on black, once — Under the Skin's credits; the spot's line at the end.
+
+**Stand-ins.** Liberation Sans for the plain grotesk. Faces: Liberation Sans 400. Case: spaced capitals. Colour #FFFFFF on #000000. Entrance: none.
+
+**Roles** (`add_text_overlay {role}` with this style in the brief):
+
+- **card (default)** — the line at the end, spaced capitals on black. Liberation Sans · spaced capitals · 3.6 %.
+- **title** — a title, small. Liberation Sans · spaced capitals · 5 %.
+
+**Never:** lower-third, caption, callout, citation, label, intertitle.
+
+**Survey note.** Surveyed: Under the Skin's credits are white lettering on black; the Guinness spots end on the brand's serif line — here a small spaced grotesk.
+
 ## Harness parameters
 
 asl 2–4 s (accelerating) · min shot 0.4 s · transitions cuts · narration optional, chant, 20–60 wpm · music required, rhythm cue · sync mixed · text sparse · interviews none · beat-cut yes

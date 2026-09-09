@@ -39,6 +39,22 @@ The familiar made wrong. A council estate in wet grey light; children with a gro
 - No dissolves, no montage of "cool" images; no explaining shot.
 - No cut away from the face too early — the discomfort is the content (hold 2 s past comfort).
 
+## Type
+
+**The signature.** Nothing on the frame; if a credit is needed it is small, plain and gone.
+
+**Stand-ins.** Liberation Sans for a plain grotesk. Faces: Liberation Sans 400. Case: upper. Colour #FFFFFF on #000000. Entrance: none.
+
+**Roles** (`add_text_overlay {role}` with this style in the brief):
+
+- **credit (default)** — artist · song, once. Liberation Sans · capitals · 2.8 % · no box · none · hold 3 s.
+
+**No text.** Beyond a title, this style puts nothing on the frame; `check_text` warns on any overlay.
+
+**Never:** lower-third, caption, callout, card, intertitle, quote, date, label.
+
+**Survey note.** The Aphex Twin mark is a custom logo; the videos carry no text.
+
 ## Harness parameters
 
 asl 4–10 s in the quiet, 0.2–0.5 s in the drops · min shot 0.1 s (a frame flurry, deliberate) · transitions cuts · narration none · music required, the track · sync mixed · text none · interviews none · beat-cut yes

@@ -41,6 +41,21 @@ The trailer is a piece of music made from the film's sound effects. A car door, 
 - No dissolves, no long dialogue, no voice-over, no wall-to-wall score.
 - No tempo change except the doubling between parts.
 
+## Type
+
+**The signature.** Condensed bold capitals on the rests, the title on the final picture-sound.
+
+**Stand-ins.** Oswald Bold for the condensed trailer gothics. Faces: Oswald 700. Case: upper. Colour #FFFFFF on #000000. Entrance: pop.
+
+**Roles** (`add_text_overlay {role}` with this style in the brief):
+
+- **card (default)** — two or three words on a rest. Oswald Bold · capitals · 5.5 % · pop · hold 1.5 s.
+- **title** — the title on the last hit. Oswald Bold · spaced capitals · 9 % · pop.
+
+**Never:** lower-third, quote, citation, label, intertitle, callout.
+
+**Survey note.** Assumption: the rhythmic trailers use the trailer houses' condensed gothics.
+
 ## Harness parameters
 
 asl 1–3 s (part 3 0.5–1 s) · min shot 0.25 s · transitions cuts · narration none · music required, cue entering late · sync sync-first (the picture's sounds are the beat) · text cards · interviews none · beat-cut yes

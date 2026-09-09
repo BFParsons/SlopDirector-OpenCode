@@ -41,6 +41,22 @@ Every shot looks like a still photograph that started moving: shallow depth, a s
 - No transition without a sound; no LUT without lifted blacks.
 - No host section longer than 15 s without a b-roll insert.
 
+## Type
+
+**The signature.** Clean geometric capitals, spaced, for section titles (arriving on the whip), a hand-drawn brush flourish for the title (the McKinnon Brush face).
+
+**Stand-ins.** Montserrat for the geometric sans; Permanent Marker for the brush hand. Faces: Montserrat 600, Permanent Marker 400. Case: spaced capitals. Colour #FFFFFF on #000000. Entrance: slide up.
+
+**Roles** (`add_text_overlay {role}` with this style in the brief):
+
+- **lower-third (default)** — a section title on the whip. Montserrat SemiBold · spaced capitals · 3.6 % · no box · shadow 4 % · slide up · hold 2.5 s.
+- **title** — the title in the brush hand. Permanent Marker · 7 % · shadow 4 %.
+- **label** — before / after. Montserrat SemiBold · capitals · 3 %.
+
+**Never:** caption, intertitle, quote, citation.
+
+**Survey note.** Surveyed: the McKinnon Brush typeface (Oban Jones) for his branding; the section titles are a clean sans.
+
 ## Harness parameters
 
 asl 2–4 s (b-roll 1–2 s) · min shot 0.5 s · transitions cuts + whips, match cuts, speed ramps · narration required, first-person host, 130–150 wpm · music required, track with a build · sync sync-first (host) / muted (b-roll under track) · text lower-thirds (titles) · interviews direct-address · beat-cut yes (b-roll)

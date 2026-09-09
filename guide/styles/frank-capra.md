@@ -43,6 +43,23 @@ The enemy's own footage turned against him. A narrator who talks to you like a n
 - No stock beauty shots; no modern graphics style; no music with a beat.
 - No evidence shown without the narrator saying what it proves.
 
+## Type
+
+**The signature.** Wartime title cards in heavy gothic capitals, maps with stencilled place names, a quotation card with attribution.
+
+**Stand-ins.** Oswald Bold for the poster gothics; Liberation Sans for the map names. Faces: Oswald 700, Liberation Sans 400. Case: upper. Colour #FFFFFF on #000000. Entrance: none.
+
+**Roles** (`add_text_overlay {role}` with this style in the brief):
+
+- **intertitle (default)** — a chapter title in heavy capitals. Oswald Bold · capitals · 7 %.
+- **label** — a place name on the map. Liberation Sans · capitals · 3 % · no box · outline 5 % · none.
+- **quote** — the enemy's own words, with attribution. Liberation Sans · 3.8 %.
+- **title** — the series title. Oswald Bold · capitals · 9 %.
+
+**Never:** caption, lower-third, callout, citation.
+
+**Survey note.** Assumption: the Why We Fight lettering was not documented; heavy display capitals in the 1940s poster manner.
+
 ## Harness parameters
 
 asl 3–6 s · min shot 1 s · transitions cuts (dissolves on maps) · narration required, second person plain speech, 100–140 wpm · music required, period score · sync mixed · text cards · interviews none · beat-cut no

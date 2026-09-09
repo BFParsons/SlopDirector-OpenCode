@@ -44,6 +44,24 @@ Nobody narrates. The subject looks straight into the lens and talks, for a long 
 - No handheld, no vérité walking; the camera is locked and formal.
 - No reenactment that shows what cannot be known (a face, a clear act); show the object, the light, the distance.
 
+## Type
+
+**The signature.** Plain cards on black in Baskerville — the typeface Morris argued makes a sentence believed — for names, dates and quotations; a heavy title in the same face.
+
+**Stand-ins.** Libre Baskerville for Baskerville. Faces: Libre Baskerville 400, Libre Baskerville 700. Case: sentence. Colour #FFFFFF on #000000. Entrance: fade.
+
+**Roles** (`add_text_overlay {role}` with this style in the brief):
+
+- **card (default)** — a fact the subject does not say, one sentence on black. Libre Baskerville · 4.6 % · center.
+- **quote** — a document's phrase, over the document. Libre Baskerville · 4 %.
+- **date** — a date on black between chapters. Libre Baskerville · 3.6 % · center.
+- **label** — the subject's name and role, the first time, small, no bar. Libre Baskerville · 3.2 % · bottom-left · shadow 4 % · hold 3.5 s.
+- **title** — the film's title. Libre Baskerville Bold · capitals · 7 %.
+
+**Never:** lower-third, caption, callout.
+
+**Survey note.** Surveyed: Morris's essay on Baskerville and truth (the New York Times); the films' name cards are plain white serif on black. The Fog of War's title face was not documented; Baskerville is used throughout.
+
 ## Harness parameters
 
 asl 5–10 s · min shot 1.5 s · transitions cuts-and-black · narration none · music required, score · sync sync-first · text sparse · interviews direct-address

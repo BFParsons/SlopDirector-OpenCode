@@ -41,6 +41,20 @@ A documentary crew that everyone in the film believes is real. Sit-down intervie
 - No interviewee who knows they are funny; no line that comments on the situation.
 - No cut that shortens the answer past its own collapse.
 
+## Type
+
+**The signature.** The 2000s DV-documentary lower-third: plain white sans with a drop shadow, no bar, cut in and out, once per subject.
+
+**Stand-ins.** Liberation Sans for Arial / Helvetica. Faces: Liberation Sans 400. Case: sentence. Colour #FFFFFF on #000000. Entrance: none.
+
+**Roles** (`add_text_overlay {role}` with this style in the brief):
+
+- **lower-third (default)** — name · self-description, first appearance. Liberation Sans · 3.6 % · no box · shadow 6 % · none · hold 4 s.
+
+**Never:** caption, callout, card, intertitle, quote, date, label, citation.
+
+**Survey note.** Assumption: Best in Show's lower-thirds imitate television documentary of the time.
+
 ## Harness parameters
 
 asl 4–8 s (interviews 8–20 s) · min shot 1.5 s · transitions cuts · narration none · music none (in-scene only) · sync sync-first · text lower-thirds · interviews produced (off-lens, deadpan) · beat-cut no

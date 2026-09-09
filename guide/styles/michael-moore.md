@@ -44,6 +44,22 @@ The filmmaker is a character. He tells you what happened to him, in the past ten
 - No slow-motion for pathos; no piano bed under the sad part (the ironic song does that job).
 - No cut that makes a subject say what they did not say (RULES 4); the joke is the arrangement, not the edit inside the sentence.
 
+## Type
+
+**The signature.** Broadcast-news grammar: bold Helvetica lower-thirds in a bar, plain white cards on black for the dates and the gags, headlines and documents filling the frame.
+
+**Stand-ins.** Liberation Sans for Helvetica / Arial. Faces: Liberation Sans 700, Liberation Sans 400. Case: sentence. Colour #FFFFFF on #000000. Entrance: none.
+
+**Roles** (`add_text_overlay {role}` with this style in the brief):
+
+- **lower-third (default)** — name · title, as a newscast would. Liberation Sans Bold · 3.8 % · none.
+- **card** — 'Two days later' — the gag card, white on black. Liberation Sans Bold · 5 % · center.
+- **callout** — the highlighted line of a document. Liberation Sans.
+
+**Never:** intertitle, quote.
+
+**Survey note.** Assumption from the films: the lower-thirds and cards imitate 1990s–2000s American news graphics; nothing is designed.
+
 ## Harness parameters
 
 asl 3–6 s · min shot 1 s · transitions cuts · narration required, first person, 90–130 wpm · music required, found (ironic) · sync sync-first · text lower-thirds · interviews confrontation
