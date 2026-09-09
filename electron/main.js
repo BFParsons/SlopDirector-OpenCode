@@ -188,7 +188,10 @@ async function createWindow() {
     mainWindow.webContents.send("slop:unload-blocked", { kind });
   });
 
-  const url = DEV ? DEV_URL : PROD_URL;
+  // SLOPSTUDIO_OPEN=/projects/<id> opens the window on that page (an agent or a
+  // launcher handing the person a project); only a same-origin path is accepted.
+  const openPath = /^\/[\w\-./?=&%]*$/.test(process.env.SLOPSTUDIO_OPEN || "") ? process.env.SLOPSTUDIO_OPEN : "";
+  const url = (DEV ? DEV_URL : PROD_URL) + openPath;
   // Something on screen at once: the embedded server takes a couple of seconds
   // to boot, and a blank dark window reads as "hung".
   mainWindow.loadFile(path.join(__dirname, "splash.html")).catch(() => {});

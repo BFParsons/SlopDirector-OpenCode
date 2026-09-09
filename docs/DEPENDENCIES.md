@@ -247,6 +247,8 @@ What differs from the Debian/Windows notes above:
   clip). 10-bit is different: the CPU decodes an 80 Mbps 4K Main10 clip at ~10 fps, so the
   GPU wins even at full size (4 s clip, 4K → 4K: 10.1 s vs 15.6 s; 4K → 1080p: 3.9 s vs
   13.5 s). Cached in `capabilities-cache.json` as `hwDecode: ["h264","hevc","hevc10"]`.
+- **Open on a project:** `SLOPSTUDIO_OPEN=/projects/<id> scripts/launch-desktop.sh --prod` starts
+  the desktop window on that page (same-origin paths only).
 - **Agent panel (2026-09).** The MCP server reports every tool call to the app so the open
   editor can show what the agent is doing (Studio → Panel → Agent; also in the rendering
   view). `SLOPSTUDIO_AGENT_FEED=0` in the MCP server's environment turns the reports off,

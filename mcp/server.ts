@@ -170,10 +170,99 @@ function installActivityFeed(server: McpServer) {
     return v;
   };
   const post = (body: Record<string, unknown>) => void api.post("/api/activity", body).catch(() => null);
-  const summarize = (r: { content?: { type: string; text?: string }[]; isError?: boolean }): string => {
+  // One human line per result: the numbers a person watching wants, not JSON.
+  const summarize = (name: string, r: { content?: { type: string; text?: string }[]; isError?: boolean }): string => {
     const t = r.content?.find((c) => c.type === "text")?.text ?? (r.content?.some((c) => c.type === "image") ? "(image)" : "");
-    const line = t.replace(/\s+/g, " ").trim();
-    return line.length > 240 ? line.slice(0, 237) + "…" : line;
+    const clip = (x: string, n = 220) => (x.length > n ? x.slice(0, n - 1) + "…" : x);
+    const flat = (x: string) => x.replace(/\s+/g, " ").trim();
+    if (r.isError) return clip(flat(t));
+    let j: Record<string, unknown> | null = null;
+    try {
+      const parsed = JSON.parse(t) as unknown;
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) j = parsed as Record<string, unknown>;
+    } catch {
+      /* plain text */
+    }
+    const n = (v: unknown) => (typeof v === "number" ? v : null);
+    const arr = (v: unknown): unknown[] => (Array.isArray(v) ? v : []);
+    const findings = (o: Record<string, unknown>) => {
+      const f = arr(o.findings) as { severity?: string; message?: string }[];
+      const errs = f.filter((x) => x.severity === "error").length;
+      const head = f[0]?.message ? ` · ${f[0].message}` : "";
+      return `${o.pass === false || errs ? `${errs} error(s), ` : ""}${f.length} finding(s)${head}`;
+    };
+    const snap = (o: Record<string, unknown>) => {
+      const segs = arr(o.segments) as { audioOnly?: boolean; library?: boolean; track?: number }[];
+      const shots = segs.filter((x) => !x.audioOnly && !x.library && (x.track ?? 0) === 0).length;
+      const audio = segs.filter((x) => x.audioOnly && !x.library).length;
+      return `${o.title ?? "project"} · ${o.status ?? ""} · ${n(o.timelineDurationS) ?? "?"} s · ${shots} shots${audio ? ` · ${audio} audio clips` : ""}`;
+    };
+    if (j) {
+      const video = j.video as { width?: number; height?: number } | undefined;
+      switch (name) {
+        case "render_draft":
+        case "draft_result":
+          return j.started ? "draft render started" : `draft ready · ${n(j.durationS)} s · ${video?.width ?? "?"}×${video?.height ?? "?"}`;
+        case "render_final":
+        case "final_result":
+          return j.started ? "final render started" : `final ready · ${n(j.durationS)} s · ${video?.width ?? "?"}×${video?.height ?? "?"}${n(j.sizeBytes) ? ` · ${(n(j.sizeBytes)! / 1e6).toFixed(1)} MB` : ""}`;
+        case "check_mix_levels": {
+          const p = j.program as { integratedLufs?: number; truePeakDb?: number } | undefined;
+          const sp = j.speech as { medianLufs?: number } | undefined;
+          const mo = j.musicOnly as { medianLufs?: number | null } | undefined;
+          return `program ${p?.integratedLufs ?? "?"} LUFS / ${p?.truePeakDb ?? "?"} dBTP · speech ${sp?.medianLufs ?? "—"} · music alone ${mo?.medianLufs ?? "—"} · gap ${j.gapLu ?? "—"} LU · ${findings(j)}`;
+        }
+        case "balance_music":
+          return `musicVolume ${j.musicVolume} (voice ${j.voiceIntegratedLufs} LUFS, music ${j.musicIntegratedLufs} LUFS, gap ${j.gapLu} LU)`;
+        case "check_soundtrack":
+        case "check_cuts":
+        case "verify_export":
+        case "pacing_report":
+        case "check_beat_alignment":
+        case "check_plan":
+          return `${j.pass === false ? "FAIL" : j.pass === true ? "pass" : "done"} · ${findings(j)}`;
+        case "apply_edit_list": {
+          const proj = j.project as Record<string, unknown> | undefined;
+          return `${j.applied} op(s) applied · ${arr(j.createdSegmentIds).length} created${proj ? ` → ${snap(proj)}` : ""}`;
+        }
+        case "transcribe":
+          return j.running ? "transcribing…" : `${arr(j.words).length || "?"} words · ${arr(j.segments).length} segments${j.cached ? " (cached)" : ""}`;
+        case "detect_scenes":
+          return `${arr(j.cuts).length} cuts · ${arr(j.shots).length} shots`;
+        case "detect_silences":
+          return `${arr(j.silences).length} silences · ${arr(j.speech).length} speech ranges`;
+        case "search_youtube": {
+          const c = arr(j.candidates) as { title?: string; durationS?: number }[];
+          return `${c.length} candidates${c[0] ? ` · top: ${clip(String(c[0].title), 80)} (${c[0].durationS ?? "?"} s)` : ""}`;
+        }
+        case "source_clips": {
+          const res = arr(j.results) as { status?: string }[];
+          return `${res.filter((x) => x.status === "importing").length} importing · ${res.filter((x) => x.status === "failed" || x.status === "no results").length} failed · ${arr(j.remaining).length} remaining`;
+        }
+        case "set_plan": {
+          const plan = j.plan as { version?: number } | undefined;
+          const check = j.check as Record<string, unknown> | undefined;
+          return `plan v${plan?.version ?? "?"} stored · ${check ? (check.pass ? "check pass" : "check FAIL") + " · " + findings(check) : ""}`;
+        }
+        case "approve_plan":
+          return "plan approved";
+        case "plan_tasks":
+          return `${arr(j.tasks).length} tasks · ${arr(j.parallelNow).length} can start now: ${arr(j.parallelNow).join(", ")}`;
+        case "generate_narration":
+          return `"${clip(String(j.text ?? ""), 60)}" · ${n(j.durationS)} s at ${n(j.offsetS)} s`;
+        case "add_ai_shot":
+          return `${j.model} · ${n(j.durationS)} s · generating`;
+        case "set_brief":
+          return "brief stored";
+        case "create_checkpoint":
+          return `checkpoint ${j.id ?? ""}`;
+        case "import_media":
+          return `${j.kind ?? "asset"} ${j.id ?? ""}${n(j.durationS) ? ` · ${n(j.durationS)} s` : ""}`;
+        default:
+          if (Array.isArray(j.segments) && "timelineDurationS" in j) return snap(j);
+      }
+    }
+    return clip(flat(t));
   };
   type Cb = (args: Record<string, unknown>, extra: unknown) => Promise<{ content?: { type: string; text?: string }[]; isError?: boolean }>;
   const orig = server.registerTool.bind(server) as unknown as (name: string, config: unknown, cb: Cb) => unknown;
@@ -186,7 +275,7 @@ function installActivityFeed(server: McpServer) {
       if (ids.projectId || ids.assetId) post({ ...ids, callId, phase: "start", tool: name, args: brief(a), agent });
       try {
         const r = await cb(args, extra);
-        if (ids.projectId || ids.assetId) post({ ...ids, callId, phase: "end", tool: name, ok: !r.isError, ms: Date.now() - t0, summary: summarize(r), agent });
+        if (ids.projectId || ids.assetId) post({ ...ids, callId, phase: "end", tool: name, ok: !r.isError, ms: Date.now() - t0, summary: summarize(name, r), agent });
         return r;
       } catch (e) {
         if (ids.projectId || ids.assetId) post({ ...ids, callId, phase: "end", tool: name, ok: false, ms: Date.now() - t0, summary: e instanceof Error ? e.message : String(e), agent });
