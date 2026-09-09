@@ -319,6 +319,121 @@ export function planCli(plan: Plan, brief: Brief | null, title: string): string 
   return L.join("\n") + "\n";
 }
 
+/** Box-drawing table with word-wrapped cells (widths = inner text widths). */
+function table(headers: string[], rows: string[][], widths: number[]): string[] {
+  const cellLines = (text: string, w: number): string[] => {
+    const out: string[] = [];
+    for (const para of text.split(/\n/)) {
+      let line = "";
+      for (let word of para.split(/\s+/).filter(Boolean)) {
+        while (word.length > w) {
+          if (line) {
+            out.push(line);
+            line = "";
+          }
+          out.push(word.slice(0, w));
+          word = word.slice(w);
+        }
+        if ((line + " " + word).trim().length > w && line) {
+          out.push(line);
+          line = word;
+        } else line = (line ? line + " " : "") + word;
+      }
+      out.push(line);
+    }
+    return out.length ? out : [""];
+  };
+  const bar = (l: string, m: string, r: string) => l + widths.map((w) => "─".repeat(w + 2)).join(m) + r;
+  const row = (cells: string[]): string[] => {
+    const wrapped = cells.map((c, i) => cellLines(c, widths[i]));
+    const h = Math.max(...wrapped.map((c) => c.length));
+    const lines: string[] = [];
+    for (let k = 0; k < h; k++) lines.push("│" + wrapped.map((c, i) => " " + pad(c[k] ?? "", widths[i]) + " ").join("│") + "│");
+    return lines;
+  };
+  const L = [bar("┌", "┬", "┐"), ...row(headers), bar("├", "┼", "┤")];
+  rows.forEach((r, i) => {
+    L.push(...row(r));
+    if (i < rows.length - 1) L.push(bar("├", "┼", "┤"));
+  });
+  L.push(bar("└", "┴", "┘"));
+  return L;
+}
+
+/**
+ * The plan as terminal tables: a two-column AV script (VIDEO | AUDIO, one row
+ * per shot: picture, source, card on the left; the narration and bite lines
+ * that play over it on the right), then beats, clips to find, AI shots.
+ * `width` = total columns (≥ 80).
+ */
+export function planTable(plan: Plan, brief: Brief | null, title: string, width = 110): string {
+  const W = Math.max(80, Math.min(200, Math.floor(width)));
+  const shots = [...plan.shots].sort((a, b) => a.order - b.order);
+  const times = shotTimes(plan);
+  const at = new Map(times.map((t) => [t.id, t]));
+  const clips = new Map(plan.clipList.map((c) => [c.id, c]));
+  const ai = new Map(plan.aiShots.map((a) => [a.shotId, a]));
+  const L: string[] = [];
+  L.push(`${title}  ·  plan v${plan.version} (${plan.status})`);
+  L.push(...wrap(plan.logline, W - 10, "Logline   "));
+  if (brief) {
+    const d = brief.deliverable;
+    L.push(`Brief     ${d.kind === "scene" ? "scene of a longer video" : "standalone"} · ${d.durationS} s · ${d.aspect} ${d.resolution} · ${brief.production.scripted ? "scripted" : "unscripted"} ${brief.production.genre}${brief.production.form ? ` (${brief.production.form})` : ""}`);
+    L.push(...wrap(`sources: ${brief.sources.kinds.join(", ")} · tone: ${brief.tone}${brief.audience ? ` · audience: ${brief.audience}` : ""}`, W - 10, "          "));
+    L.push(...wrap(brief.premise, W - 10, "Premise   "));
+  }
+  L.push("", "BEATS");
+  L.push(...table(["#", "time", "beat", "purpose"], [...plan.beats].sort((a, b) => a.startS - b.startS).map((b, i) => [String(i + 1), `${fmtT(b.startS)}–${fmtT(b.endS)}`, b.title, b.purpose ?? ""]), [2, 13, 16, W - 2 - 13 - 16 - 13]));
+  L.push("", "SCRIPT + STORYBOARD");
+  const fixed = [2, 6, 4, 5];
+  const rest = W - fixed.reduce((a, b) => a + b + 2, 0) - 7 - 4; // 2 pad per remaining col
+  const vidW = Math.ceil(rest / 2);
+  const audW = rest - vidW;
+  const placed = new Set<string>();
+  const rows: string[][] = shots.map((sh, i) => {
+    const t = at.get(sh.id)!;
+    const x = sh.source;
+    const src =
+      x.type === "youtube"
+        ? `src: YouTube ${x.clipId ?? "?"}${x.section ? ` ${fmtT(x.section.startS)}–${fmtT(x.section.endS)}` : ""}${clips.has(x.clipId ?? "") ? "" : " (not in the clip list)"}`
+        : x.type === "ai"
+          ? `src: AI ${ai.get(sh.id)?.model ?? x.model ?? "default model"}${ai.has(sh.id) ? "" : x.prompt ? ` — "${x.prompt}"` : ""}`
+          : x.type === "card"
+            ? "src: title card"
+            : `src: ${x.type}${x.assetId ? ` ${x.assetId}` : x.hint ? ` ${x.hint}` : ""}`;
+    const video = [sh.description, src, sh.text ? `CARD "${sh.text.replace(/\n/g, " / ")}"` : "", sh.transition && sh.transition !== "cut" ? `→ ${sh.transition}` : ""].filter(Boolean).join("\n");
+    const lines = plan.script.filter((l) => !placed.has(l.id) && l.atS >= t.startS - 0.05 && l.atS < t.endS - 0.05 && !(l.kind === "text" && sh.text === l.text)).sort((a, b) => a.atS - b.atS);
+    const audio = lines
+      .map((l) => {
+        placed.add(l.id);
+        const tag = l.kind === "narration" ? "VO" : l.kind === "bite" ? "BITE" : l.kind === "text" ? "CARD" : "DIAL";
+        return `${fmtT(l.atS)} ${tag} "${l.text}"${l.note ? ` (${l.note})` : ""}`;
+      })
+      .join("\n");
+    return [String(i + 1), fmtT(t.startS), `${sh.durationS}s`, sh.sound, video, audio || (sh.sound === "muted" ? "(music bed)" : sh.sound === "sync" ? "(the shot's own sound)" : "")];
+  });
+  L.push(...table(["#", "at", "len", "sound", "VIDEO", "AUDIO"], rows, [...fixed, vidW, audW]));
+  const unplaced = plan.script.filter((l) => !placed.has(l.id) && !shots.some((sh) => sh.text === l.text));
+  if (unplaced.length) L.push("  lines outside the picture: " + unplaced.map((l) => `${fmtT(l.atS)} ${l.kind} "${l.text}"`).join(" · "));
+  if (plan.clipList.length) {
+    L.push("", "CLIPS TO FIND");
+    const idW = Math.min(14, Math.max(4, ...plan.clipList.map((c) => c.id.length)));
+    const r = W - idW - 13;
+    const needW = Math.floor(r * 0.36);
+    const searchW = Math.floor(r * 0.34);
+    L.push(...table(["id", "need", "search", "wanted"], plan.clipList.map((c) => [c.id, c.need, `${c.queries.map((q) => `"${q}"`).join(", ")}${c.preferredChannels?.length ? `\nprefer ${c.preferredChannels.join(", ")}` : ""}`, `${c.wantedSection ?? ""}${c.durationHintS ? `\n(~${c.durationHintS} s video)` : ""}`]), [idW, needW, searchW, r - needW - searchW]));
+  }
+  if (plan.aiShots.length) {
+    L.push("", "AI SHOTS");
+    L.push(...table(["shot", "model", "len", "prompt"], plan.aiShots.map((a) => [a.shotId, a.model ?? "default", `${a.durationS}s`, `${a.prompt}${a.negative ? `\navoid: ${a.negative}` : ""}`]), [6, 24, 4, W - 6 - 24 - 4 - 13]));
+  }
+  if (plan.music) L.push("", "MUSIC", ...wrap(`${plan.music.brief}${plan.music.queries.length ? ` · search: ${plan.music.queries.map((q) => `"${q}"`).join(", ")}` : ""}`, W - 2, "  "));
+  if (plan.narration) L.push("", "NARRATION", `  voice: ${plan.narration.voice ?? "default"}${plan.narration.style ? ` · ${plan.narration.style}` : ""} · ${plan.narration.lines.length} line(s)`);
+  if (plan.risks.length) L.push("", "RISKS", ...plan.risks.flatMap((r) => wrap(r, W - 4, "  - ")));
+  if (plan.notes) L.push("", "NOTES", ...wrap(plan.notes, W - 2, "  "));
+  return L.join("\n") + "\n";
+}
+
 export type PlanTask = { id: string; kind: "source" | "ai" | "narration" | "music" | "assemble" | "titles" | "checks" | "draft" | "final"; deps: string[]; spec: Record<string, unknown> };
 
 /** The plan as a dependency graph: everything without deps can run at once. */

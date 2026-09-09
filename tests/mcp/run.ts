@@ -236,9 +236,12 @@ async function main() {
     const bad = await call<{ check: { pass: boolean; findings: { severity: string; message: string }[] } }>("set_plan", { projectId: p2.json.id, plan: { ...plan, shots: plan.shots.map((x) => (x.id === "s1" ? { ...x, durationS: 9 } : x)) } });
     check("check_plan flags a length that misses the brief", !bad.json.check.pass && bad.json.check.findings.some((f) => f.severity === "error" && /add up to 17/.test(f.message)), bad.json.check.findings.filter((f) => f.severity === "error").map((f) => f.message).join(" | "));
     await call("set_plan", { projectId: p2.json.id, plan });
-    const cli = await call<unknown>("plan_document", { projectId: p2.json.id });
+    const tbl = await call<unknown>("plan_document", { projectId: p2.json.id });
+    const tblText = tbl.content.find((c) => c.type === "text")?.text ?? "";
+    check("plan_document (table) draws the AV script as a boxed table", /│ VIDEO/.test(tblText) && /│ AUDIO/.test(tblText) && /BITE "beep"/.test(tblText) && /┌/.test(tblText) && /CLIPS TO FIND/.test(tblText) && /CHECK: PASS/.test(tblText), tblText.split("\n").slice(0, 3).join(" | "));
+    const cli = await call<unknown>("plan_document", { projectId: p2.json.id, format: "list" });
     const cliText = cli.content.find((c) => c.type === "text")?.text ?? "";
-    check("plan_document (cli) lists script + storyboard in one time-ordered list", /SCRIPT \+ STORYBOARD/.test(cliText) && /BITE "beep"/.test(cliText) && /CLIPS TO FIND/.test(cliText) && /CHECK: PASS/.test(cliText), cliText.split("\n").slice(0, 3).join(" | "));
+    check("plan_document (list) lists script + storyboard in one time-ordered list", /SCRIPT \+ STORYBOARD/.test(cliText) && /BITE "beep"/.test(cliText) && /CLIPS TO FIND/.test(cliText) && /CHECK: PASS/.test(cliText), cliText.split("\n").slice(0, 3).join(" | "));
     const doc = await call<unknown>("plan_document", { projectId: p2.json.id, format: "markdown" });
     const docText = doc.content.find((c) => c.type === "text")?.text ?? "";
     check("plan_document renders beats, storyboard, clips and AI prompts", /## Beats/.test(docText) && /## Storyboard/.test(docText) && /## Clips to find/.test(docText) && /oscilloscope/.test(docText) && /CHECK: PASS/.test(docText));

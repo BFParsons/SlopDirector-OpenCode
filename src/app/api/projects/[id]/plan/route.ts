@@ -9,13 +9,13 @@ import { parseJsonBody } from "@/lib/http/parseJsonBody";
 import { err, ok } from "@/lib/http/response";
 import { getOwnedProject } from "@/lib/projects/access";
 import { notifyProjectChanged } from "@/lib/projects/changed";
-import { checkPlan, planCli, planDocument, planTasks } from "@/lib/projects/plan";
+import { checkPlan, planCli, planDocument, planTable, planTasks } from "@/lib/projects/plan";
 import { briefSchema, planSchema } from "@/lib/validation/brief";
 
 type Ctx = { params: Promise<{ id: string }> };
 
 /**
- * GET ?view=json|document|cli|check|tasks → the proposed/approved plan, its
+ * GET ?view=json|document|table|cli|check|tasks → the proposed/approved plan, its
  * mechanical check against the brief, the markdown document (or the terminal
  * text) for approval, or the task graph an orchestrator fans out.
  */
@@ -31,6 +31,10 @@ export async function GET(req: Request, { params }: Ctx) {
     const b = brief.success ? brief.data : null;
     if (view === "document") return ok({ markdown: planDocument(plan.data, b, project.title), check: checkPlan(plan.data, b) });
     if (view === "cli") return ok({ text: planCli(plan.data, b, project.title), check: checkPlan(plan.data, b) });
+    if (view === "table") {
+      const width = Number(new URL(req.url).searchParams.get("width") ?? 110) || 110;
+      return ok({ text: planTable(plan.data, b, project.title, width), check: checkPlan(plan.data, b) });
+    }
     if (view === "check") return ok(checkPlan(plan.data, b));
     if (view === "tasks") return ok(planTasks(plan.data));
     return ok({ plan: plan.data, brief: b, check: checkPlan(plan.data, b) });

@@ -56,9 +56,9 @@ Write it in this order; each step constrains the next.
    where the timing is tight.
 
 `set_plan` → read the check → fix every **error**, weigh every **warn** →
-`plan_document` → paste its text into your reply **verbatim** (it is laid out
-for a terminal: the script and the storyboard as one time-ordered list; never
-summarize it, never turn it into a table) with one paragraph on the choices you
+`plan_document` → paste its text into your reply **verbatim**, in a code block
+(it is laid out for a terminal: boxed tables — beats, the AV script with VIDEO
+and AUDIO columns, clips to find, AI shots; never summarize it) with one paragraph on the choices you
 made and what you could not honour (RULES 7). Wait. Revise on
 their notes (each `set_plan` is a new version). Only after their yes:
 `approve_plan`.

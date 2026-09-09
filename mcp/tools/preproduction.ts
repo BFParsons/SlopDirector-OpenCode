@@ -61,11 +61,14 @@ export function registerPreproductionTools(server: McpServer) {
     "plan_document",
     {
       title: "The plan as a document",
-      description: "The plan as the person reads it: the script and the storyboard as one time-ordered list (each shot with its source, card and the lines over it), then clips to find, AI prompts, music, narration, risks, and the check. Default format 'cli' is fixed-width plain text for a terminal — paste it into your reply VERBATIM, do not summarize it (RULES 2: propose-and-approve). 'markdown' is the same with tables (also written to plan-v<N>.md).",
-      inputSchema: { projectId: z.string(), format: z.enum(["cli", "markdown"]).default("cli") },
+      description: "The plan as the person reads it in a terminal. Default 'table': box-drawn tables — beats, then a two-column AV script (one row per shot: # / at / len / sound / VIDEO = picture, source, card / AUDIO = the narration and bite lines over it), clips to find, AI shots — followed by music, narration, risks and the check. 'list' is the same as an indented list; 'markdown' has markdown tables (also written to plan-v<N>.md). Paste the output into your reply VERBATIM inside a code block, do not summarize it (RULES 2: propose-and-approve).",
+      inputSchema: { projectId: z.string(), format: z.enum(["table", "list", "markdown"]).default("table"), width: z.number().int().min(80).max(200).default(110).describe("table: total columns") },
     },
-    guarded(async ({ projectId, format }) => {
-      const r = format === "markdown" ? await api.get<{ markdown: string; check: Check }>(`/api/projects/${projectId}/plan?view=document`).then((x) => ({ body: x.markdown, check: x.check })) : await api.get<{ text: string; check: Check }>(`/api/projects/${projectId}/plan?view=cli`).then((x) => ({ body: x.text, check: x.check }));
+    guarded(async ({ projectId, format, width }) => {
+      const r =
+        format === "markdown"
+          ? await api.get<{ markdown: string; check: Check }>(`/api/projects/${projectId}/plan?view=document`).then((x) => ({ body: x.markdown, check: x.check }))
+          : await api.get<{ text: string; check: Check }>(`/api/projects/${projectId}/plan?view=${format === "list" ? "cli" : `table&width=${width}`}`).then((x) => ({ body: x.text, check: x.check }));
       const errs = r.check.findings.filter((f) => f.severity === "error");
       return text(`${r.body}\n${format === "markdown" ? "---\n" : ""}CHECK: ${r.check.pass ? "PASS" : `${errs.length} error(s)`}${r.check.findings.length ? "\n" + r.check.findings.map((f) => `  ${f.severity}: ${f.message}`).join("\n") : ""}`);
     }),
