@@ -5,6 +5,19 @@ Notable changes, newest first. See [DEPENDENCIES.md](DEPENDENCIES.md) for setup 
 
 ## 2026-09 — no-storyboard fork
 
+- **The harness now checks that the score is really there.** A render could pass
+  `verify_export` (loudness, peaks, silence) with its music bed missing: nothing compared
+  the file with what the project — or the brief — asked for. `verify_export` on a draft or
+  final now runs a music-bed check: the stretches where only the bed should sound (no
+  narration clip, no voiceover speech, no unmuted shot) are measured on the momentary meter,
+  and a project with a bed that renders silence there is an error ("the score did not make
+  it into the mix"); a bed that drops out in some solo stretches, or is barely there, is a
+  warning; a healthy bed is reported with its level. `check_soundtrack` gets the
+  settings-level half before any render: the brief asks for music but no bed is set (error),
+  a bed is set but muted or at ~0 volume (error), a bed the brief did not ask for (warn), a
+  bed shorter than the cut — the render does not loop it (warn). Prompted by the LA 1992
+  scene, where the user reported the music missing; the delivered file did carry the bed
+  (−17…−19 LUFS where it plays alone), but no check had said so.
 - **Fan-out found two serial bottlenecks.** Nine clip scouts on the LA riots scene queued
   behind a worker rule that ran YouTube imports one at a time (a shared cookies jar that
   yt-dlp rewrites): each yt-dlp run now gets its own copy of the jar and copies it back,

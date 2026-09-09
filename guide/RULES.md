@@ -37,7 +37,7 @@ Numbers are for 30 fps. "ch." = chapter of guide/editing-guide.md (read_guide).
 26. Every video shot's own sound is a decision (`muted`). B-roll under narration or music is muted. Imported clips carry their source's narration and music; unmuted, they bleed through.
 27. Keep a shot's sound only where the sound is the point (a machine, a laugh, a line to camera), and only from sources with no music or narration of their own.
 28. Narration is an audio-only clip (or the voiceover track), never an unmuted shot. One narrator at a time.
-29. One music source: the bed via `set_music` (ducks under narration and voiceover, fades out); a YouTube import is an overlay until it is made the bed.
+29. One music source: the bed via `set_music` (ducks under narration and voiceover, fades out); a YouTube import is an overlay until it is made the bed. The bed is checked twice: `check_soundtrack` before the render (set when the brief asks for one, audible, long enough for the cut) and `verify_export` on the render (audible where it plays alone) — a file can pass loudness and silence with its score missing.
 30. `check_soundtrack` before every `render_draft`; `verify_export` for loudness after.
 31. Levels (Part II §7 "Levels"): speech is the anchor at −14…−16 LUFS short-term (−14 program); music alone 4–8 LU under the speech, ≥ 12 LU under it while the voice speaks (≥ 8 in music-driven pieces; < 6 hurts intelligibility). Set `musicVolume` with `balance_music` (measured, not guessed) and read the draft back with `check_mix_levels`. Every voice — narration clips, the VO and unmuted sound bites — should sit within ~3 LU of each other: level a clip with its `volume` (1 = as recorded, 2 ≈ +6 dB). The bed ducks under all of them. True peak ≤ −1 dBTP.
 

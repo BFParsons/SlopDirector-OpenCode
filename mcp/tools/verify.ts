@@ -301,7 +301,7 @@ export function registerVerifyTools(server: McpServer) {
     {
       title: "Verify an export",
       description:
-        "Technical verification of a rendered file (guide ch.32): probe (duration, size, codec), duration/frame against an expected length, black stretches, frozen picture, head/tail silence, integrated loudness and true peak against a platform target (web, social, streaming, broadcast, none). Returns pass/fail with findings. Works on drafts and finals.",
+        "Technical verification of a rendered file (guide ch.32): probe (duration, size, codec), duration/frame against an expected length, black stretches, frozen picture, head/tail silence, and — for a project render — whether the music bed the project (and the brief) asks for is actually audible where it plays alone (§7 Sound), integrated loudness and true peak against a platform target (web, social, streaming, broadcast, none). Returns pass/fail with findings. Works on drafts and finals.",
       inputSchema: {
         assetId: z.string(),
         target: z.enum(["web", "social", "streaming", "broadcast", "none"]).default("web"),
@@ -341,8 +341,18 @@ export function registerVerifyTools(server: McpServer) {
         findings.push({ severity: "error", rule: `ch29 loudness standards by platform (${tgt.note})`, message: `integrated ${lo.integratedLufs.toFixed(1)} LUFS vs target ${tgt.lufs} ±${tgt.tolerance}`, fix: "update_project audioNormalize=true renders to the target; or adjust musicVolume / voVolume" });
       if (lo && lo.truePeakDb != null && lo.truePeakDb > tgt.truePeakMax)
         findings.push({ severity: "warn", rule: "ch29 true peak", message: `true peak ${lo.truePeakDb.toFixed(1)} dBTP above ${tgt.truePeakMax}` });
+      // The score: a render can pass loudness and silence and still be missing its bed.
+      let music: Awaited<ReturnType<typeof musicBedCheck>> | null = null;
+      if (info.kind === "DRAFT_MP4" || info.kind === "FINAL_MP4") {
+        try {
+          music = await musicBedCheck(info.projectId, assetId);
+          findings.push(...music.findings);
+        } catch (e) {
+          findings.push({ severity: "warn", rule: "§7 Sound: the bed in the render", message: `could not check the music bed: ${(e as Error).message}` });
+        }
+      }
       const errors = findings.filter((f) => f.severity === "error").length;
-      return text({ pass: errors === 0, errors, warnings: findings.filter((f) => f.severity === "warn").length, file: { path: info.path, durationS: dur, sizeBytes: info.sizeBytes, video: info.video }, loudness: lo, target: tgt.note, findings });
+      return text({ pass: errors === 0, errors, warnings: findings.filter((f) => f.severity === "warn").length, file: { path: info.path, durationS: dur, sizeBytes: info.sizeBytes, video: info.video }, music: music ? { bed: music.bed, loudestSoloLufs: music.loudestSoloLufs, soloStretches: music.soloStretches.length } : null, loudness: lo, target: tgt.note, findings });
     }),
   );
 
@@ -351,7 +361,7 @@ export function registerVerifyTools(server: McpServer) {
     {
       title: "Check the soundtrack",
       description:
-        "The audio map of the timeline (guide ch.27–29 and Part II §7 'Sound'): which layers sound when — unmuted shot audio, narration / audio-only clips, the voiceover, the music bed (volume, ducking, fade), audio overlays — and findings: source narration or music bleeding through unmuted shots under the bed or narration (the classic clash), narration clips overlapping, two music sources at once, music that never ducks or never ends, clips past the end, or a silent film. Run before every render_draft.",
+        "The audio map of the timeline (guide ch.27–29 and Part II §7 'Sound'): which layers sound when — unmuted shot audio, narration / audio-only clips, the voiceover, the music bed (volume, ducking, fade; set when the brief asks for one, audible, long enough for the cut), audio overlays — and findings: source narration or music bleeding through unmuted shots under the bed or narration (the classic clash), narration clips overlapping, two music sources at once, music that never ducks or never ends, clips past the end, or a silent film. Run before every render_draft.",
       inputSchema: { projectId: z.string() },
       annotations: { readOnlyHint: true },
     },
@@ -508,6 +518,7 @@ export async function soundtrackReport(projectId: string) {
   if (underBed && overlaysOn.length) findings.push({ severity: "warn", rule: "§7 Sound: one music source", message: `the music bed and ${overlaysOn.length} audio overlay(s) play together (an imported YouTube track is an overlay until set_music makes it the bed) — overlays do not duck`, fix: "set_music with the overlay's file (probe_asset gives the path) and update_project audioOverlays:[{id, included:false}]" });
   if (underBed && !music!.ducking && (narration.length || vo?.ready)) findings.push({ severity: "warn", rule: "ch29 music ducks under speech", message: "music ducking is off while narration plays", fix: "update_project musicDucking:true" });
   if (underBed && (s.audioFadeOutS ?? 0) === 0) findings.push({ severity: "info", rule: "ch28 a cue has a reason to stop", message: "the music bed runs to the last frame with only the built-in 0.75 s fade", fix: "update_project audioFadeOutS (2–3 s) so the cue resolves on picture" });
+  findings.push(...(await musicBedSettings(s, projectId)));
   const anySound = underBed || overlaysOn.length > 0 || narration.length > 0 || (vo?.ready ?? false) || shotAudio.some((x) => x.hasSound);
   if (!anySound) findings.push({ severity: "warn", rule: "§7 Sound", message: "nothing on the timeline makes a sound (every shot muted, no music, no narration)" });
 
@@ -645,6 +656,135 @@ export async function mixLevels(projectId: string, assetId?: string, musicDriven
     findings,
     pass: !findings.some((f) => f.severity === "error"),
   };
+}
+
+// ---------------------------------------------------------------------------
+// Is the music bed really there? (Part II §7 "Sound", ch.28)
+// ---------------------------------------------------------------------------
+type BriefMusic = { wanted: boolean; brief?: string } | undefined;
+
+async function briefMusic(projectId: string): Promise<BriefMusic> {
+  try {
+    const r = await api.get<{ brief: { music?: { wanted: boolean; brief?: string } } | null }>(`/api/projects/${projectId}/brief`);
+    return r.brief?.music ?? undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+const fmtRange = (r: { startS: number; endS: number }) => `${r.startS.toFixed(1)}–${r.endS.toFixed(1)} s`;
+
+/**
+ * Settings-level bed findings — no render needed: the brief vs the project
+ * (a score asked for but never set, a bed that is set but muted or at ~0, a
+ * bed the brief did not ask for) and a bed shorter than the cut (the render
+ * does not loop it: from the bed's end the last shots play over silence).
+ */
+export async function musicBedSettings(s: Snapshot, projectId: string): Promise<Finding[]> {
+  const findings: Finding[] = [];
+  const wanted = await briefMusic(projectId);
+  const set = !!s.musicAssetId;
+  const audible = set && !s.musicMuted && s.musicVolume > 0.02;
+  if (!set) {
+    if (wanted?.wanted)
+      findings.push({
+        severity: "error",
+        rule: "§7 Sound: the bed the brief asked for",
+        message: `the brief asks for music${wanted.brief ? ` ("${wanted.brief}")` : ""} but no music bed is set on the project`,
+        fix: "set_music (a file, an asset or a YouTube URL) then balance_music — or set the brief's music.wanted to false if the score was dropped on purpose",
+      });
+    return findings;
+  }
+  if (!audible)
+    findings.push({
+      severity: "error",
+      rule: "§7 Sound: a bed that cannot be heard",
+      message: s.musicMuted ? "a music bed is set but musicMuted is on — it will not be in the render" : `a music bed is set but musicVolume is ${s.musicVolume} — it will not be heard`,
+      fix: s.musicMuted ? "update_project musicMuted:false" : "balance_music",
+    });
+  if (wanted && !wanted.wanted) findings.push({ severity: "warn", rule: "§7 Sound: the brief asked for no music", message: "the brief says no music, but a bed is set on the project" });
+  try {
+    const m = await assetInfo(s.musicAssetId!);
+    const cut = mainSequence(s).reduce((a, x) => a + x.durationS, 0);
+    const fade = s.audioFadeOutS ?? 0;
+    if (m.durationS > 0 && m.durationS < cut - Math.max(fade, 0.5) - 0.5)
+      findings.push({
+        severity: "warn",
+        rule: "ch28 a cue has a reason to stop",
+        atS: m.durationS,
+        message: `the bed (${m.durationS.toFixed(1)} s) is shorter than the cut (${cut.toFixed(1)} s): the render does not loop it, so from ${m.durationS.toFixed(1)} s the last shots play over silence`,
+        fix: "a longer cue, a shorter cut, or an audioFadeOutS that lands before the bed ends",
+      });
+  } catch {
+    /* no asset info */
+  }
+  return findings;
+}
+
+/**
+ * Did the bed make it into the render? Measures the file (momentary meter)
+ * in the stretches where only the bed should sound — no narration clip, no
+ * voiceover speech, no unmuted shot. A project with a bed that renders
+ * silence there is an error: a file can pass loudness and silence checks
+ * and still be missing its score.
+ */
+export async function musicBedCheck(projectId: string, assetId: string) {
+  const s = await snapshot(projectId);
+  const findings = await musicBedSettings(s, projectId);
+  const bed = s.musicAssetId ? { assetId: s.musicAssetId, volume: s.musicVolume, ducking: s.musicDucking, muted: s.musicMuted } : null;
+  const audible = !!s.musicAssetId && !s.musicMuted && s.musicVolume > 0.02;
+  const empty = { bed, soloStretches: [] as { startS: number; endS: number; medianLufs: number | null }[], loudestSoloLufs: null as number | null, findings };
+  if (!audible) return empty;
+  const a = await api.get<{ hasAudio: boolean; timeline: { t: number; m: number; s: number }[] | null }>(`/api/assets/${assetId}/analyze?kinds=timeline`);
+  if (!a.hasAudio || !a.timeline?.length) {
+    findings.push({ severity: "error", rule: "§7 Sound: the bed in the render", message: "a music bed is set but the rendered file has no audio" });
+    return empty;
+  }
+  const end = a.timeline[a.timeline.length - 1].t;
+  // Everything on the timeline that is not the bed.
+  const busy: Range[] = s.segments.filter((x) => x.audioOnly && !x.library).map((x) => ({ startS: x.offsetS, endS: x.offsetS + x.durationS }));
+  let t = 0;
+  for (const x of mainSequence(s)) {
+    if (!x.muted) busy.push({ startS: t, endS: t + x.durationS });
+    t += x.durationS;
+  }
+  busy.push(...(await speechWindows(s)));
+  busy.sort((p, q) => p.startS - q.startS);
+  const lo = Math.max(0.5, s.audioFadeInS ?? 0);
+  const hi = end - Math.max(s.audioFadeOutS ?? 0, 0.5) - 0.3;
+  const solo: Range[] = [];
+  let cur = lo;
+  for (const b of busy) {
+    if (b.startS - 0.4 > cur) solo.push({ startS: cur, endS: Math.min(b.startS - 0.4, hi) });
+    cur = Math.max(cur, b.endS + 0.4);
+  }
+  if (hi > cur) solo.push({ startS: cur, endS: hi });
+  const stretches = solo
+    .filter((w) => w.endS - w.startS >= 1.5)
+    .map((w) => {
+      const vals = a.timeline!.filter((p) => p.t >= w.startS + 0.2 && p.t <= w.endS - 0.2).map((p) => p.m).filter((v) => Number.isFinite(v) && v > -120);
+      return { startS: +w.startS.toFixed(2), endS: +w.endS.toFixed(2), medianLufs: median(vals) };
+    });
+  const measured = stretches.filter((x) => x.medianLufs != null);
+  const loudest = measured.length ? Math.max(...measured.map((x) => x.medianLufs!)) : null;
+  const silent = measured.filter((x) => x.medianLufs! < -50);
+  const rule = "§7 Sound: the bed in the render";
+  if (!measured.length) findings.push({ severity: "info", rule, message: "no stretch where the bed plays alone — the render cannot confirm the bed by itself (a voice or an unmuted shot is on nearly every second)" });
+  else if (loudest == null || loudest < -50)
+    findings.push({
+      severity: "error",
+      rule,
+      atS: measured[0].startS,
+      message: `a music bed is set (volume ${s.musicVolume}) but the render is silent where only the bed should play (${fmtRange(measured[0])}: ${measured[0].medianLufs} LUFS) — the score did not make it into the mix`,
+      fix: "probe_asset the music asset (does it have audio?), check musicMuted / musicVolume, re-render, verify again",
+    });
+  else {
+    if (loudest < -32) findings.push({ severity: "warn", rule, message: `the bed is barely there: ${loudest} LUFS in its loudest solo stretch`, fix: "balance_music" });
+    if (silent.length)
+      findings.push({ severity: "warn", rule: "§7 Sound: the bed drops out", atS: silent[0].startS, message: `the bed is silent in ${silent.length} of ${measured.length} solo stretches (first at ${fmtRange(silent[0])})`, fix: "a bed shorter than the cut, or a gap in it — see check_soundtrack" });
+    findings.push({ severity: "info", rule, message: `music bed present: ${loudest} LUFS (momentary median) where it plays alone, ${measured.length} solo stretch${measured.length === 1 ? "" : "es"} measured` });
+  }
+  return { bed, soloStretches: stretches, loudestSoloLufs: loudest, findings };
 }
 
 export async function balanceMusic(projectId: string, gapLu: number) {

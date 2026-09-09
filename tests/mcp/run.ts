@@ -199,6 +199,14 @@ async function main() {
     }
     const lv = await call<{ speech: { medianLufs: number | null }; musicOnly: { medianLufs: number | null }; gapLu: number | null; speechToMusicUnderSpeechLu: number | null; findings: { severity: string }[] }>("check_mix_levels", { projectId: p2.json.id, assetId: draft3 });
     check("check_mix_levels reads speech vs music from the draft", lv.json.speech.medianLufs != null && lv.json.musicOnly.medianLufs != null && lv.json.gapLu != null, `speech=${lv.json.speech.medianLufs} music=${lv.json.musicOnly.medianLufs} gap=${lv.json.gapLu} smr=${lv.json.speechToMusicUnderSpeechLu}`);
+    // the score is really there: verify_export measures the bed where it plays alone;
+    // check_soundtrack catches a bed that is set but cannot be heard
+    const ver3 = await call<{ pass: boolean; findings: { severity: string; message: string }[]; music: { loudestSoloLufs: number | null } | null }>("verify_export", { assetId: draft3, target: "web" });
+    check("verify_export confirms the music bed is audible in the draft", ver3.json.music?.loudestSoloLufs != null && ver3.json.music.loudestSoloLufs > -50 && ver3.json.findings.some((f) => /music bed present/.test(f.message)), `bed=${ver3.json.music?.loudestSoloLufs} LUFS`);
+    await call("set_music", { projectId: p2.json.id, path: click, volume: 0 });
+    const stSilent = await call<{ pass: boolean; findings: { severity: string; rule: string }[] }>("check_soundtrack", { projectId: p2.json.id });
+    check("check_soundtrack errors on a bed at volume 0", !stSilent.json.pass && stSilent.json.findings.some((f) => f.severity === "error" && /cannot be heard/.test(f.rule)));
+    await call("set_music", { projectId: p2.json.id, path: click, volume: bal.json.musicVolume });
     await call("delete_segment", { projectId: p2.json.id, segmentId: narId });
     const beat = await call<{ bpm: number | null; total: number; onGrid: number; onGridPct: number | null }>("check_beat_alignment", { projectId: p2.json.id, toleranceFrames: 2 });
     check("check_beat_alignment: 120 BPM click, cuts at 2/4 s on grid", beat.json.total === 2 && beat.json.onGrid === 2 && (beat.json.bpm ?? 0) > 100 && (beat.json.bpm ?? 0) < 140, `bpm=${beat.json.bpm} onGrid=${beat.json.onGrid}/${beat.json.total}`);
@@ -214,6 +222,12 @@ async function main() {
     const brief = { deliverable: { kind: "standalone", durationS: 12, aspect: "16:9", resolution: "720p" }, production: { scripted: true, genre: "attack ad", form: "spot" }, sources: { kinds: ["youtube", "ai"] }, premise: "Twelve seconds against the tone clip.", tone: "mean, dry, fast", narration: { wanted: true, voice: "rex" }, music: { wanted: true } };
     const b = await call<{ brief: { status: string } }>("set_brief", { projectId: p2.json.id, brief });
     check("set_brief stores a draft brief", b.json.brief?.status === "draft");
+    // a brief that asks for a score, on a project with no bed: check_soundtrack must say so
+    const p3 = await call<{ id: string }>("create_project", { title: "mcp-test bed-vs-brief" });
+    await call("set_brief", { projectId: p3.json.id, brief: { deliverable: { kind: "standalone", durationS: 12 }, production: { scripted: true, genre: "attack ad" }, sources: { kinds: ["youtube"] }, premise: "Twelve seconds against a tone.", tone: "mean", music: { wanted: true, brief: "a driving score" } } });
+    const st3 = await call<{ pass: boolean; findings: { severity: string; rule: string }[] }>("check_soundtrack", { projectId: p3.json.id });
+    check("check_soundtrack errors when the brief asks for music and no bed is set", !st3.json.pass && st3.json.findings.some((f) => f.severity === "error" && /brief asked for/.test(f.rule)));
+    await call("delete_project", { projectId: p3.json.id });
     const plan = {
       logline: "The tone clip, exposed.",
       beats: [{ id: "hook", title: "Hook", startS: 0, endS: 4 }, { id: "case", title: "The case", startS: 4, endS: 10 }, { id: "sting", title: "Sting", startS: 10, endS: 12 }],

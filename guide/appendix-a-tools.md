@@ -333,7 +333,7 @@ Where every cut of the main sequence falls relative to the music's beat grid (gu
 
 ### `verify_export`
 
-Technical verification of a rendered file (guide ch.32): probe (duration, size, codec), duration/frame against an expected length, black stretches, frozen picture, head/tail silence, integrated loudness and true peak against a platform target (web, social, streaming, broadcast, none). Returns pass/fail with findings. Works on drafts and finals.
+Technical verification of a rendered file (guide ch.32): probe (duration, size, codec), duration/frame against an expected length, black stretches, frozen picture, head/tail silence, and — for a project render — whether the music bed the project (and the brief) asks for is actually audible where it plays alone (§7 Sound), integrated loudness and true peak against a platform target (web, social, streaming, broadcast, none). Returns pass/fail with findings. Works on drafts and finals.
 
 | Parameter | Type | Notes |
 |---|---|---|
@@ -454,7 +454,7 @@ The latest final export's asset id, duration, video stream, size and file path (
 
 ### `check_soundtrack`
 
-The audio map of the timeline (guide ch.27–29 and Part II §7 'Sound'): which layers sound when — unmuted shot audio, narration / audio-only clips, the voiceover, the music bed (volume, ducking, fade), audio overlays — and findings: source narration or music bleeding through unmuted shots under the bed or narration (the classic clash), narration clips overlapping, two music sources at once, music that never ducks or never ends, clips past the end, or a silent film. Run before every render_draft.
+The audio map of the timeline (guide ch.27–29 and Part II §7 'Sound'): which layers sound when — unmuted shot audio, narration / audio-only clips, the voiceover, the music bed (volume, ducking, fade; set when the brief asks for one, audible, long enough for the cut), audio overlays — and findings: source narration or music bleeding through unmuted shots under the bed or narration (the classic clash), narration clips overlapping, two music sources at once, music that never ducks or never ends, clips past the end, or a silent film. Run before every render_draft.
 
 | Parameter | Type | Notes |
 |---|---|---|
