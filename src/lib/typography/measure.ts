@@ -21,10 +21,21 @@ const wideRatio = (s: string) => {
   return 1 + wide * 0.18;
 };
 
+/**
+ * Spaced capitals ("T H E   V E R D I C T") are tracked in the text itself
+ * (drawtext has no letter-spacing): for reading and line-length rules the
+ * letters are collapsed back into words; for the box width they are not.
+ */
+export const isTracked = (t: string) => {
+  const toks = t.trim().split(/\s+/).filter(Boolean);
+  return toks.length >= 4 && toks.filter((x) => x.length === 1).length > toks.length * 0.6;
+};
+export const untrack = (t: string) => (isTracked(t) ? t.split(/\r?\n/).map((line) => line.trim().split(/\s{2,}/).map((w) => w.replace(/\s+/g, "")).join(" ")).join("\n") : t);
+
 export function estimateTextBox(text: string, fontId: string, fontPx: number, boxEnabled: boolean): TextBox {
   const f = fontById(fontId);
   const lines = text.split(/\r?\n/);
-  const longest = Math.max(...lines.map((l) => l.length), 0);
+  const longest = Math.max(...untrack(text).split(/\r?\n/).map((l) => l.length), 0);
   const widest = lines.reduce((a, l) => Math.max(a, l.length * f.avgAdvance * wideRatio(l)), 0);
   const w = Math.ceil(widest * fontPx * 1.12);
   const h = Math.ceil(lines.length * fontPx * 1.15);
@@ -33,4 +44,4 @@ export function estimateTextBox(text: string, fontId: string, fontPx: number, bo
 }
 
 /** Seconds a viewer needs: a fixed pick-up plus ~0.32 s a word (about 190 wpm). */
-export const readingTimeS = (text: string) => +(0.8 + text.trim().split(/\s+/).filter(Boolean).length * 0.32).toFixed(2);
+export const readingTimeS = (text: string) => +(0.8 + untrack(text).trim().split(/\s+/).filter(Boolean).length * 0.32).toFixed(2);
