@@ -186,6 +186,7 @@ export const patchProjectSchema = z.object({
         imageMotion: imageMotionEnum.optional(),
         muted: z.boolean().optional(),
         volume: z.number().min(0).max(4).optional(), // gain on the clip's own audio (1 = as recorded)
+        title: z.string().max(120).optional(), // label (the harness tags sourced clips 'clip:<id>')
         brightness: z.number().min(-0.3).max(0.3).optional(),
         contrast: z.number().min(0.5).max(1.5).optional(),
         saturation: z.number().min(0).max(2).optional(),

@@ -115,7 +115,7 @@ async function main() {
     const ch17 = await call<string>("read_guide", { section: "17" });
     check("read_guide returns chapter 17 (dialogue)", typeof ch17.json === "string" && /J-cuts and L-cuts/.test(ch17.json));
     const toc = await call<{ chapters: unknown[]; playbooks: { name: string }[] }>("list_guide", {});
-    check("list_guide: ≥ 37 chapters, 6 playbooks", toc.json.chapters.length >= 37 && toc.json.playbooks.length === 6, `${toc.json.chapters.length} chapters`);
+    check("list_guide: ≥ 37 chapters, ≥ 7 playbooks", toc.json.chapters.length >= 37 && toc.json.playbooks.length >= 7, `${toc.json.chapters.length} chapters`);
     const pb = await call<string>("get_playbook", { name: "interview-cleanup" });
     check("get_playbook interview-cleanup", typeof pb.json === "string" && /apply_edit_list/.test(pb.json));
     const prompt = await client.getPrompt({ name: "playbook", arguments: { name: "scene-highlight", projectId: p2.json.id } });
@@ -202,6 +202,56 @@ async function main() {
     await call("delete_segment", { projectId: p2.json.id, segmentId: narId });
     const beat = await call<{ bpm: number | null; total: number; onGrid: number; onGridPct: number | null }>("check_beat_alignment", { projectId: p2.json.id, toleranceFrames: 2 });
     check("check_beat_alignment: 120 BPM click, cuts at 2/4 s on grid", beat.json.total === 2 && beat.json.onGrid === 2 && (beat.json.bpm ?? 0) > 100 && (beat.json.bpm ?? 0) < 140, `bpm=${beat.json.bpm} onGrid=${beat.json.onGrid}/${beat.json.total}`);
+
+    // --- pre-production: brief → plan → check → document → tasks → approve; storyboard of the cut
+    let briefRejected = "";
+    try {
+      await call("set_brief", { projectId: p2.json.id, brief: { deliverable: { kind: "standalone", durationS: 12 }, production: { scripted: true, genre: "attack ad" }, sources: { kinds: ["youtube"] }, premise: "", tone: "mean" } });
+    } catch (e) {
+      briefRejected = (e as Error).message;
+    }
+    check("set_brief rejects an empty premise", briefRejected !== "", briefRejected.slice(0, 80));
+    const brief = { deliverable: { kind: "standalone", durationS: 12, aspect: "16:9", resolution: "720p" }, production: { scripted: true, genre: "attack ad", form: "spot" }, sources: { kinds: ["youtube", "ai"] }, premise: "Twelve seconds against the tone clip.", tone: "mean, dry, fast", narration: { wanted: true, voice: "rex" }, music: { wanted: true } };
+    const b = await call<{ brief: { status: string } }>("set_brief", { projectId: p2.json.id, brief });
+    check("set_brief stores a draft brief", b.json.brief?.status === "draft");
+    const plan = {
+      logline: "The tone clip, exposed.",
+      beats: [{ id: "hook", title: "Hook", startS: 0, endS: 4 }, { id: "case", title: "The case", startS: 4, endS: 10 }, { id: "sting", title: "Sting", startS: 10, endS: 12 }],
+      script: [{ id: "n1", kind: "narration", text: "Listen to this.", atS: 0.3 }, { id: "b1", kind: "bite", text: "beep", atS: 4, shotId: "s2" }, { id: "n2", kind: "narration", text: "It never stopped beeping.", atS: 6.2 }, { id: "t1", kind: "text", text: "BEEP.", atS: 10 }],
+      shots: [
+        { id: "s1", beat: "hook", order: 0, durationS: 4, description: "the tone source, wide", source: { type: "youtube", clipId: "c1" }, sound: "vo" },
+        { id: "s2", beat: "case", order: 1, durationS: 2, description: "the beep itself", source: { type: "youtube", clipId: "c1", section: { startS: 0, endS: 30 } }, sound: "sync" },
+        { id: "s3", beat: "case", order: 2, durationS: 4, description: "AI: an oscilloscope trace pulsing", source: { type: "ai" }, sound: "muted" },
+        { id: "s4", beat: "sting", order: 3, durationS: 2, description: "end card", source: { type: "card" }, sound: "muted", text: "BEEP.", transition: "cut" },
+      ],
+      clipList: [{ id: "c1", need: "a clip with a clear beep", queries: ["test tone beep"], durationHintS: 30 }],
+      aiShots: [{ shotId: "s3", prompt: "an oscilloscope trace pulsing on a dark screen, macro, cinematic", model: "alibaba/wan-2.7", durationS: 4 }],
+      music: { brief: "ominous drone", queries: ["ominous drone royalty free"] },
+      narration: { voice: "rex", lines: [{ scriptId: "n1", text: "Listen to this." }, { scriptId: "n2", text: "It never stopped beeping." }] },
+      risks: ["the beep may be copyrighted"],
+    };
+    const sp = await call<{ plan: { version: number; status: string }; check: { pass: boolean; findings: { severity: string; rule: string; message: string }[]; summary: { totalS: number; aiCostUsd: number } }; documentPath: string | null }>("set_plan", { projectId: p2.json.id, plan });
+    check("set_plan stores v1 as proposed and checks it", sp.json.plan?.version === 1 && sp.json.plan.status === "proposed" && sp.json.check?.summary.totalS === 12, `v=${sp.json.plan?.version} total=${sp.json.check?.summary.totalS}`);
+    check("check_plan: AI length warning + cost, no errors", sp.json.check.pass && sp.json.check.findings.some((f) => /5 s clips/.test(f.message)) && sp.json.check.summary.aiCostUsd > 0, sp.json.check.findings.map((f) => f.message.slice(0, 50)).join(" | "));
+    const bad = await call<{ check: { pass: boolean; findings: { severity: string; message: string }[] } }>("set_plan", { projectId: p2.json.id, plan: { ...plan, shots: plan.shots.map((x) => (x.id === "s1" ? { ...x, durationS: 9 } : x)) } });
+    check("check_plan flags a length that misses the brief", !bad.json.check.pass && bad.json.check.findings.some((f) => f.severity === "error" && /add up to 17/.test(f.message)), bad.json.check.findings.filter((f) => f.severity === "error").map((f) => f.message).join(" | "));
+    await call("set_plan", { projectId: p2.json.id, plan });
+    const doc = await call<unknown>("plan_document", { projectId: p2.json.id });
+    const docText = doc.content.find((c) => c.type === "text")?.text ?? "";
+    check("plan_document renders beats, storyboard, clips and AI prompts", /## Beats/.test(docText) && /## Storyboard/.test(docText) && /## Clips to find/.test(docText) && /oscilloscope/.test(docText) && /check: PASS/.test(docText));
+    const tasks = await call<{ tasks: { id: string; deps: string[] }[]; parallelNow: string[] }>("plan_tasks", { projectId: p2.json.id });
+    check("plan_tasks: source, ai, narration, music run first; assemble waits for them", tasks.json.parallelNow.sort().join(",") === "ai:s3,music,narration,source:c1" && tasks.json.tasks.find((t) => t.id === "assemble")!.deps.length === 4, tasks.json.parallelNow.join(","));
+    const ap = await call<{ plan: { status: string; version: number }; brief: { status: string } }>("approve_plan", { projectId: p2.json.id });
+    check("approve_plan marks plan v3 and brief approved", ap.json.plan?.status === "approved" && ap.json.plan.version === 3 && ap.json.brief?.status === "approved", `v=${ap.json.plan?.version}`);
+    const sb = await call<unknown>("storyboard_sheet", { projectId: p2.json.id, cols: 4, width: 320 });
+    const sbText = sb.content.find((c) => c.type === "text")?.text ?? "";
+    check("storyboard_sheet returns one captioned frame per shot", sb.content.some((c) => c.type === "image") && /Shots left/.test(sbText), sbText.slice(0, 60));
+    const vm = await call<{ video: { id: string; durationsS?: number[] }[] }>("list_video_models", {});
+    check("list_video_models lists the video models with clip lengths", vm.json.video.length >= 3 && vm.json.video.every((m) => Array.isArray(m.durationsS)));
+    if (process.env.MCP_TEST_NETWORK === "1") {
+      const yt = await call<{ candidates: { id: string; durationS: number | null }[] }>("search_youtube", { query: "Audionautix High Tension", max: 3 });
+      check("search_youtube returns candidates with durations", yt.json.candidates.length > 0 && yt.json.candidates.every((c) => typeof c.durationS === "number"));
+    }
   } finally {
     for (const f of fakes) (await import("node:fs")).rmSync(f, { force: true });
     for (const id of created) await call("delete_project", { projectId: id }).catch(() => {});

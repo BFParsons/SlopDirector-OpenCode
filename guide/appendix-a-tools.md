@@ -1,6 +1,6 @@
 # Appendix A. MCP Tool Reference
 
-*Generated from the server (48 tools). Regenerate with `pnpm exec tsx scripts/gen-tool-reference.ts`.*
+*Generated from the server (62 tools). Regenerate with `pnpm exec tsx scripts/gen-tool-reference.ts`.*
 
 ## Project
 
@@ -479,6 +479,129 @@ Sets musicVolume from measured loudness so the bed sits `gapLu` (default 6) belo
 | `projectId` | string | required |
 | `gapLu` | number | default 6 |
 
+### `set_brief`
+
+Record the outcome of the interview (guide Part II §11, playbook 'preproduction'): standalone piece or a scene of a longer video, length, aspect; scripted or not and the genre; where footage comes from (youtube / ai / upload / stock); premise; tone; audience; must-include / avoid; narration, music and text wanted. Stored on the project; status 'draft' until approve_plan. Replaces the whole brief — pass everything.
+
+| Parameter | Type | Notes |
+|---|---|---|
+| `projectId` | string | required |
+| `brief` | object | required |
+
+### `get_brief`
+
+The stored brief (null until set_brief).
+
+| Parameter | Type | Notes |
+|---|---|---|
+| `projectId` | string | required |
+
+### `set_plan`
+
+Store the proposed plan — logline, beats (contiguous, cover the runtime), script lines (narration / bite / text with atS), shots in order (durationS, description, source {youtube+clipId | ai+prompt | upload | card}, sound sync|muted|vo, text, transition), clipList (what to search for, per clip), aiShots (prompt + model + length per AI shot), music, narration voice. Validated, versioned (v1, v2…), status 'proposed'; returns the mechanical check (length vs brief, pacing norm, sources, narration density and overlaps, caps, AI cost) and the path of plan-v<N>.md. Fix every error, then show the person plan_document and wait for their yes before approve_plan.
+
+| Parameter | Type | Notes |
+|---|---|---|
+| `projectId` | string | required |
+| `plan` | object | required |
+
+### `get_plan`
+
+The stored plan with the brief and the current check (null until set_plan).
+
+| Parameter | Type | Notes |
+|---|---|---|
+| `projectId` | string | required |
+
+### `check_plan`
+
+Mechanical check of the stored plan against the brief: total length, average shot length vs the genre norm (ch.16), beats, every shot's source resolvable, narration density (≤ 2 w/s) and overlaps, narration over sync-sound shots, caps (segments, AI shots, text cards), AI generation cost, scene-of-a-longer-video constraints. Errors block approval.
+
+| Parameter | Type | Notes |
+|---|---|---|
+| `projectId` | string | required |
+
+### `plan_document`
+
+Markdown of the plan for the person to read and approve: brief, logline, beats, storyboard table (shot / source / sound / card), script with times, clips to find, AI prompts, music, narration, risks. Show it to them verbatim (RULES 2: propose-and-approve).
+
+| Parameter | Type | Notes |
+|---|---|---|
+| `projectId` | string | required |
+
+### `approve_plan`
+
+Record the person's approval of the current plan (and brief). Call ONLY after they said yes to plan_document. Sourcing, generation and cutting follow from an approved plan.
+
+| Parameter | Type | Notes |
+|---|---|---|
+| `projectId` | string | required |
+
+### `plan_tasks`
+
+The approved plan as tasks with dependencies: one 'source:<clipId>' per clip to find, one 'ai:<shotId>' per AI shot, 'narration' (all lines), 'music' — none of these depend on each other, so run them in parallel (sub-agents, or source_clips / generate_ai_shots / generate_narration in a batch); then 'assemble' (needs all of them), 'titles', 'checks', 'draft', 'final'. `parallelNow` lists what can start immediately.
+
+| Parameter | Type | Notes |
+|---|---|---|
+| `projectId` | string | required |
+
+### `storyboard_sheet`
+
+One captioned frame per shot of the main sequence (index · start · length · sync/mute · title card) tiled as a storyboard — the picture to review a cut with, and to send the person before the draft. Needs shots on the timeline.
+
+| Parameter | Type | Notes |
+|---|---|---|
+| `projectId` | string | required |
+| `cols` | integer | default 4 |
+| `width` | integer | default 400; cell width in px |
+
+### `list_video_models`
+
+The AI video models this build can generate with (id, label, price per second, clip lengths, notes such as public-figure blocks), plus TTS voices and chat models.
+
+### `search_youtube`
+
+Search YouTube (yt-dlp, no download): id, url, title, channel, duration, views per result. Filter by duration. Prefer archives, official channels and Creative Commons uploads; the licence isn't in the search page — check the video page when it matters. Then import_youtube a ≤ 180 s section.
+
+| Parameter | Type | Notes |
+|---|---|---|
+| `query` | string | required |
+| `max` | integer | default 8 |
+| `minDurationS` | number | optional |
+| `maxDurationS` | number | optional |
+
+### `source_clips`
+
+For each clip spec (default: the approved plan's clipList): search YouTube with its queries, rank the candidates (must-have words in the title, preferred channels, duration hint, views; penalises reactions/compilations), and import a section of the best one (the shot's planned section, else the first ≤ 180 s). Runs the clips in parallel and returns what it picked, the alternatives, and the new segment ids to poll with get_project. Handles at most `maxClips` per call and lists the rest in `remaining` — call again. For precision (a specific quote, a specific moment) send a clip-scout sub-agent instead: search_youtube → import → get_contact_sheet / transcribe → pick.
+
+| Parameter | Type | Notes |
+|---|---|---|
+| `projectId` | string | required |
+| `clips` | array | optional; explicit specs; default: the plan's clipList (+ each shot's planned section) |
+| `maxClips` | integer | default 6 |
+| `candidatesPerQuery` | integer | default 6 |
+
+### `add_ai_shot`
+
+Create an AI-generated shot from a prompt and start generating it (costs credits: see list_video_models for price per second and the clip lengths each model makes; Veo blocks public figures). The segment appears at the end of the main sequence with status PENDING/GENERATING; poll get_project for READY, then trim/reorder like any clip.
+
+| Parameter | Type | Notes |
+|---|---|---|
+| `projectId` | string | required |
+| `prompt` | string | required |
+| `durationS` | integer | default 5 |
+| `model` | string | optional; default: the build's default video model |
+| `referenceImageAssetId` | string | optional |
+
+### `generate_ai_shots`
+
+Start every AI shot in the approved plan (aiShots[]) in one go — each becomes a generating segment at the end of the main sequence. Returns shotId → segmentId so the assemble step can reorder. Costs credits; the plan's check states the estimate.
+
+| Parameter | Type | Notes |
+|---|---|---|
+| `projectId` | string | required |
+| `onlyShotIds` | array | optional |
+
 ## Resources
 
 - `slopstudio://guide` — Editing guide (table of contents)
@@ -489,3 +612,5 @@ Sets musicVolume from measured loudness so the bed sits `gapLu` (default 6) belo
 
 - `playbook` — Start a job with its playbook, the always-on rules and the project context.
 - `edit_video` — A playbook for turning a source clip into a finished edit with these tools.
+- `interview` — The questions that pin a new piece down before any footage is touched, asked in one round with inferred defaults, then set_brief.
+- `preproduction` — From an approved-or-draft brief, author the plan per the playbook, store and check it, present the document, wait for approval, then fan out.

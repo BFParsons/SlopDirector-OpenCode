@@ -125,6 +125,8 @@ model Project {
   subject       String? // politician / issue
   tone          String?
   targetLengthS Int          @default(30)
+  brief         Json? // pre-production brief (src/lib/validation/brief.ts)
+  plan          Json? // proposed/approved plan: beats, script, shots, clip list, AI shots
   aspectRatio   AspectRatio  @default(R16_9)
   resolution    Resolution   @default(R720P)
   // Custom frame size in px (even numbers). When both are set they override the

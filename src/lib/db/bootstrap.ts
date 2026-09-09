@@ -67,6 +67,8 @@ export async function ensureDesktopDb(): Promise<void> {
     { table: "FinalRender", column: "draftAssetId", ddl: "TEXT" },
     { table: "FinalRender", column: "draftUpdatedAt", ddl: "DATETIME" },
     { table: "Segment", column: "volume", ddl: "REAL NOT NULL DEFAULT 1" },
+    { table: "Project", column: "brief", ddl: "JSONB" },
+    { table: "Project", column: "plan", ddl: "JSONB" },
   ];
   const columnCache = new Map<string, Set<string>>();
   for (const m of migrations) {

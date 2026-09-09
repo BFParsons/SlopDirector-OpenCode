@@ -33,6 +33,12 @@ renders). **Text overlays** and **audio overlays** sit on top.
 
 ## Endpoints an agent uses
 
+### Pre-production
+- `GET/PUT /api/projects/:id/brief` — the interview's outcome (`src/lib/validation/brief.ts`: deliverable standalone|scene, length, aspect; scripted + genre; sources; premise; tone; audience; narration/music/text; must-include/avoid).
+- `GET /api/projects/:id/plan?view=json|document|check|tasks` · `PUT …/plan` (validated, versioned, status proposed, writes `plan-v<N>.md` next to the assets) · `POST …/plan/approve`. The plan: beats, script lines with times, shots (source youtube+clipId | ai+prompt | upload | card; sound sync|muted|vo), clipList, aiShots, music, narration. `check` = length vs brief, pacing norm, sources, narration density/overlaps, caps, AI cost; `tasks` = the dependency graph to fan out.
+- `GET /api/projects/:id/storyboard?cols=4&w=400` → JPEG, one captioned frame per main-sequence shot (header `X-Storyboard-Shots`).
+- `GET /api/youtube/search?q=…&max=8` → yt-dlp search candidates (no download). `GET /api/models` → video / TTS / chat models with prices and clip lengths. `POST …/generate-clip {videoModel, prompt, durationS}` starts an AI shot.
+
 ### Project
 - `POST /api/projects` — create; body like the Assembly dialog (`title`, `frameWidth`, `frameHeight`, `audioMode`, model names).
 - `GET /api/projects` · `GET /api/projects/:id` (snapshot) · `PATCH /api/projects/:id` (any setting; `segments: [{ id, …fields }]` edits segments in bulk) · `DELETE`.

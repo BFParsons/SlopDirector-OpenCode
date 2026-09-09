@@ -5,6 +5,28 @@ Notable changes, newest first. See [DEPENDENCIES.md](DEPENDENCIES.md) for setup 
 
 ## 2026-09 — no-storyboard fork
 
+- **Pre-production: interview → brief → plan → approval → fan-out.** Both real jobs started
+  at "clips exist"; the part where the brief gets pinned down was a chat. Now it is a
+  protocol. The `interview` prompt asks one round (standalone piece or a scene of a longer
+  video + length/aspect; scripted or not + genre; YouTube / AI / own files / stock; premise;
+  tone + audience; narration / music / text, must-include, avoid) with inferred defaults and
+  stores the answers (`set_brief`, `Project.brief`). The `preproduction` prompt and
+  playbook author the plan — logline, contiguous beats, every script line with its time,
+  the storyboard (shot / duration / source / sound decision / card / transition), a clip
+  list for YouTube shots, an AI shot list with prompts and model lengths, music, narration —
+  and `set_plan` stores it versioned with a mechanical check (`src/lib/projects/plan.ts`:
+  length vs brief, ch.16 pacing norm by genre, sources resolvable, narration ≤ 2 w/s and
+  never over a sync bite, one narrator at a time, caps, AI cost, no sign-off in a scene).
+  `plan_document` renders it for the person; `approve_plan` records the yes (RULES 32–35:
+  nothing is sourced, generated or cut before). `plan_tasks` turns the plan into a
+  dependency graph whose independent tasks run at once: `source_clips` (search → rank →
+  import a section per clip, in parallel), `generate_ai_shots` / `add_ai_shot` (real AI
+  video via the existing generate-clip job; `list_video_models` for prices, lengths,
+  public-figure blocks), `generate_narration` per line, music. `search_youtube` exposes
+  yt-dlp search without a download. `storyboard_sheet` tiles one captioned frame per shot
+  of the cut for review. Claude Code sub-agent definitions in `.claude/agents/`
+  (clip-scout, narrator, shot-picker) carry the fan-out. Guide Part II §11 documents it.
+
 - **Per-clip gain, and sound bites are voices too.** The second real job (a 30 s attack ad
   cut from archival Nixon footage: five sync-sound bites, six TTS narrator lines, a music
   bed) showed three gaps. There was no way to level a clip: the narrator lines rendered at

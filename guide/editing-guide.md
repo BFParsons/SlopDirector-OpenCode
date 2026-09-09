@@ -56,6 +56,8 @@
 
 ## Part II: The MCP Harness
 
+- §11 Pre-production: the interview, the brief, the plan (added for the harness)
+
 ### 5\. Tool Surface Overview
 
 - Tool categories: read, write, render, and session  
@@ -575,6 +577,16 @@ Reference points (approximate, practice-derived; verify against each platform's 
 - Common misunderstandings: source time vs timeline time; `durationS` is on-screen length, not the out-point; `muted` defaults to true for video clips; transitions are project-wide.
 
 ---
+
+## 11\. Pre-production: the Interview, the Brief, the Plan
+
+Every job before this section assumed the footage was already there. A new piece starts earlier: with a conversation that turns "make me a 30-second ad about X" into a brief the person has agreed to, and a plan they can read before a single clip is downloaded or generated. The tools: `set_brief` / `get_brief`, `set_plan` / `get_plan` / `check_plan` / `plan_document` / `approve_plan` / `plan_tasks`, and for sourcing `search_youtube`, `source_clips`, `add_ai_shot` / `generate_ai_shots`, `generate_narration`, `list_video_models`, `storyboard_sheet`. The procedure is the playbook `preproduction`; the prompts `interview` and `preproduction` carry it.
+
+**The interview.** One round, at most eight questions, each with the default you inferred in brackets: (a) standalone piece or a scene of a longer video — and length, aspect; (b) scripted or unscripted, genre / form; (c) where the footage comes from (YouTube, AI, their files, stock) and any licence rule; (d) the premise; (e) tone and audience; (f) narration, music, on-screen text, must-include, avoid. A scene of a longer video changes the ending (no card, no fade, no sign-off) and the opening (it hands off from the previous scene). Store the answers with `set_brief`.
+
+**The plan.** Logline → beats (contiguous, adding up to the length) → script (narration at ≤ 2 words/s, never over a sync-sound bite; the bites you expect to find; the cards) → storyboard (shots in order with duration, source, sound decision, card, transition; average shot length inside the genre norm, ch.16) → clip list (per YouTube source: what it must contain, search queries, preferred channels, the wanted moment; ≤ 180 s per import) → AI shot list (prompt, model, a length the model makes; public-figure blocks per `list_video_models`) → music brief and narration voice → risks. `set_plan` stores a version and returns the mechanical check: length against the brief, pacing, every source resolvable, narration density and overlaps, narration over sync sound, caps, AI cost, scene constraints. Fix the errors; `plan_document` renders the document; the person reads it; `approve_plan` records their yes.
+
+**Fan-out.** `plan_tasks` turns the approved plan into a dependency graph: one source task per clip, one per AI shot, narration, music — all independent — then assemble, titles, checks, draft, final. Run the independent tasks at once: a *clip-scout* sub-agent per clip when the moment matters (search → import a window → contact sheet + transcript → exact in/out), `source_clips` when speed matters; `generate_ai_shots`; `generate_narration` per line; music. Sub-agents report; the lead assembles from one checkpoint, then the usual loop: titles, checks, draft, `storyboard_sheet` and the draft path to the person, final.
 
 # Part III: Ingest and Organization
 

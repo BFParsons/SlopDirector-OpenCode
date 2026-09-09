@@ -44,6 +44,8 @@ Against a multi-user server (desktop auth off) add `SLOPSTUDIO_API_TOKEN` to
 
 ## Tools
 
+Pre-production first for a new piece: `set_brief` (after the `interview` prompt), `set_plan` / `check_plan` / `plan_document` / `approve_plan` / `plan_tasks`, then sourcing in parallel (`search_youtube`, `source_clips`, `add_ai_shot` / `generate_ai_shots`, `generate_narration`, `list_video_models`) and `storyboard_sheet` to review a cut. Sub-agent definitions for Claude Code live in `.claude/agents/` (clip-scout, narrator, shot-picker).
+
 | Group | Tools |
 |---|---|
 | Project | `list_projects`, `create_project` (frame presets: 1080p, 4k, 720p, vertical, square, 4:5, preview), `get_project`, `update_project`, `delete_project` |
