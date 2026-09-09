@@ -9,6 +9,7 @@ const segmentEdit = {
   durationS: z.number().min(0.1).optional().describe("on-screen length in seconds"),
   speed: z.number().min(0.5).max(2).optional(),
   muted: z.boolean().optional().describe("false = mix this clip's own audio into the soundtrack"),
+  volume: z.number().min(0).max(4).optional().describe("gain on this clip's audio — unmuted shots and audio-only clips; 1 = as recorded, 2 ≈ +6 dB, 0.5 ≈ −6 dB (guide §7 Levels)"),
   offsetS: z.number().min(0).optional().describe("timeline start (overlay tracks and audio-only clips)"),
   track: z.number().int().min(0).max(31).optional(),
   brightness: z.number().min(-0.3).max(0.3).optional(),
@@ -33,6 +34,7 @@ const addSegmentInput = {
   offsetS: z.number().min(0).optional(),
   audioOnly: z.boolean().default(false),
   muted: z.boolean().optional().describe("SOUND DECISION for a video clip: true (default here) = silent B-roll under music/narration; false = keep the clip's own sound (dialogue, sync sound). Note the raw API keeps sound by default; this tool mutes by default. Ignored for audioOnly clips (always audible)."),
+  volume: z.number().min(0).max(4).optional().describe("gain on this clip's audio — unmuted shots and audio-only clips; 1 = as recorded, 2 ≈ +6 dB, 0.5 ≈ −6 dB (guide §7 Levels)"),
   imageMotion: z.string().optional(),
 };
 
@@ -60,7 +62,7 @@ async function assetKind(assetId: string): Promise<string> {
 }
 
 async function addSegment(a: {
-  projectId: string; assetId: string; trimStartS?: number; durationS?: number; track: number; offsetS?: number; audioOnly: boolean; muted?: boolean; imageMotion?: string;
+  projectId: string; assetId: string; trimStartS?: number; durationS?: number; track: number; offsetS?: number; audioOnly: boolean; muted?: boolean; volume?: number; imageMotion?: string;
 }): Promise<Snapshot> {
   const kind = await assetKind(a.assetId);
   const source = kind === "UPLOAD_IMAGE" ? "UPLOAD_IMAGE_STILL" : "UPLOAD_VIDEO";
@@ -73,6 +75,7 @@ async function addSegment(a: {
   // clip carries its own narration and music). Audio-only clips are audible.
   body.muted = a.audioOnly ? false : (a.muted ?? true);
   if (a.imageMotion) body.imageMotion = a.imageMotion;
+  if (a.volume != null) body.volume = a.volume;
   return api.post<Snapshot>(`/api/projects/${a.projectId}/segments`, body);
 }
 
@@ -199,7 +202,7 @@ export function registerTimelineTools(server: McpServer) {
       title: "Apply an edit list",
       description:
         "Run a sequence of timeline operations as one unit: a checkpoint is taken first and, if any step fails, the project is rolled back to it. " +
-        "Ops: add_segment {assetId, trimStartS?, durationS?, track?, offsetS?, muted? (video is SILENT unless muted:false), audioOnly?}, update_segment {id, …fields}, delete_segment {id}, split_segment {id, atS}, reorder {orderedIds}, clear_timeline. " +
+        "Ops: add_segment {assetId, trimStartS?, durationS?, track?, offsetS?, muted? (video is SILENT unless muted:false), audioOnly?}, update_segment {id, …fields incl. volume}, delete_segment {id}, split_segment {id, atS}, reorder {orderedIds}, clear_timeline. " +
         "Ids created by earlier add_segment ops can be referenced as \"$1\", \"$2\", … (1-based index of the add op).",
       inputSchema: { projectId: z.string(), ops: z.array(op).min(1).max(200), label: z.string().max(200).optional() },
     },

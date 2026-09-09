@@ -310,6 +310,7 @@ model Segment {
   trimStartS    Float         @default(0) // source seconds skipped from the start (Premiere-style in-point). 0 for stills.
   imageMotion   ImageMotion   @default(NONE) // UPLOAD_IMAGE_STILL only — pan/zoom style
   muted         Boolean       @default(true) // video segments: include the clip's own audio in the final mix?
+  volume        Float         @default(1) // gain on this clip's audio (unmuted video / audio-only clips): 0..4, 1 = as recorded
   // per-segment color adjustments (applied before the project-wide color look)
   brightness    Float         @default(0) // -0.3..0.3 additive
   contrast      Float         @default(1) // 0.5..1.5

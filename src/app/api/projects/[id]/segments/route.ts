@@ -126,6 +126,7 @@ export async function POST(request: Request, { params }: Ctx) {
         // NLE clip carries its sound); AI clips and stills stay silent (no audio
         // stream anyway, and the voiceover is the narration track).
         muted: body.muted ?? body.source !== "UPLOAD_VIDEO",
+        volume: body.volume ?? 1,
       },
     });
 

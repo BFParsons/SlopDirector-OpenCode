@@ -28,6 +28,9 @@ import { effectsFfmpeg, stabilizeDetectFilter } from "@/config/effects";
 import type { EffectSpec } from "@/lib/render/effects";
 import type { PipPlacement } from "@/lib/render/pip";
 
+/** Per-clip gain as a filter step (empty when 1). 0..4 → −inf..+12 dB. */
+const gainStep = (v: number | undefined): string => (v == null || Math.abs(v - 1) < 1e-3 ? "" : `volume=${Math.min(4, Math.max(0, v)).toFixed(3)},`);
+
 /** Per-segment color adjustment, applied before the project-wide color look. */
 export interface SegmentAdjust {
   brightness: number; // -0.3..0.3
@@ -55,6 +58,7 @@ export type VisualInput =
       kind: "video";
       path: string;
       muted?: boolean;
+      volume?: number; // gain on the clip's own audio when unmuted (1 = as recorded)
       speed?: number;
       durationS?: number;
       trimStartS?: number; // source seconds skipped from the start (in-point)
@@ -78,6 +82,7 @@ export type OverlayInput = VisualInput & { offsetS: number; pip: PipPlacement };
 /** An audio-only clip (unlinked clip audio): a media asset whose audio is taken
  *  from [trimStartS, trimStartS+durationS] and placed at offsetS on the timeline. */
 export type AudioClipInput = {
+  volume?: number; // gain (1 = as recorded)
   path: string;
   offsetS: number;
   trimStartS?: number;
@@ -515,7 +520,7 @@ export async function assembleVideo(
       const delayPart = offsetMs > 0 ? `adelay=${offsetMs}:all=1,asetpts=N/SR/TB,` : "";
       const lbl = `sa${i}`;
       filters.push(
-        `[${i}:a]${srcTrim}${tempo}atrim=0:${effDur[i].toFixed(3)},asetpts=N/SR/TB,${delayPart}apad,atrim=0:${dur},asetpts=N/SR/TB[${lbl}]`,
+        `[${i}:a]${srcTrim}${tempo}${gainStep(inp.volume)}atrim=0:${effDur[i].toFixed(3)},asetpts=N/SR/TB,${delayPart}apad,atrim=0:${dur},asetpts=N/SR/TB[${lbl}]`,
       );
       segAudioLabels.push(lbl);
     }
@@ -537,7 +542,7 @@ export async function assembleVideo(
     const delayPart = offsetMs > 0 ? `adelay=${offsetMs}:all=1,asetpts=N/SR/TB,` : "";
     const lbl = `pa${j}`;
     filters.push(
-      `[${nV1 + j}:a]${srcTrim}${tempo}atrim=0:${m.dur.toFixed(3)},asetpts=N/SR/TB,${delayPart}apad,atrim=0:${dur},asetpts=N/SR/TB[${lbl}]`,
+      `[${nV1 + j}:a]${srcTrim}${tempo}${gainStep(pc.volume)}atrim=0:${m.dur.toFixed(3)},asetpts=N/SR/TB,${delayPart}apad,atrim=0:${dur},asetpts=N/SR/TB[${lbl}]`,
     );
     pipAudioLabels.push(lbl);
   }
@@ -569,14 +574,14 @@ export async function assembleVideo(
     const delayPart = offsetMs > 0 ? `adelay=${offsetMs}:all=1,asetpts=N/SR/TB,` : "";
     const lbl = `ac${i}`;
     filters.push(
-      `[${audioClipBaseIdx + i}:a]${srcTrim}${tempo}atrim=0:${clipDur.toFixed(3)},asetpts=N/SR/TB,${delayPart}apad,atrim=0:${dur},asetpts=N/SR/TB[${lbl}]`,
+      `[${audioClipBaseIdx + i}:a]${srcTrim}${tempo}${gainStep(ac.volume)}atrim=0:${clipDur.toFixed(3)},asetpts=N/SR/TB,${delayPart}apad,atrim=0:${dur},asetpts=N/SR/TB[${lbl}]`,
     );
     audioClipLabels.push(lbl);
   }
 
-  // Ducking: the music bed compresses under the VO and under every audio-only
-  // clip (narration, dialogue bridges). Unmuted shot audio and PiP audio do
-  // NOT key it — sync sound under music should not pump the bed.
+  // Ducking: the music bed compresses under every voice — the VO, audio-only
+  // clips (narration, dialogue bridges) and unmuted V1 shot audio (sound bites,
+  // sync dialogue). PiP audio does not key it.
   let primaryLabel: string | null = null;
   {
     const duckKeys: string[] = [];
@@ -587,11 +592,13 @@ export async function assembleVideo(
         voMix = "vomix";
         duckKeys.push("vokey");
       }
-      for (let i = 0; i < audioClipLabels.length; i++) {
-        const l = audioClipLabels[i];
-        filters.push(`[${l}]asplit=2[${l}m][${l}k]`);
-        audioClipLabels[i] = `${l}m`;
-        duckKeys.push(`${l}k`);
+      for (const labels of [audioClipLabels, segAudioLabels]) {
+        for (let i = 0; i < labels.length; i++) {
+          const l = labels[i];
+          filters.push(`[${l}]asplit=2[${l}m][${l}k]`);
+          labels[i] = `${l}m`;
+          duckKeys.push(`${l}k`);
+        }
       }
     }
     let musicOut = musicLabel;

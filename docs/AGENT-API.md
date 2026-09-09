@@ -25,7 +25,7 @@ preset), an export codec, project-wide looks (color look, LUT, transition,
 fill mode, vignette, grain, captions, watermark), and an audio mode
 (`NONE`, `UPLOAD_AUDIO`, `TTS_FROM_SCRIPT`, `TTS_VERBATIM`) with music and
 voiceover. Its **segments** are the timeline: track 0 is the main sequence in
-`index` order (each with `trimStartS`, `durationS`, `speed`, `muted`,
+`index` order (each with `trimStartS`, `durationS`, `speed`, `muted`, `volume` (gain on the clip's own audio, 1 = as recorded),
 `brightness/contrast/saturation`, `transform`, `effects[]`); tracks ≥ 1 are
 positioned overlays (`offsetS`, `pip`); `audioOnly` segments are unlinked
 audio clips at `offsetS`. **Assets** are media files (uploads, clips, LUTs,
@@ -55,9 +55,10 @@ renders). **Text overlays** and **audio overlays** sit on top.
 
 ### Timeline
 - `POST /api/projects/:id/segments` — add (`source: UPLOAD_VIDEO | UPLOAD_IMAGE_STILL | AI_GENERATED`, `sourceAssetId`, `trimStartS`, `durationS`, `track`, `offsetS`, `audioOnly`).
-- `PATCH /api/projects/:id` with `segments: [{ id, trimStartS, durationS, speed, muted, effects, transform, pip, offsetS, track, … }]` — edit any number at once.
+- `PATCH /api/projects/:id` with `segments: [{ id, trimStartS, durationS, speed, muted, volume, effects, transform, pip, offsetS, track, … }]` — edit any number at once. `volume` (0–4) is the gain on an unmuted shot's own audio or on an audio-only clip; the music bed ducks under every voice (VO, narration clips, unmuted shots).
 - `POST /api/projects/:id/segments/:sid/split { atS }` · `POST …/segments/reorder { order: [ids] }` · `DELETE …/segments/:sid` · `POST …/segments/:sid/recut`.
 - `POST /api/projects/:id/text-overlays` · `/music` · `/audio` (voiceover upload) · `/lut` · `/watermark` · `/generate-script` · `/generate-voiceover` · `/generate-clip`.
+  Note: `/generate-voiceover` files the TTS clip in the media bucket (`library: true`), where the render and the checks never see it — add its asset as an audio-only segment (`offsetS`, `volume`) to put it on the timeline, which is what the MCP `generate_narration` tool does.
 
 ### Checkpoints (server-side undo)
 - `POST /api/projects/:id/checkpoints { label? }` → `{ id, segments, … }`; `GET` lists; `GET …/:cid` includes the captured data.

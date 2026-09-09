@@ -1,6 +1,6 @@
 # Appendix A. MCP Tool Reference
 
-*Generated from the server (42 tools). Regenerate with `pnpm exec tsx scripts/gen-tool-reference.ts`.*
+*Generated from the server (48 tools). Regenerate with `pnpm exec tsx scripts/gen-tool-reference.ts`.*
 
 ## Project
 
@@ -160,6 +160,7 @@ Whisper transcript of an asset's audio with segment and word timings (startS/end
 | `model` | tiny \| base \| small \| medium \| large-v3 | default "base" |
 | `language` | string | optional |
 | `includeWords` | boolean | default true |
+| `force` | boolean | default false; ignore the cached transcript and transcribe again |
 
 ### `analyze_audio`
 
@@ -174,7 +175,7 @@ Integrated loudness (LUFS), true peak and loudness range; silence spans; tempo (
 
 ### `add_segment`
 
-Place an imported asset on the timeline. Track 0 appends to the main sequence; the same asset can be added several times with different trimStartS/durationS to make sub-clips (that is how you cut). Returns the updated project.
+Place an imported asset on the timeline. Track 0 appends to the main sequence; the same asset can be added several times with different trimStartS/durationS to make sub-clips (that is how you cut). The clip's OWN SOUND is off unless muted:false (see check_soundtrack). Returns the updated project.
 
 | Parameter | Type | Notes |
 |---|---|---|
@@ -185,7 +186,8 @@ Place an imported asset on the timeline. Track 0 appends to the main sequence; t
 | `track` | integer | default 0; 0 = main sequence (appended in order); >=1 = positioned overlay |
 | `offsetS` | number | optional |
 | `audioOnly` | boolean | default false |
-| `muted` | boolean | optional; video clips default to muted=true; pass false to keep the clip's sound |
+| `muted` | boolean | optional; SOUND DECISION for a video clip: true (default here) = silent B-roll under music/narration; false = keep the clip's own sound (dialogue, sync sound). Note the raw API keeps sound by default; this tool mutes by default. Ignored for audioOnly clips (always audible). |
+| `volume` | number | optional; gain on this clip's audio — unmuted shots and audio-only clips; 1 = as recorded, 2 ≈ +6 dB, 0.5 ≈ −6 dB (guide §7 Levels) |
 | `imageMotion` | string | optional |
 
 ### `update_segments`
@@ -209,7 +211,7 @@ Cut a segment into two at atS seconds from its own start (on-screen time, not so
 
 ### `reorder_segments`
 
-Give the complete list of segment ids in the new order.
+The main-sequence segment ids in their new order (overlay and audio-only clips may be omitted; they keep their place).
 
 | Parameter | Type | Notes |
 |---|---|---|
@@ -252,7 +254,7 @@ A title / lower-third / disclaimer drawn over the video from startS to endS (nul
 
 ### `apply_edit_list`
 
-Run a sequence of timeline operations as one unit: a checkpoint is taken first and, if any step fails, the project is rolled back to it. Ops: add_segment {assetId, trimStartS?, durationS?, track?, offsetS?, muted?}, update_segment {id, …fields}, delete_segment {id}, split_segment {id, atS}, reorder {orderedIds}, clear_timeline. Ids created by earlier add_segment ops can be referenced as "$1", "$2", … (1-based index of the add op).
+Run a sequence of timeline operations as one unit: a checkpoint is taken first and, if any step fails, the project is rolled back to it. Ops: add_segment {assetId, trimStartS?, durationS?, track?, offsetS?, muted? (video is SILENT unless muted:false), audioOnly?}, update_segment {id, …fields incl. volume}, delete_segment {id}, split_segment {id, atS}, reorder {orderedIds}, clear_timeline. Ids created by earlier add_segment ops can be referenced as "$1", "$2", … (1-based index of the add op).
 
 | Parameter | Type | Notes |
 |---|---|---|
@@ -346,23 +348,21 @@ Technical verification of a rendered file (guide ch.32): probe (duration, size, 
 
 ### `render_draft`
 
-Fast low-resolution (≤640×360) preview of the current timeline with every effect, caption and mix applied — seconds, not minutes, and free. Waits for it by default and returns the draft asset id + file path; then use get_frame / get_contact_sheet / detect_silences on that asset to check the result.
+Fast low-resolution (≤640×360) preview of the current timeline with every effect, caption and mix applied — seconds, not minutes, and free. Waits up to 50 s and returns the draft asset id + file path; a longer render returns {started:true} — call render_status, then draft_result. Then use get_frame / get_contact_sheet / detect_silences on the draft asset to check the result.
 
 | Parameter | Type | Notes |
 |---|---|---|
 | `projectId` | string | required |
 | `wait` | boolean | default true |
-| `timeoutS` | integer | default 300 |
 
 ### `render_final`
 
-Full-quality export at the project's frame and codec. Generates any AI shots / TTS narration first (those cost credits and can take minutes); pure edits of uploaded media assemble in seconds. Returns the final asset id and its file path.
+Full-quality export at the project's frame and codec. Generates any AI shots / TTS narration first (those cost credits and can take minutes); pure edits of uploaded media assemble in seconds to minutes. Waits up to 50 s; a longer render returns {started:true} — poll render_status, then final_result. Returns the final asset id and its file path.
 
 | Parameter | Type | Notes |
 |---|---|---|
 | `projectId` | string | required |
 | `wait` | boolean | default true |
-| `timeoutS` | integer | default 1800 |
 
 ### `render_status`
 
@@ -419,6 +419,65 @@ Step-by-step procedure (tools + the guide's rules) for a common job. Names: see 
 | Parameter | Type | Notes |
 |---|---|---|
 | `name` | string | required |
+
+## Other
+
+### `generate_narration`
+
+Synthesize one narrator line with the TTS model and place it on the timeline as an audio-only clip at offsetS (audible, ducks the music, levelled with volume). One call per line: an ad's six lines become six clips you can move and level separately. Costs credits (~$0.015 per 1k characters). Returns the clip id + duration and the updated project. (The raw route only files the clip in the media bucket, where the render and the checks never see it — this tool puts it on the timeline.)
+
+| Parameter | Type | Notes |
+|---|---|---|
+| `projectId` | string | required |
+| `text` | string | required |
+| `offsetS` | number | required; timeline second the line starts |
+| `voice` | string | optional; ara | eve | rex | sal | leo (Grok Voice TTS); default rex |
+| `instructions` | string | optional; delivery notes the model may honor: pace, tone, mood |
+| `volume` | number | optional; gain on the clip (1 = as synthesized) |
+| `ttsModel` | string | optional |
+
+### `draft_result`
+
+The latest draft preview's asset id, duration, video stream and file path (after render_draft reported stillRendering).
+
+| Parameter | Type | Notes |
+|---|---|---|
+| `projectId` | string | required |
+
+### `final_result`
+
+The latest final export's asset id, duration, video stream, size and file path (after render_final reported stillRendering).
+
+| Parameter | Type | Notes |
+|---|---|---|
+| `projectId` | string | required |
+
+### `check_soundtrack`
+
+The audio map of the timeline (guide ch.27–29 and Part II §7 'Sound'): which layers sound when — unmuted shot audio, narration / audio-only clips, the voiceover, the music bed (volume, ducking, fade), audio overlays — and findings: source narration or music bleeding through unmuted shots under the bed or narration (the classic clash), narration clips overlapping, two music sources at once, music that never ducks or never ends, clips past the end, or a silent film. Run before every render_draft.
+
+| Parameter | Type | Notes |
+|---|---|---|
+| `projectId` | string | required |
+
+### `check_mix_levels`
+
+Measures a rendered file (the latest draft by default) the way a mixer reads it: short-term loudness in the speech windows (narration clips / voiceover) vs the music-only stretches, the gap between them, and the estimated speech-to-music ratio under speech. Targets (guide Part II §7 'Levels', ch.29): speech windows −14…−16 LUFS for a −14 program, music-only stretches 4–8 LU under the speech, ratio under speech ≥ 12 LU (≥ 8 for music-driven pieces). Run after render_draft; fix with balance_music.
+
+| Parameter | Type | Notes |
+|---|---|---|
+| `projectId` | string | required |
+| `assetId` | string | optional; a draft or final asset; default: the latest draft |
+| `musicDriven` | boolean | default false |
+
+### `balance_music`
+
+Sets musicVolume from measured loudness so the bed sits `gapLu` (default 6) below the narration in the stretches where the music plays alone (with ducking it drops a further ~10 LU under speech). Measures the narration sources (audio-only clips / voiceover) and the music asset; reports the numbers it used. Then render_draft and check_mix_levels.
+
+| Parameter | Type | Notes |
+|---|---|---|
+| `projectId` | string | required |
+| `gapLu` | number | default 6 |
 
 ## Resources
 

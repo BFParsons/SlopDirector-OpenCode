@@ -181,6 +181,11 @@ async function main() {
     execFileSync("ffmpeg", ["-hide_banner", "-loglevel", "error", "-y", "-f", "lavfi", "-i", "aevalsrc=if(lt(mod(t\\,0.5)\\,0.03)\\,sin(2*PI*1000*t)\\,0):s=48000", "-t", "12", click]);
     await call("set_music", { projectId: p2.json.id, path: click, volume: 0.5 });
     // voice-vs-music: balance the bed from measured levels, render, read it back
+    // B-roll under narration is muted (RULES 25) — and since sound bites count as
+    // speech windows, an unmuted tone shot would leave no music-only stretch to read.
+    const p2now = await call<{ segments: { id: string; audioOnly: boolean; muted: boolean }[] }>("get_project", { projectId: p2.json.id });
+    const toMute = p2now.json.segments.filter((x) => !x.audioOnly && !x.muted).map((x) => ({ id: x.id, muted: true }));
+    if (toMute.length) await call("update_segments", { projectId: p2.json.id, edits: toMute });
     const nar = await call<{ segments: { id: string; audioOnly: boolean }[] }>("add_segment", { projectId: p2.json.id, assetId: tone2.json.id, audioOnly: true, trimStartS: 0, durationS: 2.5, offsetS: 0 });
     const narId = nar.json.segments.filter((x) => x.audioOnly).at(-1)!.id;
     const bal = await call<{ musicVolume: number; voiceIntegratedLufs: number; musicIntegratedLufs: number; gainDb: number }>("balance_music", { projectId: p2.json.id, gapLu: 6 });

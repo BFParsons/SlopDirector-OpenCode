@@ -127,6 +127,7 @@ export async function projectSnapshot(projectId: string) {
       trimStartS: s.trimStartS,
       imageMotion: s.imageMotion,
       muted: s.muted,
+      volume: s.volume,
       brightness: s.brightness,
       contrast: s.contrast,
       saturation: s.saturation,

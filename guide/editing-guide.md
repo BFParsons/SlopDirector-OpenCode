@@ -540,6 +540,8 @@ Loudness is measured in LUFS (short-term = a 3 s window). The mix's *integrated*
 
 **Rule: Set the bed from measured numbers, not by ear alone.** `musicVolume` is a linear gain: `volume = 10^((voice_LUFS − gap − music_LUFS) / 20)`. Example from the first job: narration −21 LUFS, a hot music track at −9 LUFS with +2 dBTP peaks — 0.3 (−10.5 dB) left the music *above* the voice; a 6 LU gap needs −18 dB, i.e. 0.12. `balance_music` does this arithmetic and sets the value; `check_mix_levels` reads the rendered file back: speech windows, music-only stretches, the gap, and the estimated speech-to-music ratio under speech.
 
+**Rule: Every voice sits with every other voice.** Narration clips, the TTS voiceover and unmuted sound bites (a sync-sound quote, a line of dialogue) are all "speech" to the listener and to `check_mix_levels`, which reads the spoken ranges of unmuted shots as speech windows. Archival bites arrive at any level (−12 to −23 LUFS in one job); level each clip with its `volume` (`update_segments {id, volume}`: 1 = as recorded, 2 ≈ +6 dB, 0.5 ≈ −6 dB, range 0–4) so every voice lands within ~3 LU of the narration *before* normalization lifts the whole program. The music bed ducks under all of them.
+
 **Rule: True peak ≤ −1 dBTP; a source that already clips (+2 dBTP) is attenuated, never trusted.**
 
 Reference points (approximate, practice-derived; verify against each platform's current spec): EBU R128 / ATSC A/85 for the program level; BBC guidance on background sound ≥ 4 LU under speech for accessibility; Netflix dialogue-anchored delivery (dialogue-gated −27 LKFS ±2); common mixing practice of 12–20 dB of music under narration in documentary and 8–12 dB in promos and trailers.

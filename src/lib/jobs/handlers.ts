@@ -446,11 +446,11 @@ async function assembleFinalJob(payload: { projectId: string; draft?: boolean })
     }
     if (s.source === "UPLOAD_VIDEO") {
       if (!s.sourceAsset) throw new Error(`segment ${s.index} has no video`);
-      return { kind: "video", path: absolutePath(s.sourceAsset.path), muted: s.muted, speed: s.speed, durationS: s.durationS, trimStartS: s.trimStartS, adjust: adjustOf(s), transform: asTransform(s.transform), effects: asEffects(s.effects) };
+      return { kind: "video", path: absolutePath(s.sourceAsset.path), muted: s.muted, volume: s.volume, speed: s.speed, durationS: s.durationS, trimStartS: s.trimStartS, adjust: adjustOf(s), transform: asTransform(s.transform), effects: asEffects(s.effects) };
     }
     // AI_GENERATED / UPLOAD_IMAGE_DRIVER -> generated clip (no native audio)
     if (!s.clipAsset) throw new Error(`segment ${s.index} has no clip`);
-    return { kind: "video", path: absolutePath(s.clipAsset.path), muted: s.muted, speed: s.speed, durationS: s.durationS, trimStartS: s.trimStartS, adjust: adjustOf(s), transform: asTransform(s.transform), effects: asEffects(s.effects) };
+    return { kind: "video", path: absolutePath(s.clipAsset.path), muted: s.muted, volume: s.volume, speed: s.speed, durationS: s.durationS, trimStartS: s.trimStartS, adjust: adjustOf(s), transform: asTransform(s.transform), effects: asEffects(s.effects) };
   };
 
   // V1 = the main contiguous sequence; V2 = positioned PiP overlays. Audio-only
@@ -472,6 +472,7 @@ async function assembleFinalJob(payload: { projectId: string; draft?: boolean })
     .filter((s) => s.audioOnly && !s.library && s.sourceAsset)
     .map((s) => ({
       path: absolutePath(s.sourceAsset!.path),
+      volume: s.volume,
       offsetS: s.offsetS ?? 0,
       trimStartS: s.trimStartS ?? 0,
       durationS: s.durationS,

@@ -39,7 +39,7 @@ Numbers are for 30 fps. "ch." = chapter of guide/editing-guide.md (read_guide).
 28. Narration is an audio-only clip (or the voiceover track), never an unmuted shot. One narrator at a time.
 29. One music source: the bed via `set_music` (ducks under narration and voiceover, fades out); a YouTube import is an overlay until it is made the bed.
 30. `check_soundtrack` before every `render_draft`; `verify_export` for loudness after.
-31. Levels (Part II §7 "Levels"): speech is the anchor at −14…−16 LUFS short-term (−14 program); music alone 4–8 LU under the speech, ≥ 12 LU under it while the voice speaks (≥ 8 in music-driven pieces; < 6 hurts intelligibility). Set `musicVolume` with `balance_music` (measured, not guessed) and read the draft back with `check_mix_levels`. True peak ≤ −1 dBTP.
+31. Levels (Part II §7 "Levels"): speech is the anchor at −14…−16 LUFS short-term (−14 program); music alone 4–8 LU under the speech, ≥ 12 LU under it while the voice speaks (≥ 8 in music-driven pieces; < 6 hurts intelligibility). Set `musicVolume` with `balance_music` (measured, not guessed) and read the draft back with `check_mix_levels`. Every voice — narration clips, the VO and unmuted sound bites — should sit within ~3 LU of each other: level a clip with its `volume` (1 = as recorded, 2 ≈ +6 dB). The bed ducks under all of them. True peak ≤ −1 dBTP.
 
 **Short-form (ch.36)**
 21. The first second shows what it is; the first three give a reason to stay. Something changes every 1–3 s. Open on the strongest frame.

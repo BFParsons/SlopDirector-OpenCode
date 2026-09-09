@@ -115,6 +115,7 @@ export async function PATCH(request: Request, { params }: Ctx) {
           if (s.trimStartS !== undefined) data.trimStartS = s.trimStartS;
           if (s.imageMotion !== undefined) data.imageMotion = s.imageMotion;
           if (s.muted !== undefined) data.muted = s.muted;
+          if (s.volume !== undefined) data.volume = s.volume;
           if (s.brightness !== undefined) data.brightness = s.brightness;
           if (s.contrast !== undefined) data.contrast = s.contrast;
           if (s.saturation !== undefined) data.saturation = s.saturation;

@@ -102,6 +102,7 @@ export interface Segment {
   sourceDurationS: number | null;
   speed: number;
   muted: boolean;
+  volume: number;
   sourceAssetId: string | null;
   clipAssetId: string | null;
   effects: { kind: string; enabled?: boolean }[] | null;
@@ -196,6 +197,7 @@ export function summarize(p: Snapshot) {
       sourceDurationS: s.sourceDurationS,
       speed: s.speed,
       muted: s.muted,
+      volume: s.volume,
       offsetS: s.offsetS,
       effects: (s.effects ?? []).filter((e) => e.enabled !== false).map((e) => e.kind),
       hasTransform: !!s.transform,

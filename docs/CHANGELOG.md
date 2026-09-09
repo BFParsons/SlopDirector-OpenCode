@@ -5,6 +5,30 @@ Notable changes, newest first. See [DEPENDENCIES.md](DEPENDENCIES.md) for setup 
 
 ## 2026-09 — no-storyboard fork
 
+- **Per-clip gain, and sound bites are voices too.** The second real job (a 30 s attack ad
+  cut from archival Nixon footage: five sync-sound bites, six TTS narrator lines, a music
+  bed) showed three gaps. There was no way to level a clip: the narrator lines rendered at
+  −26…−30 LUFS while two bites sat at −12, and nothing but the source file's own level
+  decided it. Segments now carry `volume` (0–4, 1 = as recorded; `Segment.volume`, forward
+  migration, `PATCH /api/projects/:id segments[]`, `POST …/segments`, MCP `update_segments`
+  / `add_segment` / edit-list ops) applied as a `volume=` step on an unmuted shot's audio,
+  a PiP clip's audio and an audio-only clip. The music bed keyed its ducking only from the
+  VO and narration clips, so it never dropped under a sound bite — unmuted V1 shot audio
+  now keys the sidechain too. And `check_soundtrack` called every bite over the bed an
+  error (it was written against B-roll bleed); a spoken unmuted shot over the bed *alone*
+  is now an `info` "sound bite over the bed" (still an error under narration), and
+  `check_mix_levels` reads the spoken ranges of unmuted shots as speech windows, so the
+  meter judges bites against the narration. RULES.md 31 and the guide's "Levels" carry the
+  rule: every voice within ~3 LU of each other, levelled with `volume`.
+  Also found: `POST …/generate-voiceover` files its TTS clip in the media bucket
+  (`library: true`), so the six narrator lines of that ad were silently absent from every
+  render and the "narration" the meter read was the bed. New MCP tool `generate_narration`
+  {text, offsetS, voice?, instructions?, volume?} synthesizes a line and places it on the
+  timeline as an audible audio-only clip (48 tools now); `check_mix_levels` says so when a
+  voice covers every second and there is no music-only stretch to read. The job itself:
+  `~/Videos/nixon-attack-ad/` (31 s, 1080p, −14.7 LUFS, −1.9 dBTP; five archival bites, six
+  narrator lines, Audionautix bed, seven title cards) with CREDITS.txt.
+
 - **Speed loops: one harness job 978 s → 169 s (5.8×).**
   `tests/bench/job.ts` times a complete agent job over one MCP connection — perceive 8 clips
   (contact sheets, scenes, silences), transcribe a 60 s narration, cut 21 shots + 3 narration

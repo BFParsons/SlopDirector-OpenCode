@@ -1,6 +1,6 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { api, type Snapshot, assetInfo, summarize } from "../client";
+import { api, type Snapshot, assetInfo, snapshot, summarize } from "../client";
 import { guarded, text } from "../format";
 
 export function registerMediaTools(server: McpServer) {
@@ -90,6 +90,50 @@ export function registerMediaTools(server: McpServer) {
       else if (path) await api.upload(`/api/projects/${projectId}/lut`, path);
       else throw new Error("give a .cube path or remove=true");
       return text(summarize(await api.get<Snapshot>(`/api/projects/${projectId}`)));
+    }),
+  );
+
+  server.registerTool(
+    "generate_narration",
+    {
+      title: "Generate a narration line (TTS)",
+      description:
+        "Synthesize one narrator line with the TTS model and place it on the timeline as an audio-only clip at offsetS (audible, ducks the music, levelled with volume). One call per line: an ad's six lines become six clips you can move and level separately. Costs credits (~$0.015 per 1k characters). Returns the clip id + duration and the updated project. (The raw route only files the clip in the media bucket, where the render and the checks never see it — this tool puts it on the timeline.)",
+      inputSchema: {
+        projectId: z.string(),
+        text: z.string().min(1).max(2000),
+        offsetS: z.number().min(0).describe("timeline second the line starts"),
+        voice: z.string().optional().describe("ara | eve | rex | sal | leo (Grok Voice TTS); default rex"),
+        instructions: z.string().max(500).optional().describe("delivery notes the model may honor: pace, tone, mood"),
+        volume: z.number().min(0).max(4).optional().describe("gain on the clip (1 = as synthesized)"),
+        ttsModel: z.string().optional(),
+      },
+    },
+    guarded(async ({ projectId, text: line, offsetS, voice, instructions, volume, ttsModel }) => {
+      const before = await snapshot(projectId);
+      const known = new Set(before.segments.map((x) => x.id));
+      const after = await api.post<Snapshot>(`/api/projects/${projectId}/generate-voiceover`, {
+        ttsModel: ttsModel ?? "x-ai/grok-voice-tts-1.0",
+        voice: voice ?? "rex",
+        text: line,
+        ...(instructions ? { instructions } : {}),
+      });
+      const bucket = after.segments.find((x) => !known.has(x.id) && x.audioOnly);
+      if (!bucket?.sourceAssetId) throw new Error("TTS produced no clip");
+      const placed = await api.post<Snapshot>(`/api/projects/${projectId}/segments`, {
+        source: "UPLOAD_VIDEO",
+        sourceAssetId: bucket.sourceAssetId,
+        audioOnly: true,
+        muted: false,
+        trimStartS: 0,
+        durationS: bucket.durationS,
+        offsetS,
+        ...(volume != null ? { volume } : {}),
+      });
+      await api.del(`/api/projects/${projectId}/segments/${bucket.id}`).catch(() => null);
+      const clip = placed.segments.find((x) => x.audioOnly && !x.library && x.sourceAssetId === bucket.sourceAssetId && Math.abs(x.offsetS - offsetS) < 1e-6);
+      const s = await snapshot(projectId);
+      return text({ clipId: clip?.id ?? null, assetId: bucket.sourceAssetId, durationS: bucket.durationS, offsetS, endS: +(offsetS + bucket.durationS).toFixed(3), text: line, project: summarize(s) });
     }),
   );
 }

@@ -485,8 +485,12 @@ export async function soundtrackReport(projectId: string) {
   for (const x of shotAudio) {
     if (!x.hasSound) continue;
     const underNarration = narration.some((n) => overlaps(n, x)) || (vo?.ready ?? false);
-    if (x.spokenWords && x.spokenWords > 0 && (underNarration || underBed)) {
-      findings.push({ severity: "error", rule: "§7 Sound: B-roll under narration or music is muted", segmentId: x.id, index: x.index, atS: x.startS, message: `shot ${x.index} (${x.startS}–${x.endS}s) is unmuted and its source has speech (${x.spokenWords} words) ${underNarration ? "under the narration" : "under the music bed"} — two voices / the source's narration bleeds through`, fix: "update_segments muted:true (keep sound only where the sound is the point)" });
+    if (x.spokenWords && x.spokenWords > 0 && underNarration) {
+      findings.push({ severity: "error", rule: "§7 Sound: B-roll under narration or music is muted", segmentId: x.id, index: x.index, atS: x.startS, message: `shot ${x.index} (${x.startS}–${x.endS}s) is unmuted and its source has speech (${x.spokenWords} words) under the narration — two voices / the source's narration bleeds through`, fix: "update_segments muted:true (keep sound only where the sound is the point), or move the narration off it" });
+    } else if (x.spokenWords && x.spokenWords > 0 && underBed) {
+      // A sound bite: speech that IS the content, over the bed alone. Not a clash —
+      // the bed ducks under it like under narration — but it must be levelled.
+      findings.push({ severity: "info", rule: "§7 Sound: sound bite over the bed", segmentId: x.id, index: x.index, atS: x.startS, message: `shot ${x.index} (${x.startS}–${x.endS}s) is a sound bite (${x.spokenWords} words) over the music bed — the bed ducks under it; level it against the narration with the clip's volume (check_mix_levels reads bites as speech windows)`, fix: "update_segments volume:<gain> if the bite sits far from the narration level" });
     } else if (underNarration) {
       findings.push({ severity: "warn", rule: "§7 Sound: sync sound under narration", segmentId: x.id, index: x.index, atS: x.startS, message: `shot ${x.index} (${x.startS}–${x.endS}s) is unmuted with sound in its source while narration plays`, fix: "mute it, or lower it — the narration must stay intelligible (rule 20)" });
     } else if (underBed && x.spokenWords == null) {
@@ -542,6 +546,11 @@ const pct = (xs: number[], p: number) => (xs.length ? +[...xs].sort((x, y) => x 
 /** Estimated gain reduction of the bed's sidechain compressor (threshold ≈ −34 dBFS, ratio 8) for a voice at `voiceLufs`. */
 const duckDepthLu = (voiceLufs: number) => +Math.max(0, Math.min(20, (voiceLufs - -34) * (7 / 8))).toFixed(1);
 
+/**
+ * Where a voice is meant to be heard: narration clips, the voiceover's spoken
+ * ranges, and — sound bites — the spoken ranges of unmuted main-sequence shots,
+ * mapped from source time to the timeline.
+ */
 async function speechWindows(s: Snapshot): Promise<{ startS: number; endS: number }[]> {
   const wins: { startS: number; endS: number }[] = s.segments.filter((x) => x.audioOnly && !x.library).map((x) => ({ startS: x.offsetS, endS: +(x.offsetS + x.durationS).toFixed(3) }));
   if (s.audioMode !== "NONE" && s.voiceover?.assetId) {
@@ -552,7 +561,31 @@ async function speechWindows(s: Snapshot): Promise<{ startS: number; endS: numbe
       /* no speech ranges */
     }
   }
-  return wins;
+  let t = 0;
+  const shots = mainSequence(s).map((x) => {
+    const r = { x, startS: t };
+    t += x.durationS;
+    return r;
+  });
+  await Promise.all(
+    shots
+      .filter(({ x }) => !x.muted && x.sourceAssetId)
+      .map(async ({ x, startS }) => {
+        try {
+          const sp = await api.get<{ speech: Range[] }>(`/api/assets/${x.sourceAssetId}/silences?noise=-35&min=0.4`);
+          const src = sourceRange(x);
+          const speed = x.speed || 1;
+          for (const r of sp.speech) {
+            const a = Math.max(r.startS, src.inS);
+            const b = Math.min(r.endS, src.outS);
+            if (b - a > 0.3) wins.push({ startS: +(startS + (a - src.inS) / speed).toFixed(3), endS: +(startS + (b - src.inS) / speed).toFixed(3) });
+          }
+        } catch {
+          /* no speech ranges */
+        }
+      }),
+  );
+  return wins.sort((a, b) => a.startS - b.startS);
 }
 
 export async function mixLevels(projectId: string, assetId?: string, musicDriven = false) {
@@ -591,6 +624,7 @@ export async function mixLevels(projectId: string, assetId?: string, musicDriven
   const findings: Finding[] = [];
   const minSmr = musicDriven ? 8 : 12;
   if (!wins.length) findings.push({ severity: "info", rule: "§7 Levels", message: "no narration / voiceover on the timeline — nothing to balance against" });
+  if (wins.length && musicMed == null) findings.push({ severity: "info", rule: "§7 Levels", message: "no music-only stretch to measure — a voice is on nearly every second, so the bed's gap and the ratio under speech are unknown here; judge the bed by ear on the draft, or leave a music-only beat" });
   if (speechMed != null && speechMed < -17) findings.push({ severity: "warn", rule: "§7 Levels: speech is the anchor (−14…−16 LUFS short-term in a −14 program)", message: `speech windows sit at ${speechMed} LUFS`, fix: "the voice is quiet: lower musicVolume so loudnorm lifts the voice, or raise voVolume (voiceover track)" });
   if (hasMusic && gap != null && gap < 4) findings.push({ severity: gap < 0 ? "error" : "warn", rule: "§7 Levels: music-only stretches 4–8 LU under the speech", message: `music-only stretches (${musicMed} LUFS) are ${gap >= 0 ? `only ${gap}` : `${-gap} LU ABOVE`} ${gap >= 0 ? "LU under" : ""} the speech windows (${speechMed} LUFS)`, fix: "balance_music (gapLu 6), then re-render" });
   if (hasMusic && gap != null && gap > 12) findings.push({ severity: "info", rule: "§7 Levels", message: `music-only stretches are ${gap} LU under the speech — the bed may be inaudible between lines`, fix: "balance_music with a smaller gapLu (4)" });
