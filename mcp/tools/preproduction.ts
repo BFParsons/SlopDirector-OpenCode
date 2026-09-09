@@ -9,6 +9,8 @@ import { z } from "zod";
 import { briefSchema, planSchema } from "../../src/lib/validation/brief";
 import { api } from "../client";
 import { nextQuestion } from "../interview";
+import { styleText } from "../guide";
+import { CATEGORIES, STYLES, styleById, stylesFor } from "../../src/lib/styles";
 import { guarded, image, text } from "../format";
 
 type Check = { pass: boolean; findings: { severity: string; rule: string; message: string; ref?: string }[]; summary: Record<string, unknown> };
@@ -23,6 +25,39 @@ export function registerPreproductionTools(server: McpServer) {
       inputSchema: { request: z.string().min(1).max(4000).describe("what the person asked for, verbatim"), answers: z.record(z.string(), z.unknown()).default({}).describe("answers so far, keyed by question id") },
     },
     guarded(async ({ request, answers }) => text(nextQuestion(request, answers))),
+  );
+
+  server.registerTool(
+    "list_styles",
+    {
+      title: "List directing styles",
+      description:
+        "The directing styles the interview can offer — real filmmakers and houses (Adam Curtis, Ken Burns, Ridley Scott, Michel Gondry, Wes Anderson, Frank Capra, Mark Woollen, MrBeast…) translated into parameters the harness checks (ASL range, shot floor, transitions, narration policy / voice / words-per-minute, music policy / kind, sync policy, text, stills, interviews, beat-cut) and prose the agent follows (get_style). Pass a genre / form to see which fit it (all otherwise), grouped by category.",
+      inputSchema: { genre: z.string().max(200).optional().describe("the brief's genre / form, e.g. 'scripted historical documentary', 'attack ad', 'music video', 'trailer', 'vlog'") },
+      annotations: { readOnlyHint: true },
+    },
+    guarded(async ({ genre }) => {
+      const fits = genre ? new Set(stylesFor(genre).map((x) => x.id)) : null;
+      const rows = STYLES.filter((x) => !fits || fits.has(x.id)).map((x) => ({ id: x.id, name: x.name, category: x.category, oneLine: x.oneLine, params: x.params }));
+      return text({ genre: genre ?? null, count: rows.length, categories: CATEGORIES.map((c) => ({ ...c, styles: rows.filter((r) => r.category === c.id).map((r) => r.id) })).filter((c) => c.styles.length), styles: rows });
+    }),
+  );
+
+  server.registerTool(
+    "get_style",
+    {
+      title: "Read a directing style",
+      description:
+        "The full instructions for a directing style (guide/styles/<id>.md): the signature, how a scene is built, the cut (numbers), narration (voice, person, density, sentence shapes), sound, picture and text, what not to do, the harness parameters, and how to apply it with SlopStudio's tools. Read it before writing a plan for a brief that names the style.",
+      inputSchema: { id: z.string().min(1).max(60).describe("a style id from list_styles, e.g. adam-curtis") },
+      annotations: { readOnlyHint: true },
+    },
+    guarded(async ({ id }) => {
+      const st = styleById(id);
+      const doc = styleText(id);
+      if (!st && !doc) throw new Error(`unknown style "${id}" — list_styles has the registry`);
+      return text({ id, name: st?.name ?? doc?.title ?? id, category: st?.category ?? null, oneLine: st?.oneLine ?? null, params: st?.params ?? null, text: doc?.text ?? null });
+    }),
   );
 
   server.registerTool(

@@ -1,6 +1,6 @@
 # Appendix A. MCP Tool Reference
 
-*Generated from the server (64 tools). Regenerate with `pnpm exec tsx scripts/gen-tool-reference.ts`.*
+*Generated from the server (66 tools). Regenerate with `pnpm exec tsx scripts/gen-tool-reference.ts`.*
 
 ## Project
 
@@ -310,6 +310,7 @@ Shot count, average/median shot length, spread, min/max and a duration histogram
 |---|---|---|
 | `projectId` | string | required |
 | `genre` | string | optional |
+| `style` | string | optional; a directing style id (list_styles); its pacing norm replaces the genre's. Default: the brief's style, if any |
 
 ### `check_cuts`
 
@@ -487,6 +488,22 @@ The pre-production interview, one question at a time with multiple choice — li
 |---|---|---|
 | `request` | string | required; what the person asked for, verbatim |
 | `answers` | object | default {}; answers so far, keyed by question id |
+
+### `list_styles`
+
+The directing styles the interview can offer — real filmmakers and houses (Adam Curtis, Ken Burns, Ridley Scott, Michel Gondry, Wes Anderson, Frank Capra, Mark Woollen, MrBeast…) translated into parameters the harness checks (ASL range, shot floor, transitions, narration policy / voice / words-per-minute, music policy / kind, sync policy, text, stills, interviews, beat-cut) and prose the agent follows (get_style). Pass a genre / form to see which fit it (all otherwise), grouped by category.
+
+| Parameter | Type | Notes |
+|---|---|---|
+| `genre` | string | optional; the brief's genre / form, e.g. 'scripted historical documentary', 'attack ad', 'music video', 'trailer', 'vlog' |
+
+### `get_style`
+
+The full instructions for a directing style (guide/styles/<id>.md): the signature, how a scene is built, the cut (numbers), narration (voice, person, density, sentence shapes), sound, picture and text, what not to do, the harness parameters, and how to apply it with SlopStudio's tools. Read it before writing a plan for a brief that names the style.
+
+| Parameter | Type | Notes |
+|---|---|---|
+| `id` | string | required; a style id from list_styles, e.g. adam-curtis |
 
 ### `set_brief`
 

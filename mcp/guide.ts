@@ -31,7 +31,7 @@ export interface Section {
 const slug = (s: string) =>
   s.toLowerCase().replace(/\\\./g, ".").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60);
 
-let cache: { sections: Section[]; rules: string; playbooks: Map<string, { name: string; title: string; text: string }> } | null = null;
+let cache: { sections: Section[]; rules: string; playbooks: Map<string, { name: string; title: string; text: string }>; styles: Map<string, { id: string; title: string; text: string }> } | null = null;
 
 export function loadGuide() {
   if (cache) return cache;
@@ -91,7 +91,17 @@ export function loadGuide() {
       playbooks.set(name, { name, title, text: t });
     }
   }
-  cache = { sections, rules, playbooks };
+  // Directing styles (guide/styles/<id>.md; parameters in src/lib/styles).
+  const styles = new Map<string, { id: string; title: string; text: string }>();
+  const stDir = path.join(dir, "styles");
+  if (existsSync(stDir)) {
+    for (const f of readdirSync(stDir).filter((x) => x.endsWith(".md") && x !== "README.md").sort()) {
+      const t = readFileSync(path.join(stDir, f), "utf8");
+      const id = f.replace(/\.md$/, "");
+      styles.set(id, { id, title: /^# (.+)/m.exec(t)?.[1] ?? id, text: t });
+    }
+  }
+  cache = { sections, rules, playbooks, styles };
   return cache;
 }
 
@@ -258,4 +268,9 @@ export function registerGuide(server: McpServer) {
       };
     },
   );
+}
+
+/** The prose of a directing style (guide/styles/<id>.md), or null. */
+export function styleText(id: string): { id: string; title: string; text: string } | null {
+  return loadGuide().styles.get(id) ?? null;
 }

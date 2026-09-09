@@ -5,6 +5,23 @@ Notable changes, newest first. See [DEPENDENCIES.md](DEPENDENCIES.md) for setup 
 
 ## 2026-09 — no-storyboard fork
 
+- **Directing styles.** The interview asks "Whose eye?" after the genre and offers directing
+  styles fashioned after real filmmakers and houses — 43 of them across nine categories
+  (documentary: Curtis, Moore, Morris, Burns, Herzog, Wiseman, Jennings, LEMMiNO; advertising:
+  Ridley Scott, Jonze, Glazer, Riney; music video: Gondry, Hype Williams, Corbijn, Cunningham;
+  dramatic scripted: Anderson, Nolan, Villeneuve, Wright, Malick; political and propaganda:
+  Riefenstahl, Capra, Eisenstein, Schwartz, the Lincoln Project; trailers: Woollen, Buddha
+  Jones, AV Squad, A24, Bimpel; essay: Zhou, Harris; comedy: Guest; YouTube: MrBeast, Neistat,
+  MKBHD, Tom Scott, Veritasium, Vsauce, Rober, Chamberlain, McKinnon). Each is a file in
+  `guide/styles/` (signature · structure · the cut · narration · sound · picture and text ·
+  do not · harness parameters · applying it in SlopStudio) plus a registry entry in
+  `src/lib/styles/index.ts` with the mechanical parameters (ASL range, minimum shot,
+  transitions, narration policy / voice / words-per-minute, music policy / kind, sync policy,
+  text, stills, interviews, beat-cut). The brief stores `production.style.id`; `check_plan`
+  holds the plan to the parameters (pacing, shot floor, narration, music, text, transitions,
+  sync, density, beat-cut), `pacing_report` takes the style's norm, `check_soundtrack`
+  its music policy; `list_styles` / `get_style` expose the registry and the prose; the
+  preproduction prompt and playbook read the style first; RULES 36.
 - **The harness now checks that the score is really there.** A render could pass
   `verify_export` (loudness, peaks, silence) with its music bed missing: nothing compared
   the file with what the project — or the brief — asked for. `verify_export` on a draft or

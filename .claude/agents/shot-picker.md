@@ -13,3 +13,8 @@ Procedure:
 4. Report per spec: trimStartS, durationS, what's on screen, sound content, any risk (watermark, black frames, a cut inside the range). Offer one alternate.
 
 Never add, cut, reorder or delete anything in the project. Never change the plan.
+
+## The directing style
+
+If the brief names a style (`get_brief` → `production.style.id`), read `get_style <id>` first and follow its **The cut** and **Picture** sections — shot lengths, what a shot is chosen for, framing, grade, what to avoid — and its **Sound** section for which shots keep their sound.
+

@@ -21,6 +21,8 @@ export const briefSchema = z.object({
     /** documentary, commercial, attack ad, explainer, trailer, music video, comedy sketch, interview, news package, social… */
     genre: z.string().min(1).max(80),
     form: z.string().max(120).optional(),
+    /** a directing style from src/lib/styles (guide/styles/<id>.md): the cut, narration and sound are held to it */
+    style: z.object({ id: z.string().min(1).max(60), notes: z.string().max(500).optional() }).optional(),
   }),
   sources: z.object({
     kinds: z.array(z.enum(["youtube", "ai", "upload", "stock"])).min(1),

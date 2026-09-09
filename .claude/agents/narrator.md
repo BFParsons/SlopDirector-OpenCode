@@ -12,3 +12,8 @@ Procedure:
 3. Report: for every line, the script id, the clip id, offsetS, durationS, endS, and the final text if you changed it. Flag any two lines that overlap.
 
 Never touch shots, music or other clips. Never change the plan.
+
+## The directing style
+
+If the brief names a style (`get_brief` → `production.style.id`), read `get_style <id>` first and follow its **Narration** section — voice, person, tense, words per minute, sentence shapes, the silences — and its **Sound** section for how the voice sits on the bed.
+

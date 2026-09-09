@@ -7,6 +7,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { api, type Segment, type Snapshot, assetInfo, snapshot } from "../client";
 import { guarded, text } from "../format";
+import { styleById } from "../../src/lib/styles";
 
 export const FPS = 30;
 const FRAME = 1 / FPS;
@@ -51,7 +52,7 @@ const GENRE_ASL: Record<string, [number, number]> = {
   commercial: [1.5, 3],
 };
 
-export function pacingReport(s: Snapshot, genre?: string) {
+export function pacingReport(s: Snapshot, genre?: string, styleId?: string) {
   const segs = mainSequence(s);
   const d = segs.map((x) => x.durationS);
   const st = stats(d);
@@ -72,13 +73,21 @@ export function pacingReport(s: Snapshot, genre?: string) {
   if (st.count >= 4 && st.aslS > 0 && st.stdevS / st.aslS < 0.15)
     findings.push({ severity: st.count >= 6 ? "warn" : "info", rule: "ch16 vary shot duration deliberately", message: `${st.count} shots with near-uniform durations (stdev ${st.stdevS}s on ASL ${st.aslS}s): reads as mechanical unless the sameness is the point — break the pattern at least once` });
   let comparison: string | null = null;
-  if (genre) {
+  const style = styleById(styleId);
+  if (style) {
+    const [lo, hi] = style.params.aslS;
+    comparison = st.aslS < lo ? `faster than ${style.name}'s norm (${lo}–${hi} s)` : st.aslS > hi ? `slower than ${style.name}'s norm (${lo}–${hi} s)` : `inside ${style.name}'s norm (${lo}–${hi} s)`;
+    const floor = style.params.minShotS;
+    segs.forEach((x, i) => {
+      if (x.durationS < floor && x.durationS >= 10 * FRAME) findings.push({ severity: "warn", rule: `style: ${style.name} shot floor`, segmentId: x.id, index: i, message: `shot ${i} is ${x.durationS.toFixed(2)} s; ${style.name} does not cut under ${floor} s` });
+    });
+  } else if (genre) {
     const ref = GENRE_ASL[genre];
     if (ref) {
       comparison = st.aslS < ref[0] ? `faster than the ${genre} norm (${ref[0]}–${ref[1]} s)` : st.aslS > ref[1] ? `slower than the ${genre} norm (${ref[0]}–${ref[1]} s)` : `inside the ${genre} norm (${ref[0]}–${ref[1]} s)`;
     }
   }
-  return { ...st, histogram: buckets, genre: genre ?? null, comparison, references: GENRE_ASL, findings };
+  return { ...st, histogram: buckets, genre: genre ?? null, style: style ? { id: style.id, name: style.name, aslS: style.params.aslS, minShotS: style.params.minShotS } : null, comparison, references: GENRE_ASL, findings };
 }
 
 type Transcript = { words: { startS: number; endS: number; text: string }[]; segments: { startS: number; endS: number; text: string }[] };
@@ -203,10 +212,10 @@ export function registerVerifyTools(server: McpServer) {
     {
       title: "Pacing report",
       description: "Shot count, average/median shot length, spread, min/max and a duration histogram for the main sequence (guide ch.16), with flags for sub-10-frame shots and near-uniform pacing, and a comparison against a genre norm if you name one (classical, drama, documentary, comedy, action, music_video, social, commercial).",
-      inputSchema: { projectId: z.string(), genre: z.string().optional() },
+      inputSchema: { projectId: z.string(), genre: z.string().optional(), style: z.string().optional().describe("a directing style id (list_styles); its pacing norm replaces the genre's. Default: the brief's style, if any") },
       annotations: { readOnlyHint: true },
     },
-    guarded(async ({ projectId, genre }) => text(pacingReport(await snapshot(projectId), genre))),
+    guarded(async ({ projectId, genre, style }) => text(pacingReport(await snapshot(projectId), genre, style ?? (await briefInfo(projectId)).styleId ?? undefined))),
   );
 
   server.registerTool(
@@ -663,12 +672,13 @@ export async function mixLevels(projectId: string, assetId?: string, musicDriven
 // ---------------------------------------------------------------------------
 type BriefMusic = { wanted: boolean; brief?: string } | undefined;
 
-async function briefMusic(projectId: string): Promise<BriefMusic> {
+/** What the brief says about music and the directing style (both optional; null brief → nothing). */
+async function briefInfo(projectId: string): Promise<{ music: BriefMusic; styleId: string | null }> {
   try {
-    const r = await api.get<{ brief: { music?: { wanted: boolean; brief?: string } } | null }>(`/api/projects/${projectId}/brief`);
-    return r.brief?.music ?? undefined;
+    const r = await api.get<{ brief: { music?: { wanted: boolean; brief?: string }; production?: { style?: { id: string } } } | null }>(`/api/projects/${projectId}/brief`);
+    return { music: r.brief?.music ?? undefined, styleId: r.brief?.production?.style?.id ?? null };
   } catch {
-    return undefined;
+    return { music: undefined, styleId: null };
   }
 }
 
@@ -682,9 +692,12 @@ const fmtRange = (r: { startS: number; endS: number }) => `${r.startS.toFixed(1)
  */
 export async function musicBedSettings(s: Snapshot, projectId: string): Promise<Finding[]> {
   const findings: Finding[] = [];
-  const wanted = await briefMusic(projectId);
+  const { music: wanted, styleId } = await briefInfo(projectId);
+  const style = styleById(styleId);
   const set = !!s.musicAssetId;
   const audible = set && !s.musicMuted && s.musicVolume > 0.02;
+  if (style?.params.music === "none" && set) findings.push({ severity: "warn", rule: `style: ${style.name}`, message: `${style.name} uses no score, but a music bed is set on the project`, fix: "drop the bed, or change the brief's style" });
+  if (style?.params.music === "required" && !set) findings.push({ severity: "warn", rule: `style: ${style.name}`, message: `${style.name} runs on music (${style.params.musicKind}); no bed is set`, fix: "set_music then balance_music" });
   if (!set) {
     if (wanted?.wanted)
       findings.push({

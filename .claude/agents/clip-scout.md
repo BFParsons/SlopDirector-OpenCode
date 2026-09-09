@@ -13,3 +13,8 @@ Procedure:
 4. Report, and nothing else: the clip id, the chosen video (id, title, channel, duration), the imported segment id and asset id, the wanted moment as source seconds (in/out, with a 0.2–0.5 s handle), what is on screen at those seconds, sound (speech? music? clean?), and the alternates. If the moment is not in the window, import another window and try once more; if it is not on YouTube, say so.
 
 Never cut, reorder, delete or mute anything in the project's sequence. Never change the plan.
+
+## The directing style
+
+If the brief names a style (`get_brief` → `production.style.id`), read `get_style <id>` first and follow its **Picture** section — which sources the style is built from, what textures and eras it wants — and its **Applying it in SlopStudio** notes for the clip list (queries, sections, what to fetch).
+

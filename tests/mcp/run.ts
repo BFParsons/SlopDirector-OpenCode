@@ -228,6 +228,13 @@ async function main() {
     const st3 = await call<{ pass: boolean; findings: { severity: string; rule: string }[] }>("check_soundtrack", { projectId: p3.json.id });
     check("check_soundtrack errors when the brief asks for music and no bed is set", !st3.json.pass && st3.json.findings.some((f) => f.severity === "error" && /brief asked for/.test(f.rule)));
     await call("delete_project", { projectId: p3.json.id });
+    // directing styles: the registry, the prose, and check_plan holding a plan to a style
+    const ls = await call<{ count: number; categories: { id: string; styles: string[] }[]; styles: { id: string; params: { narration: string } }[] }>("list_styles", {});
+    check("list_styles lists the registry by category", ls.json.count >= 40 && ls.json.categories.length >= 8 && ls.json.styles.some((x) => x.id === "frederick-wiseman" && x.params.narration === "none"), `${ls.json.count} styles, ${ls.json.categories.length} categories`);
+    const lsDoc = await call<{ count: number; styles: { id: string }[] }>("list_styles", { genre: "scripted historical documentary" });
+    check("list_styles filters by genre", lsDoc.json.count < ls.json.count && lsDoc.json.styles.some((x) => x.id === "adam-curtis") && !lsDoc.json.styles.some((x) => x.id === "hype-williams"), `${lsDoc.json.count} fit a documentary`);
+    const gs = await call<{ id: string; name: string; text: string | null; params: { aslS: [number, number] } }>("get_style", { id: "adam-curtis" });
+    check("get_style returns the prose and the parameters", gs.json.name === "Adam Curtis" && /## The cut/.test(gs.json.text ?? "") && gs.json.params.aslS[0] === 4, (gs.json.text ?? "").length + " chars");
     const plan = {
       logline: "The tone clip, exposed.",
       beats: [{ id: "hook", title: "Hook", startS: 0, endS: 4 }, { id: "case", title: "The case", startS: 4, endS: 10 }, { id: "sting", title: "Sting", startS: 10, endS: 12 }],
@@ -249,6 +256,15 @@ async function main() {
     check("check_plan: AI length warning + cost, no errors", sp.json.check.pass && sp.json.check.findings.some((f) => /5 s clips/.test(f.message)) && sp.json.check.summary.aiCostUsd > 0, sp.json.check.findings.map((f) => f.message.slice(0, 50)).join(" | "));
     const bad = await call<{ check: { pass: boolean; findings: { severity: string; message: string }[] } }>("set_plan", { projectId: p2.json.id, plan: { ...plan, shots: plan.shots.map((x) => (x.id === "s1" ? { ...x, durationS: 9 } : x)) } });
     check("check_plan flags a length that misses the brief", !bad.json.check.pass && bad.json.check.findings.some((f) => f.severity === "error" && /add up to 17/.test(f.message)), bad.json.check.findings.filter((f) => f.severity === "error").map((f) => f.message).join(" | "));
+    {
+      const p4 = await call<{ id: string }>("create_project", { title: "mcp-test style-vs-plan" });
+      await call("set_brief", { projectId: p4.json.id, brief: { ...brief, production: { ...brief.production, style: { id: "frederick-wiseman" } } } });
+      const styled = await call<{ check: { pass: boolean; findings: { severity: string; rule: string; message: string }[] } }>("set_plan", { projectId: p4.json.id, plan });
+      check("check_plan holds a narrated plan to Wiseman's no-narrator rule", !styled.json.check.pass && styled.json.check.findings.some((f) => f.severity === "error" && /Wiseman/.test(f.rule) && /no narrator/.test(f.message)), styled.json.check.findings.filter((f) => /style/.test(f.rule)).map((f) => f.message.slice(0, 60)).join(" | "));
+      const doc4 = await call<unknown>("plan_document", { projectId: p4.json.id, format: "list" });
+      check("plan_document shows the style in its header", /Style\s+Frederick Wiseman/.test(JSON.stringify(doc4.json) + doc4.content.map((c) => ("text" in c ? c.text : "")).join("")));
+      await call("delete_project", { projectId: p4.json.id });
+    }
     await call("set_plan", { projectId: p2.json.id, plan });
     const tbl = await call<unknown>("plan_document", { projectId: p2.json.id });
     const tblText = tbl.content.find((c) => c.type === "text")?.text ?? "";
@@ -286,11 +302,12 @@ async function main() {
       while (!step.done && guard++ < 20) {
         const qq = step.question;
         asked.push(qq.id);
-        const fill: Record<string, unknown> = { scenePart: "the afternoon of the verdict and the first night", context: "after the trial scene, before day two", genre: "scripted historical documentary: narration over archival footage", premise: "A verdict read in fifteen minutes became the first night of the largest unrest in modern US history.", tone: "sober, observational, unhurried — general documentary viewers", guardrails: ["include: the verdict", "avoid: close-ups of violence"] };
-        answers[qq.id] = qq.agentFills ? fill[qq.id] ?? "x" : qq.multiSelect ? [qq.options[qq.recommended ?? 0].value] : qq.options[qq.recommended ?? 0].value;
+        const fill: Record<string, unknown> = { scenePart: "the afternoon of the verdict and the first night", context: "after the trial scene, before day two", genre: "scripted historical documentary: narration over archival footage", premise: "A verdict read in fifteen minutes became the first night of the largest unrest in modern US history.", tone: "sober, observational, unhurried — general documentary viewers", guardrails: ["include: the verdict", "avoid: close-ups of violence"] , style: "adam-curtis" };
+        answers[qq.id] = qq.agentFills ? fill[qq.id] ?? "x" : fill[qq.id] ?? (qq.multiSelect ? [qq.options[qq.recommended ?? 0].value] : qq.options[qq.recommended ?? 0].value);
         step = (await call<Q>("interview_next", { request: req, answers })).json;
       }
       const b = step.done ? step.brief : null;
+      check("interview_next asks for a directing style after the genre and the brief carries it", asked.indexOf("style") === asked.indexOf("genre") + 1 && (b as { production?: { style?: { id: string } } } | null)?.production?.style?.id === "adam-curtis", asked.join(","));
       check("interview_next asks one question at a time and ends with a valid brief", !!b && !asked.includes("kind") && !asked.includes("durationS") && asked[0] === "scenePart" && asked.includes("sources") && asked.includes("licence") && b.deliverable.kind === "scene" && b.deliverable.durationS === 120 && b.production.scripted && b.sources.kinds.includes("youtube") && b.mustInclude?.[0] === "the verdict" && b.avoid?.[0] === "close-ups of violence", asked.join(","));
       if (b) {
         const stored = await call<{ brief: { status: string } }>("set_brief", { projectId: p2.json.id, brief: b });

@@ -5,6 +5,7 @@
  * orchestrator can fan out to parallel agents.
  */
 import { CAPS, VIDEO_MODELS, getVideoModel } from "@/config/models";
+import { styleById } from "@/lib/styles";
 import type { Brief, Plan } from "@/lib/validation/brief";
 
 export type PlanFinding = { severity: "error" | "warn" | "info"; rule: string; message: string; ref?: string };
@@ -51,6 +52,8 @@ export function checkPlan(plan: Plan, brief: Brief | null) {
   const total = r1(shots.reduce((a, s) => a + s.durationS, 0));
   const target = brief?.deliverable.durationS ?? null;
   const genre = brief?.production.genre ?? "";
+  const st = brief?.production.style ? styleById(brief.production.style.id) : undefined;
+  if (brief?.production.style && !st) f.push({ severity: "warn", rule: "brief: style", message: `unknown style id "${brief.production.style.id}" — list_styles has the registry` });
 
   // Length
   if (target != null) {
@@ -59,8 +62,9 @@ export function checkPlan(plan: Plan, brief: Brief | null) {
   }
   // Pacing (ch.16)
   const asl = shots.length ? r1(total / shots.length) : 0;
-  const [lo, hi] = aslNorm(genre);
-  if (shots.length >= 3 && (asl < lo * 0.6 || asl > hi * 1.6)) f.push({ severity: "warn", rule: "ch16 pacing", message: `average shot ${asl} s; ${genre || "this kind of piece"} usually runs ${lo}–${hi} s` });
+  const [lo, hi] = st ? st.params.aslS : aslNorm(genre);
+  if (shots.length >= 3 && (asl < lo * 0.6 || asl > hi * 1.6)) f.push({ severity: "warn", rule: st ? `style: ${st.name} pacing` : "ch16 pacing", message: `average shot ${asl} s; ${st ? `${st.name}'s cut` : genre || "this kind of piece"} usually runs ${lo}–${hi} s` });
+  if (st) for (const x of shots) if (x.durationS < st.params.minShotS && x.durationS >= 0.34) f.push({ severity: "warn", rule: `style: ${st.name} shot floor`, message: `shot ${x.id} is ${x.durationS} s; ${st.name} does not cut under ${st.params.minShotS} s`, ref: x.id });
   for (const s of shots) {
     if (s.durationS < 0.34) f.push({ severity: "error", rule: "ch16 minimum readable shot ≈ 10 frames", message: `shot ${s.id} is ${s.durationS} s`, ref: s.id });
   }
@@ -141,6 +145,31 @@ export function checkPlan(plan: Plan, brief: Brief | null) {
     if (brief.narration?.wanted && !(plan.narration?.lines.length || narration.length)) f.push({ severity: "warn", rule: "brief: narration", message: "the brief wants narration; the plan has no narrated lines" });
     if (brief.narration && !brief.narration.wanted && narration.length) f.push({ severity: "warn", rule: "brief: narration", message: "the brief says no narration; the plan narrates" });
     if (brief.music?.wanted && !plan.music) f.push({ severity: "warn", rule: "brief: music", message: "the brief wants music; the plan names no bed" });
+    if (st) {
+      const p = st.params;
+      const who = st.name;
+      const rule = `style: ${who}`;
+      const narrated = narration.filter((l) => l.kind === "narration").length + (plan.narration?.lines.length ?? 0);
+      const textCount = plan.script.filter((l) => l.kind === "text").length + shots.filter((x) => x.source.type === "card" || x.text).length;
+      const syncShots = shots.filter((x) => x.sound === "sync").length;
+      if (p.narration === "none" && narrated) f.push({ severity: "error", rule, message: `${who} has no narrator — the subjects and the footage carry it; move the information into bites, cards or the picture (${narrated} narration line(s) planned)` });
+      if (p.narration === "required" && !narrated && p.narrationVoice !== "presenter") f.push({ severity: "warn", rule, message: `${who} is carried by narration; the plan has none` });
+      if (p.narration === "required" && p.narrationVoice === "presenter" && !narrated && !syncShots) f.push({ severity: "warn", rule, message: `${who} is carried by a presenter speaking to camera; the plan has neither narration lines nor sync shots` });
+      if (p.music === "none" && plan.music) f.push({ severity: "error", rule, message: `${who} uses no score; drop the music bed (or choose another style)` });
+      if (p.music === "required" && !plan.music) f.push({ severity: "warn", rule, message: `${who} runs on music (${p.musicKind}); the plan names no bed` });
+      if (p.text === "none" && textCount) f.push({ severity: "warn", rule, message: `${who} puts no text on screen; the plan has ${textCount} card(s) / text line(s)` });
+      if (p.transitions === "cuts" && shots.some((x) => x.transition === "dissolve")) f.push({ severity: "warn", rule, message: `${who} cuts straight; ${shots.filter((x) => x.transition === "dissolve").length} dissolve(s) planned` });
+      if ((p.transitions === "cuts" || p.transitions === "kinetic") && shots.slice(0, -1).some((x) => x.transition === "fadeToBlack")) f.push({ severity: "warn", rule, message: `${who} does not fade to black inside the piece` });
+      if (p.sync === "sync-first" && !syncShots) f.push({ severity: "error", rule, message: `${who} is made of the shots' own sound; every shot in the plan is muted or under narration — mark the shots that keep their sound as "sync"` });
+      if (p.sync === "muted" && shots.length >= 4 && syncShots > shots.length / 2) f.push({ severity: "warn", rule, message: `${who} keeps the shots' sound off under the layers; ${syncShots} of ${shots.length} shots are sync` });
+      if (p.narrationWpm && narrated && total > 0) {
+        const wpm = r1((nWords / total) * 60);
+        const [wlo, whi] = p.narrationWpm;
+        if (wpm < wlo * 0.7 || wpm > whi * 1.3) f.push({ severity: "warn", rule, message: `narration density ${wpm} words/min; ${who} sits at ${wlo}–${whi}` });
+      }
+      if (p.beatCut && !plan.music) f.push({ severity: "warn", rule, message: `${who} cuts on the beat; the plan needs a bed to cut to (and check_beat_alignment after the cut)` });
+      if (p.stills && !shots.some((x) => /still|photo|document|map|engraving|diagram|letter|page|painting/i.test(x.description))) f.push({ severity: "info", rule, message: `${who} is built on stills that move; no shot description mentions a photograph, document or map` });
+    }
     if (brief.deliverable.kind === "scene") {
       const last = shots[shots.length - 1];
       if (last?.source.type === "card") f.push({ severity: "warn", rule: "brief: scene of a longer video", message: "a scene doesn't sign off — drop the closing card" });
@@ -196,6 +225,10 @@ export function planDocument(plan: Plan, brief: Brief | null, title: string): st
   const L: string[] = [];
   L.push(`# ${title} — plan v${plan.version} (${plan.status})`, "");
   L.push(`**Logline.** ${plan.logline}`, "");
+  if (brief?.production.style) {
+    const stl = styleById(brief.production.style.id);
+    L.push(`**Style.** ${stl ? `${stl.name} — ${stl.oneLine}` : brief.production.style.id}${brief.production.style.notes ? ` (${brief.production.style.notes})` : ""}`, "");
+  }
   if (brief) {
     L.push(
       `**Brief.** ${brief.deliverable.kind === "scene" ? "A scene of a longer video" : "A standalone piece"}, ${brief.deliverable.durationS} s, ${brief.deliverable.aspect} ${brief.deliverable.resolution}. ` +
@@ -272,6 +305,10 @@ export function planCli(plan: Plan, brief: Brief | null, title: string): string 
     L.push(`Brief     ${d.kind === "scene" ? "scene of a longer video" : "standalone"} · ${d.durationS} s · ${d.aspect} ${d.resolution} · ${brief.production.scripted ? "scripted" : "unscripted"} ${brief.production.genre}${brief.production.form ? ` (${brief.production.form})` : ""}`);
     L.push(`          sources: ${brief.sources.kinds.join(", ")} · tone: ${brief.tone}${brief.audience ? ` · audience: ${brief.audience}` : ""}`);
     if (d.kind === "scene" && d.parentContext) L.push(...wrap(d.parentContext, 86, "          context: "));
+    if (brief.production.style) {
+      const stl = styleById(brief.production.style.id);
+      L.push(...wrap(stl ? `${stl.name} — ${stl.oneLine}` : brief.production.style.id, 86, "Style     "));
+    }
     L.push(...wrap(brief.premise, 86, "Premise   "));
   }
   L.push("", "BEATS");
@@ -383,6 +420,10 @@ export function planTable(plan: Plan, brief: Brief | null, title: string, width 
     const d = brief.deliverable;
     L.push(`Brief     ${d.kind === "scene" ? "scene of a longer video" : "standalone"} · ${d.durationS} s · ${d.aspect} ${d.resolution} · ${brief.production.scripted ? "scripted" : "unscripted"} ${brief.production.genre}${brief.production.form ? ` (${brief.production.form})` : ""}`);
     L.push(...wrap(`sources: ${brief.sources.kinds.join(", ")} · tone: ${brief.tone}${brief.audience ? ` · audience: ${brief.audience}` : ""}`, W - 10, "          "));
+    if (brief.production.style) {
+      const stl = styleById(brief.production.style.id);
+      L.push(...wrap(stl ? `${stl.name} — ${stl.oneLine}` : brief.production.style.id, W - 10, "Style     "));
+    }
     L.push(...wrap(brief.premise, W - 10, "Premise   "));
   }
   L.push("", "BEATS");

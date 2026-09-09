@@ -9,6 +9,7 @@
  * knows, still one question, still a pick.
  */
 import type { Brief } from "../src/lib/validation/brief";
+import { styleById, stylesFor } from "../src/lib/styles";
 
 export type Option = { label: string; description?: string; value: string };
 export type Question = {
@@ -70,6 +71,22 @@ export function nextQuestion(request: string, a: Answers): { done: false; questi
   if (a.genre == null) {
     return q({ id: "genre", header: "Genre", question: "Scripted or unscripted, and what kind of piece?", options: [{ label: "Other", value: "other" }], agentFills: "Offer 3–4 forms that fit the request (e.g. 'scripted historical documentary: narration over archival footage', 'unscripted verité from found footage', 'explainer', 'commercial'), each starting with 'scripted' or 'unscripted'; recommend one. Store the chosen label.", recommended: 0 }, 4);
   }
+  if (a.style == null) {
+    const fits = stylesFor(`${str(a.genre)} ${request}`);
+    if (fits.length) {
+      const top = fits.slice(0, 3);
+      return q(
+        {
+          id: "style",
+          header: "Style",
+          question: `Whose eye? A directing style sets the cut, the narration and the sound${fits.length > 3 ? ` (${fits.length} fit this genre — list_styles shows them all; offer the three that fit the request and the tone best)` : ""}.`,
+          options: [...top.map((st) => ({ label: st.name, description: st.oneLine, value: st.id })), { label: "House style", description: "no particular director — the guide's defaults for the genre", value: "none" }],
+          recommended: 0,
+        },
+        8,
+      );
+    }
+  }
   if (a.sources == null) {
     const doc = /document|histor|archiv|news|riot|war|election/i.test(request + " " + str(a.genre));
     return q({ id: "sources", header: "Footage", question: "Where does the footage come from? (pick all that apply)", multiSelect: true, options: [{ label: "YouTube: archival and news footage", description: "search, import ≤180 s sections", value: "youtube" }, { label: "AI-generated shots", description: doc ? "not recommended for real events — recreations mislead" : "text-to-video (Wan / Kling / Seedance)", value: "ai" }, { label: "Your own files", description: "paths or already-imported assets", value: "upload" }, { label: "Stock", value: "stock" }], recommended: 0 }, 3);
@@ -118,7 +135,12 @@ export function nextQuestion(request: string, a: Answers): { done: false; questi
       aspect: aspect ?? "16:9",
       resolution: resolution ?? "1080p",
     },
-    production: { scripted, genre: genreLabel.replace(/^\s*(un)?scripted[:\s-]*/i, "").trim() || genreLabel, form: genreLabel },
+    production: {
+      scripted,
+      genre: genreLabel.replace(/^\s*(un)?scripted[:\s-]*/i, "").trim() || genreLabel,
+      form: genreLabel,
+      ...(styleById(str(a.style)) ? { style: { id: str(a.style) } } : {}),
+    },
     sources: {
       kinds: (srcs.length ? srcs : ["youtube"]) as ("youtube" | "ai" | "upload" | "stock")[],
       ...(licence ? { notes: licence === "archives" ? "archives and official channels only" : licence === "cc" ? "Creative Commons only" : "internal test render; any usable footage" } : {}),
