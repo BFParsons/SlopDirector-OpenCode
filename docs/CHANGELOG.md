@@ -12,6 +12,11 @@ Notable changes, newest first. See [DEPENDENCIES.md](DEPENDENCIES.md) for setup 
   transcripts together and put eleven Whisper processes on the laptop (load 67):
   `WHISPER_CONCURRENCY` (default 2) runs at once, the rest queue, and concurrent requests
   for the same file + model share one run.
+  And the scouts' search itself was wasteful: three blind 180 s windows per clip to find one
+  sentence in a 24-minute broadcast. `youtube_captions` (`GET /api/youtube/captions?url=&q=`)
+  fetches a video's caption track — manual, else YouTube's auto-captions — with timings and
+  no media download, filtered to the cues containing a phrase; the clip-scout now finds the
+  second a line is spoken first and imports a ≈ 30 s window around it.
 
 - **The interview asks one question at a time, multiple choice.** Like a planning prompt:
   `interview_next {request, answers}` (`mcp/interview.ts`) returns the next question — id,

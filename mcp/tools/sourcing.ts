@@ -51,6 +51,26 @@ export function registerSourcingTools(server: McpServer) {
   );
 
   server.registerTool(
+    "youtube_captions",
+    {
+      title: "YouTube captions (no download)",
+      description:
+        "The caption track of a YouTube video with timings — the manual track if there is one, else YouTube's auto-captions — without downloading the media. Find the second a sentence is spoken BEFORE importing: pass `q` to get only the cues containing a phrase (case-insensitive), or from/to to read a stretch; then import_youtube a short window (≈ 30 s) around it instead of blind 180 s sections. Auto-captions are rough on names and numbers; confirm with transcribe after the import when the exact words matter.",
+      inputSchema: { url: z.string().url(), q: z.string().max(200).optional().describe("phrase to look for"), fromS: z.number().min(0).optional(), toS: z.number().min(0).optional(), lang: z.string().max(8).default("en") },
+    },
+    guarded(async ({ url, q, fromS, toS, lang }) => {
+      const p = new URLSearchParams({ url, lang });
+      if (q) p.set("q", q);
+      if (fromS != null) p.set("from", String(fromS));
+      if (toS != null) p.set("to", String(toS));
+      const r = await api.get<{ videoId: string; title: string | null; durationS: number | null; auto: boolean; cueCount: number; cues: { startS: number; endS: number; text: string }[]; matches: { startS: number; endS: number; text: string }[] | null }>(`/api/youtube/captions?${p}`);
+      if (r.matches) return text({ videoId: r.videoId, title: r.title, durationS: r.durationS, auto: r.auto, cueCount: r.cueCount, matches: r.matches, hint: r.matches.length ? "import_youtube a window from ~15 s before the first match to ~15 s after the last one you need" : "no cue contains that phrase — try a shorter or different wording, or read a stretch with fromS/toS" });
+      const lines = r.cues.map((c) => `${c.startS.toFixed(1)}  ${c.text}`);
+      return text(`${r.title ?? r.videoId} · ${r.durationS ?? "?"} s · ${r.auto ? "auto-captions" : "captions"} · ${r.cueCount} cues${lines.length < r.cueCount ? ` (showing ${lines.length})` : ""}\n` + lines.join("\n"));
+    }),
+  );
+
+  server.registerTool(
     "source_clips",
     {
       title: "Fetch a clip list",

@@ -78,7 +78,7 @@ run it at once:
 
 | task | fast path (one tool) | precise path (a sub-agent per task) |
 |---|---|---|
-| `source:<clipId>` | `source_clips` (search → rank → import the planned section or the first 180 s) | **clip-scout**: `search_youtube` → pick by title/channel/duration → `import_youtube` a ≤ 180 s window → `get_contact_sheet` + `transcribe` → report the exact in/out of the wanted moment |
+| `source:<clipId>` | `source_clips` (search → rank → import the planned section or the first 180 s) | **clip-scout**: `search_youtube` → pick by title/channel/duration → `youtube_captions` with a phrase to find the second it is spoken (no download) → `import_youtube` a ≈ 30 s window around it → `get_contact_sheet` + `transcribe` → report the exact in/out of the wanted moment |
 | `ai:<shotId>` | `generate_ai_shots` (all at once) | `add_ai_shot` one by one when prompts need iteration |
 | `narration` | `generate_narration` per line (they can run concurrently) | **narrator** sub-agent: generates every line, checks each duration against its slot, re-writes a line that runs long |
 | `music` | `search_youtube` → `import_youtube kind=audio` → `set_music` → `balance_music` | — |

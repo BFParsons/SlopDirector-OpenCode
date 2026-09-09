@@ -1,6 +1,6 @@
 # Appendix A. MCP Tool Reference
 
-*Generated from the server (63 tools). Regenerate with `pnpm exec tsx scripts/gen-tool-reference.ts`.*
+*Generated from the server (64 tools). Regenerate with `pnpm exec tsx scripts/gen-tool-reference.ts`.*
 
 ## Project
 
@@ -580,6 +580,18 @@ Search YouTube (yt-dlp, no download): id, url, title, channel, duration, views p
 | `max` | integer | default 8 |
 | `minDurationS` | number | optional |
 | `maxDurationS` | number | optional |
+
+### `youtube_captions`
+
+The caption track of a YouTube video with timings — the manual track if there is one, else YouTube's auto-captions — without downloading the media. Find the second a sentence is spoken BEFORE importing: pass `q` to get only the cues containing a phrase (case-insensitive), or from/to to read a stretch; then import_youtube a short window (≈ 30 s) around it instead of blind 180 s sections. Auto-captions are rough on names and numbers; confirm with transcribe after the import when the exact words matter.
+
+| Parameter | Type | Notes |
+|---|---|---|
+| `url` | string | required |
+| `q` | string | optional; phrase to look for |
+| `fromS` | number | optional |
+| `toS` | number | optional |
+| `lang` | string | default "en" |
 
 ### `source_clips`
 
