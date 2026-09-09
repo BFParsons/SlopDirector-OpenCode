@@ -74,7 +74,6 @@ const STYLE_PRESET: Record<string, string> = {
   "wes-anderson": "intertitle",
   "christopher-nolan": "title",
   "edgar-wright": "caption-pop",
-  "leni-riefenstahl": "intertitle",
   "frank-capra": "intertitle",
   "sergei-eisenstein": "intertitle",
   "tony-schwartz": "card-editorial",

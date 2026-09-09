@@ -230,7 +230,7 @@ async function main() {
     await call("delete_project", { projectId: p3.json.id });
     // directing styles: the registry, the prose, and check_plan holding a plan to a style
     const ls = await call<{ count: number; categories: { id: string; styles: string[] }[]; styles: { id: string; params: { narration: string } }[] }>("list_styles", {});
-    check("list_styles lists the registry by category", ls.json.count >= 40 && ls.json.categories.length >= 8 && ls.json.styles.some((x) => x.id === "frederick-wiseman" && x.params.narration === "none"), `${ls.json.count} styles, ${ls.json.categories.length} categories`);
+    check("list_styles lists the registry by category", ls.json.count >= 40 && !ls.json.styles.some((x) => x.id === "leni-riefenstahl") && ls.json.categories.length >= 8 && ls.json.styles.some((x) => x.id === "frederick-wiseman" && x.params.narration === "none"), `${ls.json.count} styles, ${ls.json.categories.length} categories`);
     const lsDoc = await call<{ count: number; styles: { id: string }[] }>("list_styles", { genre: "scripted historical documentary" });
     check("list_styles filters by genre", lsDoc.json.count < ls.json.count && lsDoc.json.styles.some((x) => x.id === "adam-curtis") && !lsDoc.json.styles.some((x) => x.id === "hype-williams"), `${lsDoc.json.count} fit a documentary`);
     const gs = await call<{ id: string; name: string; text: string | null; params: { aslS: [number, number] } }>("get_style", { id: "adam-curtis" });

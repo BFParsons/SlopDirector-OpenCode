@@ -5,6 +5,8 @@ Notable changes, newest first. See [DEPENDENCIES.md](DEPENDENCIES.md) for setup 
 
 ## 2026-09 — no-storyboard fork
 
+- **Riefenstahl removed from the directing styles** at the user's request; the political and
+  propaganda category keeps Capra, Eisenstein, Schwartz and the Lincoln Project.
 - **Typography, safe areas and motion.** Text used to be inset a fixed 40 px from the
   frame edge whatever the frame, and nothing checked whether it landed inside the
   title-safe area — on a phone or under a social app's UI it did not. Every text
@@ -26,11 +28,11 @@ Notable changes, newest first. See [DEPENDENCIES.md](DEPENDENCIES.md) for setup 
   skills — canvas-design, theme-factory, brand-guidelines — into rules the tools
   enforce); playbook `typography-and-motion`; RULES 37.
 - **Directing styles.** The interview asks "Whose eye?" after the genre and offers directing
-  styles fashioned after real filmmakers and houses — 43 of them across nine categories
+  styles fashioned after real filmmakers and houses — 42 of them across nine categories
   (documentary: Curtis, Moore, Morris, Burns, Herzog, Wiseman, Jennings, LEMMiNO; advertising:
   Ridley Scott, Jonze, Glazer, Riney; music video: Gondry, Hype Williams, Corbijn, Cunningham;
   dramatic scripted: Anderson, Nolan, Villeneuve, Wright, Malick; political and propaganda:
-  Riefenstahl, Capra, Eisenstein, Schwartz, the Lincoln Project; trailers: Woollen, Buddha
+  Capra, Eisenstein, Schwartz, the Lincoln Project; trailers: Woollen, Buddha
   Jones, AV Squad, A24, Bimpel; essay: Zhou, Harris; comedy: Guest; YouTube: MrBeast, Neistat,
   MKBHD, Tom Scott, Veritasium, Vsauce, Rober, Chamberlain, McKinnon). Each is a file in
   `guide/styles/` (signature · structure · the cut · narration · sound · picture and text ·

@@ -40,7 +40,6 @@ Every file has the same sections: the signature · structure · the cut · narra
 
 ## Patriotic, political and propaganda
 
-- [Leni Riefenstahl](leni-riefenstahl.md) — the monument: the mass as a shape, low angles for the figure, long smooth moves, cuts on the march
 - [Frank Capra](frank-capra.md) — the case for the fight: the enemy's own footage turned against him, a neighbourly narrator with numbers, maps that move, contrast pairs
 - [Sergei Eisenstein](sergei-eisenstein.md) — the collision: meaning made by hitting two shots together, motifs returning faster, overlapping action, intertitles
 - [Tony Schwartz](tony-schwartz.md) — the responsive chord: one image, one sound, one implication — the audience completes the message
