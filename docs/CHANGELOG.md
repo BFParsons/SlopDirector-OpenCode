@@ -5,6 +5,61 @@ Notable changes, newest first. See [DEPENDENCIES.md](DEPENDENCIES.md) for setup 
 
 ## 2026-09 — no-storyboard fork
 
+- **Speed loops: one harness job 978 s → 169 s (5.8×).**
+  `tests/bench/job.ts` times a complete agent job over one MCP connection — perceive 8 clips
+  (contact sheets, scenes, silences), transcribe a 60 s narration, cut 21 shots + 3 narration
+  clips + music + titles, pre-checks, draft, post-checks, final, and (`BENCH_IMPORT=1`) a 60 s
+  YouTube section import — and writes `tests/bench/results/<label>.json`
+  (`BENCH_COMPARE=<label>` prints speedups). `tests/bench/calls.ts` times single tools.
+  Four profiling loops, what each found:
+  - *Loop 2 (978 → 314 s).* Input seeking (`-ss`/`-t` before `-i`: decode only the range a
+    shot shows, the graph trims from 0), contact sheets by measured cost (one GPU decode +
+    `select` for dense sheets, per-cell seeks for sparse ones; stamps from the selected frame's
+    pts), GPU proxy decode for scene/freeze passes, analysis JSON cached, whisper-ctranslate2
+    (int8) when the venv has it, per-asset lookups in `check_cuts`/`check_soundtrack` in
+    parallel, 500 ms render polling.
+  - *Loop 3 (314 → 224 s).* One cached ffprobe per file (`lib/ffmpeg/probe.ts`: the assembly
+    ran two serial ffprobes per input — 21 inputs ≈ 9 s of a 22 s draft — now probed
+    concurrently before the graph is built and memoized by path+size+mtime); `-aac_coder
+    fast` (ffmpeg's own advice above 128 kb/s: "better and much faster" — 2× here);
+    normalization measures with `ebur128` instead of `loudnorm` analysis (6.3 → 1.3 s);
+    yt-dlp's frame-accurate section cut gets `-preset veryfast` (72 → 38 s for 60 s of 720p).
+  - *Loop 4.* The analysis cache is now content-addressed and shared across projects
+    (`<ASSET_ROOT>/_cache/<fingerprint>/`, fingerprint = sha1 of the file, memoized per
+    path/size/mtime). Placing another project's clip on a timeline *copies* the file
+    (`copyAssetToProject`), so every per-project cache was cold in each new project:
+    `check_cuts` 38 s cold vs 1.4 s warm on the same 8 clips, `balance_music` 18 s vs 0.1 s —
+    and a copied narration had no transcript at all, so the mid-word checks were silently
+    skipped. Transcripts and the 16 kHz wav live in the same cache. `measureLoudness` (the
+    `loudness` kind of `/api/audio/analyze`, `balance_music`) reads `ebur128` (7.2 → 1.6 s on
+    a 70 s mp3).
+  - *Left for later (bigger projects):* an all-GPU filter graph for the final render (the CPU
+    scale/pad/concat/drawtext stages are ≈ 15 s of the 29 s final on this laptop; the VA-API
+    encode itself is 12 s), and a merged single-pass `verify_export` analysis (black + freeze
+    + loudness + silence in one decode).
+  Delete `.data/assets/_cache/` freely; it is rebuilt on demand.
+
+  Seconds per phase, one job on the UHD 620 laptop (`tests/bench/results/*.json`; render
+  phases wander ±15 % with the CPU's thermal state, so read the totals as ≈):
+
+  | phase | baseline | loop 2 | loop 3 | loop 4 |
+  |---|---:|---:|---:|---:|
+  | MCP connect | 1.9 | 1.8 | 1.2 | 1.7 |
+  | perceive 8 clips, sequential | 113.8 | 34.7 | 16.1 | 17.3 |
+  | perceive, parallel | 87.0 | 11.8 | 11.2 | 12.6 |
+  | transcribe 60 s (base, forced) | 160.2 | 19.1 | 22.0 | 24.5 |
+  | cut: 21 shots + 3 narration | 41.4 | 9.1 | 6.8 | 3.6 |
+  | music + balance_music + titles | 43.3 | 17.4 | 18.5 | 0.6 |
+  | check_soundtrack / cuts / pacing | 207.8 | 45.4 | 43.3 | 1.2 |
+  | draft render | 74.1 | 35.6 | 18.1 | 20.4 |
+  | verify_export + check_mix_levels | 39.5 | 11.1 | 10.7 | 0.2 |
+  | final render 1080p | 134.4 | 55.6 | 32.9 | 42.9 |
+  | YouTube import, 60 s section | 74.8 | 72.8 | 43.2 | 43.6 |
+  | **total (s)** | **978** | **314** | **224** | **169** |
+
+  Loop 4's post-checks read a draft whose bytes matched the previous run's (the VA-API encode
+  is deterministic here), so that phase shows the cache, not the analysis; cold it is ≈ 5 s.
+
 - **Voice-vs-music levels, measured.** After the re-cut the narration still sat slightly under
   the bed (music-only stretches −12.5 LUFS vs speech −14). Now: guide Part II §7 "Levels"
   (speech is the anchor at −14…−16 LUFS short-term; music 4–8 LU under it alone and ≥ 12 LU

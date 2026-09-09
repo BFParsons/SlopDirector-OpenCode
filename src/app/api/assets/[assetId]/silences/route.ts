@@ -3,6 +3,7 @@ import { getOwnedAsset } from "@/lib/assets/access";
 import { absolutePath } from "@/lib/assets/storage";
 import { handleApiError } from "@/lib/http/handleError";
 import { err, ok } from "@/lib/http/response";
+import { cachedJson } from "@/lib/media/cache";
 import { detectSilences } from "@/lib/media/inspect";
 
 type Ctx = { params: Promise<{ assetId: string }> };
@@ -18,7 +19,8 @@ export async function GET(req: Request, { params }: Ctx) {
     const q = new URL(req.url).searchParams;
     const noise = Math.min(0, Math.max(-90, Number(q.get("noise") ?? -30) || -30));
     const min = Math.min(60, Math.max(0.05, Number(q.get("min") ?? 0.5) || 0.5));
-    const result = await detectSilences(absolutePath(asset.path), noise, min);
+    const abs = absolutePath(asset.path);
+    const result = await cachedJson(`silences-${noise}-${min}`, abs, () => detectSilences(abs, noise, min));
     return ok({ assetId: asset.id, ...result });
   } catch (e) {
     return handleApiError(e);

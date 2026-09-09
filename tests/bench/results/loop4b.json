@@ -1,0 +1,20 @@
+{
+  "label": "loop4b",
+  "at": "2026-09-09T01:37:46.443Z",
+  "times": {
+    "mcp_connect": 1.7,
+    "perceive_sequential": 17.26,
+    "perceive_parallel": 12.62,
+    "transcribe_base": 24.49,
+    "create_project": 0.07,
+    "apply_edit_list": 3.61,
+    "music_and_titles": 0.56,
+    "checks_pre": 1.25,
+    "render_draft": 20.36,
+    "checks_post": 0.21,
+    "render_final": 42.87,
+    "import_youtube_60s_of_780s": 43.57
+  },
+  "total": 168.6,
+  "notes": {}
+}

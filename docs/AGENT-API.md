@@ -47,6 +47,8 @@ renders). **Text overlays** and **audio overlays** sit on top.
 - `GET /api/assets/:id/frame?t=12.5&w=640` → JPEG of that instant.
 - `GET /api/assets/:id/contact-sheet?cols=4&rows=3&w=1280&start=0&end=60` → JPEG grid, each cell stamped with its source time; header `X-Frame-Times`. Add `format=json` for the times only.
 - `GET /api/assets/:id/scenes?threshold=0.4` → `{ cuts: [t…], shots: [{ startS, endS }] }`.
+  Scenes, silences, analyze kinds and transcripts are cached by the file's *content*, so
+  repeated calls — and the same clip copied into another project — answer in milliseconds.
 - `GET /api/assets/:id/silences?noise=-30&min=0.5` → `{ silences: […], speech: [{ startS, endS }] }` (the ranges an edit keeps).
 - `POST /api/assets/:id/transcribe { model?, language?, wait?, force? }` → Whisper transcript with `segments[]` and `words[]` (each `{ startS, endS, text }`); cached per asset+model, `GET` reads the cache. `wait:false` returns a `jobId` for `/api/audio/jobs/:id`.
 - `POST /api/audio/analyze`, `/stems`, `/process`, `/mix` — the Audio Studio tools (loudness, stem separation, denoise/leveler/stretch, mixdown).

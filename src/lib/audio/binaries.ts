@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import path from "node:path";
 /**
  * Resolve the external audio tools the Audio Studio shells out to.
  *
@@ -38,9 +40,17 @@ export function demucsArgv(): string[] {
   return parseArgvOverride("SLOPSTUDIO_DEMUCS_ARGV") ?? [pythonBin(), "-m", "demucs.separate"];
 }
 
-/** argv prefix for Whisper transcription. */
+/**
+ * argv prefix for Whisper transcription. Prefers `whisper-ctranslate2`
+ * (faster-whisper / CTranslate2, int8 on the CPU) when it is installed in the
+ * same venv: same command line as openai-whisper, several times faster.
+ */
 export function whisperArgv(): string[] {
-  return parseArgvOverride("SLOPSTUDIO_WHISPER_ARGV") ?? [pythonBin(), "-m", "whisper"];
+  const override = parseArgvOverride("SLOPSTUDIO_WHISPER_ARGV");
+  if (override) return override;
+  const ct2 = path.join(path.dirname(pythonBin()), "whisper-ctranslate2");
+  if (existsSync(ct2)) return [ct2, "--compute_type", "int8"];
+  return [pythonBin(), "-m", "whisper"];
 }
 
 /** Python interpreter for inline scripts (librosa beat detection, etc.). */

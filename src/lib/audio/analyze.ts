@@ -1,6 +1,6 @@
 /**
  * Read-only analysis passes used by the Loudness Meter and Audio Tools panels:
- *   measureLoudness → integrated LUFS / true-peak / loudness range (ffmpeg)
+ *   measureLoudness → integrated LUFS / true-peak / loudness range (ffmpeg ebur128)
  *   detectSilence   → list of silent spans (ffmpeg silencedetect)
  *   detectTempo     → BPM + beat grid (librosa)
  */
@@ -15,34 +15,32 @@ export interface LoudnessReport {
   thresholdLufs: number | null;
 }
 
-/** Run ffmpeg's loudnorm in analysis mode and parse its JSON summary. */
+/**
+ * Integrated loudness / true peak / loudness range from ffmpeg's ebur128
+ * meter (its Summary block). loudnorm's analysis mode reports the same
+ * numbers but runs ~4x slower (it also does its own resampling pass).
+ */
 export function measureLoudness(inputAbs: string): Promise<LoudnessReport> {
-  const args = [
-    "-hide_banner", "-nostats", "-i", inputAbs,
-    "-af", "loudnorm=I=-14:TP=-1.5:LRA=11:print_format=json",
-    "-f", "null", "-",
-  ];
+  const args = ["-hide_banner", "-nostats", "-vn", "-i", inputAbs, "-af", "ebur128=peak=true", "-f", "null", "-"];
   return new Promise((resolve) => {
     const proc = spawn(ffmpegPath(), args);
     let stderr = "";
     proc.stderr.on("data", (d) => (stderr += d.toString()));
     proc.on("error", () => resolve(empty()));
     proc.on("close", () => {
-      // loudnorm prints a JSON block near the end of stderr.
-      const start = stderr.lastIndexOf("{");
-      const end = stderr.lastIndexOf("}");
-      if (start === -1 || end === -1 || end < start) return resolve(empty());
-      try {
-        const j = JSON.parse(stderr.slice(start, end + 1)) as Record<string, string>;
-        resolve({
-          integratedLufs: num(j.input_i),
-          truePeakDb: num(j.input_tp),
-          loudnessRange: num(j.input_lra),
-          thresholdLufs: num(j.input_thresh),
-        });
-      } catch {
-        resolve(empty());
-      }
+      const at = stderr.lastIndexOf("Summary:");
+      if (at === -1) return resolve(empty());
+      const summary = stderr.slice(at);
+      const pick = (re: RegExp) => {
+        const m = re.exec(summary);
+        return m ? num(m[1]) : null;
+      };
+      resolve({
+        integratedLufs: pick(/\bI:\s*(-?[0-9.]+)\s*LUFS/),
+        truePeakDb: pick(/Peak:\s*(-?[0-9.]+)\s*dBFS/),
+        loudnessRange: pick(/LRA:\s*(-?[0-9.]+)\s*LU\b/),
+        thresholdLufs: pick(/Threshold:\s*(-?[0-9.]+)\s*LUFS/),
+      });
     });
   });
 }

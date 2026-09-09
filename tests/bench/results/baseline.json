@@ -1,0 +1,20 @@
+{
+  "label": "baseline",
+  "at": "2026-09-09T00:16:50.446Z",
+  "times": {
+    "mcp_connect": 1.94,
+    "perceive_sequential": 113.75,
+    "perceive_parallel": 87.02,
+    "transcribe_base": 160.17,
+    "create_project": 0.18,
+    "apply_edit_list": 41.44,
+    "music_and_titles": 43.28,
+    "checks_pre": 207.75,
+    "render_draft": 74.1,
+    "checks_post": 39.52,
+    "render_final": 134.39,
+    "import_youtube_60s_of_780s": 74.78
+  },
+  "total": 978.3,
+  "notes": {}
+}

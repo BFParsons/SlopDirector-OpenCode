@@ -10,8 +10,11 @@ import { mkdir } from "node:fs/promises";
 import path from "node:path";
 import { FONT_BOLD } from "@/lib/ffmpeg/args";
 import { ffmpegPath } from "@/lib/ffmpeg/binary";
-import { probeDuration } from "@/lib/ffmpeg/probe";
+import { probeDuration, probeVideoStream } from "@/lib/ffmpeg/probe";
+import { planHwDecode } from "@/lib/ffmpeg/hwdecode";
+import { resolveHwDecode } from "@/lib/system/capabilities";
 import { projectDir } from "@/lib/assets/storage";
+import { mediaCachePath } from "@/lib/media/cache";
 
 function run(args: string[], timeoutMs = 10 * 60_000): Promise<{ code: number; stderr: string }> {
   return new Promise((resolve, reject) => {
@@ -94,25 +97,42 @@ export async function contactSheet(
     `sheet-${assetId}-${o.cols}x${o.rows}-${o.width}-${clean(o.startS)}-${clean(o.endS)}.jpg`,
   );
   if (existsSync(out)) return { path: out, times, cellWidth };
-  // Pick the FIRST frame at or after each sample time (select on the bucket
-  // index), so the frame shown is the one the stamp says. (`fps=1/interval`
-  // keeps the last frame of each bucket — half an interval later than its
-  // label — which sent an agent's trims to the wrong place.) drawtext prints
-  // the absolute source time: pts is rebased by -ss, so add startS back.
+  // Two strategies, chosen by measurement (720p H.264, 12 cells, UHD 620):
+  //   full decode on the GPU + GPU downscale + first-frame-per-bucket select
+  //   ≈ 0.023 s per source second (1.4 s for a 60 s clip; CPU ≈ 0.07 s/s);
+  //   one seeked input per cell ≈ 0.26 s per cell regardless of length.
+  // So: full decode for short spans, per-cell seeks for long ones.
   const font = FONT_BOLD.replace(/\\/g, "/").replace(/:/g, "\\:");
   const fontsize = Math.max(12, Math.round(cellWidth / 12));
-  const iv = interval.toFixed(4);
-  const pick = `select='isnan(prev_selected_t)+gt(floor(t/${iv}),floor(prev_selected_t/${iv}))'`;
-  const stamp =
-    `drawtext=fontfile='${font}':text='%{pts\\:hms\\:${o.startS}}':x=6:y=6:` +
-    `fontsize=${fontsize}:fontcolor=white:box=1:boxcolor=black@0.55:boxborderw=4`;
-  const vf =
-    `${pick},scale=${cellWidth}:-2,${stamp},` +
-    `tile=${o.cols}x${o.rows}:padding=2:margin=2:color=black`;
-  const { code, stderr } = await run([
-    "-y", "-ss", String(o.startS), "-t", String(span), "-i", abs,
-    "-fps_mode", "passthrough", "-frames:v", "1", "-vf", vf, "-q:v", "4", out,
-  ]);
+  const stampCommon = `x=6:y=6:fontsize=${fontsize}:fontcolor=white:box=1:boxcolor=black@0.55:boxborderw=4`;
+  const dec = await proxyDecode(abs, cellWidth);
+  const perSecond = dec.inputArgs.length ? 0.023 : 0.07;
+  const useFullDecode = span * perSecond <= n * 0.26;
+  let code: number;
+  let stderr: string;
+  if (useFullDecode) {
+    // Cell k = the first frame at or after startS + k·interval; the stamp is
+    // that frame's own time (pts rebased by -ss, so add startS back).
+    const iv = interval.toFixed(4);
+    const pick = `select='isnan(prev_selected_t)+gt(floor(t/${iv}),floor(prev_selected_t/${iv}))'`;
+    const vf = `${dec.prefilter},${pick},drawtext=fontfile='${font}':text='%{pts\\:hms\\:${o.startS}}':${stampCommon},tile=${o.cols}x${o.rows}:padding=2:margin=2:color=black`;
+    ({ code, stderr } = await run([...dec.inputArgs, "-y", "-ss", String(o.startS), "-t", String(span), "-i", abs, "-fps_mode", "passthrough", "-frames:v", "1", "-vf", vf, "-q:v", "4", out]));
+  } else {
+    const hms = (t: number) => {
+      const h = Math.floor(t / 3600);
+      const m = Math.floor((t % 3600) / 60);
+      const sec = t - h * 3600 - m * 60;
+      return `${String(h).padStart(2, "0")}\\:${String(m).padStart(2, "0")}\\:${sec.toFixed(3).padStart(6, "0")}`;
+    };
+    const args: string[] = ["-y"];
+    const chains: string[] = [];
+    times.forEach((tm, k) => {
+      args.push("-ss", tm.toFixed(3), "-t", "0.2", "-i", abs);
+      chains.push(`[${k}:v]trim=end_frame=1,scale=${cellWidth}:-2,drawtext=fontfile='${font}':text='${hms(tm)}':${stampCommon},setsar=1[c${k}]`);
+    });
+    const graph = `${chains.join(";")};${times.map((_, k) => `[c${k}]`).join("")}concat=n=${n}:v=1:a=0,tile=${o.cols}x${o.rows}:padding=2:margin=2:color=black[sheet]`;
+    ({ code, stderr } = await run([...args, "-filter_complex", graph, "-map", "[sheet]", "-frames:v", "1", "-q:v", "4", out]));
+  }
   if (code !== 0 || !existsSync(out)) throw new Error(`contact sheet failed: ${stderr.slice(-400)}`);
   return { path: out, times, cellWidth };
 }
@@ -126,12 +146,29 @@ export interface SceneResult {
   shots: { startS: number; endS: number }[];
 }
 
+/**
+ * Decode arguments for a full-file analysis pass: VA-API decode + GPU downscale
+ * to a 320px proxy when the host validated it for this codec (4K HEVC decodes
+ * ~3.5× faster on the GPU), else a CPU scale.
+ */
+async function proxyDecode(abs: string, width = 320): Promise<{ inputArgs: string[]; prefilter: string }> {
+  try {
+    const [cfg, stream] = await Promise.all([resolveHwDecode(), probeVideoStream(abs)]);
+    const plan = planHwDecode(cfg, stream, { w: width, h: Math.round((width * 9) / 16) });
+    if (plan) return { inputArgs: plan.inputArgs, prefilter: `scale_vaapi=w=${width}:h=-2:format=nv12,hwdownload,format=nv12` };
+  } catch {
+    /* fall through to CPU */
+  }
+  return { inputArgs: [], prefilter: `scale=${width}:-2` };
+}
+
 /** Scene-cut detection (ffmpeg `select=gt(scene,threshold)`), on a 320px proxy for speed. */
 export async function detectScenes(abs: string, threshold = 0.4, max = 500): Promise<SceneResult> {
   const durationS = await probeDuration(abs);
+  const dec = await proxyDecode(abs);
   const { code, stderr } = await run([
-    "-i", abs, "-an", "-vf",
-    `scale=320:-2,select='gt(scene,${threshold})',showinfo`, "-f", "null", "-",
+    ...dec.inputArgs, "-i", abs, "-an", "-vf",
+    `${dec.prefilter},select='gt(scene,${threshold})',showinfo`, "-f", "null", "-",
   ]);
   if (code !== 0) throw new Error(`scene detection failed: ${stderr.slice(-400)}`);
   const cuts: number[] = [];
@@ -190,9 +227,9 @@ export async function detectSilences(abs: string, noiseDb = -30, minS = 0.5): Pr
 }
 
 /** Mono 16 kHz WAV of the asset's audio (what Whisper wants). Returns the path. */
-export async function extractWav(abs: string, projectId: string, assetId: string): Promise<string> {
-  const dir = await cacheDir(projectId);
-  const out = path.join(dir, `audio-${assetId}-16k.wav`);
+export async function extractWav(abs: string): Promise<string> {
+  // Content-addressed (lib/media/cache.ts): a clip copied into another project reuses it.
+  const out = await mediaCachePath(abs, "audio-16k.wav");
   if (existsSync(out)) return out;
   const { code, stderr } = await run(["-y", "-i", abs, "-vn", "-ac", "1", "-ar", "16000", "-c:a", "pcm_s16le", out]);
   if (code !== 0 || !existsSync(out)) throw new Error(`audio extract failed: ${stderr.slice(-400)}`);
@@ -226,7 +263,8 @@ export interface FrozenFrameResult {
 /** Frozen picture (ffmpeg `freezedetect`), on a 320px proxy for speed. */
 export async function detectFrozen(abs: string, minS = 1, noiseDb = -60): Promise<FrozenFrameResult> {
   const durationS = await probeDuration(abs);
-  const { code, stderr } = await run(["-i", abs, "-an", "-vf", `scale=320:-2,freezedetect=n=${noiseDb}dB:d=${minS}`, "-f", "null", "-"]);
+  const dec = await proxyDecode(abs);
+  const { code, stderr } = await run([...dec.inputArgs, "-i", abs, "-an", "-vf", `${dec.prefilter},freezedetect=n=${noiseDb}dB:d=${minS}`, "-f", "null", "-"]);
   if (code !== 0) throw new Error(`freeze detection failed: ${stderr.slice(-400)}`);
   const frozen: FrozenFrameResult["frozen"] = [];
   let start: number | null = null;

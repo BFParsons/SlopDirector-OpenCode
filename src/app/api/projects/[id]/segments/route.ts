@@ -1,6 +1,8 @@
 import type { AssetKind, RefRole } from "@/lib/db/enums";
 import { requireApiUser } from "@/lib/auth/rbac";
 import { absolutePath, copyAssetToProject } from "@/lib/assets/storage";
+import { fingerprint } from "@/lib/media/cache";
+import type { Asset } from "@prisma/client";
 import { prisma } from "@/lib/db/client";
 import { probeDuration } from "@/lib/ffmpeg/probe";
 import { handleApiError } from "@/lib/http/handleError";
@@ -73,9 +75,10 @@ export async function POST(request: Request, { params }: Ctx) {
       });
       if (!asset) return err("source asset not found for this segment type", 400);
       // Reusing from another project: copy the file in so this project owns it
-      // (a deleted source project can't then break this segment).
+      // (a deleted source project can't then break this segment) — once per
+      // source, not once per sub-clip cut from it.
       const effective =
-        asset.projectId === id ? asset : await copyAssetToProject(asset, id);
+        asset.projectId === id ? asset : await reuseOrCopy(asset, id);
       sourceAssetId = effective.id;
 
       if (body.source === "UPLOAD_VIDEO") {
@@ -132,4 +135,29 @@ export async function POST(request: Request, { params }: Ctx) {
   } catch (e) {
     return handleApiError(e);
   }
+}
+
+/**
+ * A foreign asset placed on this timeline several times (every sub-clip cut
+ * from a source is its own segment) is copied in once: reuse an existing copy
+ * with the same content. Same size + same sha256 when both are recorded,
+ * otherwise the content fingerprint decides.
+ */
+async function reuseOrCopy(asset: Asset, projectId: string): Promise<Asset> {
+  const candidates = await prisma.asset.findMany({
+    where: { projectId, kind: asset.kind, sizeBytes: asset.sizeBytes },
+    orderBy: { createdAt: "asc" },
+  });
+  for (const c of candidates) {
+    if (asset.sha256 && c.sha256) {
+      if (asset.sha256 === c.sha256) return c;
+      continue;
+    }
+    try {
+      if ((await fingerprint(absolutePath(c.path))) === (await fingerprint(absolutePath(asset.path)))) return c;
+    } catch {
+      /* a copy whose file is gone: skip it */
+    }
+  }
+  return copyAssetToProject(asset, projectId);
 }

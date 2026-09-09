@@ -63,6 +63,9 @@ instructions carry `guide/RULES.md`, so every client sees the rules without aski
 ```bash
 pnpm test:mcp        # drives the server through the MCP client SDK against the running app:
                      # lists tools, cuts silences, builds a scene highlight, checkpoints, drafts
+pnpm exec tsx tests/bench/job.ts <label>     # times a whole job (perceive → cut → checks → draft → final);
+                                             # BENCH_COMPARE=<label> prints speedups, BENCH_IMPORT=1 adds a YouTube import
+pnpm exec tsx tests/bench/calls.ts 'get_project {"projectId":"…"}' …   # times single tools over one connection
 ```
 
 The eval tasks in `tests/eval/` are the scoring harness; `tests/mcp/run.ts`

@@ -77,18 +77,20 @@ export function registerInspectTools(server: McpServer) {
         model: z.enum(["tiny", "base", "small", "medium", "large-v3"]).default("base"),
         language: z.string().max(10).optional(),
         includeWords: z.boolean().default(true),
+        force: z.boolean().default(false).describe("ignore the cached transcript and transcribe again"),
       },
       annotations: { readOnlyHint: true },
     },
-    guarded(async ({ assetId, model, language, includeWords }) => {
+    guarded(async ({ assetId, model, language, includeWords, force }) => {
       type T = { text: string; language: string | null; segments: unknown[]; words: unknown[]; cached: boolean; jobId?: string };
       // Cached? Return at once. Else start the job and long-poll under the MCP
       // request timeout; a slow transcript returns {running:true} — call again.
       let r: T | null = null;
       try {
+        if (force) throw new Error("forced");
         r = await api.get<T>(`/api/assets/${assetId}/transcribe?model=${model}`);
       } catch {
-        const started = await api.post<T>(`/api/assets/${assetId}/transcribe`, { model, ...(language ? { language } : {}), wait: false });
+        const started = await api.post<T>(`/api/assets/${assetId}/transcribe`, { model, ...(language ? { language } : {}), wait: false, force });
         const t0 = Date.now();
         while (Date.now() - t0 < MAX_TOOL_WAIT_S * 1000) {
           await new Promise((res) => setTimeout(res, 1500));

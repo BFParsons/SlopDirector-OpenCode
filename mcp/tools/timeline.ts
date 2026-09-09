@@ -48,11 +48,22 @@ async function completeOrder(projectId: string, orderedIds: string[]): Promise<s
   return [...orderedIds, ...rest];
 }
 
+// Asset kinds do not change: remember them so a 25-op edit list does not probe
+// the same file 25 times (each /info is three ffprobe spawns).
+const kindCache = new Map<string, string>();
+async function assetKind(assetId: string): Promise<string> {
+  const hit = kindCache.get(assetId);
+  if (hit) return hit;
+  const info = await api.get<{ kind: string }>(`/api/assets/${assetId}/info`);
+  kindCache.set(assetId, info.kind);
+  return info.kind;
+}
+
 async function addSegment(a: {
   projectId: string; assetId: string; trimStartS?: number; durationS?: number; track: number; offsetS?: number; audioOnly: boolean; muted?: boolean; imageMotion?: string;
 }): Promise<Snapshot> {
-  const info = await api.get<{ kind: string }>(`/api/assets/${a.assetId}/info`);
-  const source = info.kind === "UPLOAD_IMAGE" ? "UPLOAD_IMAGE_STILL" : "UPLOAD_VIDEO";
+  const kind = await assetKind(a.assetId);
+  const source = kind === "UPLOAD_IMAGE" ? "UPLOAD_IMAGE_STILL" : "UPLOAD_VIDEO";
   const body: Record<string, unknown> = { source, sourceAssetId: a.assetId, track: a.track, audioOnly: a.audioOnly };
   if (a.trimStartS != null) body.trimStartS = a.trimStartS;
   if (a.durationS != null) body.durationS = a.durationS;
@@ -207,11 +218,11 @@ export function registerTimelineTools(server: McpServer) {
         for (const o of ops) {
           step++;
           if (o.op === "add_segment") {
-            const before = new Set((await snapshot(projectId)).segments.map((s) => s.id));
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { op: _op, ...rest } = o;
             const snap = await addSegment({ projectId, ...rest, track: rest.track ?? 0, audioOnly: rest.audioOnly ?? false });
-            const fresh = snap.segments.find((s) => !before.has(s.id));
+            // A new segment always gets the highest index — no pre-snapshot needed.
+            const fresh = snap.segments.reduce((best, s) => (s.index > best.index ? s : best), snap.segments[0]);
             created.push(fresh?.id ?? "");
           } else if (o.op === "update_segment") {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars

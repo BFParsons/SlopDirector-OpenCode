@@ -58,6 +58,11 @@ export function downloadYouTubeClip(opts: {
       "--download-sections",
       `*${fmtTime(startS)}-${fmtTime(endS)}`,
       "--force-keyframes-at-cuts",
+      // The frame-accurate cut re-encodes the section; yt-dlp's default x264
+      // preset ran slower than the download itself (34 s of CPU for a 60 s
+      // 720p section on a laptop). veryfast keeps up with the network.
+      "--downloader-args",
+      "ffmpeg_o:-preset veryfast -crf 20",
       "-f",
       `bv*[height<=${maxHeight}]+ba/b[height<=${maxHeight}]/b`,
       "--merge-output-format",

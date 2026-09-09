@@ -1,0 +1,20 @@
+{
+  "label": "loop2",
+  "at": "2026-09-09T00:27:43.899Z",
+  "times": {
+    "mcp_connect": 1.76,
+    "perceive_sequential": 34.66,
+    "perceive_parallel": 11.79,
+    "transcribe_base": 19.05,
+    "create_project": 0.08,
+    "apply_edit_list": 9.07,
+    "music_and_titles": 17.35,
+    "checks_pre": 45.44,
+    "render_draft": 35.63,
+    "checks_post": 11.1,
+    "render_final": 55.56,
+    "import_youtube_60s_of_780s": 72.84
+  },
+  "total": 314.3,
+  "notes": {}
+}

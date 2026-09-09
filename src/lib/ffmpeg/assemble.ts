@@ -22,7 +22,7 @@ import {
 } from "./args";
 import { type EncoderProfile, encoderProfile } from "./encoder";
 import { type HwDecodeConfig, planHwDecode } from "./hwdecode";
-import { hasAudioStream, probeDuration, probeVideoStream } from "./probe";
+import { hasAudioStream, probeDuration, probeVideoStream, warmProbes } from "./probe";
 import { type ClipTransform, zoompanTransformFilter } from "@/lib/render/transform";
 import { effectsFfmpeg, stabilizeDetectFilter } from "@/config/effects";
 import type { EffectSpec } from "@/lib/render/effects";
@@ -155,21 +155,31 @@ export async function assembleVideo(
   // main graph's vidstabtransform reads. Run those now, keyed by input index.
   const trfPaths = new Map<number, string>();
   {
-    const targets: { idx: number; file: string; effects?: EffectSpec[] }[] = [];
+    const targets: { idx: number; file: string; effects?: EffectSpec[]; trimStartS: number; neededS: number }[] = [];
     opts.inputs.forEach((inp, i) => {
-      if (inp.kind === "video") targets.push({ idx: i, file: inp.path, effects: inp.effects });
+      if (inp.kind === "video") targets.push({ idx: i, file: inp.path, effects: inp.effects, trimStartS: inp.trimStartS ?? 0, neededS: inp.durationS != null ? inp.durationS * clampSpeed(inp.speed) : Infinity });
     });
     (opts.overlayClips ?? []).forEach((pc, j) => {
-      if (pc.kind === "video") targets.push({ idx: n + j, file: pc.path, effects: pc.effects });
+      if (pc.kind === "video") targets.push({ idx: n + j, file: pc.path, effects: pc.effects, trimStartS: pc.trimStartS ?? 0, neededS: pc.durationS != null ? pc.durationS * clampSpeed(pc.speed) : Infinity });
     });
     for (const t of targets) {
       const trf = path.join(path.dirname(opts.tmpPath), `stab-${t.idx}.trf`);
       const detect = stabilizeDetectFilter(t.effects, trf);
       if (!detect) continue;
-      await runFfmpeg(["-y", "-i", t.file, "-vf", detect, "-an", "-f", "null", "-"], 1);
+      const seek = [...(t.trimStartS > 0 ? ["-ss", t.trimStartS.toFixed(3)] : []), ...(Number.isFinite(t.neededS) ? ["-t", (t.neededS + 0.5).toFixed(3)] : [])];
+      await runFfmpeg(["-y", ...seek, "-i", t.file, "-vf", detect, "-an", "-f", "null", "-"], 1);
       trfPaths.set(t.idx, trf);
     }
   }
+
+  // Probe every video input once, concurrently, before the graph is built:
+  // the per-input loops below await probes serially and a cold ffprobe costs
+  // ~0.2 s on a laptop. lib/ffmpeg/probe.ts caches the results.
+  await warmProbes([
+    ...opts.inputs.filter((i) => i.kind === "video").map((i) => i.path),
+    ...(opts.overlayClips ?? []).filter((c) => c.kind === "video").map((c) => c.path),
+    ...(opts.voPath ? [opts.voPath] : []),
+  ]);
 
   // Normalized-PTS tail: trim to the segment's on-screen length (so a trimmed
   // clip is actually cut), ending in `fps` so the link reports a constant frame
@@ -188,6 +198,15 @@ export async function assembleVideo(
     if (plan) hwDecoded++;
     return plan;
   };
+  // Input seeking: `-ss`/`-t` BEFORE `-i` make ffmpeg decode only the source
+  // range a segment shows (from the keyframe before the in-point), instead of
+  // decoding every file from 0 to its out-point and discarding the rest in the
+  // graph. The graph's own trim then starts at 0. Accurate seek is exact.
+  const SEEK_PAD_S = 0.5;
+  const seekArgs = (trimStartS: number, neededS: number): string[] =>
+    trimStartS > 0 || Number.isFinite(neededS)
+      ? [...(trimStartS > 0 ? ["-ss", trimStartS.toFixed(3)] : []), ...(Number.isFinite(neededS) ? ["-t", (neededS + SEEK_PAD_S).toFixed(3)] : [])]
+      : [];
   // Per-input ffmpeg args, effective (post-speed) durations, and full v-subgraph.
   const inputArgs: string[] = ["-y"];
   const effDur: number[] = [];
@@ -240,18 +259,18 @@ export async function assembleVideo(
       }
     } else {
       const plan = await planFor(inp.path, inp.effects, i);
-      inputArgs.push(...(plan?.inputArgs ?? []), "-i", inp.path);
-      const hdPre = plan ? `[${i}:v]${plan.filterPrefix}[hd${i}];` : "";
-      const srcIn = plan ? `hd${i}` : `${i}:v`;
       const speed = clampSpeed(inp.speed);
       // Premiere-style in-point: skip the first `trimStartS` source seconds.
       const trimStartS = Math.max(0, inp.trimStartS ?? 0);
       const probed = await probeDuration(inp.path);
       const fullDur = Math.max(0, (probed - trimStartS) / speed);
       const dur = inp.durationS != null ? Math.min(inp.durationS, fullDur) : fullDur;
+      inputArgs.push(...seekArgs(trimStartS, dur * speed), ...(plan?.inputArgs ?? []), "-i", inp.path);
+      const hdPre = plan ? `[${i}:v]${plan.filterPrefix}[hd${i}];` : "";
+      const srcIn = plan ? `hd${i}` : `${i}:v`;
       effDur.push(dur);
-      const sourceTrim =
-        trimStartS > 0 ? `trim=start=${trimStartS.toFixed(3)},setpts=PTS-STARTPTS,` : "";
+      // The input is seeked to trimStartS: the graph starts at 0.
+      const sourceTrim = "";
       // Source-stage effects (deinterlace / stabilize / deshake / HDR tone-map)
       // run on the raw decoded frames, before the in-point trim and normalize.
       const fxSrc = effectsFfmpeg(inp.effects, { ...fxCtx, trfPath: trfPaths.get(i) }, "source");
@@ -311,15 +330,15 @@ export async function assembleVideo(
       segGraphs.push(`[${idx}:v]${stillFilter(w, h)}${color2Trail}${fx2GeomTrail}${tfPart}${fx2FiltTrail},${segTail(dur)}[ovf${j}]`);
     } else {
       const plan = await planFor(pc.path, pc.effects, idx);
-      inputArgs.push(...(plan?.inputArgs ?? []), "-i", pc.path);
-      const hdPre = plan ? `[${idx}:v]${plan.filterPrefix}[hd${idx}];` : "";
-      const srcIn = plan ? `hd${idx}` : `${idx}:v`;
       const speed = clampSpeed(pc.speed);
       const trimStartS = Math.max(0, pc.trimStartS ?? 0);
       const probed = await probeDuration(pc.path);
       const fullDur = Math.max(0, (probed - trimStartS) / speed);
       dur = pc.durationS != null ? Math.min(pc.durationS, fullDur) : fullDur;
-      const sourceTrim = trimStartS > 0 ? `trim=start=${trimStartS.toFixed(3)},setpts=PTS-STARTPTS,` : "";
+      inputArgs.push(...seekArgs(trimStartS, dur * speed), ...(plan?.inputArgs ?? []), "-i", pc.path);
+      const hdPre = plan ? `[${idx}:v]${plan.filterPrefix}[hd${idx}];` : "";
+      const srcIn = plan ? `hd${idx}` : `${idx}:v`;
+      const sourceTrim = ""; // seeked input: the graph starts at 0
       const fx2Src = effectsFfmpeg(pc.effects, { w, h, fps: TARGET_FPS, trfPath: trfPaths.get(idx) }, "source");
       const fx2SrcLead = fx2Src ? `${fx2Src},` : "";
       const retime = speed !== 1 ? `,setpts=(PTS-STARTPTS)/${speed}` : "";
@@ -339,7 +358,10 @@ export async function assembleVideo(
   const overlays = opts.overlays ?? [];
   for (const ov of overlays) inputArgs.push("-i", ov.path);
   const audioClips = opts.audioClips ?? [];
-  for (const ac of audioClips) inputArgs.push("-i", ac.path);
+  for (const ac of audioClips) {
+    const needed = Math.max(0.1, ac.durationS ?? 0) * clampSpeed(ac.speed ?? 1);
+    inputArgs.push(...seekArgs(Math.max(0, ac.trimStartS ?? 0), needed), "-i", ac.path);
+  }
   // Watermark is the last input so its index is predictable.
   const hasWatermark = !!opts.watermark;
   if (opts.watermark) inputArgs.push("-i", opts.watermark.path);
@@ -487,9 +509,7 @@ export async function assembleVideo(
     const inp = opts.inputs[i];
     if (inp.kind === "video" && inp.muted === false && (await hasAudioStream(inp.path))) {
       const speed = clampSpeed(inp.speed);
-      const trimStartS = Math.max(0, inp.trimStartS ?? 0);
-      const srcTrim =
-        trimStartS > 0 ? `atrim=start=${trimStartS.toFixed(3)},asetpts=N/SR/TB,` : "";
+      const srcTrim = ""; // the input is seeked to the in-point
       const tempo = speed !== 1 ? `atempo=${speed},` : "";
       const offsetMs = Math.round(startOffset[i] * 1000);
       const delayPart = offsetMs > 0 ? `adelay=${offsetMs}:all=1,asetpts=N/SR/TB,` : "";
@@ -511,8 +531,7 @@ export async function assembleVideo(
     if (!(await hasAudioStream(pc.path))) continue;
     const m = pipMeta[j];
     const speed = clampSpeed(pc.speed);
-    const trimStartS = Math.max(0, pc.trimStartS ?? 0);
-    const srcTrim = trimStartS > 0 ? `atrim=start=${trimStartS.toFixed(3)},asetpts=N/SR/TB,` : "";
+    const srcTrim = ""; // seeked input
     const tempo = speed !== 1 ? `atempo=${speed},` : "";
     const offsetMs = Math.max(0, Math.round(m.offsetS * 1000));
     const delayPart = offsetMs > 0 ? `adelay=${offsetMs}:all=1,asetpts=N/SR/TB,` : "";
@@ -543,9 +562,8 @@ export async function assembleVideo(
   for (let i = 0; i < audioClips.length; i++) {
     const ac = audioClips[i];
     const speed = clampSpeed(ac.speed ?? 1);
-    const trimStartS = Math.max(0, ac.trimStartS ?? 0);
     const clipDur = Math.max(0.1, ac.durationS ?? 0);
-    const srcTrim = trimStartS > 0 ? `atrim=start=${trimStartS.toFixed(3)},asetpts=N/SR/TB,` : "";
+    const srcTrim = ""; // seeked input
     const tempo = speed !== 1 ? `atempo=${speed},` : "";
     const offsetMs = Math.max(0, Math.round(ac.offsetS * 1000));
     const delayPart = offsetMs > 0 ? `adelay=${offsetMs}:all=1,asetpts=N/SR/TB,` : "";

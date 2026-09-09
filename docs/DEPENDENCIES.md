@@ -247,6 +247,16 @@ What differs from the Debian/Windows notes above:
   clip). 10-bit is different: the CPU decodes an 80 Mbps 4K Main10 clip at ~10 fps, so the
   GPU wins even at full size (4 s clip, 4K → 4K: 10.1 s vs 15.6 s; 4K → 1080p: 3.9 s vs
   13.5 s). Cached in `capabilities-cache.json` as `hwDecode: ["h264","hevc","hevc10"]`.
+- **Analysis cache (2026-09, speed loops).** Scene cuts, silences, loudness, black/frozen
+  frames, loudness timelines, Whisper transcripts and the 16 kHz wav they read are cached
+  under `<ASSET_ROOT>/_cache/<fingerprint>/` (fingerprint = sha1 of the file, memoized per
+  path/size/mtime), so the same media reused in another project — the segments API *copies* a
+  foreign asset into the project — is warm from the first call. Safe to delete; rebuilt on
+  demand. Per-project `cache/` dirs still hold frames and contact sheets. ffprobe results
+  are memoized in-process by path+size+mtime (`lib/ffmpeg/probe.ts`). Exports encode AAC
+  with `-aac_coder fast` (ffmpeg's recommendation above 128 kb/s; 2× faster than the
+  default coder on this CPU). `tests/bench/job.ts` measures a whole harness job; see
+  CHANGELOG "Speed loops" for the numbers.
 - **`.npmrc`** — the Windows-only `script-shell=C:\PROGRA~1\Git\bin\bash.exe` line was
   removed from the repo (it made every `pnpm <script>` fail on Linux with ENOENT).
   Windows devs set it in their **user** `%USERPROFILE%\.npmrc` instead — see Option B.

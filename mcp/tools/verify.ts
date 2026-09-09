@@ -226,34 +226,28 @@ export function registerVerifyTools(server: McpServer) {
       const transcripts = new Map<string, Transcript | null>();
       const silences = new Map<string, { startS: number; endS: number; durationS: number }[]>();
       const sceneCuts = new Map<string, number[]>();
-      for (const id of assets) {
-        let tr: Transcript | null = null;
-        // Any cached transcript will do (the requested model first).
-        for (const m of [model, "small", "base", "medium", "tiny", "large-v3"].filter((v, i, a) => a.indexOf(v) === i)) {
-          try {
-            tr = await api.get<Transcript>(`/api/assets/${id}/transcribe?model=${m}`);
-            break;
-          } catch {
-            /* not cached for this model */
-          }
-        }
-        if (!tr && transcribe) tr = await api.post<Transcript>(`/api/assets/${id}/transcribe`, { model });
-        transcripts.set(id, tr);
-        if (videoAssets.includes(id)) {
-          try {
-            const sc = await api.get<{ cuts: number[] }>(`/api/assets/${id}/scenes?threshold=0.35`);
-            sceneCuts.set(id, sc.cuts);
-          } catch {
-            sceneCuts.set(id, []);
-          }
-        }
-        try {
-          const sil = await api.get<{ silences: { startS: number; endS: number; durationS: number }[] }>(`/api/assets/${id}/silences?noise=-35&min=0.5`);
-          silences.set(id, sil.silences);
-        } catch {
-          silences.set(id, []);
-        }
-      }
+      // Per-asset lookups run in parallel (each is an ffmpeg pass on the server).
+      await Promise.all(
+        assets.map(async (id) => {
+          const [tr, sc, sil] = await Promise.all([
+            (async () => {
+              for (const m of [model, "small", "base", "medium", "tiny", "large-v3"].filter((v, i, a) => a.indexOf(v) === i)) {
+                try {
+                  return await api.get<Transcript>(`/api/assets/${id}/transcribe?model=${m}`);
+                } catch {
+                  /* not cached for this model */
+                }
+              }
+              return transcribe ? api.post<Transcript>(`/api/assets/${id}/transcribe`, { model }) : null;
+            })(),
+            videoAssets.includes(id) ? api.get<{ cuts: number[] }>(`/api/assets/${id}/scenes?threshold=0.35`).then((r) => r.cuts).catch(() => [] as number[]) : Promise.resolve([] as number[]),
+            api.get<{ silences: { startS: number; endS: number; durationS: number }[] }>(`/api/assets/${id}/silences?noise=-35&min=0.5`).then((r) => r.silences).catch(() => []),
+          ]);
+          transcripts.set(id, tr);
+          if (videoAssets.includes(id)) sceneCuts.set(id, sc);
+          silences.set(id, sil);
+        }),
+      );
       const r = checkCuts(s, { transcripts, silences, sceneCuts });
       const untranscribed = assets.filter((id) => !transcripts.get(id));
       return text({ ...r, transcriptsUsed: assets.length - untranscribed.length, untranscribedSources: untranscribed, hint: untranscribed.length ? "mid-word checks skipped for sources without a transcript — call again with transcribe=true" : undefined });
@@ -461,26 +455,24 @@ export async function soundtrackReport(projectId: string) {
   // What is in the unmuted shots' source audio?
   const audible = shots.filter((x) => !x.muted && x.sourceAssetId);
   const cache = new Map<string, { speech: Range[]; words: { startS: number; endS: number; text: string }[] | null }>();
-  for (const x of audible) {
-    const id = x.sourceAssetId!;
-    if (cache.has(id)) continue;
-    let speech: Range[] = [];
-    let words: { startS: number; endS: number; text: string }[] | null = null;
-    try {
-      speech = (await api.get<{ speech: Range[] }>(`/api/assets/${id}/silences?noise=-35&min=0.5`)).speech;
-    } catch {
-      /* no audio stream */
-    }
-    for (const m of ["small", "base", "medium", "tiny", "large-v3"]) {
-      try {
-        words = (await api.get<{ words: { startS: number; endS: number; text: string }[] }>(`/api/assets/${id}/transcribe?model=${m}`)).words.filter((w) => /[\p{L}\p{N}]/u.test(w.text));
-        break;
-      } catch {
-        /* not cached */
-      }
-    }
-    cache.set(id, { speech, words });
-  }
+  await Promise.all(
+    [...new Set(audible.map((x) => x.sourceAssetId!))].map(async (id) => {
+      const [speech, words] = await Promise.all([
+        api.get<{ speech: Range[] }>(`/api/assets/${id}/silences?noise=-35&min=0.5`).then((r) => r.speech).catch(() => [] as Range[]),
+        (async () => {
+          for (const m of ["small", "base", "medium", "tiny", "large-v3"]) {
+            try {
+              return (await api.get<{ words: { startS: number; endS: number; text: string }[] }>(`/api/assets/${id}/transcribe?model=${m}`)).words.filter((w) => /[\p{L}\p{N}]/u.test(w.text));
+            } catch {
+              /* not cached */
+            }
+          }
+          return null;
+        })(),
+      ]);
+      cache.set(id, { speech, words });
+    }),
+  );
   const shotAudio = audible.map((x) => {
     const c = cache.get(x.sourceAssetId!)!;
     const src = { startS: x.source.inS, endS: x.source.outS };

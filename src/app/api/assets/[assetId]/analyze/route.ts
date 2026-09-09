@@ -5,6 +5,7 @@ import { measureLoudness } from "@/lib/audio/analyze";
 import { hasAudioStream, probeDuration, probeVideoStream } from "@/lib/ffmpeg/probe";
 import { handleApiError } from "@/lib/http/handleError";
 import { err, ok } from "@/lib/http/response";
+import { cachedJson } from "@/lib/media/cache";
 import { detectBlack, detectFrozen, detectSilences, loudnessTimeline } from "@/lib/media/inspect";
 
 type Ctx = { params: Promise<{ assetId: string }> };
@@ -29,13 +30,14 @@ export async function GET(req: Request, { params }: Ctx) {
     // A file with no audio stream (every shot muted, no music) is a legitimate
     // answer, not a server error: audio kinds come back null with hasAudio=false.
     const hasAudio = await hasAudioStream(abs);
+    const c = <T>(key: string, fn: () => Promise<T>) => cachedJson(key, abs, fn);
     const [probe, black, frozen, loudness, silence, timeline] = await Promise.all([
       kinds.includes("probe") ? Promise.all([probeDuration(abs), probeVideoStream(abs).catch(() => null)]).then(([d, v]) => ({ durationS: d, video: v, hasAudio })) : null,
-      kinds.includes("black") && isVideo ? detectBlack(abs).catch(() => null) : null,
-      kinds.includes("freeze") && isVideo ? detectFrozen(abs).catch(() => null) : null,
-      kinds.includes("loudness") && hasAudio ? measureLoudness(abs).catch((e: Error) => ({ error: e.message })) : null,
-      kinds.includes("silence") && hasAudio ? detectSilences(abs, -40, 0.5).catch(() => null) : null,
-      kinds.includes("timeline") && hasAudio ? loudnessTimeline(abs).catch(() => null) : null,
+      kinds.includes("black") && isVideo ? c("black", () => detectBlack(abs)).catch(() => null) : null,
+      kinds.includes("freeze") && isVideo ? c("freeze", () => detectFrozen(abs)).catch(() => null) : null,
+      kinds.includes("loudness") && hasAudio ? c("loudness", () => measureLoudness(abs)).catch((e: Error) => ({ error: e.message })) : null,
+      kinds.includes("silence") && hasAudio ? c("silences--40-0.5", () => detectSilences(abs, -40, 0.5)).catch(() => null) : null,
+      kinds.includes("timeline") && hasAudio ? c("timeline", () => loudnessTimeline(abs)).catch(() => null) : null,
     ]);
     return ok({
       assetId: asset.id,

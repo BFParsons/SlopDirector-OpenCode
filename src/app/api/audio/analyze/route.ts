@@ -8,6 +8,7 @@ import { resolveAudioFile } from "@/lib/audio/workspace";
 import { prisma } from "@/lib/db/client";
 import { absolutePath } from "@/lib/assets/storage";
 import { detectSilence, detectTempo, measureLoudness } from "@/lib/audio/analyze";
+import { cachedJson } from "@/lib/media/cache";
 
 export const dynamic = "force-dynamic";
 
@@ -40,10 +41,11 @@ export async function POST(request: Request) {
     }
     if (!abs) return err("Invalid audio path", 400);
 
+    const c = <T>(key: string, fn: () => Promise<T>) => cachedJson(key, abs, fn);
     const [loudness, silence, tempo] = await Promise.all([
-      body.kinds.includes("loudness") ? measureLoudness(abs) : Promise.resolve(null),
-      body.kinds.includes("silence") ? detectSilence(abs) : Promise.resolve(null),
-      body.kinds.includes("tempo") ? detectTempo(abs) : Promise.resolve(null),
+      body.kinds.includes("loudness") ? c("loudness", () => measureLoudness(abs)) : Promise.resolve(null),
+      body.kinds.includes("silence") ? c("silence", () => detectSilence(abs)) : Promise.resolve(null),
+      body.kinds.includes("tempo") ? c("tempo", () => detectTempo(abs)) : Promise.resolve(null),
     ]);
 
     return ok({ loudness, silence, tempo });
