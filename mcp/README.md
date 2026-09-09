@@ -77,3 +77,15 @@ pnpm exec tsx tests/bench/calls.ts 'get_project {"projectId":"…"}' …   # tim
 The eval tasks in `tests/eval/` are the scoring harness; `tests/mcp/run.ts`
 solves the same tasks through the MCP tools, which is the acceptance test for
 this layer.
+
+## What the server knows
+
+The tools are grouped project · media · inspect · timeline · render · verify ·
+pre-production · sourcing · typography · guide (68 tools, 4 prompts —
+[`guide/appendix-a-tools.md`](../guide/appendix-a-tools.md) is generated from the
+server with `pnpm exec tsx scripts/gen-tool-reference.ts`). The craft the tools
+enforce is the editing guide ([`guide/`](../guide/): `read_guide`, `search_guide`,
+`get_playbook`), the directing styles ([`guide/styles/`](../guide/styles/README.md):
+`list_styles`, `get_style`) and the typography on safe areas (`list_typography`,
+`check_text`). `pnpm test:mcp` runs the acceptance suite against the running app.
+

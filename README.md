@@ -9,6 +9,35 @@ SlopStudio Pro for **Omarchy** (Arch Linux + Hyprland) — the desktop NLE fork 
 > voiceover generation, and everything else are unchanged. Mentions of storyboards
 > below are historical. See `docs/CHANGELOG.md`.
 
+## The agent harness
+
+This fork adds a harness that lets an agent — Claude Code, or any MCP client — edit in the
+running app the way an editor would: interview the person, propose a plan, source and cut,
+check its own work, render. All of it is in this repository:
+
+| piece | where | what |
+|---|---|---|
+| MCP server | [`mcp/`](mcp/README.md) | 68 tools and 4 prompts over the app's HTTP API — project, media, inspect, timeline, render, verify, pre-production, sourcing, typography, guide. `pnpm test:mcp` runs 78 acceptance checks against the running app. |
+| The editing guide as knowledge | [`guide/`](guide/) | [`editing-guide.md`](guide/editing-guide.md) (Part II is the harness: sound §7, pre-production §11, typography §12), [`RULES.md`](guide/RULES.md) (38 always-on rules), [`playbooks/`](guide/playbooks/), [`appendix-a-tools.md`](guide/appendix-a-tools.md) (generated from the server). |
+| Directing styles | [`guide/styles/`](guide/styles/README.md), `src/lib/styles` | 42 filmmakers and houses across nine categories, asked for in the interview; each file is the signature, structure, the cut (numbers), narration, sound, picture and text, type, harness parameters, applying it — and `check_plan`, `pacing_report`, `check_soundtrack` hold the piece to it. |
+| Typography on safe areas | `src/lib/typography`, [`public/fonts`](public/fonts/LICENSES.md) | safe-area profiles (web, broadcast, social 9:16, square) anchoring every text and caption in the render, the preview and the checks; 43 bundled open-licence faces; presets; a surveyed type system per style (`add_text_overlay {role}`). |
+| Sub-agents | [`.claude/agents/`](.claude/agents/) | clip-scout, narrator, shot-picker — the fan-out after approval. |
+| Watching it work | the Agent panel; the invisible-editor follow mode | the open editor shows the work as it happens: clips arrive, the playhead follows, the draft takes the monitor. |
+
+**The flow.** `interview_next` (one question at a time, multiple choice: form, your own
+script or shot list, length, frame, genre, directing style, sources, premise, tone,
+narration, music, text, guardrails) → `set_brief` → `get_style` → the plan (`set_plan`,
+`check_plan`, `plan_document` as boxed terminal tables) → the person's yes
+(`approve_plan`) → `plan_tasks` fanned out → the cut → `check_cuts`, `pacing_report`,
+`check_soundtrack`, `check_text` → `render_draft` → `verify_export` → `render_final`.
+Nothing is sourced or cut before approval.
+
+**Run it.** Start the app (`scripts/launch-desktop.sh --prod`, or `pnpm serve:headless`
+with no display); `.mcp.json` registers the server for Claude Code inside the repo, and
+[`mcp/README.md`](mcp/README.md) has the setup for other clients. [`CLAUDE.md`](CLAUDE.md)
+is the short version for an agent, [`docs/AGENT-API.md`](docs/AGENT-API.md) the routes,
+[`docs/CHANGELOG.md`](docs/CHANGELOG.md) the history.
+
 # SlopStudio (formerly SpotForge)
 
 A browser-based, **Premiere-style non-linear video editor** with built-in AI generation:
@@ -49,6 +78,7 @@ single Hetzner box via Docker.
 
 ## Contents
 
+0. [The agent harness](#the-agent-harness) — this fork's addition
 1. [What it is](#what-it-is)
 2. [The political-content rule](#the-political-content-rule)
 3. [Features](#features)
