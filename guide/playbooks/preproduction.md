@@ -5,12 +5,20 @@ yes to a plan. This playbook turns "make me a 30 s ad about X" into a brief, a
 plan they can read (storyboard + script + shot list + clip list), and a set of
 tasks that run in parallel.
 
-## 1. The interview (one round)
+## 1. The interview (one question at a time)
 
-Read the request twice. Fill in every answer you can infer, then ask **one
-message** with only the open questions — at most eight — each with your
-proposed default in brackets, so "yes" or a word answers it. Never ask what the
-request already said.
+Read the request twice and put everything it already answers into `answers`
+(a two-minute scene → `kind: "scene"`, `durationS: 120`). Then loop:
+`interview_next {request, answers}` → present **that one question** through
+the host's question UI (Claude Code: `AskUserQuestion`, 2–4 options, the
+recommended one first and labelled "(Recommended)", multi-select when the
+question says so; in a plain chat, a numbered list) → record the answer under
+the question id → call again, until it returns the brief. Where the question
+says `agentFills` (which scene, the placement, the genre, the premise, the
+tone, the guardrails) you write the 3–4 options yourself from what you know
+of the subject — specific, one line each, "Other" last. Never two questions
+in one message; never a question the request already answered. The table
+below is what the questions cover and why.
 
 | # | question | why it changes the work |
 |---|---|---|

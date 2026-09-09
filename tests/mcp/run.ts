@@ -261,6 +261,28 @@ async function main() {
       const tools = new Set(feed.map((f) => f.tool));
       check("agent activity feed records the tool calls (start/end, timing)", tools.has("set_plan") && tools.has("approve_plan") && feed.some((f) => f.phase === "end" && f.ok === true && typeof f.ms === "number"), [...tools].slice(0, 8).join(","));
     }
+    // --- the interview: one question at a time until the brief is assembled
+    {
+      type Q = { done: false; question: { id: string; options: { value: string }[]; agentFills?: string; multiSelect?: boolean; recommended?: number } } | { done: true; brief: { deliverable: { kind: string; durationS: number }; production: { scripted: boolean; genre: string }; sources: { kinds: string[] }; premise: string; tone: string; mustInclude?: string[]; avoid?: string[] } };
+      const req = "a two minute scene for a documentary about the LA riots";
+      const answers: Record<string, unknown> = { kind: "scene", durationS: 120 };
+      const asked: string[] = [];
+      let step = (await call<Q>("interview_next", { request: req, answers })).json;
+      let guard = 0;
+      while (!step.done && guard++ < 20) {
+        const qq = step.question;
+        asked.push(qq.id);
+        const fill: Record<string, unknown> = { scenePart: "the afternoon of the verdict and the first night", context: "after the trial scene, before day two", genre: "scripted historical documentary: narration over archival footage", premise: "A verdict read in fifteen minutes became the first night of the largest unrest in modern US history.", tone: "sober, observational, unhurried — general documentary viewers", guardrails: ["include: the verdict", "avoid: close-ups of violence"] };
+        answers[qq.id] = qq.agentFills ? fill[qq.id] ?? "x" : qq.multiSelect ? [qq.options[qq.recommended ?? 0].value] : qq.options[qq.recommended ?? 0].value;
+        step = (await call<Q>("interview_next", { request: req, answers })).json;
+      }
+      const b = step.done ? step.brief : null;
+      check("interview_next asks one question at a time and ends with a valid brief", !!b && !asked.includes("kind") && !asked.includes("durationS") && asked[0] === "scenePart" && asked.includes("sources") && asked.includes("licence") && b.deliverable.kind === "scene" && b.deliverable.durationS === 120 && b.production.scripted && b.sources.kinds.includes("youtube") && b.mustInclude?.[0] === "the verdict" && b.avoid?.[0] === "close-ups of violence", asked.join(","));
+      if (b) {
+        const stored = await call<{ brief: { status: string } }>("set_brief", { projectId: p2.json.id, brief: b });
+        check("the interview's brief is accepted by set_brief", stored.json.brief?.status === "draft");
+      }
+    }
     const vm = await call<{ video: { id: string; durationsS?: number[] }[] }>("list_video_models", {});
     check("list_video_models lists the video models with clip lengths", vm.json.video.length >= 3 && vm.json.video.every((m) => Array.isArray(m.durationsS)));
     if (process.env.MCP_TEST_NETWORK === "1") {

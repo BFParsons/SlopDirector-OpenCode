@@ -5,6 +5,17 @@ Notable changes, newest first. See [DEPENDENCIES.md](DEPENDENCIES.md) for setup 
 
 ## 2026-09 — no-storyboard fork
 
+- **The interview asks one question at a time, multiple choice.** Like a planning prompt:
+  `interview_next {request, answers}` (`mcp/interview.ts`) returns the next question — id,
+  header, wording, 2–4 options with the recommended one marked, multi-select where it
+  applies — or, once everything needed is in, the assembled brief for `set_brief`. The
+  agent presents each through the host's question UI (Claude Code: AskUserQuestion) and
+  records the pick under the question id. Questions about the subject itself (which scene,
+  its placement, genre, premise, tone, guardrails) come back `agentFills`: the agent writes
+  the concrete options from what it knows. Whatever the request already answered is put
+  in `answers` up front and never asked. Prompt `interview`, playbook §1 and RULES 32
+  updated.
+
 - **Watch the agent work: the Agent panel.** An agent drives the app through the API, so
   the open editor only ever saw the results appear. Now every MCP tool call is reported to
   the app (`POST /api/activity`, one fire-and-forget request per call from the MCP server's

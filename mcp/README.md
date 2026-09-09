@@ -48,7 +48,7 @@ Open the project in the app and watch the editor: clips the agent adds fade in o
 
 ## Tools
 
-Pre-production first for a new piece: `set_brief` (after the `interview` prompt), `set_plan` / `check_plan` / `plan_document` / `approve_plan` / `plan_tasks`, then sourcing in parallel (`search_youtube`, `source_clips`, `add_ai_shot` / `generate_ai_shots`, `generate_narration`, `list_video_models`) and `storyboard_sheet` to review a cut. Sub-agent definitions for Claude Code live in `.claude/agents/` (clip-scout, narrator, shot-picker).
+Pre-production first for a new piece: the `interview` prompt drives `interview_next` one multiple-choice question at a time (AskUserQuestion in Claude Code) into `set_brief`, `set_plan` / `check_plan` / `plan_document` / `approve_plan` / `plan_tasks`, then sourcing in parallel (`search_youtube`, `source_clips`, `add_ai_shot` / `generate_ai_shots`, `generate_narration`, `list_video_models`) and `storyboard_sheet` to review a cut. Sub-agent definitions for Claude Code live in `.claude/agents/` (clip-scout, narrator, shot-picker).
 
 | Group | Tools |
 |---|---|

@@ -8,11 +8,23 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { briefSchema, planSchema } from "../../src/lib/validation/brief";
 import { api } from "../client";
+import { nextQuestion } from "../interview";
 import { guarded, image, text } from "../format";
 
 type Check = { pass: boolean; findings: { severity: string; rule: string; message: string; ref?: string }[]; summary: Record<string, unknown> };
 
 export function registerPreproductionTools(server: McpServer) {
+  server.registerTool(
+    "interview_next",
+    {
+      title: "Next interview question",
+      description:
+        "The pre-production interview, one question at a time with multiple choice — like a planning prompt. Pass the person's request and the answers so far ({questionId: value}); get the next question (id, header, question, options with the recommended one marked, multiSelect) or, when everything needed is in, the finished brief to pass to set_brief. Present each question through the host's question UI (Claude Code: AskUserQuestion — one question, the options as given, recommended first labelled '(Recommended)'); in a plain chat, a numbered list. When the question says `agentFills`, write 3–4 concrete options yourself from what you know of the subject (the tool cannot), keep 'Other' last, and store the chosen text as the value. Never ask two questions at once; never ask what the request already answered — put it in `answers` yourself.",
+      inputSchema: { request: z.string().min(1).max(4000).describe("what the person asked for, verbatim"), answers: z.record(z.string(), z.unknown()).default({}).describe("answers so far, keyed by question id") },
+    },
+    guarded(async ({ request, answers }) => text(nextQuestion(request, answers))),
+  );
+
   server.registerTool(
     "set_brief",
     {

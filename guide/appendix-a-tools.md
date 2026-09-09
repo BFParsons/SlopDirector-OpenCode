@@ -1,6 +1,6 @@
 # Appendix A. MCP Tool Reference
 
-*Generated from the server (62 tools). Regenerate with `pnpm exec tsx scripts/gen-tool-reference.ts`.*
+*Generated from the server (63 tools). Regenerate with `pnpm exec tsx scripts/gen-tool-reference.ts`.*
 
 ## Project
 
@@ -479,6 +479,15 @@ Sets musicVolume from measured loudness so the bed sits `gapLu` (default 6) belo
 | `projectId` | string | required |
 | `gapLu` | number | default 6 |
 
+### `interview_next`
+
+The pre-production interview, one question at a time with multiple choice — like a planning prompt. Pass the person's request and the answers so far ({questionId: value}); get the next question (id, header, question, options with the recommended one marked, multiSelect) or, when everything needed is in, the finished brief to pass to set_brief. Present each question through the host's question UI (Claude Code: AskUserQuestion — one question, the options as given, recommended first labelled '(Recommended)'); in a plain chat, a numbered list. When the question says `agentFills`, write 3–4 concrete options yourself from what you know of the subject (the tool cannot), keep 'Other' last, and store the chosen text as the value. Never ask two questions at once; never ask what the request already answered — put it in `answers` yourself.
+
+| Parameter | Type | Notes |
+|---|---|---|
+| `request` | string | required; what the person asked for, verbatim |
+| `answers` | object | default {}; answers so far, keyed by question id |
+
 ### `set_brief`
 
 Record the outcome of the interview (guide Part II §11, playbook 'preproduction'): standalone piece or a scene of a longer video, length, aspect; scripted or not and the genre; where footage comes from (youtube / ai / upload / stock); premise; tone; audience; must-include / avoid; narration, music and text wanted. Stored on the project; status 'draft' until approve_plan. Replaces the whole brief — pass everything.
@@ -523,11 +532,13 @@ Mechanical check of the stored plan against the brief: total length, average sho
 
 ### `plan_document`
 
-Markdown of the plan for the person to read and approve: brief, logline, beats, storyboard table (shot / source / sound / card), script with times, clips to find, AI prompts, music, narration, risks. Show it to them verbatim (RULES 2: propose-and-approve).
+The plan as the person reads it in a terminal. Default 'table': box-drawn tables — beats, then a two-column AV script (one row per shot: # / at / len / sound / VIDEO = picture, source, card / AUDIO = the narration and bite lines over it), clips to find, AI shots — followed by music, narration, risks and the check. 'list' is the same as an indented list; 'markdown' has markdown tables (also written to plan-v<N>.md). Paste the output into your reply VERBATIM inside a code block, do not summarize it (RULES 2: propose-and-approve).
 
 | Parameter | Type | Notes |
 |---|---|---|
 | `projectId` | string | required |
+| `format` | table \| list \| markdown | default "table" |
+| `width` | integer | default 110; table: total columns |
 
 ### `approve_plan`
 
@@ -547,7 +558,7 @@ The approved plan as tasks with dependencies: one 'source:<clipId>' per clip to 
 
 ### `storyboard_sheet`
 
-One captioned frame per shot of the main sequence (index · start · length · sync/mute · title card) tiled as a storyboard — the picture to review a cut with, and to send the person before the draft. Needs shots on the timeline.
+One captioned frame per shot of the main sequence (index · start · length · sync/mute · title card) tiled as a storyboard — for YOUR eyes when reviewing a cut (the person's terminal shows no images: give them the file path and the shot list in text). Needs shots on the timeline.
 
 | Parameter | Type | Notes |
 |---|---|---|
@@ -612,5 +623,5 @@ Start every AI shot in the approved plan (aiShots[]) in one go — each becomes 
 
 - `playbook` — Start a job with its playbook, the always-on rules and the project context.
 - `edit_video` — A playbook for turning a source clip into a finished edit with these tools.
-- `interview` — The questions that pin a new piece down before any footage is touched, asked in one round with inferred defaults, then set_brief.
+- `interview` — One question at a time, multiple choice, recommended answer first — the questions that pin a new piece down before any footage is touched; then set_brief.
 - `preproduction` — From an approved-or-draft brief, author the plan per the playbook, store and check it, present the document, wait for approval, then fan out.

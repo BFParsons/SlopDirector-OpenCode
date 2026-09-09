@@ -146,9 +146,12 @@ export function checkPlan(plan: Plan, brief: Brief | null) {
       if (last?.source.type === "card") f.push({ severity: "warn", rule: "brief: scene of a longer video", message: "a scene doesn't sign off — drop the closing card" });
       if (last?.transition === "fadeToBlack") f.push({ severity: "warn", rule: "brief: scene of a longer video", message: "a scene shouldn't fade to black unless it ends a chapter (ch.20)" });
     }
+    // Loose match: most of the phrase's meaningful words appear somewhere in the plan.
+    const hay = JSON.stringify(plan).toLowerCase();
     for (const m of brief.mustInclude ?? []) {
-      const hay = JSON.stringify(plan).toLowerCase();
-      if (!hay.includes(m.toLowerCase().slice(0, 24))) f.push({ severity: "warn", rule: "brief: must include", message: `nothing in the plan mentions "${m}"` });
+      const ws = m.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter((w) => w.length > 3 && !["that", "with", "this", "from", "into", "over", "being", "read", "their", "there"].includes(w));
+      const hit = ws.filter((w) => hay.includes(w)).length;
+      if (ws.length && hit / ws.length < 0.6) f.push({ severity: "warn", rule: "brief: must include", message: `little in the plan matches "${m}" (${hit}/${ws.length} of its words appear)` });
     }
   }
 
