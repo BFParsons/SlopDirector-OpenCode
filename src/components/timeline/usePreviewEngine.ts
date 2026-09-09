@@ -32,6 +32,25 @@ export function usePreviewEngine(spec: RenderSpec, active = true) {
   useEffect(() => {
     specRef.current = spec;
   }, [spec]);
+
+  /** Set the VO / music element sources and gains from the current spec (idempotent; safe every frame). */
+  const syncAudioSources = useCallback(() => {
+    const s = specRef.current;
+    const vol = volumeRef.current;
+    const vo = voRef.current;
+    const music = musicRef.current;
+    if (vo) {
+      const src = s.audio.voUrl ?? "";
+      if (src && vo.getAttribute("src") !== src) vo.src = src;
+      vo.volume = Math.min(1, Math.max(0, s.audio.voVolume)) * vol; // element gain caps at 1
+    }
+    if (music) {
+      const src = s.audio.musicUrl ?? "";
+      if (src && music.getAttribute("src") !== src) music.src = src;
+      music.volume = Math.min(1, Math.max(0, s.audio.musicVolume)) * vol;
+      music.loop = false;
+    }
+  }, []);
   useEffect(() => {
     playingRef.current = playing;
   }, [playing]);
@@ -144,6 +163,7 @@ export function usePreviewEngine(spec: RenderSpec, active = true) {
       }
     }
 
+    syncAudioSources();
     const vo = voRef.current;
     const music = musicRef.current;
     if (playingRef.current) {
@@ -151,11 +171,23 @@ export function usePreviewEngine(spec: RenderSpec, active = true) {
         vo.currentTime = Math.min(t, vo.duration || t);
         void vo.play().catch(() => {});
       }
-      if (music && music.paused) void music.play().catch(() => {});
+      if (music) {
+        // The bed follows the timeline the way the render mixes it: it starts
+        // at 0 with the picture and does not loop — past its end the preview
+        // is silent, as the export is (assemble.ts trims, it never loops).
+        const known = Number.isFinite(music.duration) && music.duration > 0;
+        if (known && t >= music.duration) {
+          if (!music.paused) music.pause();
+        } else {
+          if (music.paused || Math.abs(music.currentTime - t) > 0.3) music.currentTime = t;
+          if (music.paused) void music.play().catch(() => {});
+        }
+      }
     } else {
       if (vo && !vo.paused) vo.pause();
       if (music && !music.paused) music.pause();
       if (vo) vo.currentTime = Math.min(t, vo.duration || t);
+      if (music && Math.abs(music.currentTime - t) > 0.3) music.currentTime = t;
     }
 
     // Audio-only clips: each plays its source audio in [start, start+dur].
@@ -183,7 +215,7 @@ export function usePreviewEngine(spec: RenderSpec, active = true) {
         if (!el.paused) el.pause();
       }
     }
-  }, [draw]);
+  }, [draw, syncAudioSources]);
 
   const play = useCallback(() => {
     if (timeRef.current >= specRef.current.duration - 0.02) {
@@ -273,22 +305,16 @@ export function usePreviewEngine(spec: RenderSpec, active = true) {
     }
   }, [spec, active, sync, draw]);
 
-  // Keep audio element sources in sync with the spec.
+  // Keep audio element sources in sync with the spec. Runs from the effect
+  // below AND from every playback tick: the <audio> elements live in
+  // PreviewMonitor, which mounts after this hook's first effects have run, so
+  // an effect keyed on the spec alone left them without a src (the bed was
+  // silent in the Live monitor while the render had it). Compare the
+  // attribute, not `.src` (which resolves to an absolute URL), or a relative
+  // URL is re-assigned — and the element reloaded — on every call.
   useEffect(() => {
-    const vo = voRef.current;
-    const music = musicRef.current;
-    if (vo) {
-      const src = spec.audio.voUrl ?? "";
-      if (src && vo.src !== src) vo.src = src;
-      vo.volume = Math.min(1, Math.max(0, spec.audio.voVolume)) * volume; // element gain caps at 1
-    }
-    if (music) {
-      const src = spec.audio.musicUrl ?? "";
-      if (src && music.src !== src) music.src = src;
-      music.volume = Math.min(1, Math.max(0, spec.audio.musicVolume)) * volume;
-      music.loop = true;
-    }
-  }, [spec.audio.voUrl, spec.audio.voVolume, spec.audio.musicUrl, spec.audio.musicVolume, volume]);
+    syncAudioSources();
+  }, [spec.audio.voUrl, spec.audio.voVolume, spec.audio.musicUrl, spec.audio.musicVolume, volume, syncAudioSources]);
 
   // Master output volume (0–1) for the live preview — VO, music, and clip audio.
   const setVolume = useCallback((v: number) => {
