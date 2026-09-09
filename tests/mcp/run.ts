@@ -265,6 +265,22 @@ async function main() {
       check("plan_document shows the style in its header", /Style\s+Frederick Wiseman/.test(JSON.stringify(doc4.json) + doc4.content.map((c) => ("text" in c ? c.text : "")).join("")));
       await call("delete_project", { projectId: p4.json.id });
     }
+    // --- typography: presets land inside title-safe; check_text catches text that does not
+    {
+      const ty = await call<{ frame: { w: number; h: number }; safe: { profile: string; title: { x: number; y: number } }; presets: { id: string }[]; fonts: { id: string }[] }>("list_typography", { projectId: p2.json.id });
+      check("list_typography returns the presets, faces and the frame's safe areas", ty.json.presets.length >= 10 && ty.json.fonts.length >= 10 && ty.json.safe.profile === "web" && ty.json.safe.title.x > 0 && ty.json.frame.w > 0, `${ty.json.presets.length} presets · ${ty.json.fonts.length} faces · ${ty.json.safe.profile} · title-safe x=${ty.json.safe.title.x}`);
+      await call("add_text_overlay", { projectId: p2.json.id, text: "Jane Doe\nSenior Editor", preset: "lower-third", startS: 1 });
+      const ct = await call<{ pass: boolean; findings: { severity: string; rule: string }[]; boxes: { id?: string; text: string; inTitleSafe: boolean }[] }>("check_text", { projectId: p2.json.id });
+      const mine = ct.json.boxes.filter((b) => /Jane Doe/.test(b.text));
+      check("a preset lower-third anchors inside the title-safe area", mine.length === 1 && mine[0].inTitleSafe && !ct.json.findings.some((f) => f.severity === "error"), ct.json.findings.map((f) => f.rule).join(",") || "clean");
+      const p5 = await call<{ id: string }>("create_project", { title: "mcp-test safe-vertical" });
+      await call("add_text_overlay", { projectId: p5.json.id, text: "THIS LINE IS FAR TOO LONG FOR A PHONE SCREEN TO HOLD", position: "BOTTOM_RIGHT", sizePct: 9, marginPx: 0, startS: 0, endS: 1 });
+      // checked against the social (9:16) profile: the caption block and icon rail are outside title-safe
+      const bad = await call<{ pass: boolean; safe: { profile: string }; findings: { severity: string; rule: string }[] }>("check_text", { projectId: p5.json.id, profile: "social" });
+      check("check_text fails oversized text against the social (9:16) safe areas", bad.json.safe.profile === "social" && !bad.json.pass && bad.json.findings.some((f) => f.severity === "error" && /safe areas/.test(f.rule)) && bad.json.findings.some((f) => /reading time/.test(f.rule)), bad.json.findings.map((f) => `${f.severity}:${f.rule.slice(0, 22)}`).join(" | "));
+      await call("delete_project", { projectId: p5.json.id });
+      for (const b of mine) if (b.id) await call("remove_text_overlay", { projectId: p2.json.id, overlayId: b.id });
+    }
     await call("set_plan", { projectId: p2.json.id, plan });
     const tbl = await call<unknown>("plan_document", { projectId: p2.json.id });
     const tblText = tbl.content.find((c) => c.type === "text")?.text ?? "";
@@ -307,6 +323,14 @@ async function main() {
         step = (await call<Q>("interview_next", { request: req, answers })).json;
       }
       const b = step.done ? step.brief : null;
+      check("interview_next asks for the person's own material early (right after the scene questions)", asked.indexOf("materials") === asked.indexOf("context") + 1, asked.slice(0, 4).join(","));
+      {
+        const own = "April 29th, 1992. The jury has been out seven days.\nAt a quarter past three the verdicts are read.";
+        const a2: Record<string, unknown> = { ...answers, materials: "script", materialsText: own };
+        const st2 = (await call<Q>("interview_next", { request: req, answers: a2 })).json;
+        const b2 = st2.done ? (st2.brief as { materials?: { kind: string; text: string } }) : null;
+        check("a pasted script lands in the brief verbatim", !!b2?.materials && b2.materials.kind === "script" && b2.materials.text === own);
+      }
       check("interview_next asks for a directing style after the genre and the brief carries it", asked.indexOf("style") === asked.indexOf("genre") + 1 && (b as { production?: { style?: { id: string } } } | null)?.production?.style?.id === "adam-curtis", asked.join(","));
       check("interview_next asks one question at a time and ends with a valid brief", !!b && !asked.includes("kind") && !asked.includes("durationS") && asked[0] === "scenePart" && asked.includes("sources") && asked.includes("licence") && b.deliverable.kind === "scene" && b.deliverable.durationS === 120 && b.production.scripted && b.sources.kinds.includes("youtube") && b.mustInclude?.[0] === "the verdict" && b.avoid?.[0] === "close-ups of violence", asked.join(","));
       if (b) {

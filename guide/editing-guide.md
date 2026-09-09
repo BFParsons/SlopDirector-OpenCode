@@ -2440,3 +2440,57 @@ The desktop editor's shortcuts are listed in its Help menu. CLI equivalents: `pn
 - **ASL** — average shot length (ch.16).
 - **J-cut / L-cut** — audio leads / trails the picture cut; built here with an audio-only clip.
 - **LUFS / dBTP** — integrated loudness / true peak (ch.29).  
+
+## 12\. Typography, Safe Areas and Motion
+
+Text on a frame is a shot: it has a face, a size, a place, an entrance, a hold and an exit, and it is either the most-read thing on screen or the thing that gets cut off on a phone. This chapter is the harness's typography — distilled from the craft of title design and from three of Anthropic's design skills (`canvas-design`: text as a rare gesture, one family, nothing falls off the page, refine by subtraction; `theme-factory`: a look is a palette and a heading/body pairing applied consistently; `brand-guidelines`: a heading face and a body face with fallbacks) — turned into rules the tools enforce.
+
+### Safe areas
+
+Every delivery cuts or covers the edge of the frame: overscan on a television, the rounded corners and notches of a phone, the caption block, the icon rail and the status bar a social app draws over a vertical video. Two rectangles, from `src/lib/typography/safe.ts`:
+
+| profile | when | action-safe | title-safe |
+|---|---|---|---|
+| `web` | 16:9 and other landscape for the web (auto) | 5 % each side | 10 % each side |
+| `broadcast` | television delivery (SMPTE ST 2046-1) | 93 % (3.5 %) | 90 % (5 %) |
+| `social` | 9:16 vertical (auto) | top 8, bottom 12, left 5, right 5 | top 14, bottom 22, left 6, right 17 |
+| `square` | 1:1 (auto) | 5 % | 10 % |
+| `none` | a full-bleed card, on purpose | 0 | 0 |
+
+**Rule 12.1 — All text inside title-safe; nothing that matters outside action-safe.** Every burned-in text (`add_text_overlay`) and every caption anchors to the title-safe rectangle: `position` picks the corner or edge of *that* rectangle, `marginPx` moves it further in. The project's `safeArea` is `auto` (by aspect) unless the brief says broadcast. The Live monitor shows the two rectangles (the ▢ button); *Mechanical check:* `check_text` — error outside action-safe, warning outside title-safe; `verify_export` runs it on every render.
+
+### The face
+
+**Rule 12.2 — One family per piece, two weights at most.** The bundled faces (`list_typography`): Liberation Sans (the broadcast grotesk), Liberation Serif (the book serif), Liberation Mono (the typewriter), Noto Sans and Noto Serif (the clean humanist pair), DejaVu Sans Bold (wide and heavy, for captions that shout). A directing style names its face through its preset (Curtis: Noto Sans lower-case on black; Burns: Liberation Serif; the trailer: Liberation Sans Bold capitals; the retention cut: DejaVu Sans Bold outlined). Mixing a serif card with a grotesk lower-third is allowed when the two have different jobs; a third face is a mistake.
+
+**Rule 12.3 — Hierarchy by size and place, not by decoration.** Sizes as % of frame height: a title 8–10, a card 4–6, a lower-third 3.5–4.5, a callout 3–3.5, a citation 2.5. On a vertical frame use the preset's vertical size (the height is the long side). Never under 2.2 % (2.4 % vertical). *Mechanical check:* `check_text` readable size.
+
+### The line
+
+**Rule 12.4 — Lines are short and few.** 44 characters a line (26 on a vertical frame), three lines at most; a lower-third is two lines: the name, then the role. Break the text where the sentence breathes, not where the width runs out. Capitals are for titles and intertitles, never for a sentence. *Mechanical check:* `check_text` line length and line count.
+
+**Rule 12.5 — Hold for the reading time.** ≈ 0.8 s plus 0.32 s a word (about 190 words a minute); a card that says something holds 3–4 s; a lower-third 3.5 s; a pop caption as long as the word is spoken. *Mechanical check:* `check_text` reading time (error under 60 % of it).
+
+### Contrast
+
+**Rule 12.6 — Text over picture needs a treatment; text on a field needs none.** Over a shot: a translucent box (lower-thirds, callouts), an outline (pop captions, quotes over sky), or a shadow (titles). On black or a flat card: plain. A box is 35 % of the size in padding; an outline 4–9 % of the size; a shadow 4–6 %. Never a box *and* an outline.
+
+### Motion
+
+**Rule 12.7 — One entrance vocabulary per piece.** `FADE` (0.4 s in and out) is the default; `SLIDE_UP` (rises 0.6 em over 0.35 s, eased) is the broadcast lower-third and the map label; `POP` (grows from 82 % over 0.16 s) is the retention caption and the attack-ad word; `NONE` is the archive card and the intertitle (they cut, like the picture). Do not mix them inside a piece unless the change of vocabulary is the point.
+
+**Rule 12.8 — Text moves with the cut, not against it.** A lower-third arrives 0.5 s after the shot it names begins and leaves 0.5 s before the cut. A card is its own shot (`source.type: "card"`), never over the tail of a moving image. A caption lands on the word (`atS` from the transcript), not on the sentence.
+
+**Rule 12.9 — One thing at a time.** Two texts on screen at once are a layout, not a film. *Mechanical check:* `check_text` overlap.
+
+### Transitions between shots
+
+The cut is the default (ch.15). The project's `transition` (`CROSSFADE`, `DISSOLVE`, `FADE_BLACK`, `WIPE`, `SLIDE`) is a global grammar and belongs to the styles that name one (Ken Burns' dissolves, Hal Riney's, LEMMiNO's). A style that says "cuts" gets `NONE`. Image motion on stills (`imageMotion`: push, pull, pan) is a move with a reason — it starts on something and ends on something (Burns, Vsauce, LEMMiNO).
+
+### Applying it
+
+- `list_typography {projectId}` — the presets, the faces, the project's safe rectangles and the preset its style reaches for first.
+- `add_text_overlay {preset, text, startS}` — the preset fills face, size, place, treatment, entrance and hold for this frame; pass any field to override.
+- `check_text {projectId}` — before `render_final`; `verify_export` repeats it on the file.
+- `update_project {safeArea: "broadcast"}` for television delivery; `"none"` only for a deliberate full-bleed card.
+

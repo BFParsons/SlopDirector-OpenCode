@@ -158,6 +158,7 @@ model Project {
   captionPosition OverlayPosition @default(BOTTOM_CENTER)
   captionSizePct  Int             @default(6) // font size as a percent of frame height
   captionStyle    String          @default("OUTLINE") // OUTLINE | BOX | POP (libass rendering)
+  safeArea      String       @default("auto") // safe-area profile: auto|web|broadcast|social|square|none (src/lib/typography/safe)
   // optional logo / watermark composited over the whole ad
   watermarkAssetId String?
   watermarkAsset   Asset?          @relation("WatermarkAsset", fields: [watermarkAssetId], references: [id])
@@ -271,6 +272,8 @@ enum OverlayPosition {
 enum TextAnimation {
   NONE // hard on/off
   FADE // fade in and out at the edges of its window
+  SLIDE_UP // rises into place over 350 ms
+  POP // grows from 82 % over 160 ms
 }
 
 // Transition style between consecutive segments.
@@ -503,6 +506,10 @@ model TextOverlay {
   startS     Float           @default(0) // appears at this time
   endS       Float? // disappears at this time; null = until the end
   animation  TextAnimation   @default(NONE)
+  font      String  @default("DejaVuSans-Bold") // bundled face id (src/lib/typography/fonts)
+  outlineW  Int     @default(0) // outline width as % of the font size
+  shadow    Int     @default(0) // drop-shadow offset as % of the font size
+  preset    String? // typography preset the overlay was made from
   createdAt  DateTime        @default(now())
   updatedAt  DateTime        @updatedAt
 

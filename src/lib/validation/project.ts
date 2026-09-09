@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { FONT_IDS } from "@/lib/typography/fonts";
 import { CAPS } from "@/config/models";
 
 export const aspectRatioEnum = z.enum(["R16_9", "R9_16", "R1_1"]);
@@ -54,7 +55,9 @@ export const overlayPositionEnum = z.enum([
   "BOTTOM_CENTER",
   "BOTTOM_RIGHT",
 ]);
-export const textAnimationEnum = z.enum(["NONE", "FADE"]);
+export const textAnimationEnum = z.enum(["NONE", "FADE", "SLIDE_UP", "POP"]);
+export const fontIdEnum = z.enum(FONT_IDS);
+export const safeAreaEnum = z.enum(["auto", "web", "broadcast", "social", "square", "none"]);
 const hexColor = z.string().regex(/^#?[0-9a-fA-F]{6}$/, "must be a #RRGGBB hex color");
 export const segmentSourceEnum = z.enum([
   "AI_GENERATED",
@@ -160,6 +163,8 @@ export const patchProjectSchema = z.object({
   captionPosition: overlayPositionEnum.optional(),
   captionSizePct: z.number().int().min(1).max(40).optional(),
   captionStyle: z.enum(["OUTLINE", "BOX", "POP"]).optional(),
+  // safe-area profile for text and captions (src/lib/typography/safe)
+  safeArea: safeAreaEnum.optional(),
   // export format (codec + container)
   exportCodec: z.enum(["h264", "hevc", "av1", "vp9", "prores"]).optional(),
   // watermark mix settings (the image is uploaded via /watermark)
@@ -229,6 +234,10 @@ export const patchProjectSchema = z.object({
         startS: z.number().min(0).max(3600).optional(),
         endS: z.number().min(0).max(3600).nullable().optional(),
         animation: textAnimationEnum.optional(),
+        font: fontIdEnum.optional(),
+        outlineW: z.number().int().min(0).max(40).optional(),
+        shadow: z.number().int().min(0).max(30).optional(),
+        preset: z.string().max(40).nullable().optional(),
       }),
     )
     .max(CAPS.maxTextOverlays)
@@ -375,5 +384,9 @@ export const addTextOverlaySchema = z.object({
   startS: z.number().min(0).max(3600).optional(),
   endS: z.number().min(0).max(3600).nullable().optional(),
   animation: textAnimationEnum.optional(),
+  font: fontIdEnum.optional(),
+  outlineW: z.number().int().min(0).max(40).optional(),
+  shadow: z.number().int().min(0).max(30).optional(),
+  preset: z.string().max(40).nullable().optional(),
 });
 export type AddTextOverlayInput = z.infer<typeof addTextOverlaySchema>;

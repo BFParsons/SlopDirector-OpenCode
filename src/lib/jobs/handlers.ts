@@ -27,6 +27,7 @@ import { normalizeLoudnessLinear } from "@/lib/ffmpeg/normalize";
 import { type CaptionStyle, buildAss } from "@/lib/render/ass";
 import { aspectLabel, resolutionLabel } from "@/lib/ffmpeg/args";
 import { frameSize } from "@/config/frame-sizes";
+import { safeAreas } from "@/lib/typography/safe";
 import { probeDuration } from "@/lib/ffmpeg/probe";
 import { generateScript } from "@/lib/llm/expand";
 import type { BriefInput } from "@/lib/llm/prompts";
@@ -560,6 +561,9 @@ async function assembleFinalJob(payload: { projectId: string; draft?: boolean })
       startS: t.startS,
       endS: t.endS,
       animation: t.animation,
+      font: t.font,
+      outlineW: t.outlineW,
+      shadow: t.shadow,
     });
   }
 
@@ -580,14 +584,14 @@ async function assembleFinalJob(payload: { projectId: string; draft?: boolean })
     const cues = buildCaptions(captionText, span, {
       position: project.captionPosition,
       sizePct: project.captionSizePct,
-      marginPx: 40,
+      marginPx: 0, // captions sit on the title-safe edge (buildAss adds the safe margins)
     });
     if (cues.length) {
       const style = (["OUTLINE", "BOX", "POP"] as const).includes(project.captionStyle as CaptionStyle)
         ? (project.captionStyle as CaptionStyle)
         : "OUTLINE";
       captionsAss = path.join(tmpDir, "captions.ass");
-      await writeFile(captionsAss, buildAss(cues, { width: w, height: h, style }), "utf8");
+      await writeFile(captionsAss, buildAss(cues, { width: w, height: h, style, safe: safeAreas(w, h, project.safeArea) }), "utf8");
     }
   }
 
@@ -623,6 +627,7 @@ async function assembleFinalJob(payload: { projectId: string; draft?: boolean })
     audioFadeOutS: project.audioFadeOutS,
     watermark,
     textOverlays,
+    safeArea: project.safeArea,
     lutPath,
     captionsAss,
     width: w,

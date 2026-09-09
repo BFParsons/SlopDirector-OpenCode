@@ -91,7 +91,7 @@ export function registerProjectTools(server: McpServer) {
       title: "Update project settings",
       description:
         "Patch project-level settings. Common fields: title, exportCodec (h264|hevc|av1|vp9|prores), colorLook (NONE|WARM|COOL|VINTAGE|…), transition (NONE|CROSSFADE|…) + transitionMs, fillMode (LETTERBOX|BLUR_FILL), vignette, grain (0-100), " +
-        "captionsEnabled + captionStyle (OUTLINE|BOX|POP) + captionPosition + captionSizePct, audioNormalize, audioFadeInS/audioFadeOutS, musicVolume/musicDucking/musicMuted, voScript (narration text for TTS modes), frameWidth/frameHeight. Unknown fields are rejected by the server.",
+        "captionsEnabled + captionStyle (OUTLINE|BOX|POP) + captionPosition + captionSizePct, safeArea (auto|web|broadcast|social|square|none — where text may sit; auto picks by aspect), audioNormalize, audioFadeInS/audioFadeOutS, musicVolume/musicDucking/musicMuted, voScript (narration text for TTS modes), frameWidth/frameHeight. Unknown fields are rejected by the server.",
       inputSchema: { projectId: z.string(), patch: z.record(z.string(), z.unknown()) },
     },
     guarded(async ({ projectId, patch }) => text(summarize(await api.patch<Snapshot>(`/api/projects/${projectId}`, patch)))),

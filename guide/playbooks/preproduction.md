@@ -24,6 +24,7 @@ below is what the questions cover and why.
 |---|---|---|
 | a | **Standalone piece, or one scene of a longer video?** If a scene: what comes before and after, where in the story is it, does it carry the video's look? Length and aspect (16:9 / 9:16 / 1:1). | A scene has no title, no sign-off card, no closing fade, no "paid for by"; it must hand off to the next scene. A standalone piece owns its opening and ending. |
 | b | **Scripted or unscripted, and the genre / form** (documentary, commercial, attack ad, explainer, trailer, montage, interview, sketch, news package, social…). | Sets the pacing norm (ch.16), the sound design (§7), whether a script exists before the footage or is found in it (ch.34). |
+| a2 | **Do you already have a script or a shot list?** — asked early; if yes, the next question asks them to paste it (recorded verbatim under `materials`). | Their lines are the script (verbatim, RULES 4) and their shots the storyboard; the plan proposes only what they left open. `check_plan` warns when the plan departs from a supplied script. |
 | b2 | **Whose eye?** — a directing style fashioned after a real filmmaker (`interview_next` offers the styles that fit the genre; `list_styles` / `get_style`; House style = none). | The cut (ASL, transitions), the narration (voice, person, density), the sound (music kind, sync policy) and the text are held to the style by `check_plan`, `pacing_report` and `check_soundtrack`; the plan is written from the style file. |
 | c | **Where does the footage come from?** YouTube (any licence rule? archives only? CC only?), AI generation (which model tier / budget), their own files (paths or asset ids), stock. | Decides whether you write a clip list, an AI shot list with prompts, or ingest. Public figures block some AI models (list_video_models). |
 | d | **The premise** — one or two sentences: what it says, what it is for. | The logline and the beats come from this. |
@@ -37,6 +38,7 @@ and say so in the plan.
 
 Write it in this order; each step constrains the next.
 
+00. **Their material** — if the brief carries `materials`, copy the script into `script` lines (narration / bites, verbatim) and the shot list into `shots` in their order before anything else; `notes` names what you added.
 0. **The style** — if the brief names one, `get_style <id>` and read it before anything else; every step below follows its sections (Structure → beats, Narration → script, Sound → music and sync, Picture → clip list and AI prompts). Say in `notes` how it was applied.
 1. **Logline** — one sentence.
 2. **Beats** — 3–6 for anything under a minute; contiguous, from 0 to the brief's

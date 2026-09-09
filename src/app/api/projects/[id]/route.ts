@@ -167,6 +167,10 @@ export async function PATCH(request: Request, { params }: Ctx) {
           if (t.startS !== undefined) data.startS = t.startS;
           if (t.endS !== undefined) data.endS = t.endS;
           if (t.animation !== undefined) data.animation = t.animation;
+          if (t.font !== undefined) data.font = t.font;
+          if (t.outlineW !== undefined) data.outlineW = t.outlineW;
+          if (t.shadow !== undefined) data.shadow = t.shadow;
+          if (t.preset !== undefined) data.preset = t.preset;
           if (Object.keys(data).length === 0) continue;
           await tx.textOverlay.updateMany({ where: { id: t.id, projectId: id }, data });
         }

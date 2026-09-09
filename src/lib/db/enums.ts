@@ -108,6 +108,8 @@ export type OverlayPosition = (typeof OverlayPosition)[keyof typeof OverlayPosit
 export const TextAnimation = {
   NONE: "NONE",
   FADE: "FADE",
+  SLIDE_UP: "SLIDE_UP",
+  POP: "POP",
 } as const;
 export type TextAnimation = (typeof TextAnimation)[keyof typeof TextAnimation];
 

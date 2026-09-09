@@ -5,9 +5,10 @@
  */
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { api, type Segment, type Snapshot, assetInfo, snapshot } from "../client";
+import { api, type Segment, type Snapshot, assetInfo, snapshot, frameOf } from "../client";
 import { guarded, text } from "../format";
 import { styleById } from "../../src/lib/styles";
+import { checkText } from "../../src/lib/typography";
 
 export const FPS = 30;
 const FRAME = 1 / FPS;
@@ -360,8 +361,21 @@ export function registerVerifyTools(server: McpServer) {
           findings.push({ severity: "warn", rule: "§7 Sound: the bed in the render", message: `could not check the music bed: ${(e as Error).message}` });
         }
       }
+      // Burned-in text: inside the safe areas, readable, held long enough (§12).
+      let textCheck: { profile: string; overlays: number; pass: boolean } | null = null;
+      if (info.kind === "DRAFT_MP4" || info.kind === "FINAL_MP4") {
+        try {
+          const sp = await snapshot(info.projectId);
+          const f = frameOf(sp);
+          const tc = checkText(sp.textOverlays, { w: f.w, h: f.h }, sp.safeArea, dur);
+          findings.push(...tc.findings.map((x) => ({ severity: x.severity, rule: x.rule, message: x.message, fix: x.fix })));
+          textCheck = { profile: tc.safe.profile, overlays: sp.textOverlays.length, pass: tc.pass };
+        } catch {
+          /* not a project render */
+        }
+      }
       const errors = findings.filter((f) => f.severity === "error").length;
-      return text({ pass: errors === 0, errors, warnings: findings.filter((f) => f.severity === "warn").length, file: { path: info.path, durationS: dur, sizeBytes: info.sizeBytes, video: info.video }, music: music ? { bed: music.bed, loudestSoloLufs: music.loudestSoloLufs, soloStretches: music.soloStretches.length } : null, loudness: lo, target: tgt.note, findings });
+      return text({ pass: errors === 0, errors, warnings: findings.filter((f) => f.severity === "warn").length, file: { path: info.path, durationS: dur, sizeBytes: info.sizeBytes, video: info.video }, music: music ? { bed: music.bed, loudestSoloLufs: music.loudestSoloLufs, soloStretches: music.soloStretches.length } : null, text: textCheck, loudness: lo, target: tgt.note, findings });
     }),
   );
 

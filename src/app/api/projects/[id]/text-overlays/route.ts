@@ -45,6 +45,10 @@ export async function POST(request: Request, { params }: Ctx) {
         startS: body.startS,
         endS: body.endS ?? null,
         animation: body.animation,
+        font: body.font,
+        outlineW: body.outlineW,
+        shadow: body.shadow,
+        preset: body.preset ?? null,
       },
     });
 

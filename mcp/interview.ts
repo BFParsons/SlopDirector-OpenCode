@@ -59,6 +59,36 @@ export function nextQuestion(request: string, a: Answers): { done: false; questi
   if (kind === "scene" && a.context == null) {
     return q({ id: "context", header: "Context", question: "What comes right before and after this scene in the film?", options: [{ label: "Other", description: "describe it", value: "other" }], agentFills: "Propose 3 plausible placements (what the previous scene established, what the next one takes up) so this scene neither re-explains nor sums up; recommend one. Store it as a sentence.", recommended: 0 }, 7);
   }
+  if (a.materials == null) {
+    return q(
+      {
+        id: "materials",
+        header: "Your material",
+        question: "Do you already have a script or a shot list for this? (if so, the plan is written from it)",
+        options: [
+          { label: "No — write it for me", description: "the plan proposes the script and the shots", value: "none" },
+          { label: "I have a script", description: "paste it next; the narration and the bites come from it verbatim", value: "script" },
+          { label: "I have a shot list", description: "paste it next; the storyboard follows it, shot for shot", value: "shots" },
+          { label: "Both", description: "paste both next", value: "both" },
+        ],
+        recommended: 0,
+      },
+      10,
+    );
+  }
+  const mats = str(a.materials);
+  if (mats && mats !== "none" && a.materialsText == null) {
+    return q(
+      {
+        id: "materialsText",
+        header: "Paste it",
+        question: mats === "shots" ? "Paste the shot list." : mats === "both" ? "Paste the script and the shot list." : "Paste the script.",
+        options: [{ label: "Other", description: "paste the text", value: "other" }],
+        agentFills: "Ask the person to paste their text (the script, the shot list, or both) and record it verbatim as the answer — do not summarise or tidy it.",
+      },
+      9,
+    );
+  }
   if (a.durationS == null) {
     const g = guessDurationS(request);
     const base = g ?? (kind === "scene" ? 120 : 60);
@@ -145,6 +175,7 @@ export function nextQuestion(request: string, a: Answers): { done: false; questi
       kinds: (srcs.length ? srcs : ["youtube"]) as ("youtube" | "ai" | "upload" | "stock")[],
       ...(licence ? { notes: licence === "archives" ? "archives and official channels only" : licence === "cc" ? "Creative Commons only" : "internal test render; any usable footage" } : {}),
     },
+    ...(mats && mats !== "none" && str(a.materialsText).trim() ? { materials: { kind: mats as "script" | "shots" | "both", text: str(a.materialsText).trim() } } : {}),
     premise: str(a.premise),
     tone: toneOnly.trim(),
     ...(audience ? { audience: audience.trim() } : {}),

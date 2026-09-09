@@ -1,6 +1,6 @@
 # Appendix A. MCP Tool Reference
 
-*Generated from the server (66 tools). Regenerate with `pnpm exec tsx scripts/gen-tool-reference.ts`.*
+*Generated from the server (68 tools). Regenerate with `pnpm exec tsx scripts/gen-tool-reference.ts`.*
 
 ## Project
 
@@ -31,7 +31,7 @@ Compact view of a project: frame, look, captions, every segment (id, track, trim
 
 ### `update_project`
 
-Patch project-level settings. Common fields: title, exportCodec (h264|hevc|av1|vp9|prores), colorLook (NONE|WARM|COOL|VINTAGE|…), transition (NONE|CROSSFADE|…) + transitionMs, fillMode (LETTERBOX|BLUR_FILL), vignette, grain (0-100), captionsEnabled + captionStyle (OUTLINE|BOX|POP) + captionPosition + captionSizePct, audioNormalize, audioFadeInS/audioFadeOutS, musicVolume/musicDucking/musicMuted, voScript (narration text for TTS modes), frameWidth/frameHeight. Unknown fields are rejected by the server.
+Patch project-level settings. Common fields: title, exportCodec (h264|hevc|av1|vp9|prores), colorLook (NONE|WARM|COOL|VINTAGE|…), transition (NONE|CROSSFADE|…) + transitionMs, fillMode (LETTERBOX|BLUR_FILL), vignette, grain (0-100), captionsEnabled + captionStyle (OUTLINE|BOX|POP) + captionPosition + captionSizePct, safeArea (auto|web|broadcast|social|square|none — where text may sit; auto picks by aspect), audioNormalize, audioFadeInS/audioFadeOutS, musicVolume/musicDucking/musicMuted, voScript (narration text for TTS modes), frameWidth/frameHeight. Unknown fields are rejected by the server.
 
 | Parameter | Type | Notes |
 |---|---|---|
@@ -229,19 +229,26 @@ Remove a segment from the timeline (the media asset stays in the bucket).
 
 ### `add_text_overlay`
 
-A title / lower-third / disclaimer drawn over the video from startS to endS (null = to the end). position: TOP_LEFT|TOP_CENTER|TOP_RIGHT|CENTER|BOTTOM_LEFT|BOTTOM_CENTER|BOTTOM_RIGHT.
+A title / lower-third / caption / card drawn over the video from startS to endS. Give a `preset` (list_typography: lower-third, callout, caption-pop, card-archive, card-editorial, title, intertitle, quote, date-card, map-label, mono-note, citation) and the face, size, placement, box / outline / shadow, entrance and hold are filled in for this frame — any field you pass overrides it. Text anchors to the TITLE-SAFE area of the frame (safe areas by aspect / project.safeArea; marginPx moves it further in), so it is never cut or covered on delivery; check_text verifies. position: TOP_LEFT|TOP_CENTER|TOP_RIGHT|MIDDLE_LEFT|CENTER|MIDDLE_RIGHT|BOTTOM_LEFT|BOTTOM_CENTER|BOTTOM_RIGHT. animation: NONE|FADE|SLIDE_UP|POP.
 
 | Parameter | Type | Notes |
 |---|---|---|
 | `projectId` | string | required |
 | `text` | string | required |
-| `position` | string | default "BOTTOM_CENTER" |
+| `preset` | lower-third \| callout \| caption-pop \| card-archive \| card-editorial \| title \| intertitle \| quote \| date-card \| map-label \| mono-note \| citation | optional |
+| `position` | string | optional |
 | `startS` | number | default 0 |
 | `endS` | object | optional |
 | `sizePct` | integer | optional |
 | `color` | string | optional |
 | `boxEnabled` | boolean | optional |
-| `animation` | NONE \| FADE | optional |
+| `boxColor` | string | optional |
+| `boxOpacity` | number | optional |
+| `marginPx` | integer | optional |
+| `font` | DejaVuSans-Bold \| DejaVuSans \| LiberationSans-Bold \| LiberationSans-Regular \| LiberationSerif-Bold \| LiberationSerif-Regular \| LiberationMono-Bold \| LiberationMono-Regular \| NotoSans-Bold \| NotoSans-Regular \| NotoSerif-Bold \| NotoSerif-Regular | optional |
+| `outlineW` | integer | optional; outline width as % of the font size |
+| `shadow` | integer | optional; drop-shadow offset as % of the font size |
+| `animation` | NONE \| FADE \| SLIDE_UP \| POP | optional |
 
 ### `remove_text_overlay`
 
@@ -586,6 +593,24 @@ One captioned frame per shot of the main sequence (index · start · length · s
 ### `list_video_models`
 
 The AI video models this build can generate with (id, label, price per second, clip lengths, notes such as public-figure blocks), plus TTS voices and chat models.
+
+### `list_typography`
+
+What add_text_overlay can do: the presets (a use resolved to a face, size, placement inside title-safe, treatment and entrance), the bundled faces, the safe-area profiles, and — for a project — its frame's action-safe and title-safe rectangles and the preset its directing style reaches for first.
+
+| Parameter | Type | Notes |
+|---|---|---|
+| `projectId` | string | optional |
+| `profile` | auto \| web \| broadcast \| social \| square \| none | optional; preview another safe-area profile for this frame |
+
+### `check_text`
+
+Mechanical typography check (guide §12) on the project's text overlays: every text box inside the title-safe area (error outside action-safe), readable size, line length, three lines at most, reading time against the hold, two texts on top of each other. Runs inside verify_export too.
+
+| Parameter | Type | Notes |
+|---|---|---|
+| `projectId` | string | required |
+| `profile` | auto \| web \| broadcast \| social \| square \| none | optional; check against another safe-area profile (default: the project's) |
 
 ### `search_youtube`
 

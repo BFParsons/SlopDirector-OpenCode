@@ -17,6 +17,10 @@ export interface TextOverlayView {
   startS: number;
   endS: number | null;
   animation: string;
+  font: string;
+  outlineW: number;
+  shadow: number;
+  preset?: string | null;
 }
 
 export const OVERLAY_POSITIONS: { value: string; label: string }[] = [

@@ -187,6 +187,7 @@ export function ProjectEditorProvider({
       voAssetId: draft.audioMode !== "NONE" ? (snapshot.voiceover?.assetId ?? null) : null,
       voVolume: draft.voMuted ? 0 : draft.voVolume,
       musicAssetId: snapshot.musicAssetId,
+      safeArea: snapshot.safeArea,
       musicVolume: draft.musicMuted ? 0 : draft.musicVolume,
       voDurationS: snapshot.voiceover?.durationS ?? null,
       captions: {

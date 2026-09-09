@@ -5,6 +5,7 @@
  * which drawtext can do well. Fonts come from the bundled DejaVu faces
  * (FONTS_DIR is passed as the filter's fontsdir).
  */
+import type { SafeAreas } from "@/lib/typography/safe";
 import type { CaptionCue } from "./captions";
 
 export type CaptionStyle = "OUTLINE" | "BOX" | "POP";
@@ -41,15 +42,21 @@ function esc(text: string): string {
 
 export function buildAss(
   cues: CaptionCue[],
-  opts: { width: number; height: number; style: CaptionStyle; fontName?: string },
+  opts: { width: number; height: number; style: CaptionStyle; fontName?: string; safe?: SafeAreas },
 ): string {
   const { width, height } = opts;
   const font = opts.fontName ?? "DejaVu Sans";
   const first = cues[0];
   const sizePct = first?.sizePct ?? 6;
   const fontSize = Math.max(10, Math.round((sizePct / 100) * height));
-  const margin = Math.max(0, Math.round(first?.marginPx ?? 40));
   const align = alignment(first?.position ?? "BOTTOM_CENTER");
+  // Margins from the title-safe area (plus the cue's own inset) — MarginV is
+  // measured from the top for top alignments (7–9) and from the bottom otherwise.
+  const inset = Math.max(0, Math.round(first?.marginPx ?? 0));
+  const T = opts.safe?.title;
+  const marginL = (T ? T.x : 40) + inset;
+  const marginR = (T ? width - (T.x + T.w) : 40) + inset;
+  const marginV = (T ? (align >= 7 ? T.y : height - (T.y + T.h)) : 40) + inset;
   const outline = Math.max(1, Math.round(fontSize * 0.08));
   const shadow = Math.max(0, Math.round(fontSize * 0.04));
   // BorderStyle 3 = opaque box (BackColour), 1 = outline + shadow.
@@ -74,9 +81,9 @@ export function buildAss(
     String(box ? Math.round(fontSize * 0.25) : outline), // Outline (box: padding)
     String(box ? 0 : shadow), // Shadow
     String(align),
-    String(margin), // MarginL
-    String(margin), // MarginR
-    String(margin), // MarginV
+    String(marginL), // MarginL
+    String(marginR), // MarginR
+    String(marginV), // MarginV
     "1", // Encoding
   ].join(",");
 

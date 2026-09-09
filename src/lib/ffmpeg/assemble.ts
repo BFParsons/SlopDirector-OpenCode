@@ -1,3 +1,4 @@
+import { safeAreas } from "@/lib/typography/safe";
 import { spawn } from "node:child_process";
 import { rename } from "node:fs/promises";
 import path from "node:path";
@@ -116,6 +117,7 @@ export interface AssembleOpts {
   audioFadeOutS?: number; // fade the final mix out over N seconds
   watermark?: WatermarkSpec; // optional logo composited over the whole video
   textOverlays?: TextOverlaySpec[]; // burned-in text (lower-thirds, disclaimers)
+  safeArea?: string | null; // safe-area profile for text placement (src/lib/typography/safe); auto by aspect
   encoder?: EncoderProfile; // video encoder (default CPU x264; GPU when available)
   hwDecode?: HwDecodeConfig | null; // VA-API decode for H.264/HEVC inputs (lib/ffmpeg/hwdecode.ts)
   lutPath?: string; // optional 3D LUT (.cube) applied to every clip after the color look
@@ -468,7 +470,8 @@ export async function assembleVideo(
 
   const texts = opts.textOverlays ?? [];
   if (texts.length) {
-    const chain = texts.map((t) => drawtextFilter(t, h)).join(",");
+    const safeTitle = safeAreas(w, h, opts.safeArea).title;
+    const chain = texts.map((t) => drawtextFilter(t, w, h, safeTitle)).join(",");
     filters.push(`[${videoLabel}]${chain}[vtext]`);
     videoLabel = "vtext";
   }

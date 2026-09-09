@@ -145,6 +145,22 @@ export function checkPlan(plan: Plan, brief: Brief | null) {
     if (brief.narration?.wanted && !(plan.narration?.lines.length || narration.length)) f.push({ severity: "warn", rule: "brief: narration", message: "the brief wants narration; the plan has no narrated lines" });
     if (brief.narration && !brief.narration.wanted && narration.length) f.push({ severity: "warn", rule: "brief: narration", message: "the brief says no narration; the plan narrates" });
     if (brief.music?.wanted && !plan.music) f.push({ severity: "warn", rule: "brief: music", message: "the brief wants music; the plan names no bed" });
+    if (brief.materials?.text) {
+      const own = brief.materials.text.toLowerCase();
+      if (brief.materials.kind !== "shots") {
+        const spoken = plan.script.filter((l) => l.kind === "narration" || l.kind === "bite" || l.kind === "dialogue");
+        const cover = spoken.map((l) => {
+          const ws = l.text.toLowerCase().split(/[^\p{L}\p{N}']+/u).filter((w) => w.length > 3);
+          return ws.length ? ws.filter((w) => own.includes(w)).length / ws.length : 1;
+        });
+        const off = cover.filter((c) => c < 0.6).length;
+        if (spoken.length && off / spoken.length > 0.4) f.push({ severity: "warn", rule: "brief: the person's own script", message: `${off} of ${spoken.length} spoken lines in the plan are not in the script the person supplied — their lines are the spine (verbatim, RULES 4); propose only what they left open, and say so in notes` });
+      }
+      if (brief.materials.kind !== "script") {
+        const listed = brief.materials.text.split(/\r?\n/).filter((l) => /\S/.test(l)).length;
+        if (listed && Math.abs(listed - shots.length) > Math.max(2, listed * 0.3)) f.push({ severity: "info", rule: "brief: the person's own shot list", message: `the shot list has ${listed} line(s); the plan has ${shots.length} shots — follow their list shot for shot unless notes say why not` });
+      }
+    }
     if (st) {
       const p = st.params;
       const who = st.name;
@@ -229,6 +245,7 @@ export function planDocument(plan: Plan, brief: Brief | null, title: string): st
     const stl = styleById(brief.production.style.id);
     L.push(`**Style.** ${stl ? `${stl.name} — ${stl.oneLine}` : brief.production.style.id}${brief.production.style.notes ? ` (${brief.production.style.notes})` : ""}`, "");
   }
+  if (brief?.materials) L.push(`**Material.** The person's own ${brief.materials.kind === "both" ? "script and shot list" : brief.materials.kind === "shots" ? "shot list" : "script"} (${brief.materials.text.trim().split(/\s+/).length} words) — the plan follows it.`, "");
   if (brief) {
     L.push(
       `**Brief.** ${brief.deliverable.kind === "scene" ? "A scene of a longer video" : "A standalone piece"}, ${brief.deliverable.durationS} s, ${brief.deliverable.aspect} ${brief.deliverable.resolution}. ` +
@@ -309,6 +326,7 @@ export function planCli(plan: Plan, brief: Brief | null, title: string): string 
       const stl = styleById(brief.production.style.id);
       L.push(...wrap(stl ? `${stl.name} — ${stl.oneLine}` : brief.production.style.id, 86, "Style     "));
     }
+    if (brief.materials) L.push(...wrap(`the person's own ${brief.materials.kind === "both" ? "script and shot list" : brief.materials.kind === "shots" ? "shot list" : "script"} (${brief.materials.text.trim().split(/\s+/).length} words) — the plan follows it`, 86, "Material  "));
     L.push(...wrap(brief.premise, 86, "Premise   "));
   }
   L.push("", "BEATS");
@@ -424,6 +442,7 @@ export function planTable(plan: Plan, brief: Brief | null, title: string, width 
       const stl = styleById(brief.production.style.id);
       L.push(...wrap(stl ? `${stl.name} — ${stl.oneLine}` : brief.production.style.id, W - 10, "Style     "));
     }
+    if (brief.materials) L.push(...wrap(`the person's own ${brief.materials.kind === "both" ? "script and shot list" : brief.materials.kind === "shots" ? "shot list" : "script"} (${brief.materials.text.trim().split(/\s+/).length} words) — the plan follows it`, W - 10, "Material  "));
     L.push(...wrap(brief.premise, W - 10, "Premise   "));
   }
   L.push("", "BEATS");

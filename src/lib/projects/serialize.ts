@@ -101,6 +101,7 @@ export async function projectSnapshot(projectId: string) {
     voScript: p.voScript,
     voVerbatim: p.voVerbatim,
     voDeliveryNotes: p.voDeliveryNotes,
+    safeArea: p.safeArea,
     musicAssetId: p.musicAssetId,
     musicVolume: p.musicVolume,
     musicDucking: p.musicDucking,
@@ -211,6 +212,10 @@ export async function projectSnapshot(projectId: string) {
       startS: t.startS,
       endS: t.endS,
       animation: t.animation,
+      font: t.font,
+      outlineW: t.outlineW,
+      shadow: t.shadow,
+      preset: t.preset,
     })),
     voiceover: p.voiceover
       ? {

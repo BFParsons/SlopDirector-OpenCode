@@ -5,6 +5,7 @@
  * playback; this just paints. Effects are visual approximations of the ffmpeg
  * filters — the exported MP4 is authoritative.
  */
+import { anchorNum, fontById } from "@/lib/typography";
 import { effectsCssFilter } from "@/config/effects";
 import { contain, cover, kenBurns, posXY } from "./fit";
 import { type ColorLook, type RenderClip, type RenderSpec, clipsAt } from "./spec";
@@ -188,29 +189,57 @@ function drawText(ctx: CanvasRenderingContext2D, spec: RenderSpec, t: number) {
     if (!tx.text.trim()) continue;
     const e = tx.endS;
     if (t < tx.startS || (e != null && t > e)) continue;
+    const since = t - tx.startS;
+    const fadeOut = (f: number) => (e != null && t > e - f ? Math.max(0, (e - t) / f) : 1);
     let alpha = 1;
+    let rise = 0; // 0..1 fraction of the slide still to travel
+    let scale = 1;
     if (tx.animation === "FADE") {
       const f = e != null ? Math.min(0.4, (e - tx.startS) / 2) : 0.4;
-      if (t < tx.startS + f) alpha = (t - tx.startS) / f;
-      else if (e != null && t > e - f) alpha = (e - t) / f;
-      alpha = Math.min(1, Math.max(0, alpha));
+      alpha = Math.min(1, since / f) * fadeOut(f);
+    } else if (tx.animation === "SLIDE_UP") {
+      const k = Math.min(1, since / 0.35);
+      alpha = k * fadeOut(0.25);
+      rise = (1 - k) ** 2;
+    } else if (tx.animation === "POP") {
+      scale = 0.82 + 0.18 * Math.min(1, since / 0.16);
+      alpha = Math.min(1, since / 0.12) * fadeOut(0.2);
     }
-    const fs = Math.max(10, Math.round((tx.sizePct / 100) * spec.height));
+    alpha = Math.min(1, Math.max(0, alpha));
+    const font = fontById(tx.font);
+    const fs0 = Math.max(10, Math.round((tx.sizePct / 100) * spec.height));
+    const fs = Math.max(8, Math.round(fs0 * scale));
     ctx.save();
     ctx.globalAlpha = alpha;
-    ctx.font = `bold ${fs}px "DejaVu Sans", system-ui, sans-serif`;
+    ctx.font = `${font.weight} ${fs}px "${font.family}", "DejaVu Sans", system-ui, sans-serif`;
     ctx.textBaseline = "top";
     const lines = tx.text.split("\n");
     const lh = fs * 1.15;
     const tw = Math.max(...lines.map((l) => ctx.measureText(l).width));
     const th = lh * lines.length;
-    const pad = Math.max(4, Math.round(fs * 0.3));
-    const { x, y } = posXY(tx.position, tx.marginPx, spec.width, spec.height, tw, th);
+    // Same geometry as the render: the text anchors to the title-safe edge,
+    // inset by marginPx plus the box border, so the box itself stays inside.
+    const pad = tx.boxEnabled ? Math.max(4, Math.round(fs * 0.35)) : 0;
+    const { x, y: y0 } = anchorNum(tx.position, spec.safe.title, tx.marginPx + pad, tw, th);
+    const y = y0 + rise * Math.round(fs0 * 0.6);
     if (tx.boxEnabled) {
       ctx.fillStyle = tx.boxColor;
       ctx.globalAlpha = alpha * tx.boxOpacity;
       ctx.fillRect(x - pad, y - pad, tw + pad * 2, th + pad * 2);
       ctx.globalAlpha = alpha;
+    }
+    if (tx.shadow > 0) {
+      const d = Math.max(1, (fs * tx.shadow) / 100);
+      ctx.shadowColor = "rgba(0,0,0,0.6)";
+      ctx.shadowOffsetX = d;
+      ctx.shadowOffsetY = d;
+      ctx.shadowBlur = d;
+    }
+    if (tx.outlineW > 0) {
+      ctx.lineJoin = "round";
+      ctx.lineWidth = Math.max(1, (fs * tx.outlineW) / 100) * 2;
+      ctx.strokeStyle = "#000000";
+      lines.forEach((l, i) => ctx.strokeText(l, x, y + i * lh));
     }
     ctx.fillStyle = tx.color;
     lines.forEach((l, i) => ctx.fillText(l, x, y + i * lh));

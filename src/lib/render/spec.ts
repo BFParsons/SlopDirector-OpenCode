@@ -4,6 +4,7 @@
  * the authoritative final render from the same project. Keep the two in visual
  * agreement; the preview is a fast approximation, the export is the truth.
  */
+import { safeAreas, type SafeAreas } from "@/lib/typography/safe";
 import { withBase } from "@/lib/basePath";
 import { buildCaptions } from "./captions";
 import { asEffects, type EffectSpec } from "./effects";
@@ -61,7 +62,10 @@ export interface RenderText {
   marginPx: number;
   startS: number;
   endS: number | null;
-  animation: "NONE" | "FADE";
+  animation: "NONE" | "FADE" | "SLIDE_UP" | "POP";
+  font: string;
+  outlineW: number;
+  shadow: number;
 }
 
 /** An audio-only clip on an audio track: the asset's audio in [srcStart, +dur]
@@ -78,6 +82,8 @@ export interface RenderAudioClip {
 export interface RenderSpec {
   width: number; // preview pixel dims
   height: number;
+  /** action / title safe rectangles for this frame (src/lib/typography/safe) */
+  safe: SafeAreas;
   duration: number; // seconds
   clips: RenderClip[];
   audioClips: RenderAudioClip[]; // audio-only clips on the audio tracks
@@ -126,6 +132,9 @@ interface TextLike {
   startS: number;
   endS: number | null;
   animation: string;
+  font: string;
+  outlineW: number;
+  shadow: number;
 }
 
 export interface BuildInput {
@@ -134,6 +143,8 @@ export interface BuildInput {
   height: number;
   transition: string;
   transitionMs: number;
+  /** safe-area profile (src/lib/typography/safe); auto by aspect when absent */
+  safeArea?: string | null;
   colorLook: string;
   fillMode: string;
   vignette: boolean;
@@ -258,13 +269,16 @@ export function buildRenderSpec(input: BuildInput): RenderSpec {
     marginPx: t.marginPx,
     startS: t.startS,
     endS: t.endS,
-    animation: (t.animation as "NONE" | "FADE") ?? "NONE",
+    animation: (t.animation as RenderText["animation"]) ?? "NONE",
+    font: t.font ?? "DejaVuSans-Bold",
+    outlineW: t.outlineW ?? 0,
+    shadow: t.shadow ?? 0,
   }));
   const captionTexts: RenderText[] = input.captions?.enabled
     ? buildCaptions(input.captions.text, input.captions.spanS, {
         position: input.captions.position,
         sizePct: input.captions.sizePct,
-        marginPx: 40,
+        marginPx: 0, // captions sit on the title-safe edge
       }).map((c) => ({
         text: c.text,
         position: c.position as Position,
@@ -277,12 +291,16 @@ export function buildRenderSpec(input: BuildInput): RenderSpec {
         startS: c.startS,
         endS: c.endS,
         animation: c.animation,
+        font: "DejaVuSans-Bold",
+        outlineW: 0,
+        shadow: 0,
       }))
     : [];
 
   return {
     width,
     height,
+    safe: safeAreas(width, height, input.safeArea),
     duration: Math.max(0.1, duration),
     clips,
     audioClips,

@@ -1,6 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { api, type Snapshot, snapshot, summarize } from "../client";
+import { FONT_IDS, TYPE_PRESETS, applyPreset, presetById } from "../../src/lib/typography";
+import { api, type Snapshot, snapshot, summarize, frameOf } from "../client";
 import { guarded, text } from "../format";
 
 const segmentEdit = {
@@ -138,20 +139,36 @@ export function registerTimelineTools(server: McpServer) {
     "add_text_overlay",
     {
       title: "Add burned-in text",
-      description: "A title / lower-third / disclaimer drawn over the video from startS to endS (null = to the end). position: TOP_LEFT|TOP_CENTER|TOP_RIGHT|CENTER|BOTTOM_LEFT|BOTTOM_CENTER|BOTTOM_RIGHT.",
+      description:
+        "A title / lower-third / caption / card drawn over the video from startS to endS. Give a `preset` (list_typography: lower-third, callout, caption-pop, card-archive, card-editorial, title, intertitle, quote, date-card, map-label, mono-note, citation) and the face, size, placement, box / outline / shadow, entrance and hold are filled in for this frame — any field you pass overrides it. Text anchors to the TITLE-SAFE area of the frame (safe areas by aspect / project.safeArea; marginPx moves it further in), so it is never cut or covered on delivery; check_text verifies. position: TOP_LEFT|TOP_CENTER|TOP_RIGHT|MIDDLE_LEFT|CENTER|MIDDLE_RIGHT|BOTTOM_LEFT|BOTTOM_CENTER|BOTTOM_RIGHT. animation: NONE|FADE|SLIDE_UP|POP.",
       inputSchema: {
         projectId: z.string(),
         text: z.string().min(1).max(500),
-        position: z.string().default("BOTTOM_CENTER"),
+        preset: z.enum(TYPE_PRESETS.map((p) => p.id) as [string, ...string[]]).optional(),
+        position: z.string().optional(),
         startS: z.number().min(0).default(0),
         endS: z.number().min(0).nullable().optional(),
         sizePct: z.number().int().min(1).max(40).optional(),
         color: z.string().optional(),
         boxEnabled: z.boolean().optional(),
-        animation: z.enum(["NONE", "FADE"]).optional(),
+        boxColor: z.string().optional(),
+        boxOpacity: z.number().min(0).max(1).optional(),
+        marginPx: z.number().int().min(0).max(600).optional(),
+        font: z.enum(FONT_IDS).optional(),
+        outlineW: z.number().int().min(0).max(40).optional().describe("outline width as % of the font size"),
+        shadow: z.number().int().min(0).max(30).optional().describe("drop-shadow offset as % of the font size"),
+        animation: z.enum(["NONE", "FADE", "SLIDE_UP", "POP"]).optional(),
       },
     },
-    guarded(async ({ projectId, ...body }) => text(summarize(await api.post<Snapshot>(`/api/projects/${projectId}/text-overlays`, body)))),
+    guarded(async ({ projectId, preset, text: txt, startS, ...rest }) => {
+      let body: Record<string, unknown> = { text: txt, startS, ...rest, position: rest.position ?? "BOTTOM_CENTER" };
+      if (preset) {
+        const s = await snapshot(projectId);
+        const { endS, ...overrides } = rest;
+        body = { ...applyPreset(presetById(preset)!, frameOf(s), txt, startS, { ...overrides, ...(endS !== undefined ? { endS } : {}) }) };
+      }
+      return text(summarize(await api.post<Snapshot>(`/api/projects/${projectId}/text-overlays`, body)));
+    }),
   );
 
   server.registerTool(

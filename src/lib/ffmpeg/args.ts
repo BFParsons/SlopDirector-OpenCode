@@ -1,3 +1,4 @@
+import { anchorExpr, fontById, type Rect } from "@/lib/typography";
 import path from "node:path";
 import type {
   AspectRatio,
@@ -291,6 +292,9 @@ export interface TextOverlaySpec {
   startS: number;
   endS: number | null;
   animation: TextAnimation;
+  font: string; // bundled face id (src/lib/typography/fonts)
+  outlineW: number; // % of the font size
+  shadow: number; // % of the font size
 }
 
 /**
@@ -299,49 +303,55 @@ export interface TextOverlaySpec {
  * is rendered literally; only the numeric x/y/enable/alpha expressions are
  * evaluated. Shown only within [startS, endS] (endS null = until the end).
  */
-export function drawtextFilter(spec: TextOverlaySpec, frameH: number): string {
+export function drawtextFilter(spec: TextOverlaySpec, frameW: number, frameH: number, safeTitle: Rect): string {
   const fontSize = Math.max(8, Math.round((clampNum(spec.sizePct, 1, 40, 6) / 100) * frameH));
-  const { x, y } = positionXY(
-    spec.position,
-    spec.marginPx,
-    "w",
-    "h",
-    "text_w",
-    "text_h",
-  );
+  const font = fontById(spec.font);
+  // The text anchors to the title-safe edge (src/lib/typography/safe), inset by
+  // marginPx plus the box border so the box itself stays inside. The preview
+  // (render/draw.ts) and check_text use the same arithmetic.
+  const boxBorder = spec.boxEnabled ? Math.max(4, Math.round(fontSize * 0.35)) : 0;
+  const { x, y } = anchorExpr(spec.position, safeTitle, spec.marginPx + boxBorder, "text_w", "text_h");
   const color = hexToFfColor(spec.color);
-  // fontfile is the bundled bold face; text is read from a file (literal).
+  const s = Math.max(0, spec.startS);
+  const e = spec.endS != null && spec.endS > s ? spec.endS : null;
+  const S = s.toFixed(3);
   const parts: string[] = [];
-  parts.push(`fontfile='${FONT_BOLD}'`);
+  parts.push(`fontfile='${path.join(FONTS_DIR, font.file)}'`);
   parts.push(`textfile='${spec.textfile}'`);
   parts.push("expansion=none");
-  parts.push(`fontsize=${fontSize}`);
+  // POP: the size grows from 82 % over 160 ms (fontsize takes an expression).
+  parts.push(spec.animation === "POP" ? `fontsize='${fontSize}*(0.82+0.18*min(1,(t-${S})/0.16))'` : `fontsize=${fontSize}`);
   parts.push(`fontcolor=${color}`);
   parts.push(`x='${x}'`);
-  parts.push(`y='${y}'`);
+  // SLIDE_UP: rises 0.6 em into place over 350 ms, eased out.
+  parts.push(spec.animation === "SLIDE_UP" ? `y='${y}+${Math.round(fontSize * 0.6)}*pow(1-min(1,(t-${S})/0.35),2)'` : `y='${y}'`);
   parts.push(`line_spacing=${Math.round(fontSize * 0.15)}`);
 
   if (spec.boxEnabled) {
     const bo = clampNum(spec.boxOpacity, 0, 1, 0.5).toFixed(2);
     parts.push(`box=1`);
     parts.push(`boxcolor=${hexToFfColor(spec.boxColor)}@${bo}`);
-    parts.push(`boxborderw=${Math.max(4, Math.round(fontSize * 0.35))}`);
+    parts.push(`boxborderw=${boxBorder}`);
+  }
+  if (spec.outlineW > 0) {
+    parts.push(`borderw=${Math.max(1, Math.round((fontSize * spec.outlineW) / 100))}`);
+    parts.push("bordercolor=0x000000");
+  }
+  if (spec.shadow > 0) {
+    const d = Math.max(1, Math.round((fontSize * spec.shadow) / 100));
+    parts.push(`shadowx=${d}`, `shadowy=${d}`, "shadowcolor=0x000000@0.6");
   }
 
-  const s = Math.max(0, spec.startS);
-  const e = spec.endS != null && spec.endS > s ? spec.endS : null;
-  parts.push(`enable='${e != null ? `between(t,${s.toFixed(3)},${e.toFixed(3)})` : `gte(t,${s.toFixed(3)})`}'`);
+  parts.push(`enable='${e != null ? `between(t,${S},${e.toFixed(3)})` : `gte(t,${S})`}'`);
 
-  if (spec.animation === "FADE") {
-    const f = e != null ? Math.min(0.4, (e - s) / 2) : 0.4;
-    if (f > 0.01) {
-      const fadeIn = `(t-${s.toFixed(3)})/${f.toFixed(3)}`;
-      const alpha =
-        e != null
-          ? `if(lt(t,${(s + f).toFixed(3)}),${fadeIn},if(gt(t,${(e - f).toFixed(3)}),(${e.toFixed(3)}-t)/${f.toFixed(3)},1))`
-          : `if(lt(t,${(s + f).toFixed(3)}),${fadeIn},1)`;
-      parts.push(`alpha='${alpha}'`);
-    }
+  // Entrance / exit ramps (alpha takes an expression).
+  const f = e != null ? Math.min(0.4, (e - s) / 2) : 0.4;
+  const ramps: [number, number] | null = spec.animation === "FADE" ? [f, f] : spec.animation === "SLIDE_UP" ? [0.35, 0.25] : spec.animation === "POP" ? [0.12, 0.2] : null;
+  if (ramps && ramps[0] > 0.01) {
+    const [fi, fo] = ramps;
+    const fadeIn = `min(1,(t-${S})/${fi.toFixed(3)})`;
+    const alpha = e != null ? `if(gt(t,${(e - fo).toFixed(3)}),max(0,(${e.toFixed(3)}-t)/${fo.toFixed(3)}),${fadeIn})` : fadeIn;
+    parts.push(`alpha='${alpha}'`);
   }
 
   return `drawtext=${parts.join(":")}`;

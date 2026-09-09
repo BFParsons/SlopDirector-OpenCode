@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import type { RenderSpec } from "@/lib/render/spec";
 import { usePreviewEngine } from "./usePreviewEngine";
 
@@ -29,6 +30,10 @@ export function PreviewMonitor({
   // Match the Video Edit panel: flat grey transport buttons, no accent circle.
   const ctrlBtn =
     "flex h-5 items-center justify-center rounded border border-[var(--color-border)] px-1.5 text-[11px] text-[var(--color-muted)] transition-colors hover:text-[var(--color-fg)] disabled:opacity-40";
+  // Safe-area guides: the canvas is contained and centred in the black box; an
+  // SVG with the frame's viewBox and the same contain-fit lands exactly on it.
+  const [guides, setGuides] = useState(false);
+  const sw = Math.max(1, spec.width / 640);
   return (
     <div className="flex h-full flex-col gap-1.5">
       <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-md bg-black">
@@ -40,6 +45,15 @@ export function PreviewMonitor({
           style={{ aspectRatio: `${spec.width} / ${spec.height}` }}
           onClick={toggle}
         />
+        {guides ? (
+          <svg viewBox={`0 0 ${spec.width} ${spec.height}`} preserveAspectRatio="xMidYMid meet" className="pointer-events-none absolute inset-0 h-full w-full">
+            <rect x={spec.safe.action.x} y={spec.safe.action.y} width={spec.safe.action.w} height={spec.safe.action.h} fill="none" stroke="rgba(255,190,0,0.75)" strokeWidth={sw} strokeDasharray={`${sw * 8} ${sw * 6}`} />
+            <rect x={spec.safe.title.x} y={spec.safe.title.y} width={spec.safe.title.w} height={spec.safe.title.h} fill="none" stroke="rgba(0,220,120,0.85)" strokeWidth={sw} strokeDasharray={`${sw * 4} ${sw * 4}`} />
+            <text x={spec.safe.title.x + sw * 6} y={spec.safe.title.y - sw * 6} fill="rgba(0,220,120,0.85)" fontSize={sw * 14} fontFamily="system-ui, sans-serif">
+              title-safe · {spec.safe.profile}
+            </text>
+          </svg>
+        ) : null}
       </div>
 
       <audio ref={voRef} preload="auto" />
@@ -64,6 +78,9 @@ export function PreviewMonitor({
         <span className="shrink-0 font-mono tnum text-[11px] text-[var(--color-muted)]">
           {clock(time)} / {clock(spec.duration)}
         </span>
+        <button type="button" className={ctrlBtn} title={`Safe-area guides (${spec.safe.note})`} aria-label="Safe-area guides" aria-pressed={guides} onClick={() => setGuides((g) => !g)}>
+          {guides ? "▣" : "▢"}
+        </button>
         <button
           type="button"
           className={ctrlBtn}

@@ -30,6 +30,8 @@ export const briefSchema = z.object({
     /** local files or already-imported asset ids the person pointed at */
     uploads: z.array(z.string()).optional(),
   }),
+  /** the person's own script and / or shot list, pasted in the interview: the plan's spine (lines verbatim, shots in their order) */
+  materials: z.object({ kind: z.enum(["script", "shots", "both"]), text: z.string().min(1).max(20000) }).optional(),
   premise: z.string().min(1).max(4000),
   tone: z.string().min(1).max(500),
   audience: z.string().max(500).optional(),

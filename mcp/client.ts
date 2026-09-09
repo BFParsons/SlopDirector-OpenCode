@@ -4,6 +4,7 @@
  * desktop port); SLOPSTUDIO_API_TOKEN adds bearer auth for non-desktop mode.
  */
 import { readFile } from "node:fs/promises";
+import { frameSize } from "../src/config/frame-sizes";
 import path from "node:path";
 
 export const BASE = (process.env.SLOPSTUDIO_URL ?? "http://127.0.0.1:38473").replace(/\/$/, "");
@@ -139,7 +140,8 @@ export interface Snapshot {
   audioFadeOutS: number;
   voScript: string | null;
   segments: Segment[];
-  textOverlays: { id: string; text: string; position: string; startS: number; endS: number | null }[];
+  textOverlays: { id: string; index?: number; text: string; position: string; sizePct: number; color: string; boxEnabled: boolean; boxColor: string; boxOpacity: number; marginPx: number; startS: number; endS: number | null; animation: string; font?: string; outlineW?: number; shadow?: number; preset?: string | null }[];
+  safeArea?: string | null;
   audioOverlays: { id: string; label: string | null; assetId: string | null; offsetS: number; volume: number; included: boolean; status: string; durationS: number | null }[];
   voiceover: { status: string; assetId: string | null; durationS: number | null } | null;
   finalRender: {
@@ -247,4 +249,14 @@ export async function waitForRender(projectId: string, draft: boolean, maxWaitS:
     }
     if (Date.now() - t0 > Math.min(maxWaitS, MAX_TOOL_WAIT_S) * 1000) return null;
   }
+}
+
+/** The project's output frame in pixels (custom size, else the aspect / resolution preset). */
+export function frameOf(s: Snapshot): { w: number; h: number } {
+  return frameSize({
+    aspectRatio: s.aspectRatio as "R16_9" | "R9_16" | "R1_1",
+    resolution: s.resolution as "R480P" | "R720P" | "R1080P",
+    frameWidth: s.frameWidth ?? null,
+    frameHeight: s.frameHeight ?? null,
+  });
 }

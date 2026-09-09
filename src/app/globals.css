@@ -444,3 +444,89 @@ a.bg-\[var\(--color-control\)\]:hover {
 .agent-arrive {
   animation: agent-arrive 0.9s ease-out backwards;
 }
+
+/* Bundled faces for the preview canvas (public/fonts — the render uses the same files). */
+@font-face {
+  font-family: "DejaVu Sans";
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src: url("/fonts/DejaVuSans-Bold.ttf") format("truetype");
+}
+@font-face {
+  font-family: "DejaVu Sans";
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src: url("/fonts/DejaVuSans.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Liberation Sans";
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src: url("/fonts/LiberationSans-Regular.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Liberation Sans";
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src: url("/fonts/LiberationSans-Bold.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Liberation Serif";
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src: url("/fonts/LiberationSerif-Regular.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Liberation Serif";
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src: url("/fonts/LiberationSerif-Bold.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Liberation Mono";
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src: url("/fonts/LiberationMono-Regular.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Liberation Mono";
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src: url("/fonts/LiberationMono-Bold.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Noto Sans";
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src: url("/fonts/NotoSans-Regular.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Noto Sans";
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src: url("/fonts/NotoSans-Bold.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Noto Serif";
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src: url("/fonts/NotoSerif-Regular.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Noto Serif";
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src: url("/fonts/NotoSerif-Bold.ttf") format("truetype");
+}

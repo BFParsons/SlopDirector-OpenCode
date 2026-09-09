@@ -69,6 +69,12 @@ export async function ensureDesktopDb(): Promise<void> {
     { table: "Segment", column: "volume", ddl: "REAL NOT NULL DEFAULT 1" },
     { table: "Project", column: "brief", ddl: "JSONB" },
     { table: "Project", column: "plan", ddl: "JSONB" },
+    // Typography: bundled face, outline / shadow (as % of the size), the preset used; safe-area profile.
+    { table: "TextOverlay", column: "font", ddl: "TEXT NOT NULL DEFAULT 'DejaVuSans-Bold'" },
+    { table: "TextOverlay", column: "outlineW", ddl: "INTEGER NOT NULL DEFAULT 0" },
+    { table: "TextOverlay", column: "shadow", ddl: "INTEGER NOT NULL DEFAULT 0" },
+    { table: "TextOverlay", column: "preset", ddl: "TEXT" },
+    { table: "Project", column: "safeArea", ddl: "TEXT NOT NULL DEFAULT 'auto'" },
   ];
   const columnCache = new Map<string, Set<string>>();
   for (const m of migrations) {
