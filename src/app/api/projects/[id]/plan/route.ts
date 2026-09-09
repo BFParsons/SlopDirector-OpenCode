@@ -9,15 +9,15 @@ import { parseJsonBody } from "@/lib/http/parseJsonBody";
 import { err, ok } from "@/lib/http/response";
 import { getOwnedProject } from "@/lib/projects/access";
 import { notifyProjectChanged } from "@/lib/projects/changed";
-import { checkPlan, planDocument, planTasks } from "@/lib/projects/plan";
+import { checkPlan, planCli, planDocument, planTasks } from "@/lib/projects/plan";
 import { briefSchema, planSchema } from "@/lib/validation/brief";
 
 type Ctx = { params: Promise<{ id: string }> };
 
 /**
- * GET ?view=json|document|check|tasks → the proposed/approved plan, its
- * mechanical check against the brief, the markdown document for approval, or
- * the task graph an orchestrator fans out.
+ * GET ?view=json|document|cli|check|tasks → the proposed/approved plan, its
+ * mechanical check against the brief, the markdown document (or the terminal
+ * text) for approval, or the task graph an orchestrator fans out.
  */
 export async function GET(req: Request, { params }: Ctx) {
   try {
@@ -30,6 +30,7 @@ export async function GET(req: Request, { params }: Ctx) {
     if (!plan.success) return view === "json" ? ok({ plan: null, brief: brief.success ? brief.data : null, check: null }) : err("No plan yet — PUT one first", 404);
     const b = brief.success ? brief.data : null;
     if (view === "document") return ok({ markdown: planDocument(plan.data, b, project.title), check: checkPlan(plan.data, b) });
+    if (view === "cli") return ok({ text: planCli(plan.data, b, project.title), check: checkPlan(plan.data, b) });
     if (view === "check") return ok(checkPlan(plan.data, b));
     if (view === "tasks") return ok(planTasks(plan.data));
     return ok({ plan: plan.data, brief: b, check: checkPlan(plan.data, b) });

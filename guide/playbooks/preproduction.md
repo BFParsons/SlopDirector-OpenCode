@@ -56,8 +56,10 @@ Write it in this order; each step constrains the next.
    where the timing is tight.
 
 `set_plan` → read the check → fix every **error**, weigh every **warn** →
-`plan_document` → send it to the person **verbatim** with one paragraph on the
-choices you made and what you could not honour (RULES 7). Wait. Revise on
+`plan_document` → paste its text into your reply **verbatim** (it is laid out
+for a terminal: the script and the storyboard as one time-ordered list; never
+summarize it, never turn it into a table) with one paragraph on the choices you
+made and what you could not honour (RULES 7). Wait. Revise on
 their notes (each `set_plan` is a new version). Only after their yes:
 `approve_plan`.
 
@@ -81,7 +83,7 @@ decisions, narration offsets, `volume` per voice), adds **titles**, runs the
 **checks** (`check_soundtrack`, `check_cuts`, `pacing_report`,
 `balance_music`), renders the **draft**, reads it back (`verify_export`,
 `check_mix_levels`, `storyboard_sheet`, `get_contact_sheet` on the draft),
-sends the storyboard sheet and the draft path to the person, and only then the
+sends the person the shot list in text plus the draft's and the storyboard sheet's file paths (a terminal shows no images), and only then the
 **final**.
 
 Rules of the fan-out: one checkpoint before assembly; sub-agents never

@@ -47,7 +47,7 @@ export async function GET(req: Request, { params }: Ctx) {
     if (!cells.length) return err("No shots on the main sequence yet", 404);
     const file = await storyboardSheet(id, cells, cols, w);
     const bytes = await readFile(file);
-    return new Response(new Uint8Array(bytes), { headers: { "content-type": "image/jpeg", "cache-control": "no-store", "x-storyboard-shots": JSON.stringify(meta) } });
+    return new Response(new Uint8Array(bytes), { headers: { "content-type": "image/jpeg", "cache-control": "no-store", "x-storyboard-shots": JSON.stringify(meta), "x-storyboard-file": encodeURI(file) } });
   } catch (e) {
     return handleApiError(e);
   }

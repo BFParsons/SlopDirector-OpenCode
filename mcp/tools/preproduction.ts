@@ -61,13 +61,13 @@ export function registerPreproductionTools(server: McpServer) {
     "plan_document",
     {
       title: "The plan as a document",
-      description: "Markdown of the plan for the person to read and approve: brief, logline, beats, storyboard table (shot / source / sound / card), script with times, clips to find, AI prompts, music, narration, risks. Show it to them verbatim (RULES 2: propose-and-approve).",
-      inputSchema: { projectId: z.string() },
+      description: "The plan as the person reads it: the script and the storyboard as one time-ordered list (each shot with its source, card and the lines over it), then clips to find, AI prompts, music, narration, risks, and the check. Default format 'cli' is fixed-width plain text for a terminal — paste it into your reply VERBATIM, do not summarize it (RULES 2: propose-and-approve). 'markdown' is the same with tables (also written to plan-v<N>.md).",
+      inputSchema: { projectId: z.string(), format: z.enum(["cli", "markdown"]).default("cli") },
     },
-    guarded(async ({ projectId }) => {
-      const r = await api.get<{ markdown: string; check: Check }>(`/api/projects/${projectId}/plan?view=document`);
+    guarded(async ({ projectId, format }) => {
+      const r = format === "markdown" ? await api.get<{ markdown: string; check: Check }>(`/api/projects/${projectId}/plan?view=document`).then((x) => ({ body: x.markdown, check: x.check })) : await api.get<{ text: string; check: Check }>(`/api/projects/${projectId}/plan?view=cli`).then((x) => ({ body: x.text, check: x.check }));
       const errs = r.check.findings.filter((f) => f.severity === "error");
-      return text(`${r.markdown}\n---\ncheck: ${r.check.pass ? "PASS" : `${errs.length} error(s)`}${r.check.findings.length ? "\n" + r.check.findings.map((f) => `- ${f.severity}: ${f.message}`).join("\n") : ""}`);
+      return text(`${r.body}\n${format === "markdown" ? "---\n" : ""}CHECK: ${r.check.pass ? "PASS" : `${errs.length} error(s)`}${r.check.findings.length ? "\n" + r.check.findings.map((f) => `  ${f.severity}: ${f.message}`).join("\n") : ""}`);
     }),
   );
 
@@ -96,12 +96,13 @@ export function registerPreproductionTools(server: McpServer) {
     "storyboard_sheet",
     {
       title: "Storyboard of the cut",
-      description: "One captioned frame per shot of the main sequence (index · start · length · sync/mute · title card) tiled as a storyboard — the picture to review a cut with, and to send the person before the draft. Needs shots on the timeline.",
+      description: "One captioned frame per shot of the main sequence (index · start · length · sync/mute · title card) tiled as a storyboard — for YOUR eyes when reviewing a cut (the person's terminal shows no images: give them the file path and the shot list in text). Needs shots on the timeline.",
       inputSchema: { projectId: z.string(), cols: z.number().int().min(1).max(8).default(4), width: z.number().int().min(160).max(960).default(400).describe("cell width in px") },
     },
     guarded(async ({ projectId, cols, width }) => {
       const { bytes, contentType, headers } = await api.bytes(`/api/projects/${projectId}/storyboard?cols=${cols}&w=${width}`);
-      return image(bytes, contentType, `Shots left→right, top→bottom: ${headers.get("x-storyboard-shots") ?? ""}`);
+      const file = decodeURI(headers.get("x-storyboard-file") ?? "");
+      return image(bytes, contentType, `Shots left→right, top→bottom: ${headers.get("x-storyboard-shots") ?? ""}${file ? `\nfile: ${file} (the person can open this; a terminal shows no images — describe the shots in text)` : ""}`);
     }),
   );
 

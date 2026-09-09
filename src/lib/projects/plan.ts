@@ -230,6 +230,95 @@ export function planDocument(plan: Plan, brief: Brief | null, title: string): st
   return L.join("\n") + "\n";
 }
 
+const pad = (t: string, n: number) => (t.length >= n ? t : t + " ".repeat(n - t.length));
+const wrap = (t: string, width: number, first: string, rest = " ".repeat(first.length)): string[] => {
+  const out: string[] = [];
+  let prefix = first;
+  for (const para of t.split(/\n/)) {
+    let line = "";
+    for (const w of para.split(/\s+/).filter(Boolean)) {
+      if ((line + " " + w).trim().length > width && line) {
+        out.push(prefix + line);
+        prefix = rest;
+        line = w;
+      } else line = (line ? line + " " : "") + w;
+    }
+    out.push(prefix + line);
+    prefix = rest;
+  }
+  return out;
+};
+
+/**
+ * The plan for a terminal: the script and the storyboard as one time-ordered
+ * list (each shot with its source, card and the lines that play over it),
+ * then the clip list, AI shots, music, narration and risks. No tables, ~96
+ * columns, meant to be shown to the person verbatim.
+ */
+export function planCli(plan: Plan, brief: Brief | null, title: string): string {
+  const shots = [...plan.shots].sort((a, b) => a.order - b.order);
+  const times = shotTimes(plan);
+  const at = new Map(times.map((t) => [t.id, t]));
+  const clips = new Map(plan.clipList.map((c) => [c.id, c]));
+  const ai = new Map(plan.aiShots.map((a) => [a.shotId, a]));
+  const L: string[] = [];
+  L.push(`${title}  ·  plan v${plan.version} (${plan.status})`);
+  L.push(...wrap(plan.logline, 86, "Logline   "));
+  if (brief) {
+    const d = brief.deliverable;
+    L.push(`Brief     ${d.kind === "scene" ? "scene of a longer video" : "standalone"} · ${d.durationS} s · ${d.aspect} ${d.resolution} · ${brief.production.scripted ? "scripted" : "unscripted"} ${brief.production.genre}${brief.production.form ? ` (${brief.production.form})` : ""}`);
+    L.push(`          sources: ${brief.sources.kinds.join(", ")} · tone: ${brief.tone}${brief.audience ? ` · audience: ${brief.audience}` : ""}`);
+    if (d.kind === "scene" && d.parentContext) L.push(...wrap(d.parentContext, 86, "          context: "));
+    L.push(...wrap(brief.premise, 86, "Premise   "));
+  }
+  L.push("", "BEATS");
+  for (const b of [...plan.beats].sort((a, c) => a.startS - c.startS)) L.push(`  ${fmtT(b.startS)}–${fmtT(b.endS)}  ${pad(b.title, 14)} ${b.purpose ?? ""}`.trimEnd());
+  L.push("", "SCRIPT + STORYBOARD", `  ${pad("#", 3)} ${pad("at", 6)} ${pad("len", 5)} ${pad("sound", 6)} picture`);
+  const placed = new Set<string>();
+  const srcOf = (sh: (typeof shots)[number]) => {
+    const x = sh.source;
+    if (x.type === "youtube") return `YouTube ${x.clipId ?? "?"}${x.section ? ` ${fmtT(x.section.startS)}–${fmtT(x.section.endS)}` : ""}${clips.get(x.clipId ?? "") ? ` — ${clips.get(x.clipId!)!.need}` : ""}`;
+    if (x.type === "ai") return `AI · ${ai.get(sh.id)?.model ?? x.model ?? "default model"}${ai.get(sh.id) ? ` — "${ai.get(sh.id)!.prompt}"` : x.prompt ? ` — "${x.prompt}"` : ""}`;
+    if (x.type === "card") return "title card";
+    return `${x.type}${x.assetId ? ` ${x.assetId}` : x.hint ? ` ${x.hint}` : ""}`;
+  };
+  shots.forEach((sh, i) => {
+    const t = at.get(sh.id)!;
+    L.push(...wrap(sh.description, 70, `  ${pad(String(i + 1), 3)} ${pad(fmtT(t.startS), 6)} ${pad(`${sh.durationS}s`, 5)} ${pad(sh.sound, 6)} `, "                         "));
+    L.push(...wrap(srcOf(sh), 70, "                         src: "));
+    if (sh.text) L.push(`                         CARD "${sh.text.replace(/\n/g, " / ")}"`);
+    if (sh.transition && sh.transition !== "cut") L.push(`                         → ${sh.transition}`);
+    const lines = plan.script.filter((l) => !placed.has(l.id) && l.atS >= t.startS - 0.05 && l.atS < t.endS - 0.05 && !(l.kind === "text" && sh.text === l.text)).sort((a, b) => a.atS - b.atS);
+    for (const l of lines) {
+      placed.add(l.id);
+      const tag = l.kind === "narration" ? "VO  " : l.kind === "bite" ? "BITE" : l.kind === "text" ? "CARD" : "DIAL";
+      L.push(...wrap(`"${l.text}"${l.note ? ` (${l.note})` : ""}`, 62, `                  ${pad(fmtT(l.atS), 6)} ${tag} `));
+    }
+  });
+  const unplaced = plan.script.filter((l) => !placed.has(l.id) && !shots.some((sh) => sh.text === l.text));
+  if (unplaced.length) {
+    L.push("  lines outside the picture:");
+    for (const l of unplaced) L.push(`                  ${pad(fmtT(l.atS), 6)} ${l.kind.toUpperCase().slice(0, 4)} "${l.text}"`);
+  }
+  if (plan.clipList.length) {
+    L.push("", "CLIPS TO FIND");
+    for (const c of plan.clipList) {
+      L.push(...wrap(c.need, 80, `  ${pad(c.id, 12)} `));
+      L.push(`               search: ${c.queries.map((q) => `"${q}"`).join(", ")}${c.preferredChannels?.length ? ` · prefer ${c.preferredChannels.join(", ")}` : ""}`);
+      if (c.wantedSection || c.durationHintS) L.push(`               wanted: ${c.wantedSection ?? ""}${c.durationHintS ? ` (~${c.durationHintS} s video)` : ""}`.trimEnd());
+    }
+  }
+  if (plan.aiShots.length) {
+    L.push("", "AI SHOTS");
+    for (const a of plan.aiShots) L.push(...wrap(`${a.model ?? "default"} · ${a.durationS} s · "${a.prompt}"${a.negative ? ` · avoid: ${a.negative}` : ""}`, 80, `  ${pad(a.shotId, 6)} `));
+  }
+  if (plan.music) L.push("", "MUSIC", ...wrap(`${plan.music.brief}${plan.music.queries.length ? ` · search: ${plan.music.queries.map((q) => `"${q}"`).join(", ")}` : ""}`, 90, "  "));
+  if (plan.narration) L.push("", "NARRATION", `  voice: ${plan.narration.voice ?? "default"}${plan.narration.style ? ` · ${plan.narration.style}` : ""} · ${plan.narration.lines.length} line(s)`);
+  if (plan.risks.length) L.push("", "RISKS", ...plan.risks.map((r) => `  - ${r}`));
+  if (plan.notes) L.push("", "NOTES", ...wrap(plan.notes, 90, "  "));
+  return L.join("\n") + "\n";
+}
+
 export type PlanTask = { id: string; kind: "source" | "ai" | "narration" | "music" | "assemble" | "titles" | "checks" | "draft" | "final"; deps: string[]; spec: Record<string, unknown> };
 
 /** The plan as a dependency graph: everything without deps can run at once. */

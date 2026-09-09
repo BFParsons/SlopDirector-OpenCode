@@ -26,6 +26,11 @@ Notable changes, newest first. See [DEPENDENCIES.md](DEPENDENCIES.md) for setup 
   yt-dlp search without a download. `storyboard_sheet` tiles one captioned frame per shot
   of the cut for review. Claude Code sub-agent definitions in `.claude/agents/`
   (clip-scout, narrator, shot-picker) carry the fan-out. Guide Part II §11 documents it.
+  The plan is shown in the terminal, not in a file: `plan_document` defaults to a
+  fixed-width layout (`?view=cli`) with the script and the storyboard as one time-ordered
+  list — each shot with its source, its card and the lines that play over it — followed by
+  the clips to find, AI shots, music, narration, risks and the check; the agent pastes it
+  verbatim. Markdown (`format: "markdown"`, also written to `plan-v<N>.md`) stays for files.
 
 - **Per-clip gain, and sound bites are voices too.** The second real job (a 30 s attack ad
   cut from archival Nixon footage: five sync-sound bites, six TTS narrator lines, a music
