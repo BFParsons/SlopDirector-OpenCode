@@ -41,7 +41,46 @@ export interface WhisperOptions {
   language?: string | null;
 }
 
-export async function runWhisper(
+// Whisper is the heaviest thing the app runs. Nine clip scouts asking for
+// transcripts at once put eleven whisper processes on an 8-core laptop (load
+// 67); now at most WHISPER_CONCURRENCY (default 2) run, the rest queue, and
+// concurrent requests for the same file + model share one run.
+const gw = globalThis as unknown as { __whisperInflight?: Map<string, Promise<TranscribeResult>>; __whisperSlots?: { active: number; waiters: (() => void)[] } };
+const inflight = (gw.__whisperInflight ??= new Map<string, Promise<TranscribeResult>>());
+const slots = (gw.__whisperSlots ??= { active: 0, waiters: [] });
+const WHISPER_MAX = Math.max(1, Number(process.env.WHISPER_CONCURRENCY ?? 2) || 2);
+async function acquireSlot(): Promise<void> {
+  if (slots.active < WHISPER_MAX) {
+    slots.active++;
+    return;
+  }
+  await new Promise<void>((r) => slots.waiters.push(r));
+  slots.active++;
+}
+function releaseSlot(): void {
+  slots.active--;
+  const next = slots.waiters.shift();
+  if (next) next();
+}
+
+export async function runWhisper(projectId: string, inputAbs: string, opts: WhisperOptions, jobId: string): Promise<TranscribeResult> {
+  const key = `${inputAbs}|${opts.model?.trim() || "base"}|${opts.language ?? ""}`;
+  const existing = inflight.get(key);
+  if (existing) return existing;
+  const run = (async () => {
+    await acquireSlot();
+    try {
+      return await runWhisperOnce(projectId, inputAbs, opts, jobId);
+    } finally {
+      releaseSlot();
+      inflight.delete(key);
+    }
+  })();
+  inflight.set(key, run);
+  return run;
+}
+
+async function runWhisperOnce(
   projectId: string,
   inputAbs: string,
   opts: WhisperOptions,

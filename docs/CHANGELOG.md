@@ -5,6 +5,14 @@ Notable changes, newest first. See [DEPENDENCIES.md](DEPENDENCIES.md) for setup 
 
 ## 2026-09 — no-storyboard fork
 
+- **Fan-out found two serial bottlenecks.** Nine clip scouts on the LA riots scene queued
+  behind a worker rule that ran YouTube imports one at a time (a shared cookies jar that
+  yt-dlp rewrites): each yt-dlp run now gets its own copy of the jar and copies it back,
+  and `YT_IMPORT_CONCURRENCY` (default 3) imports run at once. Then they all asked for
+  transcripts together and put eleven Whisper processes on the laptop (load 67):
+  `WHISPER_CONCURRENCY` (default 2) runs at once, the rest queue, and concurrent requests
+  for the same file + model share one run.
+
 - **The interview asks one question at a time, multiple choice.** Like a planning prompt:
   `interview_next {request, answers}` (`mcp/interview.ts`) returns the next question — id,
   header, wording, 2–4 options with the recommended one marked, multi-select where it

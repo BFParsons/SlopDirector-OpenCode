@@ -27,6 +27,7 @@ const inFlight = new Set<string>();
 let activeAssembly = 0;
 let activeDownloads = 0;
 let activeYtImports = 0;
+const ytImportCap = Math.max(1, Number(process.env.YT_IMPORT_CONCURRENCY ?? 3) || 3);
 let shuttingDown = false;
 let timer: NodeJS.Timeout | null = null;
 
@@ -46,11 +47,12 @@ async function runJob(job: Job): Promise<void> {
     await requeue(job.id, 3000);
     return;
   }
-  // Serialize YouTube imports to one at a time: they share a single cookies file
-  // that yt-dlp rewrites with rotated session tokens, so concurrent writes would
-  // corrupt it. (YouTube imports are rare + user-initiated, so this is cheap.)
+  // YouTube imports run a few at a time (YT_IMPORT_CONCURRENCY, default 3): each
+  // yt-dlp run gets its own copy of the cookies jar (lib/youtube/import.ts), so
+  // the old one-at-a-time rule is gone — an agent fanning out nine clip scouts
+  // used to wait on a queue that drained at one clip a minute.
   const isYtImport = job.type === "IMPORT_YOUTUBE" || job.type === "IMPORT_AUDIO";
-  if (isYtImport && activeYtImports >= 1) {
+  if (isYtImport && activeYtImports >= ytImportCap) {
     await requeue(job.id, 3000);
     return;
   }

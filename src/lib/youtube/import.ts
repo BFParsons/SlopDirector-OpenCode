@@ -1,3 +1,4 @@
+import { copyFileSync, renameSync, statSync } from "node:fs";
 import { spawn } from "node:child_process";
 import { mkdtemp, readdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -11,17 +12,38 @@ function fmtTime(s: number): string {
 }
 
 /**
- * Cookie args for yt-dlp. We point it straight at the configured cookies file
- * (mounted read-write) so it can rewrite the jar with YouTube's rotated session
- * tokens — discarding that refresh makes the cookies go stale within minutes.
- * Concurrent writes to the shared file are avoided by serializing YouTube
- * imports in the worker (one at a time).
+ * Cookies for yt-dlp. YouTube rotates session tokens and yt-dlp rewrites the
+ * jar with them — discarding that refresh makes the cookies go stale within
+ * minutes. Each run gets its OWN copy of the configured jar (so several
+ * imports can run at once without corrupting the shared file) and copies it
+ * back when it is done: last writer wins, and any fresh jar is a valid jar.
  */
-function cookieArgs(): string[] {
-  if (env.YTDLP_COOKIES) return ["--cookies", env.YTDLP_COOKIES];
-  if (env.YTDLP_COOKIES_FROM_BROWSER)
-    return ["--cookies-from-browser", env.YTDLP_COOKIES_FROM_BROWSER];
-  return [];
+function cookiesFor(tmpDir: string): { args: string[]; syncBack: () => Promise<void> } {
+  if (env.YTDLP_COOKIES) {
+    const original = env.YTDLP_COOKIES;
+    const copy = path.join(tmpDir, "cookies.txt");
+    try {
+      copyFileSync(original, copy);
+    } catch {
+      return { args: ["--cookies", original], syncBack: async () => {} };
+    }
+    return {
+      args: ["--cookies", copy],
+      syncBack: async () => {
+        try {
+          const [a, b] = [statSync(copy), statSync(original)];
+          if (a.mtimeMs <= b.mtimeMs && a.size === b.size) return;
+          const tmp = `${original}.${process.pid}.tmp`;
+          copyFileSync(copy, tmp);
+          renameSync(tmp, original);
+        } catch {
+          /* best effort */
+        }
+      },
+    };
+  }
+  if (env.YTDLP_COOKIES_FROM_BROWSER) return { args: ["--cookies-from-browser", env.YTDLP_COOKIES_FROM_BROWSER], syncBack: async () => {} };
+  return { args: [], syncBack: async () => {} };
 }
 
 export interface DownloadedClip {
@@ -73,7 +95,8 @@ export function downloadYouTubeClip(opts: {
       args.push("--remote-components", env.YTDLP_REMOTE_COMPONENTS);
     }
     // YouTube often requires auth; pass cookies if the operator configured them.
-    args.push(...cookieArgs());
+    const cookies = cookiesFor(tmpDir);
+    args.push(...cookies.args);
     args.push("-o", outTmpl, url);
 
     const proc = spawn(env.YTDLP_BIN, args, { stdio: ["ignore", "pipe", "pipe"] });
@@ -92,6 +115,7 @@ export function downloadYouTubeClip(opts: {
       reject(new Error(`yt-dlp failed to start (${env.YTDLP_BIN}): ${e.message}`));
     });
     proc.on("close", async (code) => {
+      await cookies.syncBack();
       clearTimeout(killer);
       if (code !== 0) {
         await rm(tmpDir, { recursive: true, force: true }).catch(() => {});
@@ -154,7 +178,8 @@ export function downloadYouTubeAudio(opts: {
     if (env.YTDLP_REMOTE_COMPONENTS) {
       args.push("--remote-components", env.YTDLP_REMOTE_COMPONENTS);
     }
-    args.push(...cookieArgs());
+    const cookies = cookiesFor(tmpDir);
+    args.push(...cookies.args);
     args.push("-o", outTmpl, url);
 
     const proc = spawn(env.YTDLP_BIN, args, { stdio: ["ignore", "pipe", "pipe"] });
@@ -173,6 +198,7 @@ export function downloadYouTubeAudio(opts: {
       reject(new Error(`yt-dlp failed to start (${env.YTDLP_BIN}): ${e.message}`));
     });
     proc.on("close", async (code) => {
+      await cookies.syncBack();
       clearTimeout(killer);
       if (code !== 0) {
         await rm(tmpDir, { recursive: true, force: true }).catch(() => {});

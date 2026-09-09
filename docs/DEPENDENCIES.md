@@ -247,6 +247,12 @@ What differs from the Debian/Windows notes above:
   clip). 10-bit is different: the CPU decodes an 80 Mbps 4K Main10 clip at ~10 fps, so the
   GPU wins even at full size (4 s clip, 4K → 4K: 10.1 s vs 15.6 s; 4K → 1080p: 3.9 s vs
   13.5 s). Cached in `capabilities-cache.json` as `hwDecode: ["h264","hevc","hevc10"]`.
+- **Concurrency knobs for agent fan-out (2026-09).** `YT_IMPORT_CONCURRENCY` (default 3):
+  YouTube imports used to run one at a time because yt-dlp rewrote a shared cookies jar;
+  each run now gets its own copy of the jar (`lib/youtube/import.ts`) and copies it back.
+  `WHISPER_CONCURRENCY` (default 2): at most this many Whisper runs at once, the rest queue,
+  and concurrent requests for the same file + model share one run — nine scouts asking for
+  transcripts together put eleven whisper processes on the laptop (load average 67).
 - **Open on a project:** `SLOPSTUDIO_OPEN=/projects/<id> scripts/launch-desktop.sh --prod` starts
   the desktop window on that page (same-origin paths only).
 - **Agent panel (2026-09).** The MCP server reports every tool call to the app so the open
