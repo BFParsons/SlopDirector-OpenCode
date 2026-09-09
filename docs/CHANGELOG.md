@@ -21,6 +21,15 @@ Notable changes, newest first. See [DEPENDENCIES.md](DEPENDENCIES.md) for setup 
   reports altogether; `SLOPSTUDIO_AGENT_NAME` labels them. Cost: about a millisecond per
   tool call; the agent never waits on it. Also: a burst of `project.changed` events (an
   edit list fires one per operation) is now coalesced into one refetch (150 ms).
+  **Then the panel stopped opening by itself.** Watching a list is not what a person wants;
+  they want to see the piece being assembled, as if an invisible editor had the mouse. So
+  *follow* now drives the editor itself: clips the agent adds fade in one after another in
+  timeline order (`agent-arrive`), a changed clip flashes, the changed clip is selected and
+  the playhead parks on it so the Program Monitor shows that frame (`GhostFollow`, inside
+  the editor provider), and when a draft lands the monitor switches to *Rendered* on its
+  own. The Agent panel stays available (Panel → Viewer → Agent, or the toolbar pill) for
+  anyone who wants the log. `scripts/ghost-demo.ts <projectId>` shows it: it checkpoints,
+  clears the sequence shot by shot, rebuilds it, renders a draft, and restores.
 
 - **Pre-production: interview → brief → plan → approval → fan-out.** Both real jobs started
   at "clips exist"; the part where the brief gets pinned down was a chat. Now it is a

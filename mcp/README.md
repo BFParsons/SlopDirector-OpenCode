@@ -44,7 +44,7 @@ Against a multi-user server (desktop auth off) add `SLOPSTUDIO_API_TOKEN` to
 
 ## Watching it work
 
-Open the project in the app and add the **Agent** panel (Panel → Viewer → Agent): every tool call this server makes shows up there as it happens — arguments, result, the contact sheets it looked at — and the clips it changes flash on the timeline. `SLOPSTUDIO_AGENT_FEED=0` in this server's environment turns the reporting off. To see the panel without running a job: `pnpm exec tsx scripts/agent-lane-demo.ts <projectId>` replays a short scripted session into it (`--screenshot out.png` captures the editor headlessly).
+Open the project in the app and watch the editor: clips the agent adds fade in one by one, the clip it just touched is selected with the playhead on it, and a fresh draft takes over the monitor (the *follow* toggle). For the log itself add the **Agent** panel (Panel → Viewer → Agent, or click the toolbar pill): every tool call — arguments, result, the contact sheets it looked at. `pnpm exec tsx scripts/ghost-demo.ts <projectId>` replays a real clear-and-rebuild of the cut so you can see it. `SLOPSTUDIO_AGENT_FEED=0` in this server's environment turns the reporting off. To see the panel without running a job: `pnpm exec tsx scripts/agent-lane-demo.ts <projectId>` replays a short scripted session into it (`--screenshot out.png` captures the editor headlessly).
 
 ## Tools
 

@@ -36,7 +36,7 @@ export function AgentPill() {
         if (!windows.some((w) => w.panelType === "agent")) addWindow("agent", "Agent");
       }}
       title="What the agent is doing (opens the Agent panel)"
-      className="flex max-w-[16rem] items-center gap-1.5 whitespace-nowrap rounded-md border border-[var(--color-border)] px-2 py-1 text-xs text-[var(--color-muted)] transition-colors hover:text-[var(--color-fg)]"
+      className="flex max-w-[9rem] shrink items-center gap-1.5 whitespace-nowrap rounded-md border border-[var(--color-border)] px-2 py-1 text-[11px] text-[var(--color-muted)] transition-colors hover:text-[var(--color-fg)] max-md:hidden"
     >
       <span className={`inline-block h-2 w-2 rounded-full ${active ? "animate-pulse bg-amber-400" : "bg-emerald-400"}`} />
       <span className="truncate font-mono">{active ? `${active.tool}…` : `${last.tool} ✓`}</span>

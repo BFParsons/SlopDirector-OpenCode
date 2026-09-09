@@ -76,6 +76,14 @@ interface ProjectState {
   follow: boolean;
   /** segment ids the agent just changed → expiry timestamp (ms) */
   flashIds: Record<string, number>;
+  /** segments that appeared in the last refresh, in timeline order (revealed one by one) */
+  arrivals: string[];
+  /** the segment to follow (select + seek): the newest arrival, else the last change */
+  lastChangedId: string | null;
+  lastChangedAt: number;
+  /** a draft that landed since the person last saw one (the monitor switches to it) */
+  draftArrivedId: string | null;
+  ackDraft: () => void;
   _es: EventSource | null;
   _poll: ReturnType<typeof setInterval> | null;
   _projectId: string | null;
@@ -124,6 +132,11 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   agentFeed: readPref<AgentFeedMode>(FEED_KEY, "full"),
   follow: readPref<boolean>(FOLLOW_KEY, true),
   flashIds: {},
+  arrivals: [],
+  lastChangedId: null,
+  lastChangedAt: 0,
+  draftArrivedId: null,
+  ackDraft: () => set({ draftArrivedId: null }),
   _es: null,
   _poll: null,
   _projectId: null,
@@ -142,7 +155,18 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
       const now = Date.now();
       for (const k of Object.keys(flashIds)) if (flashIds[k] < now) delete flashIds[k];
       for (const cid of changed) flashIds[cid] = now + 2500;
-      set({ snapshot: snap, flashIds });
+      const before = new Set((prev?.segments ?? []).map((s) => s.id));
+      const arrivals = changed.length ? segmentOrder(snap).filter((id) => changed.includes(id) && !before.has(id)) : [];
+      const lastChangedId = arrivals[arrivals.length - 1] ?? changed[changed.length - 1] ?? null;
+      const prevDraft = prev?.finalRender?.draftAssetId ?? null;
+      const nextDraft = snap.finalRender?.draftAssetId ?? null;
+      set({
+        snapshot: snap,
+        flashIds,
+        arrivals,
+        ...(lastChangedId ? { lastChangedId, lastChangedAt: now } : {}),
+        ...(prev && nextDraft && nextDraft !== prevDraft && get().agentFeed !== "off" ? { draftArrivedId: nextDraft } : {}),
+      });
       if (changed.length) setTimeout(() => {
         const cur = { ...get().flashIds };
         const t = Date.now();
@@ -218,6 +242,26 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
     set({ _es: null, _poll: null, _refetchTimer: null, connected: false });
   },
 }));
+
+/** Timeline order: main-sequence shots by index, then positioned clips by offset. */
+function segmentOrder(snap: ProjectSnapshot): string[] {
+  const main = snap.segments.filter((s) => (s.track ?? 0) === 0 && !s.audioOnly && !s.library).sort((a, b) => a.index - b.index);
+  const rest = snap.segments.filter((s) => !main.includes(s)).sort((a, b) => (a.offsetS ?? 0) - (b.offsetS ?? 0));
+  return [...main, ...rest].map((s) => s.id);
+}
+
+/** Timeline start of a segment (seconds): cumulative for the main sequence, offsetS otherwise. */
+export function segmentStartS(snap: ProjectSnapshot, id: string): number | null {
+  const s = snap.segments.find((x) => x.id === id);
+  if (!s) return null;
+  if ((s.track ?? 0) !== 0 || s.audioOnly) return s.offsetS ?? 0;
+  let t = 0;
+  for (const m of snap.segments.filter((x) => (x.track ?? 0) === 0 && !x.audioOnly && !x.library).sort((a, b) => a.index - b.index)) {
+    if (m.id === id) return t;
+    t += m.durationS;
+  }
+  return null;
+}
 
 const MAX_ACTIVITY = 200;
 /** Merge events by callId (an end event completes its start), newest last. */

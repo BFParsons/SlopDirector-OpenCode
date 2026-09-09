@@ -5,6 +5,7 @@ import type { ProjectSnapshot } from "@/lib/projects/serialize";
 import type { WorkspaceSection } from "@/config/studio-presets";
 import { ProjectEditorProvider } from "./ProjectEditorProvider";
 import WorkspaceShell from "./WorkspaceShell";
+import { GhostFollow } from "./GhostFollow";
 
 /** The panel Studio for one project: the per-project edit context wrapping the
  *  floating-window workspace. Keyed on snapshot.updatedAt by the caller so a
@@ -26,6 +27,7 @@ export function StudioRoot({
   return (
     <ProjectEditorProvider snapshot={snapshot} refetch={refetch} isAdmin={isAdmin} userEmail={userEmail}>
       <WorkspaceShell section={section} />
+      <GhostFollow />
       <PerfHud />
     </ProjectEditorProvider>
   );

@@ -78,7 +78,7 @@ export function AgentLane({ compact = false }: { compact?: boolean }) {
               <option value="full">everything</option>
             </select>
           </label>
-          <label className="flex items-center gap-1 text-[var(--color-muted)]" title="Open this panel by itself when an agent starts working, and flash the clips it changes">
+          <label className="flex items-center gap-1 text-[var(--color-muted)]" title="Follow the agent in the editor: new clips fade in one by one, the changed clip is selected and the playhead parks on it, a new draft takes over the monitor">
             <input type="checkbox" checked={follow} onChange={(e) => setFollow(e.target.checked)} /> follow
           </label>
           <button type="button" onClick={clearActivity} className="text-[var(--color-muted)] hover:text-[var(--color-fg)]" title="Clear the list">
