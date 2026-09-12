@@ -1,5 +1,6 @@
 import { anchorExpr, fontById, type Rect } from "@/lib/typography";
 import path from "node:path";
+import { zoompanTransformFilter, type ClipTransform } from "@/lib/render/transform";
 import type {
   AspectRatio,
   ColorLook,
@@ -19,9 +20,11 @@ export const FONT_BOLD = path.join(process.cwd(), "public", "fonts", "DejaVuSans
 /** Directory of the bundled fonts (libass `fontsdir` for burned-in captions). */
 export const FONTS_DIR = path.join(process.cwd(), "public", "fonts");
 
-/** Quote a filesystem path as a filtergraph option value (single quotes; embedded quotes escaped). */
+/** Escape the option value, then the filtergraph. spawn adds no shell layer. */
 export function ffQuote(p: string): string {
-  return `'${p.replace(/'/g, "'\\''")}'`;
+  const normalized = process.platform === "win32" ? p.replaceAll("\\", "/") : p;
+  const option = normalized.replace(/[\\':\s]/g, "\\$&");
+  return option.replace(/[\\'\[\],;]/g, "\\$&");
 }
 
 const BLUR_FILL_SIGMA = 24; // gaussian blur on the enlarged background fill
@@ -111,11 +114,10 @@ const SUBTLE_TRAVEL = 0.04; // very gentle zoom range for the subtle zooms (1.0 
 const PAN_ZOOM = 1.2; // constant zoom for pans, leaving headroom to glide
 
 /**
- * Pan/scan/zoom on a still over `durationS`. Oversamples to 2x the target frame
- * first to keep zoompan smooth and jitter-free, then zoompans down to exactly
- * w x h. Motion is linear across the clip via `on/(frames-1)` (duration-accurate,
- * unlike an accumulating step). Centered crops reference the per-frame `zoom`;
- * pans hold zoom constant and sweep x or y across the available range.
+ * Pan/scan/zoom on a still over `durationS`. Prepare a 2x working frame, repeat
+ * it with a static zoompan, then move a fractional source rectangle and scale
+ * down. zoompan only supplies frames: using it for movement quantizes the crop
+ * and creates visible steps even with a higher-resolution source.
  *
  * Framing differs by intent: pans and the strong zooms COVER the frame (crop to
  * fit) since they assume an image shaped for the frame; the SUBTLE zooms FIT the
@@ -134,9 +136,6 @@ export function imageMotionFilter(
   const frames = Math.max(1, Math.round(durationS * fps));
   const ow = w * 2;
   const oh = h * 2;
-  const p = frames > 1 ? `(on/${frames - 1})` : "0"; // progress 0..1
-  const cx = "(iw/2-(iw/zoom/2))"; // centered x
-  const cy = "(ih/2-(ih/zoom/2))"; // centered y
 
   const subtle = motion === "SUBTLE_ZOOM_IN" || motion === "SUBTLE_ZOOM_OUT";
   // Subtle zooms preserve the whole image (fit + letterbox); everything else
@@ -151,37 +150,36 @@ export function imageMotionFilter(
         `crop=${ow}:${oh}`,
       ];
 
-  let z: string;
-  let x = cx;
-  let y = cy;
+  const keys = (a: number, b: number) => [{ t: 0, v: a }, { t: 1, v: b }];
+  const tr: ClipTransform = { scale: [], posX: [], posY: [] };
   switch (motion) {
     case "ZOOM_IN":
-      z = `(1+${ZOOM_TRAVEL}*${p})`;
+      tr.scale = keys(1, 1 + ZOOM_TRAVEL);
       break;
     case "ZOOM_OUT":
-      z = `(${1 + ZOOM_TRAVEL}-${ZOOM_TRAVEL}*${p})`;
+      tr.scale = keys(1 + ZOOM_TRAVEL, 1);
       break;
     case "SUBTLE_ZOOM_IN":
-      z = `(1+${SUBTLE_TRAVEL}*${p})`;
+      tr.scale = keys(1, 1 + SUBTLE_TRAVEL);
       break;
     case "SUBTLE_ZOOM_OUT":
-      z = `(${1 + SUBTLE_TRAVEL}-${SUBTLE_TRAVEL}*${p})`;
+      tr.scale = keys(1 + SUBTLE_TRAVEL, 1);
       break;
     case "PAN_RIGHT":
-      z = `${PAN_ZOOM}`;
-      x = `((iw-iw/zoom)*${p})`;
+      tr.scale = keys(PAN_ZOOM, PAN_ZOOM);
+      tr.posX = keys(-1, 1);
       break;
     case "PAN_LEFT":
-      z = `${PAN_ZOOM}`;
-      x = `((iw-iw/zoom)*(1-${p}))`;
+      tr.scale = keys(PAN_ZOOM, PAN_ZOOM);
+      tr.posX = keys(1, -1);
       break;
     case "PAN_DOWN":
-      z = `${PAN_ZOOM}`;
-      y = `((ih-ih/zoom)*${p})`;
+      tr.scale = keys(PAN_ZOOM, PAN_ZOOM);
+      tr.posY = keys(-1, 1);
       break;
     case "PAN_UP":
-      z = `${PAN_ZOOM}`;
-      y = `((ih-ih/zoom)*(1-${p}))`;
+      tr.scale = keys(PAN_ZOOM, PAN_ZOOM);
+      tr.posY = keys(1, -1);
       break;
     default:
       return stillFilter(w, h);
@@ -189,7 +187,9 @@ export function imageMotionFilter(
 
   return [
     ...base,
-    `zoompan=z='${z}':d=${frames}:x='${x}':y='${y}':s=${w}x${h}:fps=${fps}`,
+    `zoompan=z=1:d=${frames}:s=${ow}x${oh}:fps=${fps}`,
+    zoompanTransformFilter(tr, ow, oh, durationS, fps),
+    `scale=${w}:${h}:flags=lanczos`,
     "setsar=1",
     "format=yuv420p",
   ].join(",");
@@ -316,8 +316,8 @@ export function drawtextFilter(spec: TextOverlaySpec, frameW: number, frameH: nu
   const e = spec.endS != null && spec.endS > s ? spec.endS : null;
   const S = s.toFixed(3);
   const parts: string[] = [];
-  parts.push(`fontfile='${path.join(FONTS_DIR, font.file)}'`);
-  parts.push(`textfile='${spec.textfile}'`);
+  parts.push(`fontfile=${ffQuote(path.join(FONTS_DIR, font.file))}`);
+  parts.push(`textfile=${ffQuote(spec.textfile)}`);
   parts.push("expansion=none");
   // POP: the size grows from 82 % over 160 ms (fontsize takes an expression).
   parts.push(spec.animation === "POP" ? `fontsize='${fontSize}*(0.82+0.18*min(1,(t-${S})/0.16))'` : `fontsize=${fontSize}`);

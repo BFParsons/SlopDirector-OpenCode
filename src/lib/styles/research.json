@@ -1,0 +1,1480 @@
+{
+  "michael-moore": {
+    "name": "Michael Moore",
+    "reference": "Author-led investigative satire; Roger & Me as a reference, rather than a universal documentary template.",
+    "mechanism": "A public claim becomes a concrete, often absurd encounter.",
+    "materialFit": "Archive-compatible",
+    "prerequisites": "Contradictory statements with dates, a specific affected person or place, and preferably an actual encounter.",
+    "selection": "Build selects by claim, test and consequence. Prefer a revealing exchange, procedural obstacle or ordinary detail over unrelated shots of wealth or suffering.",
+    "framing": "Keep locations legible enough to establish who has access, who waits and who controls the encounter. A crop should reveal an observation, not manufacture embarrassment.",
+    "rhythm": "Try claim → literal test → unforeseen answer → consequence. Place the comic reversal after the audience understands the premise; preserve the subject's qualifying words.",
+    "sound": "Let a revealing answer play clearly. Test either an ironic cue or unscored location sound at the reversal; choose the version that makes the contradiction understandable.",
+    "typography": "Show the exact claim and its source briefly. Use typography to distinguish quotation from editorial commentary; do not invent a Moore-wide font.",
+    "exceptions": "Keep quote integrity. Treat bans on piano, slow motion and neutral passages as optional tonal choices. A stated viewpoint does not require commentary over every image.",
+    "evaluation": "Make a 25-second sequence from a claim and a documented outcome. A viewer should identify the contradiction without the narrator explaining the joke.",
+    "failureMode": "A sarcastic narrator over generic archive has attitude but no encounter.",
+    "evidence": {
+      "summary": "In his TIFF speech, Moore argues for entertainment, humor and a filmmaker's point of view. He specifically rejects routine illustrative images when a more revealing scene can carry the idea.",
+      "basis": "Direct craft account",
+      "sources": [
+        {
+          "number": 1,
+          "id": "moore",
+          "title": "13 Rules for Making Documentary Films",
+          "author_publisher": "Michael Moore; TIFF speech, reprinted by Reader Supported News",
+          "date": "2014-09-21",
+          "url": "https://readersupportednews.org/component/content/article/277/25998-focus-13-rules-for-making-documentary-films",
+          "evidence_type": "First-person speech reprint",
+          "supports": "Entertainment, humor, authorial perspective and resistance to documentary cliches.",
+          "accessed": "2026-09-10"
+        }
+      ]
+    }
+  },
+  "errol-morris": {
+    "name": "Errol Morris",
+    "reference": "Investigative interview and constructed-image nonfiction; The Thin Blue Line is one reference.",
+    "mechanism": "Testimony and recurring images expose uncertainty instead of closing it too soon.",
+    "materialFit": "Needs specific source footage",
+    "prerequisites": "Substantial interview answers, corroborating records and, where appropriate, clearly identified reconstructions.",
+    "selection": "Choose an answer with a precise assertion and a detail another source can test. Keep the speaker's reasoning, hesitation or self-correction when it changes the meaning.",
+    "framing": "For new interviews, use a consistent intimate eyeline and simple visual field. For reconstructions, photograph evidentiary details whose differing versions can be compared.",
+    "rhythm": "Return to the same detail when testimony changes. Let each recurrence add or contradict information; avoid repeating a shot merely to seem mysterious.",
+    "sound": "Try a recurring musical figure that remains unresolved across competing accounts. Keep intelligibility and the speaker's unforced cadence ahead of the score.",
+    "typography": "Identify document origin and reconstruction status. Give competing versions consistent visual treatment so typography does not silently certify one.",
+    "exceptions": "Replace blanket prohibitions on questions, narration, handheld and drums with an inquiry-specific design. Stylization requires factual discipline; it does not license presenting an imagined event as observed.",
+    "evaluation": "Cut two conflicting accounts around one recurring object in 30 seconds. The viewer should state what remains uncertain and what evidence could resolve it.",
+    "failureMode": "A direct-to-camera interview and a brooding loop do not by themselves create an investigation.",
+    "evidence": {
+      "summary": "Morris rejects the idea that any visual method guarantees truth. His account of The Thin Blue Line's music also shows score being used during development, not merely added as atmosphere after picture lock.",
+      "basis": "Direct craft account",
+      "sources": [
+        {
+          "number": 2,
+          "id": "morris",
+          "title": "Errol Morris interview",
+          "author_publisher": "The Believer; hosted by Errol Morris",
+          "date": "2004-04",
+          "url": "https://www.errolmorris.com/content/interview/believer0404.html",
+          "evidence_type": "First-person interview",
+          "supports": "Stylization and documentary truth; method does not guarantee truth.",
+          "accessed": "2026-09-10"
+        },
+        {
+          "number": 3,
+          "id": "glass",
+          "title": "The Thin Blue Line",
+          "author_publisher": "Philip Glass; includes Morris's production account",
+          "date": "Undated",
+          "url": "https://philipglass.com/compositions/thin_blue_line/",
+          "evidence_type": "Composer catalogue and director statement",
+          "supports": "Morris's use of existing Glass music during development and the resulting score.",
+          "accessed": "2026-09-10"
+        }
+      ]
+    }
+  },
+  "ken-burns": {
+    "name": "Ken Burns",
+    "reference": "Historical archive documentary; attention directed within still images and testimony.",
+    "mechanism": "An image changes meaning as its context and human stakes become visible.",
+    "materialFit": "Archive-compatible",
+    "prerequisites": "High-resolution photographs with useful internal detail, reliable dates and first-person records.",
+    "selection": "Find photographs containing both an initial point of attention and a consequential wider context. Collect letters or testimony that individualize the event without exceeding what the record establishes.",
+    "framing": "Design a start frame, discovery and resting frame. Preserve enough resolution for the largest crop; hold still when the photograph's composition already communicates the point.",
+    "rhythm": "Move or reveal on a change of meaning in the testimony. Alternate a personal detail with the broader historical situation rather than applying the same zoom to every still.",
+    "sound": "Build a small thematic palette before final assembly. Let music recur with changed context; give testimony space and use environmental sound selectively, without implying it is original recording.",
+    "typography": "Use discreet dates and source labels. Separate editorial titles from archival lettering; avoid an obligatory sepia treatment or decorative period type.",
+    "exceptions": "Keep disciplined image motion and historical specificity. Remove unsupported career-wide bans on drums, rapid cutting or first-person passages; these should be reference-specific choices.",
+    "evaluation": "Make a 20-second still-image sequence whose final framing changes the opening interpretation. Test once without movement: retain motion only if it improves the discovery.",
+    "failureMode": "Continuous slow zooms without a designed reveal create movement but little historical insight.",
+    "evidence": {
+      "summary": "Burns describes developing music alongside the writing and archive search. He gives a concrete example of a photograph whose wider framing transforms an apparently ordinary domestic scene into something chilling.",
+      "basis": "Direct craft account",
+      "sources": [
+        {
+          "number": 4,
+          "id": "burns",
+          "title": "No Longer Just Wallpaper: Archival Footage Can Inform and Shape Your Film's Story",
+          "author_publisher": "Lauren Cardillo, International Documentary Association",
+          "date": "2013-04-01",
+          "url": "https://documentary.org/feature/no-longer-just-wallpaper-archival-footage-can-inform-and-shape-your-films-story",
+          "evidence_type": "Craft reporting with direct Burns interview",
+          "supports": "Music developed alongside script and archive; reframing stills changes meaning.",
+          "accessed": "2026-09-10"
+        }
+      ]
+    }
+  },
+  "werner-herzog": {
+    "name": "Werner Herzog",
+    "reference": "Essayistic nonfiction and subjective encounter; distinguish poetic narration from factual claims.",
+    "mechanism": "A concrete observation opens a larger, unsettling question.",
+    "materialFit": "Needs specific source footage",
+    "prerequisites": "An unusual real encounter, behavior or environment with enough duration to observe it.",
+    "selection": "Seek behavior that resists an immediate explanation: a repeated task, an obsession, an indifferent landscape or an unexpected gesture. Avoid stock imagery chosen only because it looks bleak.",
+    "framing": "Keep the relationship between person and environment visible. Hold long enough for something specific to happen or for the viewer to revise an initial interpretation.",
+    "rhythm": "Try observation → restrained question → return to observation. End before the narration exhausts the image's possibilities; use duration as inquiry rather than as a fixed minimum.",
+    "sound": "Collect the environment as a distinct dramatic presence. Test a musical passage only where it changes the scale of the thought; preserve a contrasting stretch of unscored sound.",
+    "typography": "Supply essential factual context plainly. Maps and labels are permitted when needed; the image's ambiguity should not depend on withholding basic facts.",
+    "exceptions": "Replace bans on maps, interviews, lower thirds and quick sequences with a preference for experiential evidence. Mark imagined language as interpretation and preserve documentary provenance.",
+    "evaluation": "Build a 25-second encounter with one observational sentence and one open question. Viewers should describe the actual behavior before discussing the larger theme.",
+    "failureMode": "Grandiose narration over interchangeable landscapes substitutes a persona for discovery.",
+    "evidence": {
+      "summary": "Herzog's essays argue for a form of cinematic truth beyond literal description. They support a subjective artistic position, not a reliable recipe of slow shots, accent imitation or unrestricted factual invention.",
+      "basis": "Director's theoretical account",
+      "sources": [
+        {
+          "number": 5,
+          "id": "herzog",
+          "title": "Texts by Werner Herzog: On the Absolute, the Sublime, and Ecstatic Truth",
+          "author_publisher": "Werner Herzog",
+          "date": "Undated collection",
+          "url": "https://www.wernerherzog.com/text-by-werner-herzog.html",
+          "evidence_type": "Director's essays",
+          "supports": "Distinction between literal fact and subjective or poetic experience.",
+          "accessed": "2026-09-10"
+        }
+      ]
+    }
+  },
+  "frederick-wiseman": {
+    "name": "Frederick Wiseman",
+    "reference": "Institutional observational documentary; At Berkeley and Boxing Gym provide concrete editing references.",
+    "mechanism": "Procedures and relationships reveal how an institution works.",
+    "materialFit": "Needs specific source footage",
+    "prerequisites": "Complete interactions, intelligible location audio, procedural coverage and context for the participants' roles.",
+    "selection": "Find a task with a decision, negotiation or change in authority. Favor exchanges that show the rules operating over isolated emotional reactions.",
+    "framing": "Preserve who speaks to whom and what each person is doing. Include spatial or procedural context before relying on a revealing close-up.",
+    "rhythm": "Compress repetition while maintaining the logic of the exchange. Join scenes because their procedures, power relations or sounds converse; retain ambiguity where the institution itself produces it.",
+    "sound": "Use location sound to carry continuity or connect different activities. Avoid adding sounds that misrepresent what happened; silence and room tone can also separate institutional spaces.",
+    "typography": "Keep administrative context available in restrained labels when necessary. A title may orient viewers without telling them which participant is right.",
+    "exceptions": "An observational reference can prefer no explanatory narrator or added score. Remove the claim that statements cannot be shortened: ethical compression and constructed continuity are central editorial decisions.",
+    "evaluation": "Cut a 30-second procedural scene. A viewer should identify the task, the decision-maker and the unresolved tension without voiceover.",
+    "failureMode": "Long shots of an institution with no intelligible process produce opacity rather than observation.",
+    "evidence": {
+      "summary": "Wiseman describes reducing a lengthy class to a much shorter constructed scene and linking Boxing Gym sequences with overlapping location sound. Observational presentation therefore coexists with substantial editorial construction.",
+      "basis": "Direct craft account",
+      "sources": [
+        {
+          "number": 6,
+          "id": "wiseman",
+          "title": "The Choice and Order: An Interview with Frederick Wiseman",
+          "author_publisher": "MUBI Notebook",
+          "date": "2013",
+          "url": "https://mubi.com/en/notebook/posts/the-choice-and-order-an-interview-with-frederick-wiseman",
+          "evidence_type": "First-person interview",
+          "supports": "Constructed continuity, compression and sound bridges in At Berkeley and Boxing Gym.",
+          "accessed": "2026-09-10"
+        }
+      ]
+    }
+  },
+  "humphrey-jennings": {
+    "name": "Humphrey Jennings",
+    "reference": "Poetic wartime documentary; distinguish Listen to Britain from the narrated Words for Battle.",
+    "mechanism": "Sound connects separate lives into a larger social picture.",
+    "materialFit": "Archive-compatible",
+    "prerequisites": "Everyday activities with useful sound, contrasting social spaces and reliable historical identification.",
+    "selection": "Pair work, leisure and public ritual through a shared action or sound. Look for social difference within the connection, rather than smoothing every image into national unity.",
+    "framing": "Retain enough of each environment to make its social role visible. Human activity and the surrounding space should both contribute to the association.",
+    "rhythm": "Try introducing a sound in one place and continuing it over another. Return to its source after the connection becomes clear; vary the distance between sonic and visual links.",
+    "sound": "Plan the sequence from listening relationships: machinery, footsteps, broadcast, communal music, quiet. Treat recorded music within the scene differently from an added emotional bed.",
+    "typography": "Use contextual dates or locations where archive alone is insufficient. Title design should support the chosen historical execution, not force all work into one typography rule.",
+    "exceptions": "The prohibition on commentary is contradicted by Words for Battle. Keep sound-led association as a strong option, while allowing visual links and different forms across the career.",
+    "evaluation": "Make a 25-second sequence connecting three spaces through one sound. Viewers should identify both the connection and how the spaces differ.",
+    "failureMode": "A patriotic music bed over assorted archive erases the specific relationships that make the montage meaningful.",
+    "evidence": {
+      "summary": "BFI's account distinguishes Jennings's different forms and identifies Words for Battle's narration. Listen to Britain is also a collaboration with Stewart McAllister; its achievement should not be reduced to a sole-director visual preset.",
+      "basis": "Institutional analysis and primary work record",
+      "sources": [
+        {
+          "number": 7,
+          "id": "jennings",
+          "title": "Where to begin with Humphrey Jennings",
+          "author_publisher": "BFI",
+          "date": "2019-08-19",
+          "url": "https://www.bfi.org.uk/features/where-begin-humphrey-jennings",
+          "evidence_type": "Institutional film analysis",
+          "supports": "Listen to Britain, McAllister collaboration and narrated Words for Battle.",
+          "accessed": "2026-09-10"
+        },
+        {
+          "number": 8,
+          "id": "listen",
+          "title": "Listen to Britain",
+          "author_publisher": "BFI Player; Humphrey Jennings and Stewart McAllister",
+          "date": "1942 film; undated catalogue",
+          "url": "https://player.bfi.org.uk/free/film/watch-listen-to-britain-1942-online",
+          "evidence_type": "Archive film record",
+          "supports": "Primary work and collaborator attribution.",
+          "accessed": "2026-09-10"
+        }
+      ]
+    }
+  },
+  "lemmino": {
+    "name": "LEMMiNO",
+    "reference": "Researched mystery and spatial explanation; the book-depository episode is a bounded reference.",
+    "mechanism": "A confusing event becomes a set of inspectable claims, positions and uncertainties.",
+    "materialFit": "Archive plus graphics",
+    "prerequisites": "A source-backed timeline and a diagram or spatial model whose known and uncertain elements can be distinguished.",
+    "selection": "Organize material by the question each item answers. Prefer records that establish time, position, visibility or contradiction; retain unresolved alternatives in the research ledger.",
+    "framing": "Use a stable diagram orientation before moving the virtual camera. Show the entire relationship, then isolate the relevant line of sight or location.",
+    "rhythm": "Introduce one question, establish the model, test the claim, then update the model. Move into a new chapter only when the current uncertainty has changed.",
+    "sound": "Try a restrained recurring texture with distinct section changes. Reduce musical activity during dense evidence; reserve an accent for a real evidentiary turn.",
+    "typography": "Give known, inferred and unknown information different line or fill treatments with a legend. Label locations and dates consistently; avoid visual precision unsupported by the sources.",
+    "exceptions": "Remove automatic still motion, compulsory map/date beats and blanket stock-footage bans. Require a reason for each movement and a source for each apparently precise diagram.",
+    "evaluation": "Create a 30-second explanation of one line-of-sight claim. A viewer should distinguish the measured geometry from assumptions without reading the research notes.",
+    "failureMode": "Photorealistic reconstruction can make weak evidence appear more certain than it is.",
+    "evidence": {
+      "summary": "LEMMiNO's episode page provides an extensive source apparatus and music credits; the FAQ documents production tools. These establish a research and production foundation, but do not establish mandatory movement on every still or a fixed chapter-map formula.",
+      "basis": "Creator's documentation; visual mechanics proposed",
+      "sources": [
+        {
+          "number": 9,
+          "id": "lemmino",
+          "title": "The Kennedy Assassination: Inside the Book Depository",
+          "author_publisher": "LEMMiNO",
+          "date": "2023-07-24",
+          "url": "https://www.lemmi.no/p/the-kennedy-assassination-inside-the-book-depository",
+          "evidence_type": "Creator's episode bibliography and credits",
+          "supports": "Detailed evidence apparatus, episode scope and music credits.",
+          "accessed": "2026-09-10"
+        },
+        {
+          "number": 10,
+          "id": "lemmino-faq",
+          "title": "FAQ",
+          "author_publisher": "LEMMiNO",
+          "date": "Undated",
+          "url": "https://www.lemmi.no/faq",
+          "evidence_type": "Creator's production information",
+          "supports": "Tools and music sourcing; does not establish universal shot or font rules.",
+          "accessed": "2026-09-10"
+        }
+      ]
+    }
+  },
+  "ridley-scott": {
+    "name": "Ridley Scott",
+    "reference": "Commercial world-building; avoid collapsing the full feature-film career into the 1984 advertisement.",
+    "mechanism": "A believable visual world makes a brief action feel consequential.",
+    "materialFit": "Requires planned production",
+    "prerequisites": "Environment, costume, lighting and action coverage designed to belong to the same world.",
+    "selection": "Choose shots that establish a rule of the world, a figure acting within it and the consequence. Reject spectacular inserts that introduce incompatible architecture, light or social context.",
+    "framing": "Plan foreground, subject and depth separately. Establish motivated light sources and material texture; choose camera stability according to the action rather than a permanent prohibition.",
+    "rhythm": "Open with enough orientation for the decisive action to register. Use closer details to clarify intent, then widen for consequence; reserve an accelerated burst for a meaningful rupture.",
+    "sound": "Build the world with machinery, crowd, weather or other specific ambience before enlarging it with music. Give a decisive action a distinctive acoustic signature.",
+    "typography": "Design the final title or product reveal as part of the environment's visual logic. Set its duration by recognition and message length, not a universal three-second cap.",
+    "exceptions": "Replace bans on handheld, daylight, humor and particular music genres with reference-specific choices. A dark grade cannot substitute for production design.",
+    "evaluation": "In 20 seconds, establish one environmental rule and show an action that breaks it. Viewers should understand the rupture without a premise card.",
+    "failureMode": "Unrelated smoky wides and glossy close-ups suggest scale without a coherent world.",
+    "evidence": {
+      "summary": "Scott's DGA interview connects his drawing and design background with practical camera experience. He explicitly includes handheld among the methods he used while operating commercial shoots, contradicting the harness's blanket exclusion.",
+      "basis": "Direct craft account",
+      "sources": [
+        {
+          "number": 11,
+          "id": "scott",
+          "title": "Man of Vision",
+          "author_publisher": "Directors Guild of America; Ridley Scott interview",
+          "date": "Fall 2010",
+          "url": "https://www.dga.org/craft/dgaq/issues/1003-fall-2010/interview-ridley-scott",
+          "evidence_type": "First-person craft interview",
+          "supports": "Drawing, production design and hands-on commercial camerawork, including handheld.",
+          "accessed": "2026-09-10"
+        }
+      ]
+    }
+  },
+  "spike-jonze": {
+    "name": "Spike Jonze",
+    "reference": "Performance-led imaginative advertising; Welcome Home is the principal production reference.",
+    "mechanism": "An ordinary emotional state becomes a physical transformation.",
+    "materialFit": "Requires planned production",
+    "prerequisites": "A committed performer, repeatable choreography and space that can transform practically or through planned effects.",
+    "selection": "Start with a legible bodily state: tiredness, hesitation or release. Choose actions that progressively change the person's relationship to the environment.",
+    "framing": "Keep performer and transformation in the same readable space when possible. Include a physical contact or resistance that helps an impossible effect feel tactile.",
+    "rhythm": "Build ordinary routine → small discovery → expanding freedom → emotional landing. Let some actions finish; cut when a new possibility opens rather than after every beat.",
+    "sound": "Treat the music as something the body responds to. Establish everyday room sound first, then test where the track overtakes that environment and where it recedes.",
+    "typography": "Keep explanatory text outside the transformation unless it has a necessary narrative role. Design any end identity to preserve the emotional landing.",
+    "exceptions": "Keep sincerity and physical causality as priorities. Relax automatic bans on fantasy settings, voiceover or rapid techniques; their fit depends on the specific premise.",
+    "evaluation": "Make a 20-second action in which one movement visibly changes the room. The viewer should name the emotional change without a caption explaining it.",
+    "failureMode": "Random surreal inserts interrupt the performance instead of expressing it.",
+    "evidence": {
+      "summary": "The Welcome Home BTS record and reporting describe a practical expanding environment built around performance. The useful lesson is the interaction of body, music and space; the evidence here is production documentation, not a new frame-by-frame measurement.",
+      "basis": "BTS documentation and corroborating report",
+      "sources": [
+        {
+          "number": 12,
+          "id": "jonze-bts",
+          "title": "Making Welcome Home",
+          "author_publisher": "Danilo Parra",
+          "date": "2018 production; undated portfolio",
+          "url": "https://www.danilop.com/making-welcome-home-apple",
+          "evidence_type": "BTS filmmaker's portfolio",
+          "supports": "Production reference; landing page has no full transcript.",
+          "accessed": "2026-09-10"
+        },
+        {
+          "number": 13,
+          "id": "jonze-report",
+          "title": "Behind-the-Scenes Video Details Making of Spike Jonze's HomePod Ad",
+          "author_publisher": "MacRumors",
+          "date": "2018-03-22",
+          "url": "https://www.macrumors.com/2018/03/22/behind-scenes-spike-jonze-homepod/",
+          "evidence_type": "Reporting on production BTS",
+          "supports": "Practical expanding set and performance-led execution; evidence is reported, not a new shot analysis.",
+          "accessed": "2026-09-10"
+        }
+      ]
+    }
+  },
+  "jonathan-glazer": {
+    "name": "Jonathan Glazer",
+    "reference": "Concept-driven advertising; Surfer provides the best documented production mechanism here.",
+    "mechanism": "One precise visual analogy becomes a forceful sensory event.",
+    "materialFit": "Requires planned production",
+    "prerequisites": "Compatible plates or footage whose motion, perspective and texture can support one visual analogy.",
+    "selection": "Identify a physical correspondence first: force, direction, rhythm or shape. Select both sides of the analogy for that correspondence before choosing the most impressive shots.",
+    "framing": "Match horizon, scale, light and movement where the images must merge. Where compositing is impossible, make the relationship legible through juxtaposition rather than an unconvincing effect.",
+    "rhythm": "Give anticipation its own duration, then let the central event accumulate power. Repeat an image only when it changes scale, proximity or expectation.",
+    "sound": "Try a recognizable rhythmic figure against strongly physical effects. Leave space around the principal event so the sound is not a continuous wall of impact.",
+    "typography": "Keep the conceptual payoff visually uncluttered. End text should complete the communication rather than explain an analogy the images failed to establish.",
+    "exceptions": "No evidence supports career-wide bans on color, dialogue or off-beat cuts. Specify the selected campaign's image and sound relationship instead.",
+    "evaluation": "Create a 20-second visual analogy from two compatible movements. A viewer should describe the shared physical quality before seeing the final title.",
+    "failureMode": "Unrelated uncanny images create novelty but do not develop a concept.",
+    "evidence": {
+      "summary": "The Surfer collaborators describe planning and combining horse and water elements, alongside iterative post-production and sound work. Its effects depended on captured physical material and a coherent concept, not on adding an arbitrary surreal layer.",
+      "basis": "Collaborators' craft accounts",
+      "sources": [
+        {
+          "number": 14,
+          "id": "glazer",
+          "title": "Guinness Surfer: an oral history of the VFX",
+          "author_publisher": "Ian Failes, befores & afters",
+          "date": "2019-03-18",
+          "url": "https://beforesandafters.com/2019/03/18/guinness-surfer-oral-history-vfx/",
+          "evidence_type": "Production collaborators' oral history",
+          "supports": "Horses and water plates, compositing, production planning and sound collaboration.",
+          "accessed": "2026-09-10"
+        }
+      ]
+    }
+  },
+  "hal-riney": {
+    "name": "Hal Riney",
+    "reference": "Restrained voice-led advertising; the 1984 Bear execution is a counterexample to an exclusively warm style.",
+    "mechanism": "A simple spoken idea gains force from a carefully chosen everyday or symbolic image.",
+    "materialFit": "Archive-compatible",
+    "prerequisites": "One intelligible proposition, specific images that can sustain it and an unforced spoken performance.",
+    "selection": "Choose a small set of concrete actions or images with an understandable relationship to the premise. Test the concept with neutral subjects before applying any historical campaign analogy.",
+    "framing": "Use stable compositions that allow the image to be read while the voice remains conversational. Avoid covering every noun with a separate illustrative shot.",
+    "rhythm": "Let the proposition develop over a few connected images. Place the final sentence after the visual idea has become comprehensible, without an unnecessary extra montage.",
+    "sound": "Record a close, natural voice with audible phrasing. Test a sparse musical or environmental motif appropriate to the concept; restrained delivery can coexist with tension.",
+    "typography": "Use a clear final statement or identity with adequate reading time. Set a word budget from the actual sentence and frame, not an inherited maximum.",
+    "exceptions": "Remove blanket bans on dark tone, rhythmic sound, hard cuts and statistics. Keep simplicity, vocal credibility and a coherent image-to-claim relationship.",
+    "evaluation": "Cut a 20-second nonpolitical public-service concept. A viewer should repeat its single proposition and identify which image made it memorable.",
+    "failureMode": "A gentle voice and nostalgic stock footage can conceal the absence of a specific idea.",
+    "evidence": {
+      "summary": "The museum archive's Bear advertisement combines restrained delivery with ominous imagery and sound. It shows why a Riney profile cannot be defined solely by reassurance, warmth or the absence of suspense.",
+      "basis": "Primary advertisement and institutional context",
+      "sources": [
+        {
+          "number": 15,
+          "id": "riney",
+          "title": "Bear",
+          "author_publisher": "Museum of the Moving Image, The Living Room Candidate",
+          "date": "1984 advertisement; undated archive entry",
+          "url": "https://www.livingroomcandidate.org/commercials/1984/bear",
+          "evidence_type": "Primary advertisement and museum context",
+          "supports": "Ominous imagery and sound alongside restrained voice; one campaign execution.",
+          "accessed": "2026-09-10"
+        }
+      ]
+    }
+  },
+  "michel-gondry": {
+    "name": "Michel Gondry",
+    "reference": "Inventive music-image systems; distinguish strict early correspondence from later, looser approaches.",
+    "mechanism": "A simple visual rule produces accumulating surprise.",
+    "materialFit": "Requires planned production",
+    "prerequisites": "A track with distinguishable parts and repeatable actions, objects or compositing elements.",
+    "selection": "Choose two or three musical layers and assign each a visible behavior. Gather enough variations for the rule to evolve rather than merely repeat.",
+    "framing": "Make the mechanism inspectable: consistent orientation, clear silhouettes and visible spatial relationships. Allow handmade texture when it helps the viewer understand how the effect works.",
+    "rhythm": "Let actions within a held shot carry synchronization. Introduce a rule, repeat it clearly, then combine or violate it; compare strict mapping with a more emotional passage.",
+    "sound": "Work from the track's structure and separate stems where available. Map movement to timbre, entrances or phrase changes, not just kick-drum hits.",
+    "typography": "If type participates, give it a physical or musical behavior governed by the same system. Otherwise keep it secondary to the visual mechanism.",
+    "exceptions": "Replace mandatory on-grid cuts and bans on dissolves or narrative with a declared mapping rule plus permission to depart from it.",
+    "evaluation": "Build a 16-second study with two musical layers and two visible actions. A viewer should predict a recurrence and notice the deliberate variation.",
+    "failureMode": "Random stop-motion and quirky props have surface resemblance without an organizing invention.",
+    "evidence": {
+      "summary": "Gondry says he initially pursued precise correspondences between music and image, then moved beyond that restriction. His own account argues against enforcing every cut on the beat as a permanent signature.",
+      "basis": "Direct craft account",
+      "sources": [
+        {
+          "number": 16,
+          "id": "gondry",
+          "title": "Michel Gondry Interview",
+          "author_publisher": "Flash Art",
+          "date": "2008-10",
+          "url": "https://flash---art.com/2008/10/michel-gondry-interview/",
+          "evidence_type": "First-person interview",
+          "supports": "Early precise image/music correspondence and explicit later departure from that rule.",
+          "accessed": "2026-09-10"
+        }
+      ]
+    }
+  },
+  "hype-williams": {
+    "name": "Hype Williams",
+    "reference": "Artist-specific music-video image-making; use a named video or period rather than a universal 1990s preset.",
+    "mechanism": "The performer becomes an unmistakable visual icon matched to the music.",
+    "materialFit": "Requires planned production",
+    "prerequisites": "Strong performance, controlled wardrobe and set silhouettes, and coverage that preserves musical attitude.",
+    "selection": "Start with the performer's most specific gesture or stance. Design a few contrasting setups around that identity; avoid replacing personality with generic luxury imagery.",
+    "framing": "Test lens proximity, low viewpoint and exaggerated foreground deliberately. Check faces and body proportions rather than applying distortion indiscriminately; create readable silhouette against the set.",
+    "rhythm": "Organize performance setups by verse, hook or musical change. Return to a signature image with increased scale or intensity; let a powerful performance hold when it carries the phrase.",
+    "sound": "Preserve the track's authority. Use editorial accents sparingly around musical entrances; avoid stacking generic impacts over every strong beat.",
+    "typography": "Derive supporting graphics from the artist's visual world. Letterboxing and display type are campaign choices, not mandatory proof of the style.",
+    "exceptions": "Remove restrictions to mansions or tarmacs, compulsory distortion and bans on simplicity or narrative. Make artist identity and musical response the first selection criteria.",
+    "evaluation": "Create a 20-second hook study using three setups. A viewer should remember one distinctive performer-image pairing without relying on the song title.",
+    "failureMode": "Fisheye and neon applied to weak performance produce decoration rather than presence.",
+    "evidence": {
+      "summary": "Williams's RBMA conversation emphasizes responding to the music and seeing each artist distinctly. He also describes his changing practice, making a fixed package of fisheye, luxury locations and saturated color an inadequate career-wide rule.",
+      "basis": "Direct craft account",
+      "sources": [
+        {
+          "number": 17,
+          "id": "hype",
+          "title": "Hype Williams lecture",
+          "author_publisher": "Red Bull Music Academy; interview by Jeff Mao",
+          "date": "2018",
+          "url": "https://www.redbullmusicacademy.com/lectures/hype-williams/",
+          "evidence_type": "First-person lecture transcript",
+          "supports": "Music as starting point; artist-specific visual invention and changing practice.",
+          "accessed": "2026-09-10"
+        }
+      ]
+    }
+  },
+  "anton-corbijn": {
+    "name": "Anton Corbijn",
+    "reference": "Symbolic musician portraiture; keep the music-video practice distinct from Control's historical reconstruction.",
+    "mechanism": "A performer, a landscape and a recurring emblem imply an inner condition.",
+    "materialFit": "Needs specific source footage",
+    "prerequisites": "Expressive portraits, a consistent symbolic object or costume and locations that can sustain the concept.",
+    "selection": "Choose an emblem that changes the performer's apparent status or isolation. Favor images with a clear bodily attitude rather than generic moody scenery.",
+    "framing": "Use negative space, distance and scale to relate the person to the environment. Decide color treatment from the reference and material; preserve texture without obscuring expression.",
+    "rhythm": "Alternate portrait and journey or ritual. Return to the emblem with a changed setting or relationship, allowing the repeated image to gather meaning.",
+    "sound": "Let musical phrasing govern the recurrence of the motif. Test fewer cuts through a strong phrase; avoid explaining every lyric with a literal image.",
+    "typography": "Treat titles and symbols as a small related visual family. A restrained handwritten or photographic treatment is an option to test, not an attributed universal rule.",
+    "exceptions": "Remove the assumption that saturated color, movement or performance footage is inherently incompatible. Specify whether the target is a particular music video or Control.",
+    "evaluation": "Build a 25-second sequence around one person and one object. Viewers should infer a consistent emotional relationship without being given a plot summary.",
+    "failureMode": "Desaturation and grain alone cannot create a symbolic relationship.",
+    "evidence": {
+      "summary": "Corbijn explains that Control's monochrome relates to his memory of Joy Division and its contemporary visual culture, while explicitly noting that he also works in color. His podcast account describes Enjoy the Silence through a simple king-and-chair concept.",
+      "basis": "Direct craft accounts",
+      "sources": [
+        {
+          "number": 18,
+          "id": "corbijn",
+          "title": "Control: Anton Corbijn Interview",
+          "author_publisher": "Cinema.com",
+          "date": "Undated; Control production context",
+          "url": "https://www.cinema.com/articles/5185/control-anton-corbijn-interview.phtml",
+          "evidence_type": "First-person interview; original publication date unspecified",
+          "supports": "Casting for lived presence; black-and-white chosen for Joy Division's remembered visual culture.",
+          "accessed": "2026-09-10"
+        },
+        {
+          "number": 19,
+          "id": "corbijn-podcast",
+          "title": "Ep 123: Anton Corbijn",
+          "author_publisher": "Midnight Chats; transcript hosted by Metacast",
+          "date": "2024-03-26; recorded 2023-07",
+          "url": "https://metacast.app/podcast/midnight-chats/9wlqUhaV/ep-123-anton-corbijn/q5YQ2xlV",
+          "evidence_type": "First-person interview transcript mirror",
+          "supports": "Enjoy the Silence's king and chair concept; transcript contains transcription errors.",
+          "accessed": "2026-09-10"
+        }
+      ]
+    }
+  },
+  "chris-cunningham": {
+    "name": "Chris Cunningham",
+    "reference": "Music-dependent bodily and mechanical transformation; Rubber Johnny is a specific reference.",
+    "mechanism": "An apparently physical body behaves according to an unfamiliar musical logic.",
+    "materialFit": "Requires planned production",
+    "prerequisites": "Precisely controllable movement, convincing bodily or mechanical detail and a suitable musical structure.",
+    "selection": "Gather a recognizable baseline movement before its distortion. Choose joints, contact points and materials that make the transformation readable instead of relying on vague grotesque imagery.",
+    "framing": "Keep an anatomical or mechanical anchor visible through the effect. Choose clinical, nocturnal or other lighting from the specific reference, with enough detail to judge the illusion.",
+    "rhythm": "Test a repeated movement first at natural timing, then against a changed musical subdivision. Escalate the rule's consequences; include a sustained moment where viewers can inspect what changed.",
+    "sound": "Choose music whose texture supports the intended bodily response. Coordinate transient detail with motion, but reserve some continuous sound to prevent every edit feeling identical.",
+    "typography": "Avoid explanatory typography during a perceptual reveal. Use a restrained identifying frame only where the piece needs one.",
+    "exceptions": "Replace mandatory daylight, fixed discomfort holds and universal horror cues with a stated sensory premise. Effects require a baseline against which the disturbance can be perceived.",
+    "evaluation": "Make a 16-second normal-to-transformed movement study. Viewers should identify both the original motion and the new rule governing it.",
+    "failureMode": "Glitch overlays and fast cuts conceal rather than produce an uncanny physical idea.",
+    "evidence": {
+      "summary": "Cunningham describes his visual tone as dependent on the music and discusses Rubber Johnny's prolonged editing. The film's night-vision imagery directly challenges the harness's daylight-only rule. His stated interest in ambient music also complicates an exclusively aggressive stereotype.",
+      "basis": "Direct craft account",
+      "sources": [
+        {
+          "number": 20,
+          "id": "cunningham",
+          "title": "Interview: Chris Cunningham",
+          "author_publisher": "Ryan Dombal, Pitchfork",
+          "date": "2005-07-30",
+          "url": "https://pitchfork.com/features/interview/6103-chris-cunningham/",
+          "evidence_type": "First-person interview",
+          "supports": "Rubber Johnny's night vision, extended editing and music-dependent tone.",
+          "accessed": "2026-09-10"
+        }
+      ]
+    }
+  },
+  "wes-anderson": {
+    "name": "Wes Anderson",
+    "reference": "Precisely staged ensemble filmmaking; The French Dispatch and Asteroid City provide collaborator evidence.",
+    "mechanism": "Composition and performance timing turn social relationships into visible arrangements.",
+    "materialFit": "Requires planned production",
+    "prerequisites": "Coordinated blocking, art direction, costume and camera placement; arbitrary archive rarely supplies the required relationships.",
+    "selection": "Find or shoot an ensemble arrangement with a clear hierarchy and a small disruption. Choose a gesture or entrance whose position in the frame carries the joke.",
+    "framing": "Plan lateral and depth relationships before centering the camera. Use readable planes and deliberate eyelines; symmetry should organize behavior rather than crop away essential context.",
+    "rhythm": "Hold the arrangement long enough to register, then time an entrance, reveal or cut to its change. Alternate tableau and detail when the detail revises the social situation.",
+    "sound": "Keep dialogue timing and small practical sounds precise. Try a musical passage with a defined entrance or exit, rather than continuously signaling whimsy.",
+    "typography": "Design chapter and title typography as part of the chosen fictional publication, institution or era. A fixed font and pastel palette cannot replace that design logic.",
+    "exceptions": "Remove bans on natural light, spatial depth and off-center staging. Require a reason for composition and a readable performance beat.",
+    "evaluation": "Shoot a 20-second three-person tableau with one entrance or rearrangement. The viewer should understand the status change before dialogue explains it.",
+    "failureMode": "Centered stock shots with a pastel grade imitate packaging while missing the staging.",
+    "evidence": {
+      "summary": "Robert Yeoman describes animatic-led blocking and lens choices that keep ensemble positions readable. The ASC's Asteroid City interview synopsis explicitly documents extensive natural and practical lighting, contradicting a blanket artificial-light assumption.",
+      "basis": "Cinematographer's craft accounts",
+      "sources": [
+        {
+          "number": 21,
+          "id": "anderson",
+          "title": "Robert Yeoman, ASC, on Shooting Wes Anderson's The French Dispatch",
+          "author_publisher": "Musicbed",
+          "date": "Undated; The French Dispatch production context",
+          "url": "https://www.musicbed.com/articles/filmmaking/cinematography/robert-yeoman-asc-on-shooting-wes-andersons-the-french-dispatch/",
+          "evidence_type": "Cinematographer interview",
+          "supports": "Animatics, blocking, tracks and holding ensemble positions in focus.",
+          "accessed": "2026-09-10"
+        },
+        {
+          "number": 22,
+          "id": "anderson-asc",
+          "title": "Clubhouse Conversations: Asteroid City",
+          "author_publisher": "American Society of Cinematographers; Robert Yeoman with Rodney Taylor",
+          "date": "2023-11-18",
+          "url": "https://theasc.com/videos/clubhouse-conversations-asteroid-city",
+          "evidence_type": "Primary interview publisher's detailed synopsis",
+          "supports": "Natural and practical lighting and animatic-led blocking.",
+          "accessed": "2026-09-10"
+        }
+      ]
+    }
+  },
+  "christopher-nolan": {
+    "name": "Christopher Nolan",
+    "reference": "Braided time and escalating dramatic information; Oppenheimer is the principal editing reference.",
+    "mechanism": "Separate strands acquire urgency as their relationship becomes intelligible.",
+    "materialFit": "Archive plus graphics",
+    "prerequisites": "Distinct causal strands, reliable chronology and identifiable characters or processes.",
+    "selection": "Assign every candidate shot to a strand and a specific change of state. Choose correspondences with narrative significance, not just matching motion.",
+    "framing": "Give strands stable orientation or visual distinctions. Preserve enough context for a face, object or place to be recognized when it returns.",
+    "rhythm": "Establish each strand before accelerating alternation. Shorten intervals only as the relationship becomes clearer; let a sustained performance interrupt the mechanism when it adds weight.",
+    "sound": "Try one repeating pulse or motif whose orchestration changes with convergence. Use an intentional dropout or acoustic shift to make a decisive moment legible.",
+    "typography": "Use dates or locations where viewers need them. Typography may disambiguate time; it should not be asked to repair a fundamentally unreadable braid.",
+    "exceptions": "Keep strand progression and causal clarity. Relax universal bans on songs, dissolves, humor and slow motion; preserve the reference's dramatic function rather than an effects blacklist.",
+    "evaluation": "Create a 30-second two-strand sequence ending in a shared consequence. Ask viewers to explain the relationship and temporal order before increasing the cut rate.",
+    "failureMode": "A ticking clock over alternating archive suggests urgency without establishing causality.",
+    "evidence": {
+      "summary": "Jennifer Lame discusses controlling the information load in Oppenheimer and preserving performance within its complex structure. Ludwig Goransson's account describes substantial music development before editing, reinforcing the connection between score and dramatic character.",
+      "basis": "Editor and composer craft accounts",
+      "sources": [
+        {
+          "number": 23,
+          "id": "nolan",
+          "title": "Jennifer Lame interview | How to edit Oppenheimer (and win a BAFTA while you do it)",
+          "author_publisher": "James Harvey, Film Stories",
+          "date": "2024-02-19",
+          "url": "https://filmstories.co.uk/features/jennifer-lame-interview-how-to-edit-oppenheimer-without-breaking-your-brain/",
+          "evidence_type": "Editor interview",
+          "supports": "Controlling information load and anchoring complex structure in performance.",
+          "accessed": "2026-09-10"
+        },
+        {
+          "number": 24,
+          "id": "nolan-music",
+          "title": "Oppenheimer composer Ludwig Goransson interview",
+          "author_publisher": "Vanity Fair",
+          "date": "2023-07",
+          "url": "https://www.vanityfair.com/hollywood/2023/07/oppenheimer-music-interview-composer-ludwig-goransson",
+          "evidence_type": "Composer interview",
+          "supports": "Character-oriented score development before the picture edit.",
+          "accessed": "2026-09-10"
+        }
+      ]
+    }
+  },
+  "denis-villeneuve": {
+    "name": "Denis Villeneuve",
+    "reference": "Sensory scale and character tension; Joe Walker's account of Dune is the concrete reference.",
+    "mechanism": "A small human perception or gesture gains force against a vast environment.",
+    "materialFit": "Needs specific source footage",
+    "prerequisites": "Coherent environment coverage plus meaningful human detail; scale alone is insufficient.",
+    "selection": "Pair a spatially imposing image with a precise bodily response, gesture or practical task. Reject interchangeable landscapes that do not change the character's situation.",
+    "framing": "Make scale readable through a person, doorway or movement. Preserve negative space when it creates anticipation; move closer when a small action becomes decisive.",
+    "rhythm": "Try environment → detail → altered perception. Compare a patient approach with a sharp sensory transition; keep the version that communicates the actual change of state.",
+    "sound": "Establish an acoustic world with a recognizable texture, then change it deliberately at the transition. Give an intimate gesture enough sonic room to register.",
+    "typography": "Use sparse contextual text when necessary. Decide title scale and spacing from the fictional world; minimal typography is an option, not a substitute for narrative orientation.",
+    "exceptions": "Remove automatic prohibitions on fast cuts, flares, melody and reactions. Specify whether a shot carries scale, apprehension, intimacy or transition.",
+    "evaluation": "Build a 25-second sequence in which a small gesture changes the meaning of a large image. Viewers should remember the gesture as well as the spectacle.",
+    "failureMode": "Huge wides, orange fog and a low drone can remain emotionally empty.",
+    "evidence": {
+      "summary": "Walker describes deliberate flares, matched sensory transitions, an abrupt change of environment and an intimate touch held for its emotional effect. This is a more varied practice than the harness's bans on flares, sharp transitions and expressive reactions suggest.",
+      "basis": "Editor's craft account",
+      "sources": [
+        {
+          "number": 25,
+          "id": "villeneuve",
+          "title": "Dune Editor Joe Walker on Cutting Denis Villeneuve's Sweeping Epic",
+          "author_publisher": "Hugh Hart, Motion Picture Association / The Credits",
+          "date": "2021-10",
+          "url": "https://www.motionpictures.org/2021/10/dune-editor-joe-walker-on-cutting-the-denis-villeneuves-sweeping-epic/",
+          "evidence_type": "Editor interview",
+          "supports": "Sensory transitions, deliberate flares and intimate gesture within epic scale.",
+          "accessed": "2026-09-10"
+        }
+      ]
+    }
+  },
+  "edgar-wright": {
+    "name": "Edgar Wright",
+    "reference": "Designed audiovisual comedy and musical action; music-video and feature practice should inform the edit together.",
+    "mechanism": "Setup, action, sound and payoff form a pattern the audience can recognize and anticipate.",
+    "materialFit": "Requires planned production",
+    "prerequisites": "Setup and payoff coverage, specific action sounds, readable motion and performances whose timing can carry the joke.",
+    "selection": "Choose actions with a beginning, contact and consequence. Build a bank of matched mundane details that can recur with changed meaning; prioritize actual visual jokes over unrelated energetic shots.",
+    "framing": "Keep the geography of an action clear before compressing it. Compose entrances, exits and background information so the frame can deliver a reveal without an explanatory cut.",
+    "rhythm": "Try a short patterned burst, a deliberate pause and a payoff. Repeat an established action with one changed element; test some beats inside a held shot.",
+    "sound": "Map selected actions to the music, preserving dialogue punchlines and physical contacts. Alternate close, dry practical sounds with broader musical passages to create contrast.",
+    "typography": "Animate type when it participates in a specific joke or rhythmic event. Distinguish the film title from supporting cards and let both have an intentional entrance and exit.",
+    "exceptions": "Replace every-cut synchronization, all-diegetic-music and no-natural-pause rules with a required audiovisual setup/payoff relationship. Timing should serve anticipation and surprise.",
+    "evaluation": "Make a 20-second three-action setup followed by a changed repetition. Viewers should recognize the pattern and describe the variation as the payoff.",
+    "failureMode": "Whip transitions and impact sounds cannot manufacture a joke absent from the footage.",
+    "evidence": {
+      "summary": "Wright's RBMA conversation describes music planning and the After Hours long-take video as preparation for work in Shaun of the Dead. Musical construction can therefore happen within a continuous shot; it is not synonymous with cutting on every transient.",
+      "basis": "Direct craft account",
+      "sources": [
+        {
+          "number": 26,
+          "id": "wright",
+          "title": "Edgar Wright lecture",
+          "author_publisher": "Red Bull Music Academy; conversation with Brian Reitzell",
+          "date": "2017",
+          "url": "https://www.redbullmusicacademy.com/lectures/edgar-wright-lecture/",
+          "evidence_type": "First-person lecture transcript",
+          "supports": "Music planning and the After Hours long-take music video as preparation for Shaun of the Dead.",
+          "accessed": "2026-09-10"
+        }
+      ]
+    }
+  },
+  "terrence-malick": {
+    "name": "Terrence Malick",
+    "reference": "Associative memory and embodied perception; The Tree of Life and Mark Yoshikawa's editing account.",
+    "mechanism": "Image, gesture and voice suggest an experience larger than any literal illustration.",
+    "materialFit": "Needs specific source footage",
+    "prerequisites": "Intimate gestures, environmental interaction and sustained observational coverage with a consistent sensory world.",
+    "selection": "Collect physical experiences tied to a subject: touch, balance, breath, movement through a room or landscape. Avoid stock hands-and-sunlight imagery disconnected from a person or memory.",
+    "framing": "Stay responsive to an action's changing direction and available light. Preserve proximity and environmental relation; a floating camera should follow perception rather than wander without purpose.",
+    "rhythm": "Try an image sequence first, then add a short reflective voice passage whose meaning extends it. Remove overly literal matches and compare complete gestures with selected fragments.",
+    "sound": "Let voice, environment and music carry different aspects of the memory. Leave an unscored passage or a breath of room sound where it makes the experience more concrete.",
+    "typography": "Use minimal orientation outside the associative passage. A date or place can locate a memory without interpreting its emotional meaning.",
+    "exceptions": "Replace absolute bans on tripod, artificial light, night interiors and completed actions with preferences tied to the selected film. Preserve intentionality beneath apparent spontaneity.",
+    "evaluation": "Make a 25-second memory passage. The voice should add a thought the images cannot state alone, while the images contribute something absent from the words.",
+    "failureMode": "Backlit fragments plus philosophical narration can feel arbitrary when they lack a specific remembered experience.",
+    "evidence": {
+      "summary": "Lubezki describes responsive available-light work with practical exceptions. Yoshikawa explains a deliberately shaped associative edit and warns against voiceover becoming too literally illustrated by the picture.",
+      "basis": "Cinematographer and editor craft accounts",
+      "sources": [
+        {
+          "number": 27,
+          "id": "malick",
+          "title": "Emmanuel Lubezki AMC ASC: The Tree of Life",
+          "author_publisher": "British Cinematographer",
+          "date": "Undated archive article",
+          "url": "https://britishcinematographer.co.uk/emmanuel-lubezki-amc-asc-the-tree-of-life/",
+          "evidence_type": "Cinematographer interview",
+          "supports": "Available light, responsive shooting and exceptions to lighting practice.",
+          "accessed": "2026-09-10"
+        },
+        {
+          "number": 28,
+          "id": "yoshikawa",
+          "title": "Mark Yoshikawa Talks of Editing Terrence Malick, Christopher Guest, and the New Reminiscence",
+          "author_publisher": "CineMontage",
+          "date": "2021",
+          "url": "https://cinemontage.org/mark-yoshikawa-talks-of-editing-terrence-malick-christopher-guest-and-the-new-reminiscence/",
+          "evidence_type": "Editor interview",
+          "supports": "Malick voice/image disjunction; Guest footage review and comic timing. Shared source across two profiles.",
+          "accessed": "2026-09-10"
+        }
+      ]
+    }
+  },
+  "frank-capra": {
+    "name": "Frank Capra",
+    "reference": "The Why We Fight compilation documentaries, not Capra's entire dramatic and comic career.",
+    "mechanism": "A clearly stated argument is developed through organized archival evidence and explanation.",
+    "materialFit": "Archive plus graphics",
+    "prerequisites": "Provenanced footage, a defensible explanatory proposition and maps or diagrams where geography matters.",
+    "selection": "Arrange material as proposition, evidence and consequence. Keep the origin of appropriated footage visible in the research record and avoid presenting an opponent's staged imagery as neutral observation.",
+    "framing": "Preserve the action or institution needed for the argument. Use a map at the scale required to explain movement, with labels that can be read at normal playback.",
+    "rhythm": "Let each section answer a distinct question. Alternate an assertion with an example or explanation; use comparison where it adds a verifiable relationship.",
+    "sound": "Record narration with clear sentence structure and emphasis. Test music by whether it clarifies the section's dramatic role, without letting certainty of tone replace evidence.",
+    "typography": "Use maps, dates and source labels to make the argument inspectable. Distinguish historical propaganda graphics from newly authored explanatory material.",
+    "exceptions": "Rename or scope the profile to Why We Fight. Remove career-wide claims about neutrality, contemporary music or graphics; preserve archival attribution and argumentative clarity.",
+    "evaluation": "Create a 30-second historical explanation with one claim, two source-backed examples and one map. Viewers should separate the factual evidence from the narrator's interpretation.",
+    "failureMode": "Authoritative narration and marching music can give an unsupported compilation the appearance of proof.",
+    "evidence": {
+      "summary": "The National Archives account describes Prelude to War's compilation of existing material, narration and explanatory animation. These are historically situated propaganda films; their confident form does not make every historical claim independently reliable.",
+      "basis": "Archival institutional analysis",
+      "sources": [
+        {
+          "number": 29,
+          "id": "capra",
+          "title": "Why We Fight: Prelude to War, America's Crash History Lesson",
+          "author_publisher": "US National Archives, The Unwritten Record",
+          "date": "2020-09-01; updated 2021-03-22",
+          "url": "https://unwritten-record.blogs.archives.gov/2020/09/01/why-we-fight-prelude-to-war-americas-crash-history-lesson/",
+          "evidence_type": "Archival institutional analysis",
+          "supports": "Compilation propaganda, narration and animated explanatory material.",
+          "accessed": "2026-09-10"
+        }
+      ]
+    }
+  },
+  "sergei-eisenstein": {
+    "name": "Sergei Eisenstein",
+    "reference": "Expressive montage and staging; distinguish silent-film montage from the later sound films.",
+    "mechanism": "Relationships between images and bodily forms create an idea or conflict.",
+    "materialFit": "Archive plus graphics",
+    "prerequisites": "Images with a purposeful conceptual or graphic relation; for staged work, precise poses and movement.",
+    "selection": "Write the intended relationship between two images before selecting them. Choose contrast in scale, direction, social role or gesture that adds a thought beyond either image alone.",
+    "framing": "Treat bodies, architecture and shadows as active compositional forms. A held arrangement may express a conflict more clearly than additional cutting.",
+    "rhythm": "Test the same material in two orders. Use repetition, duration and collision to develop an argument; speed up only when the increasing pressure remains intelligible.",
+    "sound": "For a sound-film reference, plan music and gesture together or test deliberate audiovisual counterpoint. Do not force all material into a modern beat grid.",
+    "typography": "Intertitles can state or complicate a proposition, but should not merely explain every juxtaposition. Choose color from the specific reference rather than a historical stereotype.",
+    "exceptions": "Remove universal bans on color, camera movement, individual psychology and continuity. Preserve deliberate relations between shots and expressive staging.",
+    "evaluation": "Build two 20-second sequences from the same six images in different orders. Viewers should identify a meaning changed by the arrangement, not only a different pace.",
+    "failureMode": "Fast cutting between unrelated images creates density without a dialectical or dramatic relationship.",
+    "evidence": {
+      "summary": "Criterion's analysis of Ivan the Terrible documents expressive performance, musical construction and a color sequence. Bordwell's account foregrounds staging derived from dance and painting. These counter the harness's reduction to silent, monochrome, impersonal rapid montage.",
+      "basis": "Specialist analysis",
+      "sources": [
+        {
+          "number": 30,
+          "id": "eisenstein",
+          "title": "Ivan the Terrible, Parts I and II",
+          "author_publisher": "J. Hoberman, Criterion",
+          "date": "2001-04-23",
+          "url": "https://www.criterion.com/current/posts/535-ivan-the-terrible-parts-i-and-ii",
+          "evidence_type": "Specialist film analysis",
+          "supports": "Performance, color, music and expressive staging beyond a silent-montage stereotype.",
+          "accessed": "2026-09-10"
+        },
+        {
+          "number": 31,
+          "id": "eisenstein-staging",
+          "title": "Staging and Performance in Ivan the Terrible, Part 2",
+          "author_publisher": "David Bordwell, Criterion Channel",
+          "date": "2018 context; undated video page",
+          "url": "https://www.criterionchannel.com/videos/staging-and-performance-in-ivan-the-terrible-part-2",
+          "evidence_type": "Film scholar's original audiovisual analysis; publisher synopsis",
+          "supports": "Expressive movement and the relationship to painting and dance.",
+          "accessed": "2026-09-10"
+        }
+      ]
+    }
+  },
+  "tony-schwartz": {
+    "name": "Tony Schwartz",
+    "reference": "Sound-centered advertising; Daisy is a historical case with DDB collaborators, not a universal solo-authored template.",
+    "mechanism": "A familiar sound changes meaning through a sharply designed association.",
+    "materialFit": "Archive-compatible",
+    "prerequisites": "A recognizable sound pattern, a contrasting second pattern and a concept that can be understood without misleading context.",
+    "selection": "For a neutral demonstration, find two sounds that share a structure but imply different situations. Choose a simple visual action capable of holding attention through the transition.",
+    "framing": "Keep attention on the sound's source until the change needs a different image. A closer framing should have a perceptual purpose rather than serve as generic tension.",
+    "rhythm": "Design the sound transition first, then place the visual change where it alters interpretation. Avoid extra inserts that compete with the central association.",
+    "sound": "Shape the handoff in rhythm, perspective and loudness. Test whether the listener can identify both sources; retain clarity rather than relying on a startling peak.",
+    "typography": "Use a concise identifying or explanatory end frame when needed. Do not assume all necessary context must fit into the sound association itself.",
+    "exceptions": "Replace one-ad prohibitions with a sound-first concept requirement. Credit the agency and collaborators, and separate historical persuasion analysis from factual validation.",
+    "evaluation": "Create a 15-second nonpolitical sound study, such as a domestic timer becoming a race-start cue. A listener should identify the shift before reading the end frame.",
+    "failureMode": "An abrupt loud sound is a startle; it becomes an idea only when the association is meaningful.",
+    "evidence": {
+      "summary": "The archived Daisy transcript shows a child's counting yielding to a countdown and explosion, followed by political voiceover. The specific transition matters more than a general rule forbidding music, montage or additional voices.",
+      "basis": "Primary advertisement and institutional context",
+      "sources": [
+        {
+          "number": 32,
+          "id": "schwartz",
+          "title": "Peace Little Girl (Daisy)",
+          "author_publisher": "Museum of the Moving Image, The Living Room Candidate",
+          "date": "1964 advertisement; undated archive entry",
+          "url": "https://www.livingroomcandidate.org/commercials/1964/peace-little-girl-daisy",
+          "evidence_type": "Primary advertisement transcript and institutional attribution",
+          "supports": "Sound transition from counting to countdown; DDB collaboration.",
+          "accessed": "2026-09-10"
+        }
+      ]
+    }
+  },
+  "lincoln-project": {
+    "name": "The Lincoln Project",
+    "reference": "An organization and its campaign teams; Ben Howe's 2020 interview is the bounded reference.",
+    "mechanism": "Existing statements are organized to make a contradiction or consequence easy to follow.",
+    "materialFit": "Archive-compatible",
+    "prerequisites": "Verifiable statements with their full context, dates and relevant documented outcomes.",
+    "selection": "Build a statement ledger before a selects reel. Pair claims only where the relationship is fair and the chronology is clear; preserve qualifications that change the proposition.",
+    "framing": "Use recognizable source framing and leave room for unobtrusive provenance. Avoid crops that imply a reaction to an event occurring elsewhere or later.",
+    "rhythm": "Test assertion → relevant evidence → concise consequence. Let the actual statement remain intelligible; additional montage should contribute a new fact rather than merely intensify tone.",
+    "sound": "Keep source dialogue intelligible and distinguish editorial effects from recorded sound. Test a restrained and an unscored version before committing to an emotional bed.",
+    "typography": "Label quotation, date and source consistently. A graphic may summarize an established contrast; it should not introduce a stronger unsupported allegation.",
+    "exceptions": "Replace organizational style absolutes with a campaign-specific brief. Keep factual context as a firm requirement and treat ominous music, attack tone and typography as choices.",
+    "evaluation": "Use a nonpolitical institutional claim and documented result in a 20-second evidence comparison. Viewers should identify the contradiction and the source of both halves.",
+    "failureMode": "A forceful montage can mislead if it erases the dates or qualifications that make the comparison fair.",
+    "evidence": {
+      "summary": "Howe describes constructing scripts from existing quotations so the material carries the story. This supports a source-led assembly practice, but does not establish one permanent visual, musical or tonal style for the organization.",
+      "basis": "Production interview; campaign-bounded",
+      "sources": [
+        {
+          "number": 33,
+          "id": "lincoln",
+          "title": "Meet the Lincoln Project's Video Wiz, Who's Driving Trump Insane",
+          "author_publisher": "Vanity Fair; Ben Howe interview",
+          "date": "2020-07",
+          "url": "https://www.vanityfair.com/news/2020/07/lincoln-project-video-wiz-ben-howe-ads-are-driving-trump-insane",
+          "evidence_type": "First-person production interview",
+          "supports": "Writing through selection and assembly of existing quotations; campaign-specific evidence.",
+          "accessed": "2026-09-10"
+        }
+      ]
+    }
+  },
+  "mark-woollen": {
+    "name": "Mark Woollen",
+    "reference": "Concept-led feature-film trailers; The Social Network campaign is a documented reference.",
+    "mechanism": "A distinctive music-and-image proposition sells the film's emotional experience.",
+    "materialFit": "Archive-compatible",
+    "prerequisites": "Strong character moments, a film-specific premise and an editable musical cue whose structure supports the concept.",
+    "selection": "Create separate reels for emotional promise, premise clarity and memorable images. Choose one organizing tension before assembling chronology; keep enough setup for strangers to understand the stakes.",
+    "framing": "Preserve the intended subject and useful negative space when adapting source shots. Select footage whose visual relationships survive trailer compression.",
+    "rhythm": "Try hook → emotional proposition → complication → escalating promise → unresolved final image. Rearrange for the trailer's argument while avoiding false story claims.",
+    "sound": "Audition substantially different musical interpretations of the same selects. Plan a recognizable opening, space for dialogue, a change of musical state and a final punctuation; the cue need not be a cover or choir.",
+    "typography": "Write cards as part of the concept. Give the film title a distinct typographic event and check that reviews or credentials do not interrupt the emotional progression.",
+    "exceptions": "Remove categorical bans on narration, risers, rapid montage and premise explanation. Require a named campaign reference and a concept-led music rationale.",
+    "evaluation": "Make two 30-second concepts from the same footage with different music structures. Ask viewers what film experience each promises, not merely which is louder.",
+    "failureMode": "An unusual song over beautiful clips may feel tasteful while failing to sell a specific movie.",
+    "evidence": {
+      "summary": "Woollen's WIRED interview describes music selection, developing alternative concepts and obtaining extra material for The Social Network. These are creative development choices, not evidence for a permanent ban on voiceover, fast montage or plot information.",
+      "basis": "Direct craft accounts",
+      "sources": [
+        {
+          "number": 34,
+          "id": "woollen",
+          "title": "Secrets of a Trailer Guru: How This Guy Gets You to the Movies",
+          "author_publisher": "Jason Kehe, WIRED; Mark Woollen interview",
+          "date": "2013-06-18",
+          "url": "https://www.wired.com/2013/06/online-trailers-mark-woollen/",
+          "evidence_type": "First-person craft interview",
+          "supports": "Music casting, multiple concepts and additional material for The Social Network campaign.",
+          "accessed": "2026-09-10"
+        },
+        {
+          "number": 35,
+          "id": "woollen-freshair",
+          "title": "Mark Woollen and Michael Greenfeld",
+          "author_publisher": "Fresh Air Archive",
+          "date": "2003-03-20",
+          "url": "https://freshairarchive.org/segments/mark-woollen-and-michael-greenfeld",
+          "evidence_type": "Primary interview archive",
+          "supports": "Trailer construction; two speakers must not be conflated.",
+          "accessed": "2026-09-10"
+        }
+      ]
+    }
+  },
+  "buddha-jones": {
+    "name": "Buddha Jones",
+    "reference": "A trailer agency with multiple teams and campaigns; use Bill Neil's craft discussion and credited examples, not a single horror formula.",
+    "mechanism": "Controlled information and changing sonic pressure build anticipation and reversal.",
+    "materialFit": "Archive-compatible",
+    "prerequisites": "A legible hook, escalating source events, a strong reveal or reversal and independently editable dialogue, music and effects.",
+    "selection": "Rank clips by what they disclose: rule, threat, reaction, escalation or payoff. Choose one distinctive set piece for identity and enough connective material to make its stakes readable.",
+    "framing": "Protect spatial orientation before a surprise. Select approach and reaction coverage that can sustain expectation without relying entirely on black frames.",
+    "rhythm": "Try a complete miniature scene as the opening, then a change of scale and a compressed final passage. Reserve a reversal or button for after the audience thinks the section has ended.",
+    "sound": "Build separate tracks for atmosphere, pulse, transitions, impacts and dialogue. Design contrast in density and silence; derive a recurring motif from the film when the source supports it.",
+    "typography": "Give cards, title and end information distinct jobs. Synchronize a title entrance to a chosen event rather than adding a hit to every text appearance.",
+    "exceptions": "Replace universal horror rules with campaign-specific reveal strategy. Allow finished actions, warmth, narration and non-black transitions where they strengthen the promise.",
+    "evaluation": "Build a 30-second trailer passage with one deliberate pressure release and reversal. Viewers should anticipate one event and clearly register the changed expectation.",
+    "failureMode": "Continuous risers and black-frame impacts exhaust contrast before the important reveal.",
+    "evidence": {
+      "summary": "Vox's Bill Neil interview description explicitly identifies sound design and rug pulls as trailer techniques. The Clio record supplies a specific Buddha Jones campaign reference for Boots. Neither source establishes that every agency trailer must cut to black or hide every reveal.",
+      "basis": "Primary interview synopsis and campaign credit; detailed timing remains to be measured",
+      "sources": [
+        {
+          "number": 36,
+          "id": "buddha",
+          "title": "Iconic movie trailers, explained by a trailer editor",
+          "author_publisher": "Vox; interview with Bill Neil",
+          "date": "2023-02-17",
+          "url": "https://www.youtube.com/watch?v=r01fv4IXZ68",
+          "evidence_type": "Primary interview publisher's description",
+          "supports": "Trailer editor's sound design and reversal techniques; full transcript not available here.",
+          "accessed": "2026-09-10"
+        },
+        {
+          "number": 37,
+          "id": "buddha-boots",
+          "title": "28 Years Later: Boots",
+          "author_publisher": "Clio Awards; Buddha Jones",
+          "date": "2026 award entry",
+          "url": "https://clios.com/winners-gallery/details/206964",
+          "evidence_type": "Campaign credit and award record",
+          "supports": "Specific trailer credit and campaign reference; not an agency-wide formula.",
+          "accessed": "2026-09-10"
+        }
+      ]
+    }
+  },
+  "a24": {
+    "name": "A24",
+    "reference": "A studio and distributor; define the actual film campaign and credited agency before prescribing craft.",
+    "mechanism": "Campaign specificity is the useful starting point; there is no defensible single-director system.",
+    "materialFit": "Archive-compatible",
+    "prerequisites": "One named trailer version with credits, its film-specific hook and footage that supports that promise.",
+    "selection": "Write the campaign's promise in one sentence, then select a distinctive character, object or situation that can carry it. Separate an intriguing omission from missing basic premise information.",
+    "framing": "Choose a consistent image logic from the film itself: intimacy, geometry, texture or scale. Do not apply a studio-wide palette to incompatible source footage.",
+    "rhythm": "Develop one concrete reference version. Test how much orientation viewers need before ambiguity becomes productive; let pace follow the campaign rather than an assumed 'art-house' duration.",
+    "sound": "Choose a sonic identity grounded in that film's material or campaign concept. Record which cue, motif and silence pattern belong to the reference instead of calling them A24 defaults.",
+    "typography": "Research the specific campaign's title and supporting cards. Allow premise lines, reviews and multiple typographic roles when they have a clear purpose.",
+    "exceptions": "Reclassify as a campaign collection or studio filter. Remove blanket bans on voiceover, explanations, montage and card counts; attach actual agency and version metadata.",
+    "evaluation": "Make a 20-second concept whose film-specific promise remains clear after hiding the studio logo. If the only identifiable attribute is the logo, the profile is not specific enough.",
+    "failureMode": "Sparse cards and eerie music can imitate a marketing stereotype without capturing any particular campaign.",
+    "evidence": {
+      "summary": "The Hereditary 'Charlie' credit record identifies A24 as studio, Buddha Jones as agency, Tommy Malatesta as producer/editor, Brent Buckman as creative director, Eric Peschel on graphics and AVS Music. It provides a concrete attribution correction, not proof of a universal A24 editing formula.",
+      "basis": "Primary campaign credit; broader style claim unsupported",
+      "sources": [
+        {
+          "number": 38,
+          "id": "a24-credit",
+          "title": "Hereditary: Charlie",
+          "author_publisher": "Golden Trailer Awards on Vimeo",
+          "date": "Undated upload; Hereditary campaign",
+          "url": "https://vimeo.com/828044253",
+          "evidence_type": "Campaign credit record",
+          "supports": "A24 client; Buddha Jones agency; Tommy Malatesta, Brent Buckman, Eric Peschel and AVS Music.",
+          "accessed": "2026-09-10"
+        }
+      ]
+    }
+  },
+  "tony-zhou": {
+    "name": "Taylor Ramos & Tony Zhou",
+    "reference": "Every Frame a Painting by Taylor Ramos and Tony Zhou; the 2017 retrospective describes a particular period.",
+    "mechanism": "The viewer sees an argument demonstrated through the audiovisual evidence itself.",
+    "materialFit": "Archive-compatible",
+    "prerequisites": "Clips that directly demonstrate a formal claim, with source identification and enough surrounding action to understand the comparison.",
+    "selection": "Find the demonstration before polishing the narration. Choose contrasting examples that isolate the same decision: staging, framing, movement, sound or cut timing.",
+    "framing": "Preserve the original composition when the claim depends on it. Use a crop, freeze or annotation only to direct attention to the specific evidence under discussion.",
+    "rhythm": "Try uninterrupted example → concise explanation → replay or comparison. Give the viewer a chance to perceive the difference; avoid talking across the exact sound or action being analyzed.",
+    "sound": "Switch deliberately between original clip sound and explanatory voice. If the claim concerns music or effects, replay that passage without a competing bed.",
+    "typography": "Credit the film and relevant makers. Keep arrows, labels and split screens functional; typography should point to evidence rather than replace it.",
+    "exceptions": "Correct the profile's visible credit to include Taylor Ramos. Keep evidence-first demonstration and source labels, while allowing new footage or other formats when the argument needs them.",
+    "evaluation": "Make a 30-second essay on one editing choice. Afterward, viewers should locate that choice in a new clip rather than merely repeat the narrator's terminology.",
+    "failureMode": "An articulate voiceover over film clips can remain an illustrated opinion with no actual demonstration.",
+    "evidence": {
+      "summary": "Ramos and Zhou explicitly correct the series' coauthorship and describe explaining visual ideas by showing them. Their retrospective also recognizes that their chosen format could become constraining, which argues against treating its original limits as permanent laws.",
+      "basis": "Creators' craft account",
+      "sources": [
+        {
+          "number": 39,
+          "id": "zhou",
+          "title": "Postmortem",
+          "author_publisher": "Taylor Ramos and Tony Zhou, Every Frame a Painting / Medium",
+          "date": "2017-12-03",
+          "url": "https://medium.com/@tonyszhou/postmortem-1b338537fabc",
+          "evidence_type": "Creators' retrospective",
+          "supports": "Coauthorship, visual demonstration, footage-led argument and limitations of their format.",
+          "accessed": "2026-09-10"
+        }
+      ]
+    }
+  },
+  "johnny-harris": {
+    "name": "Johnny Harris",
+    "reference": "Visual explanatory journalism; the 2025 How I Write interview supplies workflow evidence, not universal map rules.",
+    "mechanism": "A question is developed through visual explanation with a clear promise to the viewer.",
+    "materialFit": "Archive plus graphics",
+    "prerequisites": "An answerable question, source-backed facts and graphics whose information can be traced to those facts.",
+    "selection": "Build a paired script: each claim beside the visual evidence or explanation that carries it. Prefer a document, place or comparison that resolves the question over generic illustrative footage.",
+    "framing": "On maps, establish geography before moving to the relevant location. Keep orientation and scale visible long enough to support the claim; show the host where personal inquiry adds context.",
+    "rhythm": "Open a specific information gap, demonstrate the key relationship and update the question. Alternate explanation and encounter when each contributes something the other cannot.",
+    "sound": "Use music changes to distinguish inquiry, discovery and synthesis. Keep dense explanations acoustically simple; avoid treating every map move as an action-trailer transition.",
+    "typography": "Make labels and source dates readable. Animate routes, boundaries or comparisons only when movement conveys information; distinguish schematics from exact geography.",
+    "exceptions": "Replace no-desk, no-label and map-by-default rules with a visual justification for each claim. Flag uncertain source claims independently from presentation polish.",
+    "evaluation": "Build a 30-second map explanation. Viewers should state the relationship the animation demonstrated and distinguish it from a merely decorative camera move.",
+    "failureMode": "Moving maps and handwritten marks can create the appearance of investigation without supplying evidence.",
+    "evidence": {
+      "summary": "The interview publisher's notes and chapters identify visual scripting, video-first thinking and story promise. They support those workflow topics, but do not substantiate arbitrary map frequency, label bans or a prohibition on desk-based presentation.",
+      "basis": "Primary interview notes; detailed visual prescriptions proposed",
+      "sources": [
+        {
+          "number": 40,
+          "id": "harris",
+          "title": "Johnny Harris: Master Storytelling on YouTube",
+          "author_publisher": "David Perell, How I Write / Apple Podcasts",
+          "date": "2025-03-12",
+          "url": "https://podcasts.apple.com/ca/podcast/johnny-harris-master-storytelling-on-youtube/id1700171470?i=1000698950686",
+          "evidence_type": "Primary interview publisher's notes and chapters",
+          "supports": "Visual scripting, video-first thinking and story promise; chapter evidence is limited.",
+          "accessed": "2026-09-10"
+        }
+      ]
+    }
+  },
+  "christopher-guest": {
+    "name": "Christopher Guest",
+    "reference": "Improvised ensemble comedy in Guest-directed films such as Best in Show; do not credit him as director of This Is Spinal Tap.",
+    "mechanism": "Committed characters reveal the gap between their self-image and observable behavior.",
+    "materialFit": "Needs specific source footage",
+    "prerequisites": "Believable character desires, improvised or natural conversational detail and reactions from the actual exchange.",
+    "selection": "Choose a statement of self-belief and a behavior that complicates it. Prefer sincere specificity to performers signaling that they know they are funny.",
+    "framing": "Let characters share space when the relationship carries the humor. Reserve a closer reaction for a meaningful change, not a compulsory cue telling viewers to laugh.",
+    "rhythm": "Protect the setup and find the smallest pause that allows the contradiction to register. Compare a held reaction with an earlier cut; select by the performance's actual timing.",
+    "sound": "Keep conversational texture and intelligible details. Test the joke without score first; add music only when the scene's own premise or chosen reference justifies it.",
+    "typography": "Use ordinary documentary identification when it supports the fiction. Avoid exaggerated caption commentary that announces the joke before the character reveals it.",
+    "exceptions": "Keep respect for sincere performance. Remove fixed rules that every answer must remain whole or every awkward pause must be extended; the comedy is shaped in selection and timing.",
+    "evaluation": "Create a 25-second character introduction with one self-description and one contradicting action. Viewers should identify the character's belief before explaining the joke.",
+    "failureMode": "Random pauses, zooms and reaction shots can ridicule a person without creating a coherent comic character.",
+    "evidence": {
+      "summary": "The Best in Show production account describes outline-based improvisation and extensive editing. Mark Yoshikawa emphasizes reviewing the material and finding comic timing in performance, supporting a selective rather than mechanically uncut approach.",
+      "basis": "Production account and editor interview",
+      "sources": [
+        {
+          "number": 41,
+          "id": "guest",
+          "title": "Best in Show",
+          "author_publisher": "Turner Classic Movies",
+          "date": "Undated article",
+          "url": "https://www.tcm.com/articles/220874/best-in-show",
+          "evidence_type": "Institutional production account",
+          "supports": "Improvised material developed from an outline and shaped extensively in editing.",
+          "accessed": "2026-09-10"
+        },
+        {
+          "number": 28,
+          "id": "yoshikawa",
+          "title": "Mark Yoshikawa Talks of Editing Terrence Malick, Christopher Guest, and the New Reminiscence",
+          "author_publisher": "CineMontage",
+          "date": "2021",
+          "url": "https://cinemontage.org/mark-yoshikawa-talks-of-editing-terrence-malick-christopher-guest-and-the-new-reminiscence/",
+          "evidence_type": "Editor interview",
+          "supports": "Malick voice/image disjunction; Guest footage review and comic timing. Shared source across two profiles.",
+          "accessed": "2026-09-10"
+        }
+      ]
+    }
+  },
+  "mrbeast": {
+    "name": "MrBeast",
+    "reference": "Large-premise challenge and spectacle videos; specify a dated reference rather than assuming one enduring editing cadence.",
+    "mechanism": "A legible objective, stakes and changing progress sustain attention.",
+    "materialFit": "Needs specific source footage",
+    "prerequisites": "A real objective, comprehensible rules, observable progress, consequential choices and an authentic payoff.",
+    "selection": "Choose material that establishes what someone wants, what makes it difficult and what changes. Prefer decisions and consequences over interchangeable excited reactions.",
+    "framing": "Make the scale and rules visible in the same shot where possible. Use close-ups to clarify effort or choice, and wide views to establish the actual challenge.",
+    "rhythm": "Open with a clear promise and evidence that the premise exists. Introduce a real complication or secondary objective when the situation becomes repetitive. Compress repeated attempts while preserving decisions and consequences.",
+    "sound": "Use score and effects to mark changes of state rather than every cut. Protect dialogue explaining a rule or choice, and create headroom before the largest payoff.",
+    "typography": "Display progress when it changes or needs clarification. Counters must reflect real measurements; persistent numbers are optional if the scene already communicates the state.",
+    "exceptions": "Remove the universal four-second cap, compulsory riser-hit reveals and permanent on-screen counters. Evaluate clarity and progression separately from cut density.",
+    "evaluation": "Make a 30-second miniature challenge with a genuine mid-sequence complication. Viewers should state the objective and explain how the new situation changes what they expect next.",
+    "failureMode": "Relentless cuts and escalating adjectives cannot replace real progress or a payoff.",
+    "evidence": {
+      "summary": "In the 2021 Colin and Samir interview, Donaldson explains that a long video often needs a secondary story or changed situation to renew interest. This is a narrative development principle, not evidence for a universal four-second shot ceiling. Later interview notes document the growing production scale.",
+      "basis": "Direct interview transcript; 2021 reference",
+      "sources": [
+        {
+          "number": 42,
+          "id": "mrbeast",
+          "title": "An Unfiltered Conversation with MrBeast",
+          "author_publisher": "Colin and Samir",
+          "date": "Undated publisher page",
+          "url": "https://www.colinandsamir.com/resources/an-unfiltered-conversation-with-mrbeast",
+          "evidence_type": "Primary interview publisher's notes",
+          "supports": "Scale and production choices; insufficient evidence for a universal four-second cut rule.",
+          "accessed": "2026-09-10"
+        },
+        {
+          "number": 52,
+          "id": "mrbeast-transcript",
+          "title": "Colin and Samir Show: with MrBeast (Transcript)",
+          "author_publisher": "Colin and Samir with Jimmy Donaldson; The Singju Post transcript",
+          "date": "2021-09-20 interview; later transcript publication",
+          "url": "https://singjupost.com/colin-and-samir-show-with-mrbeast-transcript/",
+          "evidence_type": "First-person interview transcript mirror",
+          "supports": "Introducing secondary stories or changed situations to renew attention during longer videos; specific to the 2021 discussion.",
+          "accessed": "2026-09-10"
+        }
+      ]
+    }
+  },
+  "casey-neistat": {
+    "name": "Casey Neistat",
+    "reference": "Personal action-led filmmaking and vlogs; Make It Count is a concrete edit-discovery reference.",
+    "mechanism": "A personal intention becomes an improvised journey with a visible result.",
+    "materialFit": "Needs specific source footage",
+    "prerequisites": "A real personal objective, action coverage, spatial context and evidence of what changed.",
+    "selection": "Build a day or journey around an intention and obstacle. Collect practical transitions such as leaving, traveling, arriving and doing, alongside the most revealing unexpected moment.",
+    "framing": "Use self-placement, wide context and tactile details to establish presence. An improvised camera position can feel purposeful when it clearly shows the action.",
+    "rhythm": "Try intention → attempt → complication → revised action → result. Use travel compression between meaningful scenes; retain an imperfect take if its event is stronger.",
+    "sound": "Let actual city, travel or task sounds establish place. Use a music phrase to compress movement, then step out of it for a decisive encounter or spoken thought.",
+    "typography": "Use handwritten or physical notes only when they express planning, evidence or personality. A map should explain the journey rather than function as a compulsory vlog transition.",
+    "exceptions": "Relax bans on studio, desk, static shots and dissolves. Keep first-person agency and a clear story of doing something.",
+    "evaluation": "Build a 30-second personal errand film. A viewer should identify the initial intention and what altered it, even with the music muted.",
+    "failureMode": "Timelapses and travel montages show activity without a personal story.",
+    "evidence": {
+      "summary": "Neistat's Little Black Book interview describes finding Make It Count's story from a substantial body of travel footage. It supports discovering structure through editing and treating equipment as a means, not defining the style by particular cameras or transitions.",
+      "basis": "Direct craft account",
+      "sources": [
+        {
+          "number": 43,
+          "id": "casey",
+          "title": "Breakfast with Casey Neistat",
+          "author_publisher": "Little Black Book",
+          "date": "2014-09-24",
+          "url": "https://lbbonline.com/news/breakfast-with-casey-neistat/",
+          "evidence_type": "First-person interview",
+          "supports": "Finding Make It Count's story from substantial travel footage in the edit.",
+          "accessed": "2026-09-10"
+        }
+      ]
+    }
+  },
+  "mkbhd": {
+    "name": "MKBHD",
+    "reference": "Scripted technology explanation and review; Brownlee's own course is the principal craft reference.",
+    "mechanism": "A clear judgment is supported by an immediately relevant demonstration.",
+    "materialFit": "Requires planned production",
+    "prerequisites": "Hands-on observations, reproducible demonstrations, useful comparisons and clean product coverage.",
+    "selection": "Pair every major judgment with a demonstration or clearly identified observation. Separate attractive product images from shots that actually support a claim.",
+    "framing": "Control reflections, background separation and focus so the relevant feature is visible. Choose a static view when it makes a comparison easier than a moving beauty shot.",
+    "rhythm": "Move from judgment to evidence with minimal friction. Group related features into a coherent argument; avoid repeating specifications that do not change the viewer's understanding.",
+    "sound": "Prioritize an even, intelligible voice. Keep music subordinate during measurements and comparisons; use product sound where it demonstrates something relevant.",
+    "typography": "Show units, comparison conditions and a meaningful baseline. Use restrained hierarchy and adequate size; red, one typeface and a fixed animation style are optional design choices.",
+    "exceptions": "Remove aesthetic bans on non-red colors, effects, jokes and rapid cuts. Require contextualized evidence and a purpose for the product shot.",
+    "evaluation": "Create a 25-second feature assessment with one comparison. Viewers should recall the practical conclusion and what evidence supports it, not only the specification.",
+    "failureMode": "Beautiful product footage can make an unsupported opinion look more rigorous than it is.",
+    "evidence": {
+      "summary": "Brownlee describes extensive scripting, deciding A-roll and B-roll during writing, and putting numbers in comparative context. He explicitly says sophisticated camera equipment is not necessary. This makes explanatory shot design more fundamental than a red accent or robotic move.",
+      "basis": "Creator's detailed teaching account",
+      "sources": [
+        {
+          "number": 44,
+          "id": "mkbhd",
+          "title": "YouTube Success: Script, Shoot & Edit with MKBHD",
+          "author_publisher": "Marques Brownlee, Skillshare",
+          "date": "Undated course transcript",
+          "url": "https://www.skillshare.com/en/classes/youtube-success-script-shoot-and-edit-with-mkbhd/731552530",
+          "evidence_type": "Creator's teaching transcript",
+          "supports": "Research, scripting, A-roll/B-roll planning and contextualizing measurements.",
+          "accessed": "2026-09-10"
+        }
+      ]
+    }
+  },
+  "tom-scott": {
+    "name": "Tom Scott",
+    "reference": "Concise factual entertainment about a specific real thing; distinguish this format from Scott's other shows.",
+    "mechanism": "A surprising proposition leads to an understandable mechanism and its limit.",
+    "materialFit": "Needs specific source footage",
+    "prerequisites": "A precise factual question, a location or object that helps answer it and enough evidence to explain the mechanism.",
+    "selection": "Choose the physical detail that makes the premise surprising. Include evidence of how it works and one boundary or exception; do not rely on the location merely as an attractive background.",
+    "framing": "Position the presenter relative to the relevant object. Cut closer or add a diagram when the mechanism cannot be seen from the establishing view.",
+    "rhythm": "Try surprising claim → real-world demonstration → explanation → qualification. Remove detours that do not help the central question, while retaining necessary caveats.",
+    "sound": "Make speech and relevant location sound clear. Music and additional coverage are choices to test, not categorically forbidden; avoid competing with the explanation.",
+    "typography": "Use a label, number or diagram when it reduces verbal load. Keep scale and units clear, and avoid unsupported precision.",
+    "exceptions": "Replace bans on cuts within takes, music and supplementary coverage with a requirement that every addition improve understanding of the specific thing.",
+    "evaluation": "Explain one unusual piece of infrastructure in 30 seconds. A viewer should describe both what is surprising and how it works.",
+    "failureMode": "A presenter in an interesting location can still deliver a generic fact list.",
+    "evidence": {
+      "summary": "In the Waveform interview, Scott describes a factual-entertainment sensibility and explains reframing an aquarium through a spaceship analogy. He also discusses different formats, undermining the idea that his entire practice is one uninterrupted on-location take.",
+      "basis": "Direct interview transcript",
+      "sources": [
+        {
+          "number": 45,
+          "id": "tom",
+          "title": "How Tom Scott Makes Videos",
+          "author_publisher": "Waveform: The MKBHD Podcast; transcript hosted by Podscripts",
+          "date": "2022-06-03",
+          "url": "https://podscripts.co/podcasts/waveform-the-mkbhd-podcast/how-tom-scott-makes-videos",
+          "evidence_type": "First-person interview transcript mirror",
+          "supports": "Factual-entertainment premise, format differences and aquarium/spaceship analogy.",
+          "accessed": "2026-09-10"
+        }
+      ]
+    }
+  },
+  "veritasium": {
+    "name": "Veritasium",
+    "reference": "Misconception-aware science explanation; distinguish educational evidence from assumptions about platform engagement.",
+    "mechanism": "A plausible mental model is tested and revised through evidence.",
+    "materialFit": "Requires planned production",
+    "prerequisites": "A testable proposition, a plausible misconception, a valid demonstration and an explanation of its conditions.",
+    "selection": "Find an experiment that distinguishes the competing explanations. Capture the setup, relevant variables, observation and a useful comparison; retain results that complicate the expected story.",
+    "framing": "Keep cause and effect visible together where feasible. Add close coverage or a diagram for hidden mechanisms, clearly distinguishing measurement from illustration.",
+    "rhythm": "Try prediction → test → observed mismatch → revised explanation → transfer question. Change this order if prior context is necessary; surprise should serve understanding.",
+    "sound": "Protect the actual observation and its explanation from distracting cues. Use musical change to mark a conceptual turn, not to imply that a result is more certain than it is.",
+    "typography": "Display relevant variables, units and uncertainty. Let the diagram evolve as the explanation changes; avoid illustrating an incorrect model without clearly identifying it.",
+    "exceptions": "Replace mandatory demo-first ordering and blanket cutting or music bans with a test of whether the viewer's initial model has actually changed.",
+    "evaluation": "Create a 30-second misconception demonstration, then ask viewers to predict a different example. Correct transfer is stronger evidence of learning than recalling the reveal.",
+    "failureMode": "A surprising result without a repaired mental model can leave the original misconception intact.",
+    "evidence": {
+      "summary": "Muller's physics-education thesis examines multimedia explanations that engage learners' alternative conceptions. Its educational context matters: it does not establish a universal YouTube story order or prove that every surprising demonstration improves retention.",
+      "basis": "Original educational research",
+      "sources": [
+        {
+          "number": 46,
+          "id": "veritasium",
+          "title": "Designing Effective Multimedia for Physics Education",
+          "author_publisher": "Derek Alexander Muller, University of Sydney; thesis mirror",
+          "date": "2008",
+          "url": "https://studylib.net/doc/18658765/designing-effective-multimedia-for-physics-education",
+          "evidence_type": "Original doctoral research, third-party text mirror",
+          "supports": "Misconception-aware educational explanations; evidence scoped to physics-learning studies.",
+          "accessed": "2026-09-10"
+        },
+        {
+          "number": 47,
+          "id": "veritasium-origin",
+          "title": "About / author's thesis link",
+          "author_publisher": "Derek Muller, Veritasium",
+          "date": "Undated",
+          "url": "https://www.veritasium.com/about",
+          "evidence_type": "Author's official publication pointer",
+          "supports": "Authenticates thesis title and author; current audience metrics not used.",
+          "accessed": "2026-09-10"
+        }
+      ]
+    }
+  },
+  "vsauce": {
+    "name": "Vsauce",
+    "reference": "Conversational conceptual essays; Michael Stevens's 2014 AMA documents the writing and delivery process.",
+    "mechanism": "A small question opens a chain of meaningful conceptual connections.",
+    "materialFit": "Archive plus graphics",
+    "prerequisites": "A compelling question, source-backed conceptual links and visual demonstrations for abstract transitions.",
+    "selection": "Choose examples that make the next conceptual step feel earned. For every apparent tangent, write its connection to the central question before sourcing decorative footage.",
+    "framing": "Use presenter contact for inquiry and a clear object or diagram for the key abstraction. Shift scale only when the conceptual move requires it.",
+    "rhythm": "Build question → surprising connection → deeper implication → return or reframing. Allow a direct answer early if it opens a better question; do not withhold it by rule.",
+    "sound": "Keep the spoken argument conversational and intelligible. Test a recurring musical texture that changes at genuine conceptual turns, leaving room for a difficult idea.",
+    "typography": "Introduce notation or a diagram when it helps comprehension, even before a complete verbal explanation. Cite the underlying research rather than treating the presenter as the final authority.",
+    "exceptions": "Remove automatic bans on early answers, montage and particular music. Require explicit conceptual bridges and a purposeful return to the original question.",
+    "evaluation": "Make a 30-second two-connection essay. Viewers should explain why each connection belongs and how the ending changes the opening question.",
+    "failureMode": "Unrelated trivia with rhetorical questions resembles curiosity without forming an argument.",
+    "evidence": {
+      "summary": "Stevens describes writing a full script, then rehearsing and delivering it in conversational paragraphs. He also directs readers toward the underlying sources. The apparent spontaneity therefore coexists with structured preparation.",
+      "basis": "Creator's first-person account",
+      "sources": [
+        {
+          "number": 48,
+          "id": "vsauce",
+          "title": "Michael Stevens Reddit AMA Transcript",
+          "author_publisher": "Michael Stevens; AMA Transcripts reprint",
+          "date": "2014-04-21",
+          "url": "https://amatranscripts.com/ama/michael_stevens_2014-04-21.html",
+          "evidence_type": "First-person AMA reprint",
+          "supports": "Complete scripting, conversational paragraph delivery and pointing to underlying sources.",
+          "accessed": "2026-09-10"
+        }
+      ]
+    }
+  },
+  "mark-rober": {
+    "name": "Mark Rober",
+    "reference": "Engineering spectacle with accessible scientific explanation; use a specific experiment or build reference.",
+    "mechanism": "A playful objective becomes a visible engineering problem and a satisfying test.",
+    "materialFit": "Requires planned production",
+    "prerequisites": "A real build, measurable constraints, documented iterations and coverage of a valid test.",
+    "selection": "Choose an ambitious but legible objective and the engineering obstacle that matters most. Include an actual design decision and its consequence; omit decorative workshop footage that explains nothing.",
+    "framing": "Establish the apparatus and test conditions clearly. Capture normal-speed cause and effect before using a close-up or slow-motion replay to reveal the mechanism.",
+    "rhythm": "Try goal → constraint → design choice → test → explanation of result. Compress routine fabrication but preserve the decision that makes the solution understandable.",
+    "sound": "Use music to support anticipation around the test. Let the device's real sound carry the event where useful; add a replay cue only if it helps identify a newly visible detail.",
+    "typography": "Draw the mechanism at the moment viewers need it. Label measured results and relevant conditions; keep a simplified schematic distinct from a precise technical drawing.",
+    "exceptions": "Remove mandatory failure, mandatory slow-motion success and fixed narration limits. Authentic progression is the requirement; the footage determines the available arc.",
+    "evaluation": "Create a 30-second build story with one constraint and one design response. Viewers should explain why the design improved the result.",
+    "failureMode": "A spectacular payoff with no understandable design choice becomes a stunt rather than engineering storytelling.",
+    "evidence": {
+      "summary": "The Stanford event report records Rober discussing science embedded in entertaining storytelling and the value of authenticity. It supports accessible engineering narratives, not a requirement to fabricate a failed attempt or slow every successful result.",
+      "basis": "Firsthand event reporting",
+      "sources": [
+        {
+          "number": 49,
+          "id": "rober",
+          "title": "YouTuber and former NASA engineer Mark Rober draws full crowd, speaks to scientific storytelling",
+          "author_publisher": "Jack Quach and Steven D. Liu, The Stanford Daily",
+          "date": "2025-05-19",
+          "url": "https://stanforddaily.com/2025/05/19/youtuber-and-former-nasa-engineer-mark-rober-draws-full-crowd-speaks-to-scientific-storytelling/",
+          "evidence_type": "Firsthand event reporting with direct quotations",
+          "supports": "Entertainment as a route into science and the importance of authentic storytelling.",
+          "accessed": "2026-09-10"
+        }
+      ]
+    }
+  },
+  "emma-chamberlain": {
+    "name": "Emma Chamberlain",
+    "reference": "Personal vlog and editorial self-observation; identify a period rather than freezing the creator in an early style.",
+    "mechanism": "The edit reveals the gap between a performed self and a more candid thought.",
+    "materialFit": "Needs specific source footage",
+    "prerequisites": "Authentic first-person material, meaningful self-reaction and ordinary moments whose context is retained.",
+    "selection": "Choose a small experience with a genuine change of thought. Preserve the detail that makes it personal; avoid substituting generic awkwardness for the speaker's actual perspective.",
+    "framing": "Use proximity or a self-directed camera when it creates intimacy. Keep a wider or quiet observational shot if it contributes to the experience rather than rejecting polish automatically.",
+    "rhythm": "Test a straightforward spoken version, then add a small number of editorial asides, ellipses or reframings. Each should reveal a thought absent from the unedited delivery.",
+    "sound": "Use room sound, breath or a selective interruption to expose the moment. Music is a tonal choice; silence should feel connected to the experience rather than mechanically inserted.",
+    "typography": "Write captions as an additional thought only when that voice is authentic. Separate necessary accessibility captions from optional comic or reflective commentary.",
+    "exceptions": "Remove blanket bans on polished footage, smooth transitions and clean introductions. Label early chaotic-edit references separately from other periods.",
+    "evaluation": "Create a 25-second ordinary-life scene with two editorial interventions. Viewers should identify what those edits reveal about the speaker beyond the literal words.",
+    "failureMode": "Random zooms and self-deprecating captions imitate mannerisms without a personal point of view.",
+    "evidence": {
+      "summary": "Chamberlain's V Magazine interview describes enjoyment of editing, creative autonomy and limits on constant filming. It supports the importance of a personal editorial voice; comments about slowing life down should not be misreported as measured evidence of slower cutting.",
+      "basis": "Direct interview; era-specific visual prescriptions proposed",
+      "sources": [
+        {
+          "number": 50,
+          "id": "emma",
+          "title": "Emma Chamberlain and Derek Blasberg interview",
+          "author_publisher": "V Magazine",
+          "date": "2022-07-27",
+          "url": "https://vmagazine.com/article/emma-chamberlain-derek-blasberg-interview-cartier-louis-vuitton/",
+          "evidence_type": "First-person interview",
+          "supports": "Editing enjoyment, creative autonomy and boundaries around filming.",
+          "accessed": "2026-09-10"
+        }
+      ]
+    }
+  },
+  "peter-mckinnon": {
+    "name": "Peter McKinnon",
+    "reference": "Cinematic vlog and filmmaking instruction; the 2018 Epidemic Sound BTS provides a specific workflow account.",
+    "mechanism": "Tactile supplementary footage gives an everyday activity sensory appeal and continuity.",
+    "materialFit": "Requires planned production",
+    "prerequisites": "Coherent coverage of a real activity, useful detail shots and motion that can connect adjacent images.",
+    "selection": "Collect beginning, action and result alongside texture. Choose details that locate the activity or reveal a step; use beauty shots to strengthen a sequence with an actual progression.",
+    "framing": "Control light direction, reflections and foreground depth. Mix wide context, medium action and close detail; include static frames where they make texture or action easier to read.",
+    "rhythm": "Build a short action sequence before adding transitions. Match movement only where it preserves orientation or creates a purposeful reveal; keep the result on screen long enough to register.",
+    "sound": "Use captured practical sounds for tactile detail and a music phrase for overall flow. Test transitions without effects and retain accents only where they clarify or enhance the action.",
+    "typography": "Keep tutorial labels functional and title design separate from the montage. Grade for consistent material and skin rendering rather than enforcing one LUT or black level.",
+    "exceptions": "Remove compulsory camera movement, transition sounds and host-duration ceilings. Require B-roll to establish, connect, demonstrate or reveal.",
+    "evaluation": "Create a 20-second everyday-task montage. A viewer should reconstruct the action's beginning and result without narration; remove any beauty shot that breaks that logic.",
+    "failureMode": "Slow motion and whooshes can make a sequence attractive while leaving it narratively incomplete.",
+    "evidence": {
+      "summary": "The BTS account describes McKinnon finding structure in the timeline, using B-roll to establish scenes and bridge story gaps, and sometimes choosing music before filming and sometimes afterward. It does not support requiring movement and a sound effect on every transition.",
+      "basis": "Production participant's account; commercial context disclosed",
+      "sources": [
+        {
+          "number": 51,
+          "id": "peter",
+          "title": "Behind the Creator's Lens: Peter McKinnon",
+          "author_publisher": "Epidemic Sound",
+          "date": "2018-03-15",
+          "url": "https://www.epidemicsound.com/blog/behind-the-creators-lens-peter-mckinnon/",
+          "evidence_type": "Production participant's BTS account; commercial music supplier",
+          "supports": "B-roll purpose, edit-discovered structure and music chosen before or after filming.",
+          "accessed": "2026-09-10"
+        }
+      ]
+    }
+  },
+  "martin-scorsese": {
+    "name": "Martin Scorsese",
+    "reference": "Goodfellas and Casino for insider seduction, social machinery and unraveling; The Irishman for retrospective restraint. Select one film/sequence as the governing reference. Credit editor Thelma Schoonmaker and the relevant camera, sound, music and title collaborators.",
+    "mechanism": "An insider's account draws us into a world of status and appetite, then behavior and consequences expose the cost.",
+    "materialFit": "Archive-compatible with character and consequence coverage; choreographed camera passages need suitable source footage or a shoot",
+    "prerequisites": "Log a protagonist's desire, an actual transaction or ritual granting access, a change in a relationship, and its visible cost. For archive, retain dates and speaker context. For a sustained moving shot, secure a readable route, blocking, permissions, lighting and sound; a digital push-in cannot supply missing space.",
+    "selection": "Tag selects as invitation, privilege, procedure, fracture or aftermath. Favor a telling exchange, money or object changing hands, someone granting access, or a listener reassessing a speaker. Retain performance turns and ordinary labor that explain how the world works. Glamour and consequences must both have concrete footage.",
+    "framing": "Use proximity, eyelines, doorways and foreground obstacles to show who belongs and who controls access. For new footage, choreograph a move around changing relationships and rehearse the complete route. With existing clips, preserve their screen direction and spatial anchors. Choose light, lens contrast and palette from the named film; red light is optional.",
+    "rhythm": "Build an inviting scene, compress repeated procedures, then let a specific hesitation or refusal interrupt the momentum. Vary complete dialogue scenes with associative montage. A freeze, repeated detail, temporal jump or abrupt cut needs a stated narrative job and readable duration. Preserve performance over cosmetic continuity when justified. For The Irishman, allow quiet and aftermath to dominate rather than importing Goodfellas velocity.",
+    "sound": "Optional first-person narration can give a character's self-justification while picture reveals a discrepancy; write concrete recollection and avoid imitating an actor's voice. Use verified quotes for factual subjects. Audition exact song recordings/passages for emotional subtext, period and structural turns; song, score or unscored scene are valid. Map which line, lyric, practical sound or musical phrase leads each moment, with separate stems and deliberate quiet after consequences.",
+    "typography": "Design the film title as a story-specific metaphor or identity, separately from supporting dates, names and quotes. Credit Saul and Elaine Bass when referencing their Casino sequence. Bundled bold sans and restrained serif treatments are editorial options, not verified Scorsese-wide fonts. Animate only when motion expresses the chosen idea; hold source labels long enough to read.",
+    "exceptions": "This profile also supports restrained character drama and period work. Narration, pop songs, freeze frames, violence, red lighting and long tracking shots are optional. A trailer needs its own campaign construction and named trailer execution where available; a film-director reference is not a trailer-agency credit. Preserve factual integrity when translating the mechanism to documentary material.",
+    "evaluation": "Make a 20-30-second proof with an invitation, a visible privilege or transaction, and a consequence. A viewer should identify whose perspective shaped the opening, who held power, and what changed. Test a song-led and an unscored turn; inspect geography, full dialogue, title legibility and the final hold. Report listening and material limitations separately.",
+    "failureMode": "A rapid gangster montage with a familiar rock song supplies surface attitude but no social mechanism, changing point of view or cost.",
+    "evidence": {
+      "summary": "Schoonmaker describes The Irishman's deliberate simplicity and music experiments. Fleischman details Goodfellas foreground sound handoffs. Ballhaus and McConkey describe spatial planning and camera collaboration. The Casino title record credits Saul and Elaine Bass. The harness mechanism and exercise are editorial translations of these accounts.",
+      "basis": "Primary collaborator interviews and reproduced production/title records; sequence-specific evidence. Production recipes and numeric defaults are editorial proposals, not measured career-wide laws.",
+      "sources": [
+        {
+          "number": 53,
+          "id": "scorsese-schoonmaker",
+          "title": "Thelma Schoonmaker Talks of Editing, Aging, and Endings in Martin Scorsese's The Irishman",
+          "author_publisher": "Patrick Z. McGavin / CineMontage",
+          "date": "2019-12-02",
+          "url": "https://cinemontage.org/thelma-schoonmaker-talks-of-editing-aging-and-endings-in-martin-scorseses-the-irishman/",
+          "evidence_type": "First-person editor interview",
+          "supports": "Performance-led editing, quiet pacing, temporal framing, music alternatives and late-life consequence.",
+          "accessed": "2026-09-10"
+        },
+        {
+          "number": 54,
+          "id": "scorsese-fleischman",
+          "title": "Tom Fleischman on GoodFellas",
+          "author_publisher": "CineMontage / Motion Picture Editors Guild",
+          "date": "2014",
+          "url": "https://cinemontage.org/tom-fleischman-goodfellas/",
+          "evidence_type": "First-person re-recording mixer interview",
+          "supports": "Songs as dramatic subtext and foreground handoffs among dialogue, music and specific location sounds.",
+          "accessed": "2026-09-10"
+        },
+        {
+          "number": 55,
+          "id": "scorsese-ballhaus",
+          "title": "In Memoriam: Michael Ballhaus, ASC, BVK (1935-2017)",
+          "author_publisher": "American Society of Cinematographers",
+          "date": "2017",
+          "url": "https://theasc.com/news/in-memoriam-michael-ballhaus-asc-1935-2017/",
+          "evidence_type": "Cinematographer and director accounts reproduced by the ASC",
+          "supports": "Goodfellas camera and lighting decisions, the Copacabana collaboration, and contrasting period-film photography.",
+          "accessed": "2026-09-10"
+        },
+        {
+          "number": 56,
+          "id": "scorsese-mcconkey",
+          "title": "Steadicam Operator Larry McConkey on Filming the Goodfellas Copacabana Tracking Shot and the Early Days of Steadicam",
+          "author_publisher": "Filmmaker Magazine",
+          "date": "2015",
+          "url": "https://filmmakermagazine.com/93916-steadicam-operator-larry-mcconkey-on-filming-the-goodfellas-copacabana-tracking-shot-and-the-early-days-of-steadicam/",
+          "evidence_type": "First-person camera operator interview",
+          "supports": "Rehearsed blocking, timing and spatial transitions in the Copacabana shot.",
+          "accessed": "2026-09-10"
+        },
+        {
+          "number": 57,
+          "id": "scorsese-bass",
+          "title": "Casino (1995)",
+          "author_publisher": "Art of the Title; Pat Kirkham; Saul and Elaine Bass credits",
+          "date": "2011 essay / 1995 title sequence",
+          "url": "https://www.artofthetitle.com/title/casino/",
+          "evidence_type": "Reproduced title sequence, credited designers and designer account",
+          "supports": "Saul and Elaine Bass's metaphorical title design; title craft attributed to collaborators, not a universal director font.",
+          "accessed": "2026-09-10"
+        }
+      ]
+    }
+  }
+}

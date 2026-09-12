@@ -1,67 +1,61 @@
-# Denis Villeneuve — the monolith
+# Denis Villeneuve
 
-Films: *Incendies*, *Prisoners*, *Sicario*, *Arrival*, *Blade Runner 2049*, *Dune*.
+## Reference and mechanism
 
-## The signature
+Sensory scale and character tension; Joe Walker's account of Dune is the concrete reference.
 
-A human figure tiny against something vast and silent — a canyon, a ship, a wall of fog. Shots held far past the point of information. Dialogue sparse and low. A score that is a single sustained low frequency with a slow, enormous swell. Colour is one hue per world: orange dust, grey-green rain, blue night. Violence, when it comes, is fast and mostly off-screen.
+A small human perception or gesture gains force against a vast environment.
 
-## Structure — how a scene is built
+## Evidence
 
-- Arrive slowly: 20–40 s of approach (the landscape, the vehicle, the figure moving through it) before anyone speaks.
-- The scene has one decision, made by one person, mostly in silence; the dialogue around it is short and functional.
-- The event (a reveal, an act) is a single wide or a single close-up, held; the reaction is the landscape again.
-- Leave slowly: the last 10–20 s are a wide with the figure already small.
+Walker describes deliberate flares, matched sensory transitions, an abrupt change of environment and an intimate touch held for its emotional effect. This is a more varied practice than the harness's bans on flares, sharp transitions and expressive reactions suggest.
 
-## The cut
+**Basis:** Editor's craft account. The production choices below are editorial translations, not measured career-wide rules.
 
-- Average shot 6–15 s; wides 12–30 s; dialogue in slow alternation 4–8 s; nothing under 2 s except a single hard cut at the event.
-- Straight cuts; a slow fade to black (3 s) at the end of a chapter; no dissolves.
-- Camera: locked or a glacial push-in / drift; aerials that do not turn; silhouettes against light; frontality; deep shadow. No handheld.
-- Grade: monochromatic per world (`colorLook` cool or warm, `saturation` down 20 %, `contrast` up, blacks deep, `vignette` light); haze and dust welcome.
+## Material prerequisites
 
-## Narration
+**Production fit:** Needs specific source footage. Coherent environment coverage plus meaningful human detail; scale alone is insufficient.
 
-- None, usually. If the brief needs one: a single quiet voice, present tense, 15–40 wpm, one thought per minute, spoken as if remembering ("I used to think this was the beginning of your story.").
+## Picture and clip selection
 
-## Sound
+Pair a spatially imposing image with a precise bodily response, gesture or practical task. Reject interchangeable landscapes that do not change the character's situation.
 
-- Music is a **score** of drones and low brass: a sustained sub-bass, a slow chord that takes 20 s to change, one massive swell at the event (search "low drone cinematic CC", "sub bass swell library", "brass drone slow build"). It is felt more than heard; ducking on, but the dialogue is so sparse it rarely triggers.
-- Sync ambience is continuous and precise: wind, sand, rain, engines, footsteps — the shots' own sound at 0.6–0.8 or audio-only beds; the room tone of a big space.
-- Silence used as a cut: 2–3 s of nothing before the event.
+## Framing and camera
 
-## Picture — sources and text
+Make scale readable through a person, doorway or movement. Preserve negative space when it creates anticipation; move closer when a small action becomes decisive.
 
-- Sources: archive of deserts, ports, industrial coasts, fog, aerials that do not turn; generated shots ("extreme wide, a lone figure walking toward a colossal concrete wall in orange haze, static, anamorphic, 65 mm, low contrast highlights, deep blacks"); dialogue shots frontal and dark.
-- Text: none. A chapter title only on a standalone film (thin sans, small, 3 s, over black).
+## Structure and rhythm
 
-## Do not
+Try environment → detail → altered perception. Compare a patient approach with a sharp sensory transition; keep the version that communicates the actual change of state.
 
-- No fast cutting, no handheld, no bright saturated palette, no lens flares, no montage to a song.
-- No explaining dialogue; no reaction shots of faces emoting; no music that has a melody.
-- No cut inside the approach or the leaving.
+## Narration and sound
+
+Establish an acoustic world with a recognizable texture, then change it deliberately at the transition. Give an intimate gesture enough sonic room to register.
 
 ## Type
 
-**The signature.** Light geometric capitals with wide tracking (Arrival's lightened Gotham, Blade Runner 2049's Brandon Grotesque credits), a monumental extended wordmark (Dune) — cool white, slow.
+Use sparse contextual text when necessary. Decide title scale and spacing from the fictional world; minimal typography is an option, not a substitute for narrative orientation.
 
-**Stand-ins.** Montserrat Light with spaced capitals for the light geometrics; Michroma for the extended wordmark. Faces: Montserrat 300, Michroma 400. Case: spaced capitals. Colour #DCE3E8 on #000000. Entrance: fade.
+Bundled typography presets are starting treatments. Choose a named work and a coherent project-specific title and supporting-text system. Fonts, colors, cases and roles may vary; source labels and accessibility captions remain available. Check safe areas, reading time and overlap.
 
-**Roles** (`add_text_overlay {role}` with this style in the brief):
+## Exceptions and review
 
-- **title** — the extended, tracked title. Michroma · spaced capitals · 6 % · hold 5 s.
-- **card (default)** — a chapter card, light spaced capitals. Montserrat Light · spaced capitals · 3.4 % · hold 4 s.
+Remove automatic prohibitions on fast cuts, flares, melody and reactions. Specify whether a shot carries scale, apprehension, intimacy or transition.
 
-**Never:** lower-third, caption, callout, citation, label, intertitle.
+Numeric pacing and narration ranges in the catalogue are editorial starting points, not measurements of the creator's career. Explain purposeful departures in styleTreatment.exceptions. Source integrity and technical validity still apply.
 
-**Survey note.** Surveyed: Arrival (modified Gotham Light), Blade Runner 2049 (Brandon Grotesque credits, custom extended wordmark), Dune (custom wide geometric with extreme tracking).
+## Evaluation
 
-## Harness parameters
+Build a 25-second sequence in which a small gesture changes the meaning of a large image. Viewers should remember the gesture as well as the spectacle.
 
-asl 6–15 s · min shot 2 s · transitions cuts · narration optional, quiet present tense, 15–40 wpm · music required, score (drone) · sync mixed · text none · interviews none · beat-cut no
+**Failure mode:** Huge wides, orange fog and a low drone can remain emotionally empty.
+
+The duration above is a suggested experiment length. Plan the test within the approved production scope; it is not a new approval gate or a claim that the test has passed.
 
 ## Applying it in SlopStudio
 
-- Plan: beats approach / decision / event / leaving; 6–10 shots in 2 minutes; wides hold 12–30 s; ambience noted per shot.
-- Cut: `update_project colorLook` cool/warm, `saturation 0.8`, `contrast 1.15`, `vignette 0.25`; `update_segments muted:false volume 0.7` on ambience shots.
-- Music: `set_music` a drone; `balance_music` gap 6; `audioFadeOutS` 3 on a chapter end; `check_mix_levels musicDriven:true`.
+Read the shared director-style playbook included by get_style. Store reference, mechanism, materialPlan, rhythm, sound, typography, exceptions and evaluation in plan.styleTreatment. Carry these choices into actual shot descriptions, durations, script offsets and audio decisions. Inspect available material before committing exact timing; identify missing coverage instead of compensating with effects. Report technical checks, picture/motion review, listening review and the observed style result separately.
+
+## Sources
+
+- [Dune Editor Joe Walker on Cutting Denis Villeneuve's Sweeping Epic](https://www.motionpictures.org/2021/10/dune-editor-joe-walker-on-cutting-the-denis-villeneuves-sweeping-epic/) — Hugh Hart, Motion Picture Association / The Credits; 2021-10. Editor interview.

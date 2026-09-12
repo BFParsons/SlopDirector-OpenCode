@@ -16,9 +16,9 @@
  * then loaded under a mismatched runtime with an empty handler map and every
  * API route answered 405 Method Not Allowed.
  */
-import { cpSync, existsSync, readFileSync, realpathSync } from "node:fs";
+import { cpSync, existsSync, readFileSync, realpathSync, readdirSync, readlinkSync, unlinkSync, symlinkSync } from "node:fs";
 import { createRequire } from "node:module";
-import { dirname, join } from "node:path";
+import { dirname, join, relative, resolve, isAbsolute } from "node:path";
 
 const root = process.cwd();
 const sa = join(root, ".next", "standalone");
@@ -26,6 +26,29 @@ if (!existsSync(join(sa, "server.js"))) {
   console.error("No .next/standalone/server.js — did `next build` run with output:'standalone'?");
   process.exit(1);
 }
+
+// On Windows Next's trace can copy pnpm links with absolute targets pointing
+// back to the development checkout. Rebase them to the traced dependency tree
+// before backfilling or packaging; never copy through a link into node_modules.
+const dependencyRoot = realpathSync(join(root, "node_modules"));
+function rebaseLinks(dir) {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const file = join(dir, entry.name);
+    if (entry.isSymbolicLink()) {
+      const target = resolve(dirname(file), readlinkSync(file));
+      const rel = relative(dependencyRoot, target);
+      if (!rel.startsWith("..") && !isAbsolute(rel)) {
+        const local = join(sa, "node_modules", rel);
+        if (!existsSync(local)) throw new Error(`Missing traced dependency: ${local}`);
+        unlinkSync(file);
+        symlinkSync(relative(dirname(file), local), file, "dir");
+      }
+    } else if (entry.isDirectory()) {
+      rebaseLinks(file);
+    }
+  }
+}
+rebaseLinks(join(sa, "node_modules"));
 
 cpSync(join(root, ".next", "static"), join(sa, ".next", "static"), { recursive: true });
 if (existsSync(join(root, "public"))) {
@@ -41,7 +64,7 @@ const dstPkg = existsSync(dstLink) ? realpathSync(dstLink) : null;
 
 const version = (dir) => JSON.parse(readFileSync(join(dir, "package.json"), "utf8")).version;
 
-if (dstPkg && version(srcPkg) === version(dstPkg)) {
+if (dstPkg && dstPkg !== srcPkg && version(srcPkg) === version(dstPkg)) {
   const src = join(srcPkg, "dist", "compiled", "next-server");
   const dst = join(dstPkg, "dist", "compiled", "next-server");
   // force:false — only add files tracing missed; never replace traced ones.

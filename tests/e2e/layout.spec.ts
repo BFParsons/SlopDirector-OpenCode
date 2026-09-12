@@ -25,7 +25,8 @@ test.describe("Workspace fits the laptop viewport", () => {
     await page.getByRole("button", { name: /^\+ ?Panel$/ }).click();
     const menu = page.locator("div.absolute.z-\\[10000\\]").first();
     await expect(menu).toBeVisible();
-    await expect(menu.getByRole("button")).toHaveCount(18);
+    await expect(menu.getByRole("button")).toHaveCount(19);
+    await expect(menu.getByRole("button", { name: /Agent$/ })).toBeVisible();
     const box = (await menu.boundingBox())!;
     expect(box.y + box.height).toBeLessThanOrEqual(490);
     expect(await menu.evaluate((m) => m.scrollHeight <= m.clientHeight + 1)).toBeTruthy();

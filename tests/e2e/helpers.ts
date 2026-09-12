@@ -1,6 +1,6 @@
 import { expect, type APIRequestContext, type Page } from "@playwright/test";
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
@@ -77,7 +77,7 @@ export async function waitForRender(request: APIRequestContext, projectId: strin
 /** Absolute path of a legacy (non-bundle) project's final render on disk. */
 export function finalRenderPath(projectId: string): string {
   const dir = path.join(process.cwd(), ".data", "assets", projectId, "final");
-  const f = execFileSync("ls", [dir]).toString().trim().split("\n").find((n) => n.startsWith("final."));
+  const f = readdirSync(dir).find((n) => n.startsWith("final."));
   if (!f) throw new Error(`no final render in ${dir}`);
   return path.join(dir, f);
 }
@@ -105,7 +105,7 @@ export function probe(file: string): { video: string[]; audio: string[] } {
 }
 
 export function readPublic(rel: string): Buffer {
-  return execFileSync("cat", [path.join(process.cwd(), "public", rel)]);
+  return readFileSync(path.join(process.cwd(), "public", rel));
 }
 
 /** Attach the test wav as the project's music bed (so renders carry an audio stream). */

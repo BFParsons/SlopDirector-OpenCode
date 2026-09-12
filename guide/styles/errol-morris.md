@@ -1,74 +1,63 @@
-# Errol Morris — the interrogation
+# Errol Morris
 
-Films: *The Thin Blue Line*, *The Fog of War*, *Mr. Death*, *Tabloid*, *The Unknown Known*.
+## Reference and mechanism
 
-## The signature
+Investigative interview and constructed-image nonfiction; The Thin Blue Line is one reference.
 
-Nobody narrates. The subject looks straight into the lens and talks, for a long time, and the film believes them a little less each minute. Between the talking: reenactments shot like a thriller — a detail in slow motion, a milkshake in the air, a clock, a road at night — repeated with small changes as the story changes. A minimalist score loops underneath like a machine that will not stop.
+Testimony and recurring images expose uncertainty instead of closing it too soon.
 
-## Structure — how a scene is built
+## Evidence
 
-- The scene is an account and its cracks. Open on the subject mid-thought (no preamble, no name card first); the account runs 30–60 s; then the film cuts away to a document, a reenactment or a second witness that does not quite match.
-- Reenactment inserts are short (3–6 s), stylised, and return: the same object from a new angle each time the story changes.
-- Documents fill the frame: a page, a photograph, a headline, a map, held 4–6 s, often with one phrase enlarged.
-- The scene ends on the subject in silence, or on the object, not on a conclusion.
+Morris rejects the idea that any visual method guarantees truth. His account of The Thin Blue Line's music also shows score being used during development, not merely added as atmosphere after picture lock.
 
-## The cut
+**Basis:** Direct craft account. The production choices below are editorial translations, not measured career-wide rules.
 
-- Average shot 5–10 s. Interview holds can run 20–40 s; inserts 3–6 s. Nothing under 1.5 s.
-- Straight cuts within a sequence; a cut to black (1–2 s) between chapters of the account. Dissolves only on a document montage.
-- The interview frame: the subject centred, direct to lens, tight (head and shoulders), dark or single-colour background, shallow focus; the interviewer is never seen or heard except as a beat of silence.
-- Reenactments and inserts: high contrast, one light source, slow motion (`speed` 0.5–0.75), macro detail, no faces or faces in shadow.
+## Material prerequisites
 
-## Narration
+**Production fit:** Needs specific source footage. Substantial interview answers, corroborating records and, where appropriate, clearly identified reconstructions.
 
-- None. The subject's words carry the scene; the film's opinion is in the cut and the score.
-- If the plan needs a fact the subject does not say, it is a text card (white on black, 3–4 s, one sentence) or a document.
+## Picture and clip selection
 
-## Sound
+Choose an answer with a precise assertion and a detail another source can test. Keep the speaker's reasoning, hesitation or self-correction when it changes the meaning.
 
-- Music is a **score**: minimalist, arpeggiated, looping, in a minor key (Philip Glass is the reference; search "minimalist arpeggio piano loop", "Glass-style strings", CC / library). It runs under most of the scene at a low level and swells only when the account contradicts itself.
-- The bed ducks under the subject (`musicDucking` on) and holds through the inserts.
-- Sync sound: the subject's voice always (`muted: false`); reenactments are silent or carry one designed sound (a clock, a door) added as an audio-only clip.
-- Silence: after the key admission, 2–4 s of nothing.
+## Framing and camera
 
-## Picture — sources and text
+For new interviews, use a consistent intimate eyeline and simple visual field. For reconstructions, photograph evidentiary details whose differing versions can be compared.
 
-- Sources: interviews (generated shots follow the frame above; archive interviews cropped to a direct address where the subject looked near the lens); reenactments (AI shots: "slow motion close-up of …, single hard light, black background, film grain, 35 mm"); documents and photographs (stills with slight push-in).
-- Text: sparse cards — a name and role the first time (white on black, not a lower-third), a date, a quoted phrase from a document.
+## Structure and rhythm
 
-## Do not
+Return to the same detail when testimony changes. Let each recurrence add or contradict information; avoid repeating a shot merely to seem mysterious.
 
-- No narrator, no interviewer's questions, no "expert" talking heads.
-- No music that resolves; no drums.
-- No handheld, no vérité walking; the camera is locked and formal.
-- No reenactment that shows what cannot be known (a face, a clear act); show the object, the light, the distance.
+## Narration and sound
+
+Try a recurring musical figure that remains unresolved across competing accounts. Keep intelligibility and the speaker's unforced cadence ahead of the score.
 
 ## Type
 
-**The signature.** Plain cards on black in Baskerville — the typeface Morris argued makes a sentence believed — for names, dates and quotations; a heavy title in the same face.
+Identify document origin and reconstruction status. Give competing versions consistent visual treatment so typography does not silently certify one.
 
-**Stand-ins.** Libre Baskerville for Baskerville. Faces: Libre Baskerville 400, Libre Baskerville 700. Case: sentence. Colour #FFFFFF on #000000. Entrance: fade.
+Bundled typography presets are starting treatments. Choose a named work and a coherent project-specific title and supporting-text system. Fonts, colors, cases and roles may vary; source labels and accessibility captions remain available. Check safe areas, reading time and overlap.
 
-**Roles** (`add_text_overlay {role}` with this style in the brief):
+## Exceptions and review
 
-- **card (default)** — a fact the subject does not say, one sentence on black. Libre Baskerville · 4.6 % · center.
-- **quote** — a document's phrase, over the document. Libre Baskerville · 4 %.
-- **date** — a date on black between chapters. Libre Baskerville · 3.6 % · center.
-- **label** — the subject's name and role, the first time, small, no bar. Libre Baskerville · 3.2 % · bottom-left · shadow 4 % · hold 3.5 s.
-- **title** — the film's title. Libre Baskerville Bold · capitals · 7 %.
+Replace blanket prohibitions on questions, narration, handheld and drums with an inquiry-specific design. Stylization requires factual discipline; it does not license presenting an imagined event as observed.
 
-**Never:** lower-third, caption, callout.
+Numeric pacing and narration ranges in the catalogue are editorial starting points, not measurements of the creator's career. Explain purposeful departures in styleTreatment.exceptions. Source integrity and technical validity still apply.
 
-**Survey note.** Surveyed: Morris's essay on Baskerville and truth (the New York Times); the films' name cards are plain white serif on black. The Fog of War's title face was not documented; Baskerville is used throughout.
+## Evaluation
 
-## Harness parameters
+Cut two conflicting accounts around one recurring object in 30 seconds. The viewer should state what remains uncertain and what evidence could resolve it.
 
-asl 5–10 s · min shot 1.5 s · transitions cuts-and-black · narration none · music required, score · sync sync-first · text sparse · interviews direct-address
+**Failure mode:** A direct-to-camera interview and a brooding loop do not by themselves create an investigation.
+
+The duration above is a suggested experiment length. Plan the test within the approved production scope; it is not a new approval gate or a claim that the test has passed.
 
 ## Applying it in SlopStudio
 
-- Plan: `script` has `bite` lines only (plus `text` cards); no `narration` kind. Interview shots `sound: "sync"`; inserts `sound: "muted"` with `speed` noted in the description; chapters end on `transition: "fadeToBlack"`.
-- AI shots: `generate_ai_shots` with the reenactment prompt shape above; 4–6 s each, one object per shot, re-used at 2–3 points of the scene.
-- Music: `set_music` a minimalist loop; `balance_music` gap 8–10; `audioFadeOutS` 2 at a chapter end.
-- Verify: `check_soundtrack` expects speech in the unmuted interview shots and no narration clips; `check_cuts` on every interview in/out (never inside a word).
+Read the shared director-style playbook included by get_style. Store reference, mechanism, materialPlan, rhythm, sound, typography, exceptions and evaluation in plan.styleTreatment. Carry these choices into actual shot descriptions, durations, script offsets and audio decisions. Inspect available material before committing exact timing; identify missing coverage instead of compensating with effects. Report technical checks, picture/motion review, listening review and the observed style result separately.
+
+## Sources
+
+- [Errol Morris interview](https://www.errolmorris.com/content/interview/believer0404.html) — The Believer; hosted by Errol Morris; 2004-04. First-person interview.
+
+- [The Thin Blue Line](https://philipglass.com/compositions/thin_blue_line/) — Philip Glass; includes Morris's production account; Undated. Composer catalogue and director statement.

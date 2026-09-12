@@ -8,6 +8,8 @@ import { z } from "zod";
 import { api, type Segment, type Snapshot, assetInfo, snapshot, frameOf } from "../client";
 import { guarded, text } from "../format";
 import { styleById } from "../../src/lib/styles";
+import { sourceAudioCovers, sourceMusicFinding } from "../../src/lib/audio/source-music";
+import { planSchema } from "../../src/lib/validation/brief";
 import { checkText, typeSystemFor } from "../../src/lib/typography";
 
 export const FPS = 30;
@@ -77,10 +79,10 @@ export function pacingReport(s: Snapshot, genre?: string, styleId?: string) {
   const style = styleById(styleId);
   if (style) {
     const [lo, hi] = style.params.aslS;
-    comparison = st.aslS < lo ? `faster than ${style.name}'s norm (${lo}–${hi} s)` : st.aslS > hi ? `slower than ${style.name}'s norm (${lo}–${hi} s)` : `inside ${style.name}'s norm (${lo}–${hi} s)`;
+    comparison = st.aslS < lo ? `faster than ${style.name}'s starting range (${lo}–${hi} s)` : st.aslS > hi ? `slower than ${style.name}'s starting range (${lo}–${hi} s)` : `inside ${style.name}'s starting range (${lo}–${hi} s)`;
     const floor = style.params.minShotS;
     segs.forEach((x, i) => {
-      if (x.durationS < floor && x.durationS >= 10 * FRAME) findings.push({ severity: "warn", rule: `style: ${style.name} shot floor`, segmentId: x.id, index: i, message: `shot ${i} is ${x.durationS.toFixed(2)} s; ${style.name} does not cut under ${floor} s` });
+      if (x.durationS < floor && x.durationS >= 10 * FRAME) findings.push({ severity: "warn", rule: `style: ${style.name} shot floor`, segmentId: x.id, index: i, message: `shot ${i} is ${x.durationS.toFixed(2)} s; below the ${floor} s starting preference; review the intended effect and selected reference` });
     });
   } else if (genre) {
     const ref = GENRE_ASL[genre];
@@ -515,19 +517,39 @@ export async function soundtrackReport(projectId: string) {
   });
 
   const underBed = !!music && !music.muted && (music.volume ?? 0) > 0;
+  // Audits apply to the actual audible asset/range, including extracted dialogue
+  // on audio-only tracks. Missing/stale plans cannot certify a clean soundtrack.
+  if (underBed) {
+    const raw = await api.get<{ plan: unknown }>(`/api/projects/${projectId}/plan`).catch(() => null);
+    const parsed = planSchema.safeParse(raw?.plan);
+    const planned = parsed.success ? parsed.data.shots : [];
+    const audits = planned.flatMap(x => x.sourceAudio ? [x.sourceAudio] : []);
+    const candidates = s.segments.filter(x => !x.library && x.sourceAssetId && x.volume > 0 && (x.audioOnly || !x.muted));
+    for (const x of candidates) {
+      const range = sourceRange(x);
+      const matching = audits.filter(a => sourceAudioCovers(a, x.sourceAssetId!, range.inS, range.outS));
+      // Conflicting records must not let a clean record hide known contamination.
+      const audit = matching.find(a => a.music === "present") ?? matching.find(a => !sourceMusicFinding(a)) ?? matching[0];
+      const originalStillAudible = planned.some(p => p.source.assetId === x.sourceAssetId && p.sourceAudio?.originalMusic === "present" && p.source.section && p.source.section.startS < range.outS && p.source.section.endS > range.inS && p.sourceAudio.treatment !== "original");
+      const finding = originalStillAudible
+        ? { severity: "error" as const, message: "The original music-containing clip is still audible despite planned isolation/replacement. Mute the original and use the cleaned stem." }
+        : sourceMusicFinding(audit);
+      if (finding) findings.push({ ...finding, rule: "sound: embedded source music", segmentId: x.id, fix: "Follow get_playbook film-dialogue; record sourceAudio for the exact audible asset/range. Pending review is not a clean pass." });
+    }
+  }
   for (const x of shotAudio) {
     if (!x.hasSound) continue;
     const underNarration = narration.some((n) => overlaps(n, x)) || (vo?.ready ?? false);
     if (x.spokenWords && x.spokenWords > 0 && underNarration) {
       findings.push({ severity: "error", rule: "§7 Sound: B-roll under narration or music is muted", segmentId: x.id, index: x.index, atS: x.startS, message: `shot ${x.index} (${x.startS}–${x.endS}s) is unmuted and its source has speech (${x.spokenWords} words) under the narration — two voices / the source's narration bleeds through`, fix: "update_segments muted:true (keep sound only where the sound is the point), or move the narration off it" });
     } else if (x.spokenWords && x.spokenWords > 0 && underBed) {
-      // A sound bite: speech that IS the content, over the bed alone. Not a clash —
-      // the bed ducks under it like under narration — but it must be levelled.
-      findings.push({ severity: "info", rule: "§7 Sound: sound bite over the bed", segmentId: x.id, index: x.index, atS: x.startS, message: `shot ${x.index} (${x.startS}–${x.endS}s) is a sound bite (${x.spokenWords} words) over the music bed — the bed ducks under it; level it against the narration with the clip's volume (check_mix_levels reads bites as speech windows)`, fix: "update_segments volume:<gain> if the bite sits far from the narration level" });
+      // Speech may be intentional, but it can still carry embedded film music.
+      // The separate source-audio audit above is required before mix approval.
+      findings.push({ severity: "info", rule: "§7 Sound: sound bite over the bed", segmentId: x.id, index: x.index, atS: x.startS, message: `shot ${x.index} (${x.startS}–${x.endS}s) is a sound bite (${x.spokenWords} words) over the music bed — verify embedded music separately, then level it against the narration with the clip's volume (check_mix_levels reads bites as speech windows)`, fix: "update_segments volume:<gain> if the bite sits far from the narration level" });
     } else if (underNarration) {
       findings.push({ severity: "warn", rule: "§7 Sound: sync sound under narration", segmentId: x.id, index: x.index, atS: x.startS, message: `shot ${x.index} (${x.startS}–${x.endS}s) is unmuted with sound in its source while narration plays`, fix: "mute it, or lower it — the narration must stay intelligible (rule 20)" });
     } else if (underBed && x.spokenWords == null) {
-      findings.push({ severity: "warn", rule: "§7 Sound: unmuted shot under the music bed", segmentId: x.id, index: x.index, atS: x.startS, message: `shot ${x.index} (${x.startS}–${x.endS}s) is unmuted under the music bed and its source has sound (no transcript — could be the source's own music or narration)`, fix: "transcribe the source, or mute unless the sync sound is wanted" });
+      findings.push({ severity: "warn", rule: "§7 Sound: unmuted shot under the music bed", segmentId: x.id, index: x.index, atS: x.startS, message: `shot ${x.index} (${x.startS}–${x.endS}s) is unmuted under the music bed and its source has sound (no transcript — could be the source's own music or narration)`, fix: "audition for embedded music, select clean audio or isolate and review; a transcript alone cannot clear it" });
     }
   }
   // Narration overlaps / runs past the end.

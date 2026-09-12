@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { api } from "@/lib/api";
+import { FONTS } from "@/lib/typography/fonts";
+import { applyPreset, presetById } from "@/lib/typography/presets";
+import { roleOf } from "@/lib/typography/styleType";
 
 export interface TextOverlayView {
   id: string;
@@ -46,6 +49,7 @@ const ctl =
 
 export function TextOverlaySection({
   projectId,
+  frame,
   overlays,
   readOnly,
   onChange,
@@ -53,6 +57,7 @@ export function TextOverlaySection({
   refetch,
 }: {
   projectId: string;
+  frame: { w: number; h: number };
   overlays: TextOverlayView[];
   readOnly: boolean;
   onChange: (id: string, patch: Partial<TextOverlayView>) => void;
@@ -62,7 +67,7 @@ export function TextOverlaySection({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function add() {
+  async function add(kind: "title" | "text") {
     setError(null);
     // Persist current field edits first so the keyed remount doesn't drop them.
     if (!(await save())) return;
@@ -70,7 +75,7 @@ export function TextOverlaySection({
     try {
       await api(`/api/projects/${projectId}/text-overlays`, {
         method: "POST",
-        body: JSON.stringify({ text: "YOUR TEXT" }),
+        body: JSON.stringify(applyPreset(presetById(kind === "title" ? "title" : "lower-third")!, frame, kind === "title" ? "FILM TITLE" : "Your text", 0)),
       });
       await refetch();
     } catch (e) {
@@ -96,28 +101,27 @@ export function TextOverlaySection({
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between gap-2">
+      <div>
         <h2 className="text-xs font-semibold">Text &amp; titles</h2>
-        <button
-          type="button"
-          disabled={readOnly || busy}
-          onClick={add}
-          className="shrink-0 rounded border border-[var(--color-border)] px-1.5 py-0.5 text-[10px] text-[var(--color-muted)] hover:text-[var(--color-fg)] disabled:opacity-40"
-        >
-          {busy ? "…" : "+ Add"}
-        </button>
       </div>
       <p className="text-[10px] leading-snug text-[var(--color-muted)]">
-        Burned-in overlays — lower-thirds, callouts, disclaimers. Each shows only within its time window.
+        Give the film its own title treatment. Use supporting text for names, facts and captions.
       </p>
 
       {error ? <p className="text-[11px] text-[var(--color-danger)]">{error}</p> : null}
 
-      {overlays.length === 0 ? (
-        <p className="text-[10px] text-[var(--color-muted)]">No text overlays yet.</p>
-      ) : (
-        <div className="space-y-2">
-          {overlays.map((o) => (
+      {(["title", "text"] as const).map((kind) => (
+        <section key={kind} aria-label={kind === "title" ? "Film titles" : "Supporting text"} className="space-y-2">
+          <div className="flex items-center justify-between gap-2">
+            <h3 className="text-[11px] font-semibold">{kind === "title" ? "Film titles" : "Supporting text"}</h3>
+            <button type="button" disabled={readOnly || busy} onClick={() => add(kind)} className="rounded border border-[var(--color-border)] px-1.5 py-0.5 text-[10px] disabled:opacity-40">
+              {kind === "title" ? "+ Title" : "+ Text"}
+            </button>
+          </div>
+          <p className="text-[10px] leading-snug text-[var(--color-muted)]">
+            {kind === "title" ? "The name of the clip or film. Give it space and time to land." : "Information within the film. Keep its styling consistent and easy to read."}
+          </p>
+          {overlays.filter((o) => (roleOf(o.preset) === "title") === (kind === "title")).map((o) => (
             <TextOverlayRow
               key={o.id}
               overlay={o}
@@ -126,8 +130,8 @@ export function TextOverlaySection({
               onRemove={() => remove(o.id)}
             />
           ))}
-        </div>
-      )}
+        </section>
+      ))}
     </div>
   );
 }
@@ -156,6 +160,7 @@ function TextOverlayRow({
   onRemove: () => void;
 }) {
   const o = overlay;
+  const isTitle = roleOf(o.preset) === "title";
   return (
     <div className="space-y-1.5 rounded border border-[var(--color-border)] p-2">
       <div className="flex items-start gap-1.5">
@@ -179,6 +184,17 @@ function TextOverlayRow({
       </div>
 
       <div className="grid grid-cols-2 gap-1.5">
+        <Field label="Purpose">
+          <select aria-label="Text purpose" className={ctl} value={isTitle ? "title" : "text"} disabled={readOnly} onChange={(e) => onChange({ preset: e.target.value === "title" ? "title" : "card-editorial" })}>
+            <option value="title">Film title</option>
+            <option value="text">Supporting text</option>
+          </select>
+        </Field>
+        <Field label="Font">
+          <select aria-label="Text font" className={ctl} value={o.font} disabled={readOnly} onChange={(e) => onChange({ font: e.target.value })}>
+            {FONTS.map((f) => <option key={f.id} value={f.id}>{f.family} · {f.weight}</option>)}
+          </select>
+        </Field>
         <Field label="Position">
           <select className={ctl} value={o.position} disabled={readOnly} onChange={(e) => onChange({ position: e.target.value })}>
             {OVERLAY_POSITIONS.map((p) => (

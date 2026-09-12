@@ -1,71 +1,61 @@
-# Tony Zhou — Every Frame a Painting
+# Taylor Ramos & Tony Zhou
 
-Work: *Every Frame a Painting* (with Taylor Ramos, 2014–16): "Edgar Wright — How to Do Visual Comedy", "Akira Kurosawa — Composing Movement", "The Marvel Symphonic Universe", "Jackie Chan — How to Do Action Comedy", "The Coen Brothers — Shot | Reverse Shot".
+## Reference and mechanism
 
-## The signature
+Every Frame a Painting by Taylor Ramos and Tony Zhou; the 2017 retrospective describes a particular period.
 
-A film editor explaining one idea about film form, with the films themselves as the evidence. A calm, precise voice; a clip shown, then shown again with the point marked (a freeze, a circle, a counter, a side-by-side); a joke exactly where the point lands. Nine minutes, one thesis, every clip cited on screen. The essay is cut like the thing it explains.
+The viewer sees an argument demonstrated through the audiovisual evidence itself.
 
-## Structure — how an essay is built
+## Evidence
 
-- The thesis in the first 30 s, stated plainly, with one clip that shows it.
-- Three or four sections, each a facet of the thesis, each built as claim → clip → the clip again with the mark → the counter-example → the joke.
-- A "look at this" moment: a clip played twice, the second time with sound removed or a graphic over it.
-- The last section widens (why it matters), then a short coda: one clip, no words, the title.
+Ramos and Zhou explicitly correct the series' coauthorship and describe explaining visual ideas by showing them. Their retrospective also recognizes that their chosen format could become constraining, which argues against treating its original limits as permanent laws.
 
-## The cut
+**Basis:** Creators' craft account. The production choices below are editorial translations, not measured career-wide rules.
 
-- Average shot 3–6 s; clips run 6–15 s when the point needs the whole beat; graphics 2–4 s; nothing under 1 s (except when the essay is about fast cutting — then the cut copies the subject).
-- Straight cuts; a freeze-frame with a drawn mark (a circle, an arrow, a line) is the main device (`imageMotion` none, a `text` overlay or a card); a side-by-side comparison (V2 overlay track) for two clips.
-- The essay's own cut imitates the subject when it is about editing: rhythm, whip pans, match cuts — then returns to plain.
-- Grade: none (the clips are shown as they are, with their aspect ratio).
+## Material prerequisites
 
-## Narration — the editor
+**Production fit:** Archive-compatible. Clips that directly demonstrate a formal claim, with source identification and enough surrounding action to understand the comparison.
 
-- First person, present tense, plain, unhurried, specific: "Here's the shot. Now watch it again, and look at the door." 110–140 wpm, but with clips left to play un-narrated for 5–10 s at a time (the point must be seen).
-- A joke is a flat line delivered straight ("It's a ceiling.").
-- Voice: calm, conversational, not a presenter (`generate_narration` voice rex, "even, curious, unhurried").
+## Picture and clip selection
 
-## Sound
+Find the demonstration before polishing the narration. Choose contrasting examples that isolate the same decision: staging, framing, movement, sound or cut timing.
 
-- The clips' **own sound** is the evidence (`muted: false`, `volume` 0.8 under narration, 1 when the clip plays alone); ducked under the voice.
-- Music: light, from the films or library, only in the coda and under the sections' openings (search "light jazz piano library", "minimal guitar loop CC"); never under a clip's own music.
-- No sound effects.
+## Framing and camera
 
-## Picture — sources and text
+Preserve the original composition when the claim depends on it. Use a crop, freeze or annotation only to direct attention to the specific evidence under discussion.
 
-- Sources: the films discussed (archive, official channels, uploads; `licence` per the brief); graphics as `card` shots (a black card with the citation, 2 s) and text overlays (the mark, the counter).
-- Text: the citation for every clip (film, year, small, bottom-left, 2–3 s: lower-third); the thesis and each section title as a plain card (white on black, sans, 2–3 s); marks over freezes; the counter ("cut 14") in a corner.
+## Structure and rhythm
 
-## Do not
+Try uninterrupted example → concise explanation → replay or comparison. Give the viewer a chance to perceive the difference; avoid talking across the exact sound or action being analyzed.
 
-- No clip without its citation; no narration over the key beat of the clip; no stock footage; no music under a clip's dialogue.
-- No fast cutting for its own sake; no "content" pacing; no jokes without a point.
-- No section that does not return to the thesis.
+## Narration and sound
+
+Switch deliberately between original clip sound and explanatory voice. If the claim concerns music or effects, replay that passage without a competing bed.
 
 ## Type
 
-**The signature.** A plain humanist sans: a citation under every clip, the thesis and section titles on black, marks over freezes.
+Credit the film and relevant makers. Keep arrows, labels and split screens functional; typography should point to evidence rather than replace it.
 
-**Stand-ins.** Noto Sans for the plain sans. Faces: Noto Sans 400, Noto Sans 700. Case: sentence. Colour #FFFFFF on #000000. Entrance: fade.
+Bundled typography presets are starting treatments. Choose a named work and a coherent project-specific title and supporting-text system. Fonts, colors, cases and roles may vary; source labels and accessibility captions remain available. Check safe areas, reading time and overlap.
 
-**Roles** (`add_text_overlay {role}` with this style in the brief):
+## Exceptions and review
 
-- **citation (default)** — film · year under the clip. Noto Sans.
-- **card** — the thesis or a section title on black. Noto Sans Bold · 4.6 % · hold 3 s.
-- **label** — a mark or a counter on a freeze. Noto Sans Bold · 3 %.
+Correct the profile's visible credit to include Taylor Ramos. Keep evidence-first demonstration and source labels, while allowing new footage or other formats when the argument needs them.
 
-**Never:** caption, intertitle, quote.
+Numeric pacing and narration ranges in the catalogue are editorial starting points, not measurements of the creator's career. Explain purposeful departures in styleTreatment.exceptions. Source integrity and technical validity still apply.
 
-**Survey note.** Assumption: the essays' face was not documented; a plain sans with the citation grammar is the manner.
+## Evaluation
 
-## Harness parameters
+Make a 30-second essay on one editing choice. Afterward, viewers should locate that choice in a new clip rather than merely repeat the narrator's terminology.
 
-asl 3–6 s (clips 6–15 s) · min shot 1 s · transitions cuts (freezes, side-by-sides) · narration required, first-person editor, 110–140 wpm with gaps · music optional, light · sync sync-first (the clips) · text lower-thirds + cards · interviews none · beat-cut no
+**Failure mode:** An articulate voiceover over film clips can remain an illustrated opinion with no actual demonstration.
+
+The duration above is a suggested experiment length. Plan the test within the approved production scope; it is not a new approval gate or a claim that the test has passed.
 
 ## Applying it in SlopStudio
 
-- Plan: beats = sections; each section's shots follow claim / clip / clip-with-mark / counter / joke; clips `sound: "sync"`; every clip's description names its citation; the mark as a `text` line on the freeze.
-- Sourcing: `youtube_captions` to find the exact beat in each film before importing only that section.
-- Cut: `add_text_overlay` citations (OUTLINE, bottom-left, 2.5 s) and marks; `split_segment` for the freeze (a 1–2 s shot with `speed 0.01` or a still); overlays on track 1 for side-by-sides.
-- Music: `set_music` only for the coda, or none; `balance_music` gap 8.
+Read the shared director-style playbook included by get_style. Store reference, mechanism, materialPlan, rhythm, sound, typography, exceptions and evaluation in plan.styleTreatment. Carry these choices into actual shot descriptions, durations, script offsets and audio decisions. Inspect available material before committing exact timing; identify missing coverage instead of compensating with effects. Report technical checks, picture/motion review, listening review and the observed style result separately.
+
+## Sources
+
+- [Postmortem](https://medium.com/@tonyszhou/postmortem-1b338537fabc) — Taylor Ramos and Tony Zhou, Every Frame a Painting / Medium; 2017-12-03. Creators' retrospective.

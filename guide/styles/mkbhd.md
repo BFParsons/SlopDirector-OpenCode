@@ -1,68 +1,61 @@
-# MKBHD — the clean review
+# MKBHD
 
-Work: Marques Brownlee's channel: phone, camera and car reviews; "Smartphone Awards"; *Waveform*; the red-and-black studio.
+## Reference and mechanism
 
-## The signature
+Scripted technology explanation and review; Brownlee's own course is the principal craft reference.
 
-A dark studio with one red accent; the product on a matte surface, lit like jewellery; macro b-roll that glides (a slider, a probe lens) while a calm voice says exactly what it thinks. Sections announced by a clean title; a spec on screen exactly when it is said; no hype, no filler, no "guys". It looks expensive because everything unnecessary was removed.
+A clear judgment is supported by an immediately relevant demonstration.
 
-## Structure — how a video is built
+## Evidence
 
-- Cold open (0–15 s): the thesis about the product in two sentences, over the hero b-roll; the title card.
-- Sections (each 1–3 min): design, screen, performance, camera, battery, price — each opens with a section title, makes one claim, shows the evidence (a demo, a comparison, a graph), and ends with a verdict sentence.
-- The conclusion: who it is for, in three sentences, over the product turning on the table; the sign-off card.
+Brownlee describes extensive scripting, deciding A-roll and B-roll during writing, and putting numbers in comparative context. He explicitly says sophisticated camera equipment is not necessary. This makes explanatory shot design more fundamental than a red accent or robotic move.
 
-## The cut
+**Basis:** Creator's detailed teaching account. The production choices below are editorial translations, not measured career-wide rules.
 
-- Average shot 3–6 s; b-roll glides 4–8 s; the host to camera 5–15 s (few jump cuts); demos as long as they need; nothing under 1 s.
-- Straight cuts; a clean slide or a quick fade to the section title; no whips, no snap zooms, no dissolves between b-roll.
-- Camera: the host at a desk, medium, shallow depth, the red accent behind; b-roll on a slider, macro, slow; the product from three angles per section; screen recordings full-frame.
-- Grade: cool neutral, deep blacks, controlled highlights (`contrast` 1.1, `saturation` 0.95, no vignette); the red is the only saturated colour.
+## Material prerequisites
 
-## Narration — the reviewer
+**Production fit:** Requires planned production. Hands-on observations, reproducible demonstrations, useful comparisons and clean product coverage.
 
-- First person, present tense, measured, specific, opinionated without heat: "This is the best screen on any phone. It's also the reason the battery is what it is." 130–150 wpm; every claim followed by its evidence; no adjectives without a number.
-- Voice: calm, warm, unhurried (`generate_narration` voice rex, "measured, clear, quietly confident").
+## Picture and clip selection
 
-## Sound
+Pair every major judgment with a demonstration or clearly identified observation. Separate attractive product images from shots that actually support a claim.
 
-- Music is a **low-key bed**: lo-fi, minimal electronic, no vocals, no drums that pull attention (search "lofi minimal background library", "ambient electronic bed CC"); ducked 10 LU under the voice; changes per section.
-- Sync: the host's voice (`muted: false`), the product's sounds in demos (a click, a shutter, a speaker test at full level for 3–5 s).
-- No sound effects beyond the product's own.
+## Framing and camera
 
-## Picture — sources and text
+Control reflections, background separation and focus so the relevant feature is visible. Choose a static view when it makes a comparison easier than a moving beauty shot.
 
-- Sources: the project's own product footage; generated b-roll ("macro slider shot of a matte black phone on a dark table, a single red light accent, shallow depth of field, 4K, studio"); screen recordings; comparison tables as cards.
-- Text: section titles (clean geometric sans, white, lower-left, 2–3 s); specs and numbers as small callouts exactly when spoken (2–3 s); a comparison table as a card (5–8 s); no captions.
+## Structure and rhythm
 
-## Do not
+Move from judgment to evidence with minimal friction. Group related features into a coherent argument; avoid repeating specifications that do not change the viewer's understanding.
 
-- No hype words, no "guys", no jokes at the product's expense, no fast cuts, no snap zooms, no bright colour except the red.
-- No spec on screen that is not spoken; no claim without a demo.
-- No music with vocals; no sound effects.
+## Narration and sound
+
+Prioritize an even, intelligible voice. Keep music subordinate during measurements and comparisons; use product sound where it demonstrates something relevant.
 
 ## Type
 
-**The signature.** A clean neo-grotesque (the Helvetica / SF look), white, small, lower-left section titles, specs as callouts; the only colour is the red accent.
+Show units, comparison conditions and a meaningful baseline. Use restrained hierarchy and adequate size; red, one typeface and a fixed animation style are optional design choices.
 
-**Stand-ins.** Liberation Sans for Helvetica / SF Pro (Roboto appears in some graphics). Faces: Liberation Sans 700, Liberation Sans 400. Case: sentence. Colour #FFFFFF on #0A0A0A. Entrance: fade.
+Bundled typography presets are starting treatments. Choose a named work and a coherent project-specific title and supporting-text system. Fonts, colors, cases and roles may vary; source labels and accessibility captions remain available. Check safe areas, reading time and overlap.
 
-**Roles** (`add_text_overlay {role}` with this style in the brief):
+## Exceptions and review
 
-- **lower-third (default)** — a section title, lower-left. Liberation Sans Bold · 3.6 % · no box · fade · hold 2.5 s.
-- **callout** — a spec when it is spoken. Liberation Sans · 3 %.
-- **card** — a comparison table. Liberation Sans · 3.4 %.
+Remove aesthetic bans on non-red colors, effects, jokes and rapid cuts. Require contextualized evidence and a purpose for the product shot.
 
-**Never:** caption, intertitle, quote, citation.
+Numeric pacing and narration ranges in the catalogue are editorial starting points, not measurements of the creator's career. Explain purposeful departures in styleTreatment.exceptions. Source integrity and technical validity still apply.
 
-**Survey note.** Surveyed: a clean neo-grotesque in white; Roboto named for some of the tutorials.
+## Evaluation
 
-## Harness parameters
+Create a 25-second feature assessment with one comparison. Viewers should recall the practical conclusion and what evidence supports it, not only the specification.
 
-asl 3–6 s · min shot 1 s · transitions cuts (clean title slides) · narration required, first-person reviewer, 130–150 wpm · music required, low-key bed · sync sync-first · text lower-thirds (titles + callouts) · interviews direct-address (host at desk) · beat-cut no
+**Failure mode:** Beautiful product footage can make an unsupported opinion look more rigorous than it is.
+
+The duration above is a suggested experiment length. Plan the test within the approved production scope; it is not a new approval gate or a claim that the test has passed.
 
 ## Applying it in SlopStudio
 
-- Plan: beats = sections with a claim / evidence / verdict each; b-roll shots 4–8 s `sound: "vo"`; demo shots `sound: "sync"`; section titles and callouts as `text` lines.
-- Cut: `add_text_overlay` titles (OUTLINE or BOX, lower-left) and callouts; `update_project contrast 1.1 saturation 0.95`.
-- Music: `set_music` the bed; `balance_music` gap 10; `check_mix_levels` speech −16 LUFS short-term.
+Read the shared director-style playbook included by get_style. Store reference, mechanism, materialPlan, rhythm, sound, typography, exceptions and evaluation in plan.styleTreatment. Carry these choices into actual shot descriptions, durations, script offsets and audio decisions. Inspect available material before committing exact timing; identify missing coverage instead of compensating with effects. Report technical checks, picture/motion review, listening review and the observed style result separately.
+
+## Sources
+
+- [YouTube Success: Script, Shoot & Edit with MKBHD](https://www.skillshare.com/en/classes/youtube-success-script-shoot-and-edit-with-mkbhd/731552530) — Marques Brownlee, Skillshare; Undated course transcript. Creator's teaching transcript.

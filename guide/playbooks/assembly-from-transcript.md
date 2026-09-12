@@ -8,3 +8,6 @@
 4. Ethics gate (rule 4): any range that joins two answers or drops a qualifier is listed separately for approval.
 5. Only after the radio cut is approved: cover with B-roll on overlay track 1 (`add_segment` track 1, `offsetS`, `pip` null for full-frame, muted) at the points where the face is not adding; cut back to the speaker for the line that matters. `check_soundtrack`: the interview audio must be the only voice. Music, if any, only after the structure is approved: `set_music`, `balance_music` (gapLu 8: documentary), `check_mix_levels` on the draft.
 6. `check_cuts` (no mid-word cuts), `pacing_report` (documentary norm), `compare_versions` against the checkpoint. Report the structure, runtime and open questions.
+
+
+For dialogue extracted from scored footage, follow [Clean dialogue from film clips](film-dialogue.md). Audit embedded source music before arranging the new score; separation requires listening review.

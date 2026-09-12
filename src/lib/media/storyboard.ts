@@ -7,21 +7,20 @@ import { spawn } from "node:child_process";
 import { writeFile, rename } from "node:fs/promises";
 import path from "node:path";
 import { ffmpegPath } from "@/lib/ffmpeg/binary";
+import { ffQuote, FONT_BOLD } from "@/lib/ffmpeg/args";
 import { cacheDir, frameAt } from "@/lib/media/inspect";
 
 export type StoryboardCell = { abs: string; assetId: string; t: number; caption: string };
 
 function run(args: string[]): Promise<{ code: number; stderr: string }> {
   return new Promise((resolve) => {
-    const p = spawn(ffmpegPath(), ["-hide_banner", "-nostdin", "-loglevel", "error", ...args]);
+    const p = spawn(ffmpegPath(), ["-hide_banner", "-nostdin", "-loglevel", "error", ...args], { windowsHide: true });
     let stderr = "";
     p.stderr.on("data", (d) => (stderr += d.toString()));
     p.on("error", (e) => resolve({ code: -1, stderr: String(e) }));
     p.on("close", (code) => resolve({ code: code ?? -1, stderr }));
   });
 }
-
-const ffEscape = (s: string) => s.replace(/\\/g, "\\\\").replace(/:/g, "\\:").replace(/'/g, "\\'");
 
 export async function storyboardSheet(projectId: string, cells: StoryboardCell[], cols = 4, cellW = 400): Promise<string> {
   if (!cells.length) throw new Error("no shots on the main sequence");
@@ -52,7 +51,7 @@ export async function storyboardSheet(projectId: string, cells: StoryboardCell[]
     chains.push(
       // one size, square pixels (archival sources carry odd SARs) and one pixel format per cell: concat wants uniform inputs, mjpeg wants yuvj
       `[${i}:v]scale=${W}:${H}:force_original_aspect_ratio=decrease,setsar=1,format=yuvj420p,pad=${W}:${H + CAP}:(ow-iw)/2:0:color=0x141414,` +
-        `drawtext=textfile='${ffEscape(cap)}':fontsize=${fs}:fontcolor=white:x=8:y=${H + Math.round((CAP - fs) / 2)}[c${i}]`,
+        `drawtext=fontfile=${ffQuote(FONT_BOLD)}:textfile=${ffQuote(cap)}:expansion=none:fontsize=${fs}:fontcolor=white:x=8:y=${H + Math.round((CAP - fs) / 2)}[c${i}]`,
     );
   }
   // Pad the last row with black cells so tile gets a full grid.

@@ -1,74 +1,61 @@
-# Werner Herzog — the ecstatic truth
+# Werner Herzog
 
-Films: *Grizzly Man*, *Encounters at the End of the World*, *Cave of Forgotten Dreams*, *Lessons of Darkness*, *Into the Abyss*.
+## Reference and mechanism
 
-## The signature
+Essayistic nonfiction and subjective encounter; distinguish poetic narration from factual claims.
 
-The director narrates in his own voice, slowly, in accented English, and says what he thinks. Landscapes are held until they become strange. People are asked one question too many and the camera stays on them after they have finished answering. Choral and sacred music turns a burning oil field or a penguin into a vision. The film is not afraid to be wrong, or ridiculous, in pursuit of a truth that facts cannot reach.
+A concrete observation opens a larger, unsettling question.
 
-## Structure — how a scene is built
+## Evidence
 
-- The scene is a meditation on one image or one person. It opens on the image, silent or with music, for 15–30 s before a word is spoken.
-- Narration arrives as a thought, not an explanation: an observation, a doubt, a question with no answer ("What are the penguins' dreams?"). Then silence again.
-- A person speaks, at length, and the shot holds 3–5 s after they stop — the discomfort is the content.
-- The scene ends on the landscape, wide, with the music, and a last sentence that opens rather than closes.
+Herzog's essays argue for a form of cinematic truth beyond literal description. They support a subjective artistic position, not a reliable recipe of slow shots, accent imitation or unrestricted factual invention.
 
-## The cut
+**Basis:** Director's theoretical account. The production choices below are editorial translations, not measured career-wide rules.
 
-- Average shot 8–20 s; landscapes 15–40 s; interviews 20–60 s. Nothing under 4 s.
-- Straight cuts; a slow dissolve (2–3 s) only between two landscapes as time passes. No cuts to black inside a scene.
-- Slow motion (`speed` 0.4–0.6) on one shot per scene, with the music: a wave, a flame, an animal, a face.
-- Aerials and wides are long and continuous; a helicopter shot is not cut into pieces.
-- Grade: natural, slightly cool or slightly warm, never stylised; grain welcome.
+## Material prerequisites
 
-## Narration — the director
+**Production fit:** Needs specific source footage. An unusual real encounter, behavior or environment with enough duration to observe it.
 
-- First person, present tense where possible ("I look at this and…"); the narrator is a person with opinions, awe and a dark sense of humour.
-- Sentences are simple and declarative, then one long one that wanders. Words like "abyss", "ecstasy", "the indifference of nature", "a fever dream" are allowed, once.
-- 30–60 words a minute over the whole scene; long silences (10–30 s) between thoughts. Never over a person's speech.
-- Voice: slow, low, deliberate, deadpan, an accent is fine (`generate_narration` voice leo or sal; instruct "slow, flat, a slight German cadence, no drama in the delivery").
+## Picture and clip selection
 
-## Sound
+Seek behavior that resists an immediate explanation: a repeated task, an obsession, an indifferent landscape or an unexpected gesture. Avoid stock imagery chosen only because it looks bleak.
 
-- Music is **choral** or sacred or drone: choirs, Wagner-scale strings, cello drones, Sardinian or Georgian polyphony, sustained organ (search "choral drone public domain", "sacred choir a cappella CC", "Requiem strings library"). It comes in on the landscape and swells where the picture is most indifferent.
-- The bed ducks under the narration but stays audible; it goes out entirely under the interviews (a person is heard in a silent room).
-- Sync sound: wind, engines, ice, birds, the room — the shots keep their ambience (`muted: false`, `volume` 0.5–0.8) under narration and are fully open in the holds.
+## Framing and camera
 
-## Picture — sources and text
+Keep the relationship between person and environment visible. Hold long enough for something specific to happen or for the viewer to revise an initial interpretation.
 
-- Sources: landscapes and wildlife (archive, official channels, generated shots: "wide static shot of …, natural light, long lens, no people, 35 mm film grain"), long interviews (produced, the subject looking slightly off lens, a plain background, natural light), found footage with its owner's voice (home video, expedition footage).
-- Text: none inside a scene. A title only for a standalone piece.
+## Structure and rhythm
 
-## Do not
+Try observation → restrained question → return to observation. End before the narration exhausts the image's possibilities; use duration as inquiry rather than as a fixed minimum.
 
-- No lower-thirds, no maps, no graphics, no montage of quick shots.
-- No music with a beat; no sting, no swell at "the sad part".
-- No narration that explains what is in the shot; it says what is not.
-- No cutting away from a person because the silence is awkward.
+## Narration and sound
+
+Collect the environment as a distinct dramatic presence. Test a musical passage only where it changes the scale of the thought; preserve a contrasting stretch of unscored sound.
 
 ## Type
 
-**The signature.** A plain serif title on black and nothing else on the frame; the voice does what a caption would.
+Supply essential factual context plainly. Maps and labels are permitted when needed; the image's ambiguity should not depend on withholding basic facts.
 
-**Stand-ins.** Liberation Serif for the plain serif of the titles. Faces: Liberation Serif 400. Case: sentence. Colour #FFFFFF on #000000. Entrance: fade.
+Bundled typography presets are starting treatments. Choose a named work and a coherent project-specific title and supporting-text system. Fonts, colors, cases and roles may vary; source labels and accessibility captions remain available. Check safe areas, reading time and overlap.
 
-**Roles** (`add_text_overlay {role}` with this style in the brief):
+## Exceptions and review
 
-- **title (default)** — the title of a standalone film, on black. Liberation Serif · 6 %.
+Replace bans on maps, interviews, lower thirds and quick sequences with a preference for experiential evidence. Mark imagined language as interpretation and preserve documentary provenance.
 
-**No text.** Beyond a title, this style puts nothing on the frame; `check_text` warns on any overlay.
+Numeric pacing and narration ranges in the catalogue are editorial starting points, not measurements of the creator's career. Explain purposeful departures in styleTreatment.exceptions. Source integrity and technical validity still apply.
 
-**Never:** lower-third, caption, callout, citation, label, card, intertitle, quote, date.
+## Evaluation
 
-**Survey note.** Surveyed loosely: Grizzly Man and Encounters at the End of the World open on plain titles; nothing is superimposed inside the films.
+Build a 25-second encounter with one observational sentence and one open question. Viewers should describe the actual behavior before discussing the larger theme.
 
-## Harness parameters
+**Failure mode:** Grandiose narration over interchangeable landscapes substitutes a persona for discovery.
 
-asl 8–20 s · min shot 4 s · transitions cuts · narration required, the director's voice, 30–60 wpm · music required, choral · sync mixed · text none · interviews produced
+The duration above is a suggested experiment length. Plan the test within the approved production scope; it is not a new approval gate or a claim that the test has passed.
 
 ## Applying it in SlopStudio
 
-- Plan: few shots (a 2-minute scene has 6–10); the first and last are `sound: "sync"` holds with no narration; narration lines carry `note: "slow; 20 s silence before"`; one shot's description names the slow motion.
-- Cut: `update_segments speed 0.5` on the chosen shot; `muted: false` with `volume 0.6` on ambience shots.
-- Music: `set_music` the choral track; `balance_music` gap 6; `audioFadeOutS` 4–6 at a chapter end, 0 at a scene hand-off.
-- Verify: `pacing_report` with the style (8–20 s is the norm, not a fault); `check_mix_levels` will flag narration density as low — that is correct here.
+Read the shared director-style playbook included by get_style. Store reference, mechanism, materialPlan, rhythm, sound, typography, exceptions and evaluation in plan.styleTreatment. Carry these choices into actual shot descriptions, durations, script offsets and audio decisions. Inspect available material before committing exact timing; identify missing coverage instead of compensating with effects. Report technical checks, picture/motion review, listening review and the observed style result separately.
+
+## Sources
+
+- [Texts by Werner Herzog: On the Absolute, the Sublime, and Ecstatic Truth](https://www.wernerherzog.com/text-by-werner-herzog.html) — Werner Herzog; Undated collection. Director's essays.

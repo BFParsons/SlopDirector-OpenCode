@@ -1,69 +1,63 @@
-# Terrence Malick — the whisper
+# Terrence Malick
 
-Films: *Days of Heaven*, *The Thin Red Line*, *The Tree of Life*, *To the Wonder*, *A Hidden Life*.
+## Reference and mechanism
 
-## The signature
+Associative memory and embodied perception; The Tree of Life and Mark Yoshikawa's editing account.
 
-Magic hour. A camera that drifts through wheat, water, a kitchen, as if it were a person walking behind the people. Nobody finishes a sentence on screen; instead a whispered voice asks the sky a question. Shots begin and end in the middle of things. Classical music and choirs. The cut follows feeling, not action; a scene is a handful of moments from a day, not the day.
+Image, gesture and voice suggest an experience larger than any literal illustration.
 
-## Structure — how a scene is built
+## Evidence
 
-- Fragments: 8–15 short pieces of the same afternoon, out of order, each a gesture (a hand in the grass, a child running, a door, a look), stitched by the whisper and the music.
-- The whisper is a prayer or a question addressed to someone absent ("Where were you?", "Brother."); it never explains the picture.
-- Dialogue is caught, not staged: half a line, off-mic, overlapped by the music.
-- The scene ends on nature (light on water, a tree, a window) and the whisper's last, unanswered line.
+Lubezki describes responsive available-light work with practical exceptions. Yoshikawa explains a deliberately shaped associative edit and warns against voiceover becoming too literally illustrated by the picture.
 
-## The cut
+**Basis:** Cinematographer and editor craft accounts. The production choices below are editorial translations, not measured career-wide rules.
 
-- Average shot 2–5 s; a few holds of 8–12 s on light; nothing under 1 s. Cuts come early — before the gesture completes — and late — after the frame has emptied.
-- Straight cuts; a dissolve (1.5–2 s) between two natural images allowed twice per scene; a fade to white or black at a chapter's end.
-- Camera: wide lens, close, low, drifting (Steadicam / handheld at walking pace), always moving, into the sun, lens flare accepted; natural light only, golden hour and blue hour.
-- Grade: warm, low contrast, lifted blacks, natural saturation; no vignette; `grain` light; slow motion (`speed` 0.6–0.8) on one gesture.
+## Material prerequisites
 
-## Narration — the whisper
+**Production fit:** Needs specific source footage. Intimate gestures, environmental interaction and sustained observational coverage with a consistent sensory world.
 
-- First person, whispered, present tense, fragments and questions: "How did I lose you?", "Light. Everywhere." 20–50 wpm, with 5–15 s silences; two voices may alternate (a mother, a son) — each a different `generate_narration` voice, instructed "whispered, intimate, close to the mic, slow, unfinished sentences".
-- Never a fact, a date or a name.
+## Picture and clip selection
 
-## Sound
+Collect physical experiences tied to a subject: touch, balance, breath, movement through a room or landscape. Avoid stock hands-and-sunlight imagery disconnected from a person or memory.
 
-- Music is **choral** and classical: Bach, Górecki-like strings, a boys' choir, a solo cello, sacred works (search "choral sacred a cappella public domain", "string adagio public domain recording", "Bach organ CC"). It runs long, under everything, and swells on the nature holds.
-- Sync sound is ambience — wind in grass, water, birds, a screen door — at 0.5–0.7 under the music; caught dialogue at −10 dB, half heard.
-- No sound effect is ever emphasised.
+## Framing and camera
 
-## Picture — sources and text
+Stay responsive to an action's changing direction and available light. Preserve proximity and environmental relation; a floating camera should follow perception rather than wander without purpose.
 
-- Sources: generated shots ("golden hour, handheld drifting through tall grass toward a woman turning, wide lens, lens flare, 35 mm, warm low contrast"), archive of landscapes at magic hour, family-film textures.
-- Text: none.
+## Structure and rhythm
 
-## Do not
+Try an image sequence first, then add a short reflective voice passage whose meaning extends it. Remove overly literal matches and compare complete gestures with selected fragments.
 
-- No locked-off tripod, no artificial light, no night interiors, no explanation, no plot in the whisper.
-- No cut on action; no reaction shot; no music with a beat; no sound effect hit.
-- No shot that completes its own gesture.
+## Narration and sound
+
+Let voice, environment and music carry different aspects of the memory. Leave an unscored passage or a breath of room sound where it makes the experience more concrete.
 
 ## Type
 
-**The signature.** A small, delicate serif title on black, spaced; nothing else, ever.
+Use minimal orientation outside the associative passage. A date or place can locate a memory without interpreting its emotional meaning.
 
-**Stand-ins.** Cormorant Garamond for the delicate serif. Faces: Cormorant Garamond 400. Case: spaced capitals. Colour #F5F0E6 on #000000. Entrance: fade.
+Bundled typography presets are starting treatments. Choose a named work and a coherent project-specific title and supporting-text system. Fonts, colors, cases and roles may vary; source labels and accessibility captions remain available. Check safe areas, reading time and overlap.
 
-**Roles** (`add_text_overlay {role}` with this style in the brief):
+## Exceptions and review
 
-- **title (default)** — the title, small spaced capitals on black. Cormorant Garamond · spaced capitals · 4.6 % · hold 5 s.
+Replace absolute bans on tripod, artificial light, night interiors and completed actions with preferences tied to the selected film. Preserve intentionality beneath apparent spontaneity.
 
-**No text.** Beyond a title, this style puts nothing on the frame; `check_text` warns on any overlay.
+Numeric pacing and narration ranges in the catalogue are editorial starting points, not measurements of the creator's career. Explain purposeful departures in styleTreatment.exceptions. Source integrity and technical validity still apply.
 
-**Never:** lower-third, caption, callout, citation, label, card, intertitle, quote, date.
+## Evaluation
 
-**Survey note.** Assumption: The Tree of Life's title face was not documented; the manner (small, delicate, on black, alone) is.
+Make a 25-second memory passage. The voice should add a thought the images cannot state alone, while the images contribute something absent from the words.
 
-## Harness parameters
+**Failure mode:** Backlit fragments plus philosophical narration can feel arbitrary when they lack a specific remembered experience.
 
-asl 2–5 s (holds 8–12 s) · min shot 1 s · transitions cuts (rare dissolves) · narration required, whispered first person, 20–50 wpm · music required, choral / classical · sync mixed · text none · interviews none · beat-cut no
+The duration above is a suggested experiment length. Plan the test within the approved production scope; it is not a new approval gate or a claim that the test has passed.
 
 ## Applying it in SlopStudio
 
-- Plan: one beat = one afternoon; 10–15 shots with gestures in the description; the whisper lines placed with 5–15 s gaps (`check_plan` density will read low — correct); two voices if the brief allows.
-- Cut: `update_segments speed 0.7` on one gesture; `muted:false volume 0.6` on ambience shots; `update_project transition DISSOLVE transitionMs 1800` for the two nature dissolves (or per-shot `transition` in the plan).
-- Music: `set_music` the choral work; `balance_music` gap 5; `audioFadeOutS` 5 at a chapter end.
+Read the shared director-style playbook included by get_style. Store reference, mechanism, materialPlan, rhythm, sound, typography, exceptions and evaluation in plan.styleTreatment. Carry these choices into actual shot descriptions, durations, script offsets and audio decisions. Inspect available material before committing exact timing; identify missing coverage instead of compensating with effects. Report technical checks, picture/motion review, listening review and the observed style result separately.
+
+## Sources
+
+- [Emmanuel Lubezki AMC ASC: The Tree of Life](https://britishcinematographer.co.uk/emmanuel-lubezki-amc-asc-the-tree-of-life/) — British Cinematographer; Undated archive article. Cinematographer interview.
+
+- [Mark Yoshikawa Talks of Editing Terrence Malick, Christopher Guest, and the New Reminiscence](https://cinemontage.org/mark-yoshikawa-talks-of-editing-terrence-malick-christopher-guest-and-the-new-reminiscence/) — CineMontage; 2021. Editor interview.

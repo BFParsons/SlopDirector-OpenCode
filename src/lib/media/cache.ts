@@ -61,7 +61,7 @@ export async function mediaCachePath(file: string, name: string): Promise<string
 }
 
 /** JSON result cache: `key` names the analysis + its parameters (no asset id needed). */
-export async function cachedJson<T>(key: string, file: string, compute: () => Promise<T>): Promise<T> {
+export async function cachedJson<T>(key: string, file: string, compute: () => Promise<T>, accept: (value: T) => boolean = () => true): Promise<T> {
   let f: string;
   try {
     f = await mediaCachePath(file, `${key}.json`);
@@ -70,12 +70,14 @@ export async function cachedJson<T>(key: string, file: string, compute: () => Pr
   }
   if (existsSync(f)) {
     try {
-      return JSON.parse(await readFile(f, "utf8")) as T;
+      const cached = JSON.parse(await readFile(f, "utf8")) as T;
+      if (accept(cached)) return cached;
     } catch {
       /* recompute */
     }
   }
   const value = await compute();
+  if (!accept(value)) return value;
   try {
     const tmp = `${f}.${process.pid}.tmp`;
     await writeFile(tmp, JSON.stringify(value));

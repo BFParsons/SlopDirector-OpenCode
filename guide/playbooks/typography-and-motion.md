@@ -11,12 +11,57 @@ outside title-safe, 1:1 → square) and the title-safe / action-safe rectangles.
 television delivery `update_project {safeArea: "broadcast"}` first. The Live
 monitor's ▢ button draws the rectangles.
 
-## 2. Pick the vocabulary once
+## 2. Design the film title separately from supporting text
 
-One family, two weights at most, one entrance animation for the piece. If the brief
-names a directing style, `list_typography` says which preset it reaches for
-(`stylePreset`); the style file's *Picture — sources and text* section says the rest
-(case, colour, where, how long).
+A title identifies the clip or film. Supporting text communicates within it.
+Decide which job the words do before choosing their appearance. A large accusation,
+chapter heading, quotation or closing CTA is still supporting text, not the film's
+name. The project's library name is metadata; it does not automatically appear on screen.
+
+| | Film title (`title`) | Supporting text (other roles) |
+|---|---|---|
+| Purpose | Establish the film's identity; one memorable display treatment | Explain names, places, claims, chapters and sources |
+| Scale | Start around 8–12% landscape frame height, 6–8% portrait; adjust to the words and safe area | Usually 3–5%; statement cards 4–6%; deliberately emphatic captions may be larger |
+| Composition | One or two intentional lines, generous empty space, a clear focal point; centre or compose around the subject | A consistent anchor and readable measure; avoid covering the subject |
+| Typeface | One display face selected for this film; may differ from captions | One supporting family, usually no more than two weights; a planned serif for quotes is allowed |
+| Palette | A chosen title color and background, with at most one meaningful accent | A neutral readable color plus a consistent accent for emphasis |
+| Timing | A dedicated reveal and readable hold, usually 3–5 seconds; can follow the opening hook or land at the end | Follow the information or spoken phrase; hold for reading time |
+| Motion | One intentional entrance/exit tied to the cut or score; stillness is a valid treatment | A repeatable, restrained entrance vocabulary |
+
+These are starting points, not a requirement to enlarge every quiet filmmaker's
+title. Prominence also comes from isolation, contrast, timing and negative space.
+An understated title alone on black can dominate more effectively than a giant
+caption over a busy image. Preserve explicit quiet title designs in the style
+profiles. Break long titles into deliberate lines before reducing their size.
+Subtitle/tagline text should be visibly subordinate (roughly 35–50% of the title
+size when readable), separated spatially and checked for overlap. Keep other
+callouts off the title's reveal; do not obscure necessary accessibility captions.
+
+For example, a historical attack ad could use a large cream serif film title on
+charcoal, with white condensed captions and red accusations within the film.
+`HIS FAILURE` remains a caption; `VOTE HIS ALLIES OUT` remains a closing card.
+They do not become film titles just because they are bold or occupy the whole frame.
+
+The director style guides both treatments without forcing them to be identical.
+`list_typography` returns `hierarchy`, `styleType.roles.title` (including a fallback
+when needed) and the supporting roles. Explicit font/color/size overrides win.
+A custom title font is allowed; supporting text retains its own consistency rules.
+The checker still tests titles for safe areas, reading time and overlaps.
+
+During planning, propose the exact title, its timing, font, case, size, colors,
+background and reveal separately from supporting typography. Put these in the
+plan's `notes` and the corresponding timed script/shot entries. A standalone piece
+may omit a title if that serves the brief; state the choice. A scene within a longer
+film inherits the parent's identity and gets no new film-title sequence unless
+requested. Do this after the quick interview, without extra per-answer processing.
+
+In the editor, **Film titles** and **Supporting text** have separate add buttons.
+Both retain editable font, color, size, placement and timing. The **Purpose** menu
+reclassifies existing text while preserving its appearance; it does not silently
+restyle a reviewed overlay. New manual items use generic presets; the harness uses
+the brief's style via `role`. Existing untagged text stays in Supporting text until
+classified explicitly. A title over a solid field needs that background shot too;
+the title role itself does not insert footage or reserve timeline duration.
 
 ## 3. Place text through the style's roles
 
@@ -27,8 +72,9 @@ citation, date, quote, label, credit) with what each is for. `add_text_overlay
 {projectId, role, text, startS}` fills everything from it — a Curtis card is white
 Helvetica (Liberation Sans) in sentence case on black, cut in; a Nolan card is spaced
 Montserrat capitals; a MrBeast caption is Anton with a black outline popping on the
-word. The roles the style never uses, and the no-text styles (Herzog, Wiseman,
-Jennings, Malick, Cunningham), are departures to name in notes.
+word. The roles the style never uses are departures to name in notes. The no-text
+styles (Herzog, Wiseman, Jennings, Malick, Cunningham) still allow a film title and
+any credits explicitly defined by their profile; supporting overlays are departures.
 
 ## 3b. Or with the generic presets
 

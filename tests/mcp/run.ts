@@ -16,8 +16,8 @@ type Content = { type: string; text?: string; data?: string; mimeType?: string }
 async function main() {
   await mkdir(TMP, { recursive: true });
   const transport = new StdioClientTransport({
-    command: path.resolve("node_modules/.bin/tsx"),
-    args: [path.resolve("mcp/server.ts")],
+    command: process.execPath,
+    args: [path.resolve("mcp/run.cjs")],
     env: { ...process.env as Record<string, string>, SLOPSTUDIO_URL: process.env.SLOPSTUDIO_URL ?? process.env.BASE_URL ?? "http://127.0.0.1:38473" },
     stderr: "pipe",
   });
@@ -133,10 +133,14 @@ async function main() {
     const { mediaCachePath } = await import("../../src/lib/media/cache");
     const info = await call<{ path: string; projectId: string }>("probe_asset", { assetId: a2.json.id });
     const fakeA2 = await mediaCachePath(info.json.path, "transcript-base.json");
-    rmSync(fakeA2, { force: true });
+    // check_cuts now reuses any cached model, so this synthetic fixture must
+    // start without transcripts for every supported model.
+    for (const model of ["base", "small", "medium", "tiny", "large-v3"]) {
+      rmSync(await mediaCachePath(info.json.path, `transcript-${model}.json`), { force: true });
+    }
     fakes.push(fakeA2);
     const cuts0 = await call<{ cuts: number[]; findings: { rule: string }[]; untranscribedSources: string[] }>("check_cuts", { projectId: p2.json.id });
-    check("check_cuts: 3 cut times, no transcript → hint, no false errors", cuts0.json.cuts.length === 3 && cuts0.json.untranscribedSources.length === 1 && !cuts0.json.findings.some((f) => /mid-word|inside the word/.test(f.rule)));
+    check("check_cuts: 3 cut times, no transcript → hint, no false errors", cuts0.json.cuts.length === 3 && cuts0.json.untranscribedSources.length === 1 && !cuts0.json.findings.some((f) => /mid-word|inside the word/.test(f.rule)), JSON.stringify(cuts0.json));
     // a fake transcript in the server's cache puts a word across the 3.0 s cut → check_cuts must catch it
     writeFileSync(fakeA2, JSON.stringify({ language: "en", text: "hello world", segments: [{ startS: 2.5, endS: 3.6, text: "hello world", words: [{ startS: 2.5, endS: 2.8, text: "hello" }, { startS: 2.85, endS: 3.4, text: "world" }] }], words: [{ startS: 2.5, endS: 2.8, text: "hello" }, { startS: 2.85, endS: 3.4, text: "world" }], srt: null, vtt: null }));
     const cuts1 = await call<{ findings: { rule: string; message: string; index?: number }[] }>("check_cuts", { projectId: p2.json.id });
@@ -260,7 +264,7 @@ async function main() {
       const p4 = await call<{ id: string }>("create_project", { title: "mcp-test style-vs-plan" });
       await call("set_brief", { projectId: p4.json.id, brief: { ...brief, production: { ...brief.production, style: { id: "frederick-wiseman" } } } });
       const styled = await call<{ check: { pass: boolean; findings: { severity: string; rule: string; message: string }[] } }>("set_plan", { projectId: p4.json.id, plan });
-      check("check_plan holds a narrated plan to Wiseman's no-narrator rule", !styled.json.check.pass && styled.json.check.findings.some((f) => f.severity === "error" && /Wiseman/.test(f.rule) && /no narrator/.test(f.message)), styled.json.check.findings.filter((f) => /style/.test(f.rule)).map((f) => f.message.slice(0, 60)).join(" | "));
+      check("check_plan asks for review of narration under the Wiseman reference without blocking it", styled.json.check.pass && styled.json.check.findings.some((f) => f.severity === "warn" && /Wiseman/.test(f.rule) && /no narrator/.test(f.message)), styled.json.check.findings.filter((f) => /style/.test(f.rule)).map((f) => f.message.slice(0, 60)).join(" | "));
       const doc4 = await call<unknown>("plan_document", { projectId: p4.json.id, format: "list" });
       check("plan_document shows the style in its header", /Style\s+Frederick Wiseman/.test(JSON.stringify(doc4.json) + doc4.content.map((c) => ("text" in c ? c.text : "")).join("")));
       await call("delete_project", { projectId: p4.json.id });
@@ -293,10 +297,10 @@ async function main() {
       check("a role resolves through the style (Curtis card → Liberation Sans, sentence case, no style warning)", card?.font === "LiberationSans-Regular" && card.preset === "adam-curtis:card" && !ct6.json.findings.some((f) => /type/.test(f.rule)), `${card?.font} ${card?.preset} · ${ct6.json.findings.map((f) => f.rule).join(",") || "clean"}`);
       await call("add_text_overlay", { projectId: p6.json.id, text: "BREAKING NEWS", preset: "caption-pop", startS: 5 });
       const ct6b = await call<{ findings: { severity: string; rule: string; message: string }[] }>("check_text", { projectId: p6.json.id });
-      check("check_text flags capitals in a foreign face on a sentence-case style", ct6b.json.findings.some((f) => /type/.test(f.rule) && /capitals/.test(f.message)) && ct6b.json.findings.some((f) => /type/.test(f.rule) && /outside/.test(f.message)), ct6b.json.findings.filter((f) => /type/.test(f.rule)).map((f) => f.message.slice(0, 50)).join(" | "));
+      check("check_text flags a foreign face while allowing the caption role's capitals", !ct6b.json.findings.some((f) => /type/.test(f.rule) && /capitals/.test(f.message)) && ct6b.json.findings.some((f) => /type/.test(f.rule) && /outside/.test(f.message)), ct6b.json.findings.filter((f) => /type/.test(f.rule)).map((f) => f.message.slice(0, 50)).join(" | "));
       await call("set_brief", { projectId: p6.json.id, brief: { ...brief, production: { ...brief.production, genre: "observational documentary", style: { id: "frederick-wiseman" } } } });
       const ct6c = await call<{ findings: { severity: string; rule: string; message: string }[] }>("check_text", { projectId: p6.json.id });
-      check("check_text warns on any text under a no-text style (Wiseman)", ct6c.json.findings.some((f) => /Wiseman type/.test(f.rule) && /no text/.test(f.message)));
+      check("check_text treats the researched Wiseman type reference as a preference", !ct6c.json.findings.some((f) => /Wiseman type/.test(f.rule)));
       await call("delete_project", { projectId: p6.json.id });
     }
     await call("set_plan", { projectId: p2.json.id, plan });
@@ -341,7 +345,7 @@ async function main() {
         step = (await call<Q>("interview_next", { request: req, answers })).json;
       }
       const b = step.done ? step.brief : null;
-      check("interview_next asks for the person's own material early (right after the scene questions)", asked.indexOf("materials") === asked.indexOf("context") + 1, asked.slice(0, 4).join(","));
+      check("interview_next asks for the person's own material after clip type and directing style", asked.indexOf("genre") === asked.indexOf("context") + 1 && asked.indexOf("materials") === asked.indexOf("style") + 1, asked.slice(0, 5).join(","));
       {
         const own = "April 29th, 1992. The jury has been out seven days.\nAt a quarter past three the verdicts are read.";
         const a2: Record<string, unknown> = { ...answers, materials: "script", materialsText: own };

@@ -1,64 +1,61 @@
-# Michel Gondry — the handmade loop
+# Michel Gondry
 
-Work: Björk "Human Behaviour" and "Bachelorette", Daft Punk "Around the World", Kylie Minogue "Come Into My World", The White Stripes "Fell in Love with a Girl" and "The Hardest Button to Button", Chemical Brothers "Star Guitar"; features *Eternal Sunshine of the Spotless Mind*.
+## Reference and mechanism
 
-## The signature
+Inventive music-image systems; distinguish strict early correspondence from later, looser approaches.
 
-The song's structure made visible, by hand. Each instrument is a character; each bar is a loop; each chorus a multiplication. A street repeats and the singer is cloned every time she passes; the scenery of a train ride lands on the beat; a drum kit multiplies across a city. Effects are done in camera or in the edit, never as gloss.
+A simple visual rule produces accumulating surprise.
 
-## Structure — how a video is built
+## Evidence
 
-- Find the song's system (verse / chorus / bridge, the instruments, the count) and give each element a visual rule. Write the rule down before choosing a shot ("every snare: a new copy of the object").
-- The video is a loop that grows: the first pass is plain; each repeat adds one thing; the bridge breaks the rule; the last chorus is the full stack.
-- No story beyond the rule; the pleasure is watching the rule hold.
+Gondry says he initially pursued precise correspondences between music and image, then moved beyond that restriction. His own account argues against enforcing every cut on the beat as a permanent signature.
 
-## The cut
+**Basis:** Direct craft account. The production choices below are editorial translations, not measured career-wide rules.
 
-- Cuts on the beat or on the bar; average shot equals a bar or a half-bar at the song's tempo (at 120 BPM, 2 s or 1 s). Cuts are on the grid to the frame (`check_beat_alignment`).
-- Straight cuts. Repetition of the same shot with one change is the main device; a shot may recur 8–16 times.
-- Camera locked or on a strict rail; the same framing every pass; the change is inside the frame.
-- Speed changes and reverse are allowed when they are the rule (`speed` 2 on the double-time section).
+## Material prerequisites
 
-## Narration
+**Production fit:** Requires planned production. A track with distinguishable parts and repeatable actions, objects or compositing elements.
 
-- None. The lyric is the text.
+## Picture and clip selection
 
-## Sound
+Choose two or three musical layers and assign each a visible behavior. Gather enough variations for the rule to evolve rather than merely repeat.
 
-- The **song** is the whole soundtrack; no sync sound, no effects unless they are in the record. The bed is the track at full level (`set_music` volume 1, ducking off).
-- The cut is built from the song's map: `analyze_audio` / `detect_tempo` for the grid; the plan lists the bars.
+## Framing and camera
 
-## Picture — sources and text
+Make the mechanism inspectable: consistent orientation, clear silhouettes and visible spatial relationships. Allow handmade texture when it helps the viewer understand how the effect works.
 
-- Sources: generated shots that can repeat exactly (static frame prompts, the same seed, one variable), archive with a strong repeating motion (trains, factories, loops), stills animated by the rule (pixilation: a new still per beat).
-- Text: none, except the lyric as an on-screen object when it is the rule.
+## Structure and rhythm
 
-## Do not
+Let actions within a held shot carry synchronization. Introduce a rule, repeat it clearly, then combine or violate it; compare strict mapping with a more emotional passage.
 
-- No cut off the grid; no drift in the rule; no "beauty" cutaway that has no place in the system.
-- No dissolves, no lens flares, no colour grade beyond a flat, slightly saturated look.
-- No narrative that needs explaining.
+## Narration and sound
+
+Work from the track's structure and separate stems where available. Map movement to timbre, entrances or phrase changes, not just kick-drum hits.
 
 ## Type
 
-**The signature.** A small rounded lower-case credit, once, lower-left; nothing else on the frame.
+If type participates, give it a physical or musical behavior governed by the same system. Otherwise keep it secondary to the visual mechanism.
 
-**Stand-ins.** Nunito for the rounded lower-case of the Eternal Sunshine title. Faces: Nunito 400. Case: lower. Colour #FFFFFF on #000000. Entrance: none.
+Bundled typography presets are starting treatments. Choose a named work and a coherent project-specific title and supporting-text system. Fonts, colors, cases and roles may vary; source labels and accessibility captions remain available. Check safe areas, reading time and overlap.
 
-**Roles** (`add_text_overlay {role}` with this style in the brief):
+## Exceptions and review
 
-- **credit (default)** — artist · song, small, lower-left, first and last five seconds. Nunito · lower-case · 3 % · no box · shadow 4 % · none · hold 4 s.
+Replace mandatory on-grid cuts and bans on dissolves or narrative with a declared mapping rule plus permission to depart from it.
 
-**Never:** lower-third, caption, callout, card, intertitle, quote, date, label.
+Numeric pacing and narration ranges in the catalogue are editorial starting points, not measurements of the creator's career. Explain purposeful departures in styleTreatment.exceptions. Source integrity and technical validity still apply.
 
-**Survey note.** Surveyed loosely: Eternal Sunshine's title is small, rounded and lower-case.
+## Evaluation
 
-## Harness parameters
+Build a 16-second study with two musical layers and two visible actions. A viewer should predict a recurrence and notice the deliberate variation.
 
-asl 1–2 s (one bar) · min shot 0.25 s (a beat) · transitions cuts · narration none · music required, the song · sync muted · text none · interviews none · beat-cut yes
+**Failure mode:** Random stop-motion and quirky props have surface resemblance without an organizing invention.
+
+The duration above is a suggested experiment length. Plan the test within the approved production scope; it is not a new approval gate or a claim that the test has passed.
 
 ## Applying it in SlopStudio
 
-- Plan: `notes` state the rule; beats are song sections with bar counts; shots are one bar each with the recurrence written in the description ("copy 3 of 8").
-- Cut: `apply_edit_list` from a bar grid (start = bar × 60/BPM × 4); `check_beat_alignment toleranceFrames 1` must be nearly 100 % on grid.
-- Music: `set_music` the track, `volume 1`, `ducking false`; nothing else on the sound.
+Read the shared director-style playbook included by get_style. Store reference, mechanism, materialPlan, rhythm, sound, typography, exceptions and evaluation in plan.styleTreatment. Carry these choices into actual shot descriptions, durations, script offsets and audio decisions. Inspect available material before committing exact timing; identify missing coverage instead of compensating with effects. Report technical checks, picture/motion review, listening review and the observed style result separately.
+
+## Sources
+
+- [Michel Gondry Interview](https://flash---art.com/2008/10/michel-gondry-interview/) — Flash Art; 2008-10. First-person interview.

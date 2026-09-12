@@ -104,7 +104,7 @@ export function registerMediaTools(server: McpServer) {
         text: z.string().min(1).max(2000),
         offsetS: z.number().min(0).describe("timeline second the line starts"),
         voice: z.string().optional().describe("ara | eve | rex | sal | leo (Grok Voice TTS); default rex"),
-        instructions: z.string().max(500).optional().describe("delivery notes the model may honor: pace, tone, mood"),
+        instructions: z.string().max(500).optional().describe("delivery notes the model may honor: pace, tone, mood, narrative context. For the final sentence of a monologue or film, explicitly direct its emotional landing and closing cadence; do not treat every chunk ending as a narrative ending. Keep these directions out of spoken text."),
         volume: z.number().min(0).max(4).optional().describe("gain on the clip (1 = as synthesized)"),
         ttsModel: z.string().optional(),
       },

@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+/.venv
 /.pnp
 .pnp.*
 .yarn/*
@@ -15,6 +16,7 @@
 
 # local data: user-owned postgres instance + generated assets
 /.data
+/output/
 
 # next.js
 /.next/
@@ -63,6 +65,12 @@ qa-*.py
 # Bundled static ffmpeg/ffprobe for the desktop AppImage (fetched via scripts/fetch-ffmpeg.sh)
 /vendor/ffmpeg/ffmpeg
 /vendor/ffmpeg/ffprobe
+/vendor/ffmpeg/*.exe
+/vendor/ffmpeg/LICENSE*
+/vendor/ffmpeg/SOURCE*
+
+# Generated Codex configuration contains absolute paths for this checkout.
+/.codex/config.toml
 
 # Playwright
 /test-results

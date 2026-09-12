@@ -1,71 +1,63 @@
-# Wes Anderson — the diorama
+# Wes Anderson
 
-Films: *Rushmore*, *The Royal Tenenbaums*, *The Grand Budapest Hotel*, *Moonrise Kingdom*, *The French Dispatch*, *Asteroid City*.
+## Reference and mechanism
 
-## The signature
+Precisely staged ensemble filmmaking; The French Dispatch and Asteroid City provide collaborator evidence.
 
-The camera looks straight at the wall. People stand in the middle of the frame and speak in complete sentences without moving their faces. The camera moves only on right angles — a snap pan, a lateral dolly, a slow push-in — and often on a whip. Chapters have title cards. Colours are chosen from one palette. Sad things are said cheerfully; a narrator reads them like a book.
+Composition and performance timing turn social relationships into visible arrangements.
 
-## Structure — how a scene is built
+## Evidence
 
-- Chapters: a title card ("Chapter Three: The Escape") opens each beat; the scene is a sequence of tableaux, each a flat composition with the action inside it.
-- Dialogue is formal and fast; the joke is the deadpan and the framing. The scene's turn is a single close-up, centred, of a face not reacting.
-- A narrator (if present) reads exposition in the past tense, like a novel, and stops exactly when the picture takes over.
-- Ends on a symmetrical wide and a hard cut to the next chapter card.
+Robert Yeoman describes animatic-led blocking and lens choices that keep ensemble positions readable. The ASC's Asteroid City interview synopsis explicitly documents extensive natural and practical lighting, contradicting a blanket artificial-light assumption.
 
-## The cut
+**Basis:** Cinematographer's craft accounts. The production choices below are editorial translations, not measured career-wide rules.
 
-- Average shot 3–7 s; tableaux hold 6–10 s; reaction close-ups 1.5–2.5 s. Nothing under 1 s.
-- Straight cuts. Whip pans (in-frame, from the source) and a fast lateral dolly are the transitions; a fade to black or an iris only at a chapter's end.
-- Framing: planimetric — the camera perpendicular to the back wall; subjects centred; symmetry; 90° moves; overhead inserts of hands, letters, objects laid out on a table (2–3 s).
-- Grade: one palette per scene (pastel pink and mustard; teal and rust); flat, evenly lit; `saturation` slightly up, no vignette; a 4:3 or 1.85 frame accepted; slow motion (`speed` 0.5) for one walking group shot with a song.
+## Material prerequisites
 
-## Narration — the storybook narrator
+**Production fit:** Requires planned production. Coordinated blocking, art direction, costume and camera placement; arbitrary archive rarely supplies the required relationships.
 
-- Third person, past tense, exact dates and proper nouns, dry: "On the fourteenth of March, at eleven minutes past four, the escape began." 60–100 wpm in short bursts between dialogue.
-- Voice: crisp, unhurried, slightly amused (`generate_narration` voice leo or sal).
-- On-screen text is part of the narration: chapter cards, labels, letters read aloud while shown.
+## Picture and clip selection
 
-## Sound
+Find or shoot an ensemble arrangement with a clear hierarchy and a small disruption. Choose a gesture or entrance whose position in the frame carries the joke.
 
-- Music is **found** and specific: 1960s British Invasion, French pop, a baroque harpsichord cue, a Mark Mothersbaugh-style plinking score (search "harpsichord baroque CC", "1960s garage pop instrumental library", "toy piano waltz").
-- Sync dialogue is the content (`muted: false`); the bed ducks fully under speech and returns loud on the slow-motion group shot.
-- Foley is precise and dry (a stamp, a zip, a door) as audio-only clips on the overhead inserts.
+## Framing and camera
 
-## Picture — sources and text
+Plan lateral and depth relationships before centering the camera. Use readable planes and deliberate eyelines; symmetry should organize behavior rather than crop away essential context.
 
-- Sources: generated tableaux ("symmetrical wide shot, pastel pink hotel lobby, a bellboy centred, flat lighting, 1960s, Wes Anderson style, 35 mm"), overhead insert shots of objects, archive only if it can be framed square-on.
-- Text: chapter title cards (serif, centred, on a coloured field, 2–3 s); labels on objects; a letter filling the frame while read.
+## Structure and rhythm
 
-## Do not
+Hold the arrangement long enough to register, then time an entrance, reveal or cut to its change. Alternate tableau and detail when the detail revises the social situation.
 
-- No handheld, no Dutch angles, no depth staging, no naturalistic lighting.
-- No off-centre framing unless it is the joke; no dissolves; no emotional swell in the music at the sad line.
-- No actor who moves their face; the reaction is the cut.
+## Narration and sound
+
+Keep dialogue timing and small practical sounds precise. Try a musical passage with a defined entrance or exit, rather than continuously signaling whimsy.
 
 ## Type
 
-**The signature.** Futura in every film — title cards, chapter headings, signage, credits — capitals centred on a flat colour field; Archer for Isle of Dogs's credits; a script for Moonrise Kingdom.
+Design chapter and title typography as part of the chosen fictional publication, institution or era. A fixed font and pastel palette cannot replace that design logic.
 
-**Stand-ins.** Jost for Futura; Zilla Slab for Archer. Faces: Jost 700, Jost 500, Zilla Slab 400. Case: upper. Colour #2B1E1A on #F1D9B5. Entrance: none.
+Bundled typography presets are starting treatments. Choose a named work and a coherent project-specific title and supporting-text system. Fonts, colors, cases and roles may vary; source labels and accessibility captions remain available. Check safe areas, reading time and overlap.
 
-**Roles** (`add_text_overlay {role}` with this style in the brief):
+## Exceptions and review
 
-- **intertitle (default)** — a chapter card in Futura capitals on a colour field. Jost Bold · capitals · 6 % · #2B1E1A · hold 3 s.
-- **title** — the title on the field. Jost Bold · capitals · 8 % · #2B1E1A.
-- **label** — a label on an object. Jost Medium · capitals · 3 % · #2B1E1A · box · none.
-- **quote** — a letter read aloud while shown. Zilla Slab · 4 %.
+Remove bans on natural light, spatial depth and off-center staging. Require a reason for composition and a readable performance beat.
 
-**Never:** caption, lower-third, callout, citation.
+Numeric pacing and narration ranges in the catalogue are editorial starting points, not measurements of the creator's career. Explain purposeful departures in styleTreatment.exceptions. Source integrity and technical validity still apply.
 
-**Survey note.** Surveyed: Futura across the filmography; Archer in Isle of Dogs; Tilda in Moonrise Kingdom; Annie Atkins's period faces in The Grand Budapest Hotel.
+## Evaluation
 
-## Harness parameters
+Shoot a 20-second three-person tableau with one entrance or rearrangement. The viewer should understand the status change before dialogue explains it.
 
-asl 3–7 s · min shot 1 s · transitions cuts (whips) · narration optional, storybook third person, 60–100 wpm · music required, found · sync sync-first · text cards · interviews none · beat-cut no
+**Failure mode:** Centered stock shots with a pastel grade imitate packaging while missing the staging.
+
+The duration above is a suggested experiment length. Plan the test within the approved production scope; it is not a new approval gate or a claim that the test has passed.
 
 ## Applying it in SlopStudio
 
-- Plan: every beat opens with a `card` shot; tableaux 6–10 s, `sound: "sync"`; overhead inserts 2–3 s `sound: "muted"`; the narrator's lines in `script` never overlap dialogue (`check_plan` "one narrator at a time").
-- Cut: `update_project saturation 1.15`; `update_segments speed 0.5` on the group walk with the song up; `add_text_overlay` chapter cards style BOX, centred.
-- Music: `set_music` the cue; `balance_music` gap 8.
+Read the shared director-style playbook included by get_style. Store reference, mechanism, materialPlan, rhythm, sound, typography, exceptions and evaluation in plan.styleTreatment. Carry these choices into actual shot descriptions, durations, script offsets and audio decisions. Inspect available material before committing exact timing; identify missing coverage instead of compensating with effects. Report technical checks, picture/motion review, listening review and the observed style result separately.
+
+## Sources
+
+- [Robert Yeoman, ASC, on Shooting Wes Anderson's The French Dispatch](https://www.musicbed.com/articles/filmmaking/cinematography/robert-yeoman-asc-on-shooting-wes-andersons-the-french-dispatch/) — Musicbed; Undated; The French Dispatch production context. Cinematographer interview.
+
+- [Clubhouse Conversations: Asteroid City](https://theasc.com/videos/clubhouse-conversations-asteroid-city) — American Society of Cinematographers; Robert Yeoman with Rodney Taylor; 2023-11-18. Primary interview publisher's detailed synopsis.

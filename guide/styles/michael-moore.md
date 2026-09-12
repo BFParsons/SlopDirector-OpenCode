@@ -1,72 +1,61 @@
-# Michael Moore — the first-person polemic
+# Michael Moore
 
-Films: *Roger & Me*, *Bowling for Columbine*, *Fahrenheit 9/11*, *Sicko*.
+## Reference and mechanism
 
-## The signature
+Author-led investigative satire; Roger & Me as a reference, rather than a universal documentary template.
 
-The filmmaker is a character. He tells you what happened to him, in the past tense, with a straight face, and the footage contradicts or confirms him for laughs. Cheerful old songs play under terrible things. Institutions are confronted on camera and the camera keeps rolling while they say no.
+A public claim becomes a concrete, often absurd encounter.
 
-## Structure — how a scene is built
+## Evidence
 
-- The scene has an argument and a punchline. Open on the claim, in the narrator's voice; build with archive and interviews; land on an ironic cut — the corporate slogan, the smiling official, the song's happiest line under the worst image.
-- Confrontation sequences run on sync sound: the walk up, the receptionist, the "he's not available", the door. 20–40 s of uninterrupted sync; the narration returns only to summarise.
-- Repetition is a joke: the same clip a second time, a beat later, after the narration has reframed it.
-- End the scene on the punchline; do not explain it.
+In his TIFF speech, Moore argues for entertainment, humor and a filmmaker's point of view. He specifically rejects routine illustrative images when a more revealing scene can carry the idea.
 
-## The cut
+**Basis:** Direct craft account. The production choices below are editorial translations, not measured career-wide rules.
 
-- Average shot 3–6 s; montage 2–3 s; confrontations and bites as long as they need. Nothing under 1 s.
-- Straight cuts. A dissolve only inside a montage of stills or headlines. Never fade to black mid-scene.
-- Archive is chosen for irony first: 1950s industrial films, commercials, training films, old news anchors, politicians smiling. Corporate and government footage is the best material.
+## Material prerequisites
 
-## Narration — first person
+**Production fit:** Archive-compatible. Contradictory statements with dates, a specific affected person or place, and preferably an actual encounter.
 
-- "I", past tense, conversational, deadpan; short sentences; the joke is in the understatement, not the adjectives. "So I went to see him." "They said he was busy." "He was busy for eleven years."
-- 90–130 words a minute; it can run under montage, but stops dead for the confrontation and the key bite.
-- Facts are stated flatly with numbers ("Forty thousand jobs. One town."). A rhetorical question is allowed once a scene.
-- Voice: warm, unpolished, a little tired (`generate_narration` voice rex or sal).
+## Picture and clip selection
 
-## Sound
+Build selects by claim, test and consequence. Prefer a revealing exchange, procedural obstacle or ordinary detail over unrelated shots of wealth or suffering.
 
-- Music is **found**, ironic: a cheerful standard, a patriotic anthem, a corporate jingle, a 1960s pop song under the grim pictures. Lyrics matter (pick the line, place it on the image). Search by title and era; CC or library covers when the original is unusable.
-- The bed ducks under narration; it cuts hard on the punchline.
-- Sync sound is the content of confrontations and street interviews: `muted: false`, `volume` ~1, and the bed out. Keep the awkward silence.
+## Framing and camera
 
-## Picture — sources and text
+Keep locations legible enough to establish who has access, who waits and who controls the encounter. A crop should reveal an observation, not manufacture embarrassment.
 
-- Sources: news archive, corporate and industrial films, commercials, C-SPAN-style footage, street interviews (with the filmmaker in frame when generating shots: a big man in a cap and a windbreaker, mic in hand).
-- Lower-thirds: name · title, plain, as a broadcast would do it, held 3 s. Gag cards are allowed ("Actual footage", "Two days later"): one per scene at most.
-- Graphics: a headline or a document filling the frame, 3–4 s, with the key line highlighted.
+## Structure and rhythm
 
-## Do not
+Try claim → literal test → unforeseen answer → consequence. Place the comic reversal after the audience understands the premise; preserve the subject's qualifying words.
 
-- No neutral narration; no "some say". The narrator has a side.
-- No slow-motion for pathos; no piano bed under the sad part (the ironic song does that job).
-- No cut that makes a subject say what they did not say (RULES 4); the joke is the arrangement, not the edit inside the sentence.
+## Narration and sound
+
+Let a revealing answer play clearly. Test either an ironic cue or unscored location sound at the reversal; choose the version that makes the contradiction understandable.
 
 ## Type
 
-**The signature.** Broadcast-news grammar: bold Helvetica lower-thirds in a bar, plain white cards on black for the dates and the gags, headlines and documents filling the frame.
+Show the exact claim and its source briefly. Use typography to distinguish quotation from editorial commentary; do not invent a Moore-wide font.
 
-**Stand-ins.** Liberation Sans for Helvetica / Arial. Faces: Liberation Sans 700, Liberation Sans 400. Case: sentence. Colour #FFFFFF on #000000. Entrance: none.
+Bundled typography presets are starting treatments. Choose a named work and a coherent project-specific title and supporting-text system. Fonts, colors, cases and roles may vary; source labels and accessibility captions remain available. Check safe areas, reading time and overlap.
 
-**Roles** (`add_text_overlay {role}` with this style in the brief):
+## Exceptions and review
 
-- **lower-third (default)** — name · title, as a newscast would. Liberation Sans Bold · 3.8 % · none.
-- **card** — 'Two days later' — the gag card, white on black. Liberation Sans Bold · 5 % · center.
-- **callout** — the highlighted line of a document. Liberation Sans.
+Keep quote integrity. Treat bans on piano, slow motion and neutral passages as optional tonal choices. A stated viewpoint does not require commentary over every image.
 
-**Never:** intertitle, quote.
+Numeric pacing and narration ranges in the catalogue are editorial starting points, not measurements of the creator's career. Explain purposeful departures in styleTreatment.exceptions. Source integrity and technical validity still apply.
 
-**Survey note.** Assumption from the films: the lower-thirds and cards imitate 1990s–2000s American news graphics; nothing is designed.
+## Evaluation
 
-## Harness parameters
+Make a 25-second sequence from a claim and a documented outcome. A viewer should identify the contradiction without the narrator explaining the joke.
 
-asl 3–6 s · min shot 1 s · transitions cuts · narration required, first person, 90–130 wpm · music required, found (ironic) · sync sync-first · text lower-thirds · interviews confrontation
+**Failure mode:** A sarcastic narrator over generic archive has attitude but no encounter.
+
+The duration above is a suggested experiment length. Plan the test within the approved production scope; it is not a new approval gate or a claim that the test has passed.
 
 ## Applying it in SlopStudio
 
-- Plan: every beat ends on a shot marked as the punchline in `description`; confrontations are `sound: "sync"` shots of 15–40 s with no narration line over them (`check_plan` flags narration over sync).
-- Clip list: queries pair the subject with the ironic source ("1950s industrial film assembly line", "company promotional video 1990s", "congressional hearing …").
-- Music: `set_music` the song; `balance_music` gap 4–6 (the song is meant to be heard); place the lyric line with `update_segments offsetS` if the bed is added as an audio-only clip instead.
-- Text: `add_text_overlay` lower-thirds, style OUTLINE, bottom-left.
+Read the shared director-style playbook included by get_style. Store reference, mechanism, materialPlan, rhythm, sound, typography, exceptions and evaluation in plan.styleTreatment. Carry these choices into actual shot descriptions, durations, script offsets and audio decisions. Inspect available material before committing exact timing; identify missing coverage instead of compensating with effects. Report technical checks, picture/motion review, listening review and the observed style result separately.
+
+## Sources
+
+- [13 Rules for Making Documentary Films](https://readersupportednews.org/component/content/article/277/25998-focus-13-rules-for-making-documentary-films) — Michael Moore; TIFF speech, reprinted by Reader Supported News; 2014-09-21. First-person speech reprint.

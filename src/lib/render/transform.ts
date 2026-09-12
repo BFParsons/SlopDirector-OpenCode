@@ -2,8 +2,8 @@
  * Per-clip Motion (Effect Controls): a keyframable zoom + pan applied to a clip
  * over its on-screen life. Keyframe times are NORMALIZED (0..1 of the clip), so
  * they survive trims and resolution changes. The live preview samples the tracks
- * each frame; the ffmpeg export turns them into a `zoompan` expression — the same
- * mechanism the Ken Burns stills already use, so the two paths agree.
+ * each frame; the ffmpeg export samples animated crops with fractional-pixel
+ * interpolation. Integer crop coordinates visibly stutter on slow moves.
  *
  * Conventions: scale ∈ [0.1,4] (1 = untransformed; <1 shrinks the clip with empty
  * space around it, >1 zooms in), posX/posY ∈ [-1,1] pan within the margin (0 = centred).
@@ -95,8 +95,10 @@ function exprTrack(track: Keyframe[], def: number, P: string): string {
 }
 
 /**
- * A `zoompan` filter that animates this transform over `durationS`, or "" if the
- * transform is identity (so untransformed clips are byte-for-byte unchanged).
+ * Render a transform over `durationS`, or "" for identity. Static framing keeps
+ * the existing zoompan path. Animated framing uses perspective's interpolated
+ * source rectangle: zoompan truncates its crop to integer/chroma-aligned pixels,
+ * which magnifies small coordinate steps into visible jumps on close-ups.
  */
 export function zoompanTransformFilter(
   tr: ClipTransform | null | undefined,
@@ -123,6 +125,16 @@ export function zoompanTransformFilter(
   const frames = Math.max(2, Math.round(durationS * fps));
   const P = `(on/${frames - 1})`;
   const z = `max(1,${exprTrack(tr.scale, SCALE_DEFAULT, P)})`;
+  const animated = [tr.scale, tr.posX, tr.posY].some((ks) => ks.some((k) => Math.abs(k.v - ks[0].v) > 1e-4));
+  if (animated) {
+    const px = `clip(${exprTrack(tr.posX, POS_DEFAULT, P)},-1,1)`;
+    const py = `clip(${exprTrack(tr.posY, POS_DEFAULT, P)},-1,1)`;
+    const left = `(W-W/(${z}))/2*(1+(${px}))`;
+    const top = `(H-H/(${z}))/2*(1+(${py}))`;
+    const right = `(${left})+W/(${z})`;
+    const bottom = `(${top})+H/(${z})`;
+    return `setpts=N/(${fps}*TB),perspective=x0='${left}':y0='${top}':x1='${right}':y1='${top}':x2='${left}':y2='${bottom}':x3='${right}':y3='${bottom}':sense=source:eval=frame:interpolation=cubic`;
+  }
   const x = `((iw-iw/zoom)/2*(1+(${exprTrack(tr.posX, POS_DEFAULT, P)})))`;
   const y = `((ih-ih/zoom)/2*(1+(${exprTrack(tr.posY, POS_DEFAULT, P)})))`;
   return `zoompan=z='${z}':x='${x}':y='${y}':d=1:s=${w}x${h}:fps=${fps}`;

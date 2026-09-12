@@ -59,7 +59,7 @@ function run(cmd: string, args: string[], timeoutMs = 8000): Promise<{ code: num
     let out = "";
     let p: ReturnType<typeof spawn>;
     try {
-      p = spawn(cmd, args);
+      p = spawn(cmd, args, { windowsHide: true });
     } catch {
       resolve({ code: -1, out: "" });
       return;

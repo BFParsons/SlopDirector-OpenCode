@@ -691,7 +691,7 @@ function runFfmpeg(
   onProgress?: (percent: number) => void,
 ): Promise<void> {
   return new Promise((resolve, reject) => {
-    const proc = spawn(ffmpegPath(), args);
+    const proc = spawn(ffmpegPath(), args, { windowsHide: true });
     let stderrTail = "";
 
     proc.stdout.on("data", (d: Buffer) => {

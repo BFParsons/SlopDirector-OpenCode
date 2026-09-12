@@ -8,7 +8,7 @@ import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
 import { mkdir } from "node:fs/promises";
 import path from "node:path";
-import { FONT_BOLD } from "@/lib/ffmpeg/args";
+import { ffQuote, FONT_BOLD } from "@/lib/ffmpeg/args";
 import { ffmpegPath } from "@/lib/ffmpeg/binary";
 import { probeDuration, probeVideoStream } from "@/lib/ffmpeg/probe";
 import { planHwDecode } from "@/lib/ffmpeg/hwdecode";
@@ -18,7 +18,7 @@ import { mediaCachePath } from "@/lib/media/cache";
 
 function run(args: string[], timeoutMs = 10 * 60_000): Promise<{ code: number; stderr: string }> {
   return new Promise((resolve, reject) => {
-    const proc = spawn(ffmpegPath(), ["-hide_banner", "-nostdin", ...args]);
+    const proc = spawn(ffmpegPath(), ["-hide_banner", "-nostdin", ...args], { windowsHide: true });
     let stderr = "";
     const to = setTimeout(() => proc.kill("SIGKILL"), timeoutMs);
     proc.stdout.on("data", () => {});
@@ -102,7 +102,7 @@ export async function contactSheet(
   //   ≈ 0.023 s per source second (1.4 s for a 60 s clip; CPU ≈ 0.07 s/s);
   //   one seeked input per cell ≈ 0.26 s per cell regardless of length.
   // So: full decode for short spans, per-cell seeks for long ones.
-  const font = FONT_BOLD.replace(/\\/g, "/").replace(/:/g, "\\:");
+  const font = ffQuote(FONT_BOLD);
   const fontsize = Math.max(12, Math.round(cellWidth / 12));
   const stampCommon = `x=6:y=6:fontsize=${fontsize}:fontcolor=white:box=1:boxcolor=black@0.55:boxborderw=4`;
   const dec = await proxyDecode(abs, cellWidth);
@@ -115,7 +115,7 @@ export async function contactSheet(
     // that frame's own time (pts rebased by -ss, so add startS back).
     const iv = interval.toFixed(4);
     const pick = `select='isnan(prev_selected_t)+gt(floor(t/${iv}),floor(prev_selected_t/${iv}))'`;
-    const vf = `${dec.prefilter},${pick},drawtext=fontfile='${font}':text='%{pts\\:hms\\:${o.startS}}':${stampCommon},tile=${o.cols}x${o.rows}:padding=2:margin=2:color=black`;
+    const vf = `${dec.prefilter},${pick},drawtext=fontfile=${font}:text='%{pts\\:hms\\:${o.startS}}':${stampCommon},tile=${o.cols}x${o.rows}:padding=2:margin=2:color=black`;
     ({ code, stderr } = await run([...dec.inputArgs, "-y", "-ss", String(o.startS), "-t", String(span), "-i", abs, "-fps_mode", "passthrough", "-frames:v", "1", "-vf", vf, "-q:v", "4", out]));
   } else {
     const hms = (t: number) => {
@@ -128,7 +128,7 @@ export async function contactSheet(
     const chains: string[] = [];
     times.forEach((tm, k) => {
       args.push("-ss", tm.toFixed(3), "-t", "0.2", "-i", abs);
-      chains.push(`[${k}:v]trim=end_frame=1,scale=${cellWidth}:-2,drawtext=fontfile='${font}':text='${hms(tm)}':${stampCommon},setsar=1[c${k}]`);
+      chains.push(`[${k}:v]trim=end_frame=1,scale=${cellWidth}:-2,drawtext=fontfile=${font}:text='${hms(tm)}':${stampCommon},setsar=1[c${k}]`);
     });
     const graph = `${chains.join(";")};${times.map((_, k) => `[c${k}]`).join("")}concat=n=${n}:v=1:a=0,tile=${o.cols}x${o.rows}:padding=2:margin=2:color=black[sheet]`;
     ({ code, stderr } = await run([...args, "-filter_complex", graph, "-map", "[sheet]", "-frames:v", "1", "-q:v", "4", out]));

@@ -1,67 +1,63 @@
-# Spike Jonze — the playful idea
+# Spike Jonze
 
-Work: Ikea "Lamp", Apple HomePod "Welcome Home", Adidas "Hello Tomorrow", Gap "Khakis A Go-Go", Kenzo "My Mutant Brain"; music videos "Sabotage", "Weapon of Choice", "Praise You"; features *Being John Malkovich*, *Her*.
+## Reference and mechanism
 
-## The signature
+Performance-led imaginative advertising; Welcome Home is the principal production reference.
 
-One idea, taken completely seriously, until it is absurd. A lamp is thrown away and you feel sorry for it. An office worker dances through a hotel because the song is good. A woman in a party dress sabotages a gala. The camera is simple and honest; the joke is that nobody in the frame thinks it is a joke.
+An ordinary emotional state becomes a physical transformation.
 
-## Structure — how a spot is built
+## Evidence
 
-- Set up an ordinary situation in one shot (3–5 s). Introduce the idea. Follow it all the way; escalate twice; end on a deadpan turn (the Swede who tells you the lamp has no feelings; the product mentioned as an afterthought).
-- The product is either the hero of the absurd idea or a footnote after it — never explained.
-- 30–60 s; the idea needs room; do not cut to fit — trim the set-up.
+The Welcome Home BTS record and reporting describe a practical expanding environment built around performance. The useful lesson is the interaction of body, music and space; the evidence here is production documentation, not a new frame-by-frame measurement.
 
-## The cut
+**Basis:** BTS documentation and corroborating report. The production choices below are editorial translations, not measured career-wide rules.
 
-- Average shot 2–5 s; one continuous performance take of 8–20 s at the centre (a dance, a walk, a gesture) — the film's honesty depends on it.
-- Straight cuts; a whip pan or a smash cut allowed once as a gag. No dissolves.
-- Camera: eye level, wide-ish lens, handheld or simple dolly; no "beauty" shots; the location is real (a street, an office, a kitchen).
-- Grade: natural; slightly warm; no vignette.
+## Material prerequisites
 
-## Narration
+**Production fit:** Requires planned production. A committed performer, repeatable choreography and space that can transform practically or through planned effects.
 
-- Rare: one deadpan voice at the end (accented, unimpressed, or a child's), 1–2 sentences. 0–30 wpm. The turn is spoken flatly.
-- Dialogue in the spot is naturalistic and half-heard.
+## Picture and clip selection
 
-## Sound
+Start with a legible bodily state: tiredness, hesitation or release. Choose actions that progressively change the person's relationship to the environment.
 
-- Music is a **song** or a sincere score: an emotional cue played straight under the absurd idea (a sad piano for the lamp), or a pop song the character dances to (search "melancholy piano CC", "funk instrumental library").
-- Sync sound is part of the joke: the rain, the thump of the lamp, the shoes on the marble; keep it (`muted: false`) and mix the song under it.
-- The music stops dead for the turn.
+## Framing and camera
 
-## Picture — sources and text
+Keep performer and transformation in the same readable space when possible. Include a physical contact or resistance that helps an impossible effect feel tactile.
 
-- Sources: generated performance shots ("medium wide, real office corridor, fluorescent light, a man in a suit dancing awkwardly, handheld 16 mm"), real locations, product on a table.
-- Text: none inside; the logo or a plain line at the very end, 2–3 s.
+## Structure and rhythm
 
-## Do not
+Build ordinary routine → small discovery → expanding freedom → emotional landing. Let some actions finish; cut when a new possibility opens rather than after every beat.
 
-- No irony in the camera (no winks, no fast zooms, no comedy music); the actors and the idea are sincere.
-- No montage of features; no voiceover explaining the idea; no slow motion for beauty.
-- No fantasy environments; the strangeness happens in ordinary places.
+## Narration and sound
+
+Treat the music as something the body responds to. Establish everyday room sound first, then test where the track overtakes that environment and where it recedes.
 
 ## Type
 
-**The signature.** Small, lower-case and unhurried, like the 'her' wordmark; the spot's only text is the deadpan line at the end.
+Keep explanatory text outside the transformation unless it has a necessary narrative role. Design any end identity to preserve the emotional landing.
 
-**Stand-ins.** Nunito (rounded humanist) for the soft lower-case of the titles. Faces: Nunito 400. Case: lower. Colour #FFFFFF on #000000. Entrance: fade.
+Bundled typography presets are starting treatments. Choose a named work and a coherent project-specific title and supporting-text system. Fonts, colors, cases and roles may vary; source labels and accessibility captions remain available. Check safe areas, reading time and overlap.
 
-**Roles** (`add_text_overlay {role}` with this style in the brief):
+## Exceptions and review
 
-- **card (default)** — the last line, lower-case, on black. Nunito · lower-case · 4.8 %.
-- **title** — a title, lower-case. Nunito · lower-case · 7 %.
+Keep sincerity and physical causality as priorities. Relax automatic bans on fantasy settings, voiceover or rapid techniques; their fit depends on the specific premise.
 
-**Never:** lower-third, caption, callout, citation, intertitle.
+Numeric pacing and narration ranges in the catalogue are editorial starting points, not measurements of the creator's career. Explain purposeful departures in styleTreatment.exceptions. Source integrity and technical validity still apply.
 
-**Survey note.** Assumption: the 'her' title face was not documented; the manner (small, lower-case, light) is.
+## Evaluation
 
-## Harness parameters
+Make a 20-second action in which one movement visibly changes the room. The viewer should name the emotional change without a caption explaining it.
 
-asl 2–5 s (one long performance take) · min shot 0.7 s · transitions cuts · narration optional, deadpan, 0–30 wpm · music required, song · sync mixed · text sparse · interviews none · beat-cut optional
+**Failure mode:** Random surreal inserts interrupt the performance instead of expressing it.
+
+The duration above is a suggested experiment length. Plan the test within the approved production scope; it is not a new approval gate or a claim that the test has passed.
 
 ## Applying it in SlopStudio
 
-- Plan: beats set-up / the idea / the escalation / the turn; the central shot is the long take (`durationS` 8–20, `sound: "sync"`); the turn is a `narration` line in the last 4 s or a `text` line.
-- AI shots: `generate_ai_shots` with plain, real-location prompts; the performer's action stated simply.
-- Music: `set_music` the sincere cue; `balance_music` gap 4–6; cut it with `update_project audioFadeOutS 0` and end the bed on the turn by trimming the music-bearing range or placing the cue as an audio-only clip.
+Read the shared director-style playbook included by get_style. Store reference, mechanism, materialPlan, rhythm, sound, typography, exceptions and evaluation in plan.styleTreatment. Carry these choices into actual shot descriptions, durations, script offsets and audio decisions. Inspect available material before committing exact timing; identify missing coverage instead of compensating with effects. Report technical checks, picture/motion review, listening review and the observed style result separately.
+
+## Sources
+
+- [Making Welcome Home](https://www.danilop.com/making-welcome-home-apple) — Danilo Parra; 2018 production; undated portfolio. BTS filmmaker's portfolio.
+
+- [Behind-the-Scenes Video Details Making of Spike Jonze's HomePod Ad](https://www.macrumors.com/2018/03/22/behind-scenes-spike-jonze-homepod/) — MacRumors; 2018-03-22. Reporting on production BTS.

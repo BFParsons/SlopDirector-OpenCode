@@ -1,69 +1,61 @@
-# Tom Scott — the single take on location
+# Tom Scott
 
-Work: "Things You Might Not Know", "Amazing Places", "The Basics"; "This Video Has X Views"; the red T-shirt; a decade of weekly videos.
+## Reference and mechanism
 
-## The signature
+Concise factual entertainment about a specific real thing; distinguish this format from Scott's other shows.
 
-One presenter, one place, one idea, one take. He stands in front of the thing (a lighthouse, a dam, a border stone, a server hall) and explains it from memory, walking a little, in three to six minutes, without a cut if he can help it. Drone shots and a few inserts show what he is pointing at. No music until the end card. The authority is the location and the clarity.
+A surprising proposition leads to an understandable mechanism and its limit.
 
-## Structure — how a video is built
+## Evidence
 
-- Open on the presenter in the place, the hook in the first sentence ("This is the only place in the world where…").
-- The explanation in one continuous argument: what it is, why it is here, the surprising detail, what it means; each step matched by a small move or a gesture toward the thing.
-- Inserts (a drone wide, a detail, an archive still, a diagram) only where the words need them, 3–6 s each, returning to the take.
-- The ending: the presenter's last line to camera, a beat of silence, the end card with the music.
+In the Waveform interview, Scott describes a factual-entertainment sensibility and explains reframing an aquarium through a spaceship analogy. He also discusses different formats, undermining the idea that his entire practice is one uninterrupted on-location take.
 
-## The cut
+**Basis:** Direct interview transcript. The production choices below are editorial translations, not measured career-wide rules.
 
-- The main take runs 60–180 s; inserts 3–6 s; the drone establishing 6–10 s; nothing under 2 s.
-- Straight cuts to and from inserts only; a jump cut inside the take never (it is a single take); a slow fade to the end card.
-- Camera: a locked or a slow-tracking medium wide of the presenter, eye level, the location filling the background, natural light; drone wides; a handheld detail insert.
-- Grade: natural; the red shirt is the only designed element.
+## Material prerequisites
 
-## Narration — the presenter
+**Production fit:** Needs specific source footage. A precise factual question, a location or object that helps answer it and enough evidence to explain the mechanism.
 
-- The presenter's sync speech is the narration: second person, present tense, clear, quick, precise, British; a joke every minute, dry; 150–170 wpm. If generated: `generate_narration` voice leo, "quick, clear, British, matter-of-fact, slightly amused".
-- No voice-over over the take; the inserts are narrated by the take's continuing audio.
+## Picture and clip selection
 
-## Sound
+Choose the physical detail that makes the premise surprising. Include evidence of how it works and one boundary or exception; do not rely on the location merely as an attractive background.
 
-- Sync sound: the presenter (`muted: false`, `volume` 1) with the location's ambience (wind, water, a machine) live behind; no bed; music only in the end card (search "short upbeat sting library").
-- The location sound stays under the inserts (the take's audio continues; the insert is `muted`).
-- No sound effects.
+## Framing and camera
 
-## Picture — sources and text
+Position the presenter relative to the relevant object. Cut closer or add a diagram when the mechanism cannot be seen from the establishing view.
 
-- Sources: generated presenter shots ("a man in a red T-shirt standing in front of a large concrete dam, medium wide, overcast, natural light, 16:9, handheld-stable"), drone wides (archive or generated), archive stills and diagrams as inserts.
-- Text: a short on-screen caption for a name or a number the first time (small sans, bottom-left, 2–3 s); a "correction" or a source in small type when needed; the end card (name, place, credits).
+## Structure and rhythm
 
-## Do not
+Try surprising claim → real-world demonstration → explanation → qualification. Remove detours that do not help the central question, while retaining necessary caveats.
 
-- No cuts inside the take, no music under the speech, no dramatic drone move, no captions repeating the words, no b-roll for pace.
-- No claim without a source in the description or on screen.
-- No fake enthusiasm; the interest is in the fact.
+## Narration and sound
+
+Make speech and relevant location sound clear. Music and additional coverage are choices to test, not categorically forbidden; avoid competing with the explanation.
 
 ## Type
 
-**The signature.** Helvetica Black on a red band for the title, lighter Helvetica for the small text; captions for names and numbers only.
+Use a label, number or diagram when it reduces verbal load. Keep scale and units clear, and avoid unsupported precision.
 
-**Stand-ins.** Liberation Sans Bold / Regular for Helvetica Black / Helvetica. Faces: Liberation Sans 700, Liberation Sans 400. Case: sentence. Colour #FFFFFF on #C8102E. Entrance: none.
+Bundled typography presets are starting treatments. Choose a named work and a coherent project-specific title and supporting-text system. Fonts, colors, cases and roles may vary; source labels and accessibility captions remain available. Check safe areas, reading time and overlap.
 
-**Roles** (`add_text_overlay {role}` with this style in the brief):
+## Exceptions and review
 
-- **lower-third (default)** — the title on the red band. Liberation Sans Bold · 4.2 % · box · none · hold 3.5 s.
-- **callout** — a name or a number, first time. Liberation Sans · 3 % · none.
-- **citation** — a source or a correction. Liberation Sans.
+Replace bans on cuts within takes, music and supplementary coverage with a requirement that every addition improve understanding of the specific thing.
 
-**Never:** caption, intertitle, quote, card, date, label.
+Numeric pacing and narration ranges in the catalogue are editorial starting points, not measurements of the creator's career. Explain purposeful departures in styleTreatment.exceptions. Source integrity and technical validity still apply.
 
-**Survey note.** Surveyed: Helvetica Black for the titles, lighter Helvetica for small text; the red band is his signature.
+## Evaluation
 
-## Harness parameters
+Explain one unusual piece of infrastructure in 30 seconds. A viewer should describe both what is surprising and how it works.
 
-asl 6–12 s overall (one take 60–180 s, inserts 3–6 s) · min shot 2 s · transitions cuts (inserts only) · narration required as sync speech, presenter to camera, 150–170 wpm · music none (end card only) · sync sync-first · text sparse (captions for names / numbers) · interviews direct-address · beat-cut no
+**Failure mode:** A presenter in an interesting location can still deliver a generic fact list.
+
+The duration above is a suggested experiment length. Plan the test within the approved production scope; it is not a new approval gate or a claim that the test has passed.
 
 ## Applying it in SlopStudio
 
-- Plan: one long shot (`sound: "sync"`) as the spine, split in the plan into segments where inserts go (the take's audio continues via an audio-only clip of the take under the inserts); inserts `sound: "muted"` 3–6 s; `music: null`.
-- Cut: `split_segment` the take at the insert points and `add_segment audioOnly` the take's audio for continuity; `add_text_overlay` captions; `check_cuts` clean.
-- Verify: `check_soundtrack` shows one sound bite spanning the piece and no bed — the style; `pacing_report` will show a long ASL — correct.
+Read the shared director-style playbook included by get_style. Store reference, mechanism, materialPlan, rhythm, sound, typography, exceptions and evaluation in plan.styleTreatment. Carry these choices into actual shot descriptions, durations, script offsets and audio decisions. Inspect available material before committing exact timing; identify missing coverage instead of compensating with effects. Report technical checks, picture/motion review, listening review and the observed style result separately.
+
+## Sources
+
+- [How Tom Scott Makes Videos](https://podscripts.co/podcasts/waveform-the-mkbhd-podcast/how-tom-scott-makes-videos) — Waveform: The MKBHD Podcast; transcript hosted by Podscripts; 2022-06-03. First-person interview transcript mirror.

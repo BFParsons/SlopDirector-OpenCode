@@ -32,10 +32,10 @@ export async function ensureDesktopDb(): Promise<void> {
     "SELECT name FROM sqlite_master WHERE type='table' AND name='User'",
   );
   if (existing.length === 0) {
-    const ddlPath =
-      process.env.SLOPSTUDIO_SCHEMA_SQL ||
-      path.join(process.cwd(), "prisma", "desktop-schema.sql");
-    const ddl = readFileSync(ddlPath, "utf8");
+    // Runtime overrides must not trace the whole workspace into the build.
+    const ddl = process.env.SLOPSTUDIO_SCHEMA_SQL
+      ? readFileSync(/* turbopackIgnore: true */ process.env.SLOPSTUDIO_SCHEMA_SQL, "utf8")
+      : readFileSync(path.join(process.cwd(), "prisma", "desktop-schema.sql"), "utf8");
     for (const stmt of ddl.split(";").map((s) => s.trim()).filter(Boolean)) {
       await prisma.$executeRawUnsafe(stmt);
     }

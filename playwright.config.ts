@@ -1,4 +1,8 @@
 import { defineConfig } from "@playwright/test";
+import { existsSync } from "node:fs";
+
+const baseURL = process.env.PW_BASE_URL ?? "http://127.0.0.1:38473";
+const executablePath = process.env.PW_CHROMIUM ?? (existsSync("/usr/bin/chromium") ? "/usr/bin/chromium" : undefined);
 
 /**
  * End-to-end tests against the running dev server (SQLite desktop target, no
@@ -19,17 +23,18 @@ export default defineConfig({
   retries: 0,
   reporter: [["list"]],
   use: {
-    baseURL: process.env.PW_BASE_URL ?? "http://localhost:3000",
+    baseURL,
     viewport: { width: 936, height: 490 },
     // The API's CSRF check wants this on mutating requests (matches src/lib/api.ts).
     extraHTTPHeaders: { "X-Requested-With": "spotforge" },
-    launchOptions: { executablePath: process.env.PW_CHROMIUM ?? "/usr/bin/chromium" },
+    launchOptions: { executablePath },
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
   },
   webServer: {
-    command: "pnpm dev",
-    url: "http://localhost:3000/start",
+    command: "node scripts/launch-local.mjs --headless --dev",
+    url: `${baseURL}/start`,
+    env: { SLOPSTUDIO_PORT: new URL(baseURL).port || "38473" },
     reuseExistingServer: true,
     timeout: 120_000,
   },

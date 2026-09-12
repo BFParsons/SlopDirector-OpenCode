@@ -1,70 +1,63 @@
-# Veritasium — the misconception
+# Veritasium
 
-Work: Derek Muller's channel: "The Most Misunderstood Concept in Physics", "Why Machines That Bend Are Better", "The Big Misconception About Electricity", "Why Are 96,000,000 Black Balls on This Reservoir?"; the early street interviews.
+## Reference and mechanism
 
-## The signature
+Misconception-aware science explanation; distinguish educational evidence from assumptions about platform engagement.
 
-Start with what everyone believes, let people say it on camera, then take it apart — with a demonstration you can see, a diagram drawn on screen, an expert in their lab, and the host's own doubt. Clarity numbs; confusion opens. The video builds a question, makes it worse, then resolves it in a way you will remember because you were wrong first.
+A plausible mental model is tested and revised through evidence.
 
-## Structure — how a video is built
+## Evidence
 
-- The question (0–30 s) posed as a common belief, with two or three street answers (sync bites, 3–5 s each) that share the misconception.
-- The demonstration (30 s–2 min): a physical experiment, shown simply, that contradicts the belief; the host reacts honestly.
-- The explanation, layered: a diagram drawn as it is explained (kinetic text and simple graphics), an expert interview (produced, 10–20 s bites), a second demonstration at scale.
-- The reframe: the belief restated correctly; why the misconception exists; a last image of the demonstration.
+Muller's physics-education thesis examines multimedia explanations that engage learners' alternative conceptions. Its educational context matters: it does not establish a universal YouTube story order or prove that every surprising demonstration improves retention.
 
-## The cut
+**Basis:** Original educational research. The production choices below are editorial translations, not measured career-wide rules.
 
-- Average shot 3–6 s; demonstrations hold 8–15 s (the viewer must see it happen unedited); interviews 5–15 s; diagrams 6–12 s; nothing under 1.5 s.
-- Straight cuts; a diagram overlay animates in on the narration's nouns; a slow-motion replay (`speed` 0.25) of the demonstration once.
-- Camera: the host in the field or a workshop, medium; the experiment locked off and wide, then a detail; the expert in their own place (produced, off-lens); drone for scale.
-- Grade: natural, clean, slightly warm.
+## Material prerequisites
 
-## Narration — the curious host
+**Production fit:** Requires planned production. A testable proposition, a plausible misconception, a valid demonstration and an explanation of its conditions.
 
-- First person, present tense, plainly curious, admitting confusion: "I thought this was obvious. It isn't." 130–150 wpm; questions to the viewer ("So what's going on?"); the reframe stated in one memorable sentence.
-- Voice: the host's (sync) or `generate_narration` voice rex, "curious, clear, thinking aloud".
+## Picture and clip selection
 
-## Sound
+Find an experiment that distinguishes the competing explanations. Capture the setup, relevant variables, observation and a useful comparison; retain results that complicate the expected story.
 
-- Music is a **light bed** of curiosity (a plucked, minimal, slightly wondering cue) that drops out for the demonstration and returns for the explanation (search "curious plucked strings library", "science documentary light bed CC"); ducked 8 LU under speech.
-- Sync: the host and the experiment's real sound at full level (a snap, a hum, a splash — the sound is evidence); street bites clean.
-- A single hit when the demonstration contradicts the belief is allowed.
+## Framing and camera
 
-## Picture — sources and text
+Keep cause and effect visible together where feasible. Add close coverage or a diagram for hidden mechanisms, clearly distinguishing measurement from illustration.
 
-- Sources: the project's own demonstrations; generated shots ("wide static shot of a physics demonstration on a wooden table, a chain lifting from a beaker, natural light, 4K"); expert interviews (generated, off-lens, in a lab); street bites (archive or generated); diagrams as cards / text.
-- Text: the belief as a card ("Everyone thinks: …", 3 s); diagrams with labelled parts (kinetic text on a clean field); a number or a unit as a callout when spoken; the expert's lower-third (name · institution, 3 s).
+## Structure and rhythm
 
-## Do not
+Try prediction → test → observed mismatch → revised explanation → transfer question. Change this order if prior context is necessary; surprise should serve understanding.
 
-- No explanation before the demonstration; no diagram that is not drawn on the narration's words; no stock footage of "science".
-- No fast cutting; no music under the demonstration; no cut inside the demonstration.
-- No claim without the demonstration or the expert.
+## Narration and sound
+
+Protect the actual observation and its explanation from distracting cues. Use musical change to mark a conceptual turn, not to imply that a result is more certain than it is.
 
 ## Type
 
-**The signature.** A bold geometric sans for the belief card and the diagram labels, white, with light boxes; a lower-third for the expert.
+Display relevant variables, units and uncertainty. Let the diagram evolve as the explanation changes; avoid illustrating an incorrect model without clearly identifying it.
 
-**Stand-ins.** Montserrat for the geometric sans. Faces: Montserrat 600, Montserrat 900. Case: sentence. Colour #FFFFFF on #000000. Entrance: fade.
+Bundled typography presets are starting treatments. Choose a named work and a coherent project-specific title and supporting-text system. Fonts, colors, cases and roles may vary; source labels and accessibility captions remain available. Check safe areas, reading time and overlap.
 
-**Roles** (`add_text_overlay {role}` with this style in the brief):
+## Exceptions and review
 
-- **card** — 'Everyone thinks: …' on black. Montserrat SemiBold · 4.6 %.
-- **label (default)** — a diagram label drawn on the word. Montserrat SemiBold · 3 %.
-- **callout** — a number or a unit when spoken. Montserrat SemiBold.
-- **lower-third** — the expert's name and institution. Montserrat SemiBold · 3.4 %.
+Replace mandatory demo-first ordering and blanket cutting or music bans with a test of whether the viewer's initial model has actually changed.
 
-**Never:** intertitle, quote.
+Numeric pacing and narration ranges in the catalogue are editorial starting points, not measurements of the creator's career. Explain purposeful departures in styleTreatment.exceptions. Source integrity and technical validity still apply.
 
-**Survey note.** Assumption: the channel's face was not documented; a bold geometric sans is the manner.
+## Evaluation
 
-## Harness parameters
+Create a 30-second misconception demonstration, then ask viewers to predict a different example. Correct transfer is stronger evidence of learning than recalling the reveal.
 
-asl 3–6 s (demonstrations 8–15 s) · min shot 1.5 s · transitions cuts (diagrams animate in) · narration required, first-person curious host, 130–150 wpm · music required, light bed (out under demos) · sync sync-first · text kinetic (diagrams, callouts, lower-thirds) · interviews produced + street bites · beat-cut no
+**Failure mode:** A surprising result without a repaired mental model can leave the original misconception intact.
+
+The duration above is a suggested experiment length. Plan the test within the approved production scope; it is not a new approval gate or a claim that the test has passed.
 
 ## Applying it in SlopStudio
 
-- Plan: beats question / demonstration / explanation / reframe; street bites `sound: "sync"` 3–5 s; the demonstration shot 8–15 s `sound: "sync"` with no narration over it; diagram `card` shots with `text`; expert bites with lower-thirds.
-- Cut: `update_segments speed 0.25` on the replay; `add_text_overlay` labels and lower-thirds; `check_plan` "narration over sync" must be clean for the demonstration.
-- Music: `set_music` the bed; `balance_music` gap 8; the bed as an audio-only clip in two ranges (before and after the demonstration) if the cut wants it out completely.
+Read the shared director-style playbook included by get_style. Store reference, mechanism, materialPlan, rhythm, sound, typography, exceptions and evaluation in plan.styleTreatment. Carry these choices into actual shot descriptions, durations, script offsets and audio decisions. Inspect available material before committing exact timing; identify missing coverage instead of compensating with effects. Report technical checks, picture/motion review, listening review and the observed style result separately.
+
+## Sources
+
+- [Designing Effective Multimedia for Physics Education](https://studylib.net/doc/18658765/designing-effective-multimedia-for-physics-education) — Derek Alexander Muller, University of Sydney; thesis mirror; 2008. Original doctoral research, third-party text mirror.
+
+- [About / author's thesis link](https://www.veritasium.com/about) — Derek Muller, Veritasium; Undated. Author's official publication pointer.

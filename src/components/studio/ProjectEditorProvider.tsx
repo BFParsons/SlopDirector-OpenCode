@@ -303,6 +303,10 @@ export function ProjectEditorProvider({
             startS: t.startS,
             endS: t.endS,
             animation: t.animation,
+            font: t.font,
+            outlineW: t.outlineW,
+            shadow: t.shadow,
+            preset: t.preset,
           })),
           audioOverlays: draft.audioOverlays.map((o) => ({
             id: o.id,

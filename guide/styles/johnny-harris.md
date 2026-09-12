@@ -1,72 +1,61 @@
-# Johnny Harris — the map essay
+# Johnny Harris
 
-Work: Vox *Borders*, "Why the US has so many Filipino nurses", "How the US stole thousands of Native American children", the independent channel's geopolitics explainers; the Vox house style (no desks, no talking-head backbone).
+## Reference and mechanism
 
-## The signature
+Visual explanatory journalism; the 2025 How I Write interview supplies workflow evidence, not universal map rules.
 
-A first-person journalist standing in front of a wall of paper, and then a map: clean, label-free, zooming down to a region that fills with an accent colour, borders drawing themselves, callouts landing exactly on the words. Archive stitched between, a photograph pinned to the wall, a document with a line underlined, kinetic type that states the point in three words. Every animated element answers a question the narration just asked.
+A question is developed through visual explanation with a clear promise to the viewer.
 
-## Structure — how an essay is built
+## Evidence
 
-- The question in the first 15 s, personal ("I kept seeing this, and I couldn't figure out why."), over a map zooming in.
-- Three or four chapters, each moving in space (the map travels) and time (a date card); each built from the map → the archive → the document → the interview or the on-location shot → the point as kinetic type.
-- A personal on-location beat (the journalist walking, talking to camera, in the place) in the middle chapter.
-- The ending widens the map back out; the point restated in one sentence; the title.
+The interview publisher's notes and chapters identify visual scripting, video-first thinking and story promise. They support those workflow topics, but do not substantiate arbitrary map frequency, label bans or a prohibition on desk-based presentation.
 
-## The cut
+**Basis:** Primary interview notes; detailed visual prescriptions proposed. The production choices below are editorial translations, not measured career-wide rules.
 
-- Average shot 3–6 s; maps 5–10 s (a camera move: zoom, orbit, tilt); archive 2–4 s; on-location 4–8 s; nothing under 1 s.
-- Straight cuts; the map moves are the transitions; a photograph "pinned" onto the wall (a card with a slow push); type animates in on the word.
-- Camera: the journalist in front of a paper wall (medium, direct to lens), handheld on location; the map as a 3D camera (orbit + tilt); archive with slight motion.
-- Grade: the map palette — off-white, one accent colour, thin lines; archive warm; the wall neutral.
+## Material prerequisites
 
-## Narration — the journalist
+**Production fit:** Archive plus graphics. An answerable question, source-backed facts and graphics whose information can be traced to those facts.
 
-- First person, present tense, curious and plain, with the question re-asked at each chapter: "So why does this line exist?" 140–160 wpm; sources named in speech ("according to the 1898 treaty"); the point as a short sentence.
-- Voice: the host's (sync) or `generate_narration` voice rex, "curious, quick, clear, a journalist thinking aloud".
+## Picture and clip selection
 
-## Sound
+Build a paired script: each claim beside the visual evidence or explanation that carries it. Prefer a document, place or comparison that resolves the question over generic illustrative footage.
 
-- Music is a **library bed** with movement: a pulse, a piano, a light electronic drive under the maps; a warmer cue for the on-location beat; out under an interview (search "documentary explainer pulse bed library", "light piano electronic CC"); ducked 8 LU.
-- Sound design on the maps: a soft whoosh on the zoom, a tick on a label, a paper slide on a pinned photo (audio-only clips at −18 dB).
-- Sync: the journalist to camera and on location (`muted: false`); archive muted under narration.
+## Framing and camera
 
-## Picture — sources and text
+On maps, establish geography before moving to the relevant location. Keep orientation and scale visible long enough to support the claim; show the host where personal inquiry adds context.
 
-- Sources: generated map shots as cards ("clean minimal map, off-white land, thin grey borders, one country highlighted in orange, camera zooming down and orbiting, no labels"), archive (news, official channels, national archives), photographs and documents (public domain), the journalist (generated: "a man in a plain shirt in front of a wall covered in pinned papers and maps, medium, direct to lens").
-- Text: kinetic type — the point in 2–4 words (bold sans, accent colour, 1.5–2.5 s), map labels landing on the words, a date card (serif, 2–3 s), a source citation small under a document (2 s), an interviewee's lower-third.
+## Structure and rhythm
 
-## Do not
+Open a specific information gap, demonstrate the key relationship and update the question. Alternate explanation and encounter when each contributes something the other cannot.
 
-- No desk, no talking head as the spine, no stock footage, no map with default labels, no type that repeats the whole sentence.
-- No archive without a source; no claim without a document or a named source.
-- No animation that does not answer the narration's question.
+## Narration and sound
+
+Use music changes to distinguish inquiry, discovery and synthesis. Keep dense explanations acoustically simple; avoid treating every map move as an action-trailer transition.
 
 ## Type
 
-**The signature.** Vox's Franklin-class grotesque (Balto): bold points in an accent colour landing on the words, small-caps map labels, serif date cards, a lower-third for a source.
+Make labels and source dates readable. Animate routes, boundaries or comparisons only when movement conveys information; distinguish schematics from exact geography.
 
-**Stand-ins.** Libre Franklin for Balto / Franklin Gothic. Faces: Libre Franklin 900, Libre Franklin 700, Noto Serif 400. Case: sentence. Colour #FFD400 on #000000. Entrance: slide up.
+Bundled typography presets are starting treatments. Choose a named work and a coherent project-specific title and supporting-text system. Fonts, colors, cases and roles may vary; source labels and accessibility captions remain available. Check safe areas, reading time and overlap.
 
-**Roles** (`add_text_overlay {role}` with this style in the brief):
+## Exceptions and review
 
-- **caption (default)** — the point in 2–4 words, accent colour. Libre Franklin Black · 5 % · #FFD400 · no box · slide up · hold 2.2 s.
-- **label** — a map label landing on the word. Libre Franklin Bold · capitals · 2.8 % · #FFFFFF.
-- **date** — a date card in a serif. Noto Serif · 3.6 % · center · #FFFFFF.
-- **lower-third** — a source's name and role. Libre Franklin Bold · 3.4 % · #FFFFFF.
-- **citation** — a source under a document. Libre Franklin Bold · #FFFFFF.
+Replace no-desk, no-label and map-by-default rules with a visual justification for each claim. Flag uncertain source claims independently from presentation polish.
 
-**Never:** intertitle, quote.
+Numeric pacing and narration ranges in the catalogue are editorial starting points, not measurements of the creator's career. Explain purposeful departures in styleTreatment.exceptions. Source integrity and technical validity still apply.
 
-**Survey note.** Surveyed: Vox sets in Balto (with Harriet and Roboto Mono); Harris's own channel keeps the bold grotesque and the accent colour.
+## Evaluation
 
-## Harness parameters
+Build a 30-second map explanation. Viewers should state the relationship the animation demonstrated and distinguish it from a merely decorative camera move.
 
-asl 3–6 s (maps 5–10 s) · min shot 1 s · transitions cuts (map moves) · narration required, first-person journalist, 140–160 wpm · music required, pulse bed · sync mixed · text kinetic (type, labels, date cards, citations) · interviews direct-address (journalist) + produced (sources) · beat-cut no
+**Failure mode:** Moving maps and handwritten marks can create the appearance of investigation without supplying evidence.
+
+The duration above is a suggested experiment length. Plan the test within the approved production scope; it is not a new approval gate or a claim that the test has passed.
 
 ## Applying it in SlopStudio
 
-- Plan: chapters as beats each opening on a map `card` and a date `card`; the on-location beat in the middle with `sound: "sync"` shots; kinetic type as `text` lines at the narration's points; every archive shot's description names its source.
-- Sourcing: `search_youtube` on official and archive channels; `youtube_captions` to find the quoted moment.
-- Cut: `add_text_overlay` type (POP, accent colour) and labels; `update_segments imageMotion` push on photographs; `add_segment audioOnly` whooshes and ticks at −18 dB.
-- Music: `set_music` the pulse bed; `balance_music` gap 8.
+Read the shared director-style playbook included by get_style. Store reference, mechanism, materialPlan, rhythm, sound, typography, exceptions and evaluation in plan.styleTreatment. Carry these choices into actual shot descriptions, durations, script offsets and audio decisions. Inspect available material before committing exact timing; identify missing coverage instead of compensating with effects. Report technical checks, picture/motion review, listening review and the observed style result separately.
+
+## Sources
+
+- [Johnny Harris: Master Storytelling on YouTube](https://podcasts.apple.com/ca/podcast/johnny-harris-master-storytelling-on-youtube/id1700171470?i=1000698950686) — David Perell, How I Write / Apple Podcasts; 2025-03-12. Primary interview publisher's notes and chapters.

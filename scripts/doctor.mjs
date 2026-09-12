@@ -1,0 +1,38 @@
+import { spawnSync } from "node:child_process";
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { ROOT, require } from "./local-runtime.mjs";
+
+process.chdir(ROOT);
+if (existsSync(join(ROOT, ".env"))) process.loadEnvFile(join(ROOT, ".env"));
+let failed = false;
+const report = (name, ok, detail, optional = false) => {
+  console.log(`${ok ? "OK" : optional ? "OPTIONAL" : "MISSING"} ${name}: ${detail}`);
+  if (!ok && !optional) failed = true;
+};
+const check = (name, command, args, optional = false) => {
+  const result = spawnSync(command, args, { encoding: "utf8", windowsHide: true, timeout: 20000 });
+  report(name, result.status === 0, result.status === 0 ? (result.stdout || result.stderr).split(/\r?\n/)[0] : `install/configure ${command}`, optional);
+};
+report("Node", Number(process.versions.node.split(".")[0]) >= 22 && Number(process.versions.node.split(".")[0]) < 26, process.version);
+for (const name of ["next", "tsx", "@prisma/client"]) {
+  try { report(name, true, require(`${name}/package.json`).version); }
+  catch { report(name, false, "run corepack pnpm install --frozen-lockfile"); }
+}
+try {
+  const dir = dirname(require.resolve("electron/package.json"));
+  const installed = existsSync(join(dir, "dist", readFileSync(join(dir, "path.txt"), "utf8").trim()));
+  report("Electron", installed, installed ? "desktop runtime" : "run node node_modules/electron/install.js");
+} catch { report("Electron", false, "run node node_modules/electron/install.js"); }
+const binary = (name) => process.env[`SLOPSTUDIO_${name.toUpperCase()}_PATH`] || (process.env.SLOPSTUDIO_FFMPEG_DIR ? join(process.env.SLOPSTUDIO_FFMPEG_DIR, name + (process.platform === "win32" ? ".exe" : "")) : name);
+check("FFmpeg", binary("ffmpeg"), ["-version"]);
+check("FFprobe", binary("ffprobe"), ["-version"]);
+check("YouTube import", process.env.YTDLP_BIN || "yt-dlp", ["--version"], true);
+check("YouTube JS runtime", "deno", ["--version"], true);
+const venv = join(ROOT, ".venv", process.platform === "win32" ? "Scripts/python.exe" : "bin/python");
+const python = process.env.SLOPSTUDIO_PYTHON || (existsSync(venv) ? venv : process.platform === "win32" ? "python" : "python3");
+check("Beat detection", python, ["-c", "import librosa; print('librosa available')"], true);
+check("Transcription", python, ["-c", "import whisper; print('Whisper available')"], true);
+check("Stem separation", python, ["-c", "import demucs, torch, torchaudio, torchcodec; print('Demucs / torch / torchcodec available')"], true);
+report("Codex configuration", existsSync(join(ROOT, ".codex", "config.toml")), "run corepack pnpm codex:setup", true);
+process.exitCode = failed ? 1 : 0;

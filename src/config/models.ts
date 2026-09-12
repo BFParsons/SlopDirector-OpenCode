@@ -170,8 +170,8 @@ export function ttsVoices(id: string): string[] {
 
 export const CAPS = {
   maxShots: 8, // max AI-generated shots per project (cost guard)
-  maxSegments: 30, // max total visual segments (AI + uploaded clips/photos)
-  maxAudioOverlays: 8, // max audio overlays mixed over the final
+  maxSegments: 120, // visual edit capacity; not a shot-count target or AI budget
+  maxAudioOverlays: 32, // independently mixed music/effects/ambience overlays
   maxTextOverlays: 12, // max burned-in text overlays
   maxShotDurationS: 8,
   maxTotalDurationS: 60,

@@ -6,7 +6,7 @@
   "main": "electron/main.js",
   "packageManager": "pnpm@10.33.0",
   "scripts": {
-    "dev": "NODE_OPTIONS=--max-old-space-size=4096 next dev",
+    "dev": "cross-env NODE_OPTIONS=--max-old-space-size=4096 next dev",
     "worker": "tsx --env-file=.env scripts/worker.ts",
     "create-admin": "tsx scripts/create-admin.ts",
     "seed-perf": "tsx --env-file=.env scripts/seed-perf-project.ts",
@@ -22,17 +22,23 @@
     "db:sqlite:ddl": "node scripts/gen-desktop-ddl.mjs",
     "db:sqlite:generate": "prisma generate --schema prisma/schema.sqlite.prisma",
     "db:sqlite:migrate": "prisma migrate dev --schema prisma/schema.sqlite.prisma",
-    "desktop:dev": "concurrently -k -n next,electron -c blue,magenta \"next dev\" \"wait-on -t 60000 http://localhost:3000 && cross-env ELECTRON_DEV=1 electron electron/main.js\"",
+    "desktop:dev": "node scripts/launch-local.mjs --dev",
     "desktop:start": "cross-env ELECTRON_DEV=1 electron electron/main.js",
-    "desktop:standalone": "rm -rf dist .next/standalone && pnpm db:sqlite:generate && next build && node scripts/postbuild-standalone.mjs",
-    "desktop:build": "pnpm desktop:standalone && bash scripts/fetch-ffmpeg.sh && electron-builder --linux AppImage",
+    "desktop:standalone": "node scripts/build-desktop.mjs",
+    "desktop:build": "node scripts/build-desktop.mjs && bash scripts/fetch-ffmpeg.sh && electron-builder --linux AppImage",
+    "desktop:build:win": "node scripts/build-desktop.mjs && powershell -NoProfile -ExecutionPolicy Bypass -File scripts/fetch-ffmpeg.ps1 && node scripts/package-desktop.mjs --win nsis --x64",
+    "codex:setup": "node scripts/setup-codex.mjs",
+    "doctor": "node scripts/doctor.mjs",
+    "test:windows": "tsx --test tests/platform/windows.test.ts",
+    "test:motion": "tsx --test tests/platform/motion.test.ts",
+    "test:interview": "tsx --test tests/platform/interview.test.ts",
     "test:e2e": "playwright test",
     "test:eval": "tsx tests/eval/run.ts",
     "test:mcp": "tsx tests/mcp/run.ts",
-    "mcp": "tsx mcp/server.ts",
-    "serve:headless": "bash scripts/serve-headless.sh",
+    "mcp": "node mcp/run.cjs",
+    "serve:headless": "node scripts/launch-local.mjs --headless",
     "test:e2e:ui": "playwright test --ui",
-    "desktop:prod": "bash scripts/launch-desktop.sh --prod"
+    "desktop:prod": "node scripts/launch-local.mjs --prod"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -96,11 +102,37 @@
         "to": "ffmpeg",
         "filter": [
           "ffmpeg",
-          "ffprobe"
+          "ffprobe",
+          "*.exe",
+          "LICENSE*",
+          "SOURCE*"
         ]
       }
     ],
+    "win": {
+      "target": ["nsis"],
+      "signAndEditExecutable": false,
+      "extraResources": [
+        {
+          "from": ".data/windows-runtime/node_modules",
+          "to": "standalone/node_modules"
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "deleteAppDataOnUninstall": false
+    },
     "linux": {
+      "extraResources": [
+        {
+          "from": ".next/standalone/node_modules",
+          "to": "standalone/node_modules"
+        }
+      ],
       "target": [
         "AppImage"
       ],

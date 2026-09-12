@@ -4,23 +4,29 @@
  * pacing_report, check_soundtrack) and prose the agent follows
  * (guide/styles/<id>.md, read with get_style). The brief names one
  * (production.style.id) during the interview; the plan and the cut are then
- * held to it.
+ * reviewed against its selected reference and creative treatment.
  *
  * The parameters are deliberately blunt — a range, a policy, a kind — so a
- * plan can be checked mechanically. The nuance (sentence shapes, what a cut
+ * plan receives advisory checks; these are not historical measurements. The nuance (sentence shapes, what a cut
  * to black means, which music) lives in the markdown next to each entry.
  * guide/styles/README.md is the index by category.
  */
+import research from "./research.json";
+
+export type StyleCraft = (typeof research)[keyof typeof research];
+const craftById: Readonly<Record<string, StyleCraft | undefined>> = research;
+
 export type Policy = "required" | "optional" | "none";
 export type Category = "documentary" | "advertising" | "music-video" | "drama" | "political" | "trailer" | "essay" | "comedy" | "youtube";
 
 export interface StyleParams {
-  /** average shot length the style lives in (seconds) */
+  /** suggested starting average shot length (seconds), not a measured signature */
   aslS: [number, number];
-  /** a shot shorter than this is out of style (seconds) */
+  /** review shorter shots against the selected reference; this is not a prohibition */
   minShotS: number;
   /** cuts · cuts-and-black (hard cuts; black between beats) · dissolves (dissolves and fades are the grammar) · kinetic (whips, snap zooms, wipes, jump cuts) */
   transitions: "cuts" | "cuts-and-black" | "dissolves" | "kinetic";
+  /** Preference for the starting reference; departures are review findings. */
   narration: Policy;
   /** essayist (third person, "this is a story about") · first-person (the filmmaker as a character, or a whisper) · director (the director's own meditative voice) · third-person (a measured reader) · presenter (a host to camera, sync) · chant · none */
   narrationVoice: "essayist" | "first-person" | "director" | "third-person" | "presenter" | "chant" | "none";
@@ -36,7 +42,7 @@ export interface StyleParams {
   stills: boolean;
   /** none · direct-address (the subject or host speaks to the lens) · produced (lit talking heads, off-lens) · confrontation (the filmmaker in frame) */
   interviews: "none" | "direct-address" | "produced" | "confrontation";
-  /** the cut sits on a beat grid (check_beat_alignment is part of verification) */
+  /** rhythmic editing is a tendency; selected passages may use beat analysis, never a required alignment percentage */
   beatCut: boolean;
 }
 
@@ -50,6 +56,9 @@ export interface Style {
   /** genres / forms the style is offered for (tested against the brief's genre and form) */
   genres: RegExp;
   params: StyleParams;
+  /** Editorial starting ranges, not measured career-wide limits. */
+  parameterBasis: "editorial-defaults";
+  craft?: StyleCraft;
   /** guide/styles/<file> — the prose instructions */
   file: string;
 }
@@ -71,9 +80,11 @@ type P = [
 ];
 const style = (id: string, name: string, category: Category, oneLine: string, genres: RegExp, p: P): Style => ({
   id,
-  name,
+  name: craftById[id]?.name ?? name,
   category,
-  oneLine,
+  oneLine: craftById[id]?.mechanism ?? oneLine,
+  parameterBasis: "editorial-defaults",
+  craft: craftById[id],
   genres,
   params: { aslS: p[0], minShotS: p[1], transitions: p[2], narration: p[3], narrationVoice: p[4], narrationWpm: p[5], music: p[6], musicKind: p[7], sync: p[8], text: p[9], stills: p[10], interviews: p[11], beatCut: p[12] },
   file: `${id}.md`,
@@ -92,56 +103,57 @@ const any = (...rs: RegExp[]) => new RegExp(rs.map((r) => r.source).join("|"), "
 
 export const STYLES: Style[] = [
   // --- documentary
-  style("adam-curtis", "Adam Curtis", "documentary", "the archive essay: raided archive, an essayist's narration, found music against the picture, hard cuts to black", any(DOC, /politic|power/), [[4, 9], 1.5, "cuts-and-black", "required", "essayist", [60, 95], "required", "found", "mixed", "cards", false, "none", false]),
-  style("michael-moore", "Michael Moore", "documentary", "the first-person polemic: sardonic narration, ironic pop against grim archive, confrontations with sync sound", any(DOC, POL, /expos/), [[3, 6], 1, "cuts", "required", "first-person", [90, 130], "required", "found", "sync-first", "lower-thirds", false, "confrontation", false]),
-  style("errol-morris", "Errol Morris", "documentary", "the interrogation: subjects speak straight to the lens, stylised reenactments, a minimalist looping score, no narrator", any(DOC, /crime|interview/), [[5, 10], 1.5, "cuts-and-black", "none", "none", null, "required", "score", "sync-first", "sparse", false, "direct-address", false]),
-  style("ken-burns", "Ken Burns", "documentary", "the chronicle: photographs that move, a measured narrator and a chorus of letters, period music, dissolves", any(DOC, /biograph|heritage|\bwar\b/), [[6, 12], 3, "dissolves", "required", "third-person", [70, 105], "required", "period", "muted", "sparse", true, "produced", false]),
-  style("werner-herzog", "Werner Herzog", "documentary", "the ecstatic truth: long takes, the director's own meditative voice, choral music, silence, the unanswerable question", any(DOC, /nature|landscape|expedition|science/), [[8, 20], 4, "cuts", "required", "director", [30, 60], "required", "choral", "mixed", "none", false, "produced", false]),
-  style("frederick-wiseman", "Frederick Wiseman", "documentary", "the observation: no narrator, no music, no text, no interviews — long sequences of sync sound inside an institution", any(DOC, /fly on the wall|cinema/), [[8, 30], 3, "cuts", "none", "none", null, "none", "none", "sync-first", "none", false, "none", false]),
-  style("humphrey-jennings", "Humphrey Jennings", "documentary", "the country listening: sequences of real sound handed one to the next, found music from inside the picture, no commentary", any(DOC, POL), [[4, 8], 1.5, "cuts", "none", "none", null, "optional", "found", "sync-first", "none", false, "none", false]),
-  style("lemmino", "LEMMiNO", "documentary", "the dark documentary: maps, documents and photographs on black, a calm archivist's narration, an ambient score", any(DOC, /mystery|youtube/), [[5, 10], 2, "dissolves", "required", "third-person", [110, 130], "required", "score", "muted", "cards", true, "none", false]),
+  style("adam-curtis", "Adam Curtis", "documentary", "the archive essay: declarative narration, pregnant pauses carried by striking archive, found songs that turn the emotion, hard cuts to black", any(DOC, /politic|power/), [[4, 9], 1.5, "cuts-and-black", "required", "essayist", [60, 95], "required", "found", "mixed", "cards", false, "none", false]),
+  style("michael-moore", "Michael Moore", "documentary", "A public claim becomes a concrete, often absurd encounter.", any(DOC, POL, /expos/), [[3, 6], 1, "cuts", "required", "first-person", [90, 130], "required", "found", "sync-first", "lower-thirds", false, "confrontation", false]),
+  style("errol-morris", "Errol Morris", "documentary", "Testimony and recurring images expose uncertainty instead of closing it too soon.", any(DOC, /crime|interview/), [[5, 10], 1.5, "cuts-and-black", "optional", "third-person", null, "required", "score", "sync-first", "sparse", false, "direct-address", false]),
+  style("ken-burns", "Ken Burns", "documentary", "An image changes meaning as its context and human stakes become visible.", any(DOC, /biograph|heritage|\bwar\b/), [[6, 12], 3, "dissolves", "required", "third-person", [70, 105], "required", "period", "mixed", "sparse", true, "produced", false]),
+  style("werner-herzog", "Werner Herzog", "documentary", "A concrete observation opens a larger, unsettling question.", any(DOC, /nature|landscape|expedition|science/), [[8, 20], 4, "cuts", "required", "director", [30, 60], "required", "choral", "mixed", "none", false, "produced", false]),
+  style("frederick-wiseman", "Frederick Wiseman", "documentary", "Procedures and relationships reveal how an institution works.", any(DOC, /fly on the wall|cinema/), [[8, 30], 3, "cuts", "none", "none", null, "none", "none", "sync-first", "none", false, "none", false]),
+  style("humphrey-jennings", "Humphrey Jennings", "documentary", "Sound connects separate lives into a larger social picture.", any(DOC, POL), [[4, 8], 1.5, "cuts", "optional", "third-person", null, "optional", "found", "sync-first", "none", false, "none", false]),
+  style("lemmino", "LEMMiNO", "documentary", "A confusing event becomes a set of inspectable claims, positions and uncertainties.", any(DOC, /mystery|youtube/), [[5, 10], 2, "dissolves", "required", "third-person", [110, 130], "required", "score", "mixed", "cards", true, "none", false]),
   // --- advertising
-  style("ridley-scott", "Ridley Scott", "advertising", "the cinematic spot: an epic world, one figure who breaks the pattern, the product arriving late and once", AD, [[2, 4], 0.7, "cuts", "optional", "third-person", [10, 50], "required", "score", "muted", "sparse", false, "none", true]),
-  style("spike-jonze", "Spike Jonze", "advertising", "the playful idea: one absurd premise taken completely seriously, a sincere song, a deadpan turn", any(AD, MV), [[2, 5], 0.7, "cuts", "optional", "third-person", [0, 30], "required", "song", "mixed", "sparse", false, "none", false]),
-  style("jonathan-glazer", "Jonathan Glazer", "advertising", "the sensory spot: monochrome, slow motion, one physical event become a myth, a drum that the cut sits on", AD, [[2, 4], 0.4, "cuts", "optional", "chant", [20, 60], "required", "cue", "mixed", "sparse", false, "none", true]),
-  style("hal-riney", "Hal Riney", "advertising", "Morning in America: soft sunlit moments, a warm neighbourly voice with numbers folded in, strings that climb", any(AD, POL), [[4, 6], 2, "dissolves", "required", "third-person", [70, 100], "required", "score", "muted", "sparse", false, "none", false]),
+  style("ridley-scott", "Ridley Scott", "advertising", "A believable visual world makes a brief action feel consequential.", AD, [[2, 4], 0.7, "cuts", "optional", "third-person", [10, 50], "required", "score", "mixed", "sparse", false, "none", true]),
+  style("spike-jonze", "Spike Jonze", "advertising", "An ordinary emotional state becomes a physical transformation.", any(AD, MV), [[2, 5], 0.7, "cuts", "optional", "third-person", [0, 30], "required", "song", "mixed", "sparse", false, "none", false]),
+  style("jonathan-glazer", "Jonathan Glazer", "advertising", "One precise visual analogy becomes a forceful sensory event.", AD, [[2, 4], 0.4, "cuts", "optional", "chant", [20, 60], "required", "cue", "mixed", "sparse", false, "none", true]),
+  style("hal-riney", "Hal Riney", "advertising", "A simple spoken idea gains force from a carefully chosen everyday or symbolic image.", any(AD, POL), [[4, 6], 2, "dissolves", "required", "third-person", [70, 100], "required", "score", "muted", "sparse", false, "none", false]),
   // --- music video
-  style("michel-gondry", "Michel Gondry", "music-video", "the handmade loop: the song's structure made visible, one rule per element, repetition that grows", MV, [[1, 2], 0.25, "cuts", "none", "none", null, "required", "song", "muted", "none", false, "none", true]),
-  style("hype-williams", "Hype Williams", "music-video", "the gloss: fisheye, saturated colour per section, split screens, the performer at the centre of a bending world", MV, [[0.8, 2], 0.25, "cuts", "none", "none", null, "required", "song", "muted", "lower-thirds", false, "none", true]),
-  style("anton-corbijn", "Anton Corbijn", "music-video", "the grain: black and white, a performer alone in a landscape, the band to camera in a bare room, still frontal portraits", MV, [[3, 6], 1, "cuts", "none", "none", null, "required", "song", "muted", "sparse", false, "none", false]),
-  style("chris-cunningham", "Chris Cunningham", "music-video", "the uncanny: a bleak real place, something slightly wrong, a drop cut to the track's stutters, technically exact", MV, [[2, 6], 0.1, "cuts", "none", "none", null, "required", "song", "mixed", "none", false, "none", true]),
+  style("michel-gondry", "Michel Gondry", "music-video", "A simple visual rule produces accumulating surprise.", MV, [[1, 2], 0.25, "cuts", "none", "none", null, "required", "song", "muted", "none", false, "none", true]),
+  style("hype-williams", "Hype Williams", "music-video", "The performer becomes an unmistakable visual icon matched to the music.", MV, [[0.8, 2], 0.25, "cuts", "none", "none", null, "required", "song", "muted", "lower-thirds", false, "none", true]),
+  style("anton-corbijn", "Anton Corbijn", "music-video", "A performer, a landscape and a recurring emblem imply an inner condition.", MV, [[3, 6], 1, "cuts", "none", "none", null, "required", "song", "muted", "sparse", false, "none", false]),
+  style("chris-cunningham", "Chris Cunningham", "music-video", "An apparently physical body behaves according to an unfamiliar musical logic.", MV, [[2, 6], 0.1, "cuts", "none", "none", null, "required", "song", "mixed", "none", false, "none", true]),
   // --- dramatic scripted
-  style("wes-anderson", "Wes Anderson", "drama", "the diorama: planimetric symmetry, chapter cards, whip pans, deadpan faces, a storybook narrator, found 1960s pop", any(DRAMA, COMEDY, /whimsical/), [[3, 7], 1, "kinetic", "optional", "third-person", [60, 100], "required", "found", "sync-first", "cards", false, "none", false]),
-  style("christopher-nolan", "Christopher Nolan", "drama", "the clockwork: parallel strands intercut faster and faster, enormous steady images, a score that only rises", any(DRAMA, /action/), [[3, 6], 0.8, "cuts", "optional", "third-person", [20, 50], "required", "score", "sync-first", "cards", false, "none", false]),
-  style("denis-villeneuve", "Denis Villeneuve", "drama", "the monolith: a tiny figure against something vast, shots held past information, a drone score, one hue per world", DRAMA, [[6, 15], 2, "cuts", "optional", "first-person", [15, 40], "required", "score", "mixed", "none", false, "none", false]),
-  style("edgar-wright", "Edgar Wright", "drama", "the snap: every cut on a sound, whip pans and crash zooms, a diegetic song the world moves on, set-ups that pay off", any(DRAMA, COMEDY, /action|montage/), [[1, 3], 0.2, "kinetic", "none", "none", null, "required", "song", "sync-first", "kinetic", false, "none", true]),
-  style("terrence-malick", "Terrence Malick", "drama", "the whisper: magic hour, a drifting camera, fragments of a day, a whispered question to someone absent, choral music", any(DRAMA, /memory|poetic|elegy/), [[2, 5], 1, "cuts", "required", "first-person", [20, 50], "required", "choral", "mixed", "none", false, "none", false]),
+  style("martin-scorsese", "Martin Scorsese", "drama", "An insider's account draws us into a world of status and appetite, then behavior and consequences expose the cost.", any(DRAMA, TRAILER, DOC, /crime|gangster|biograph|rise and fall|character study/), [[2, 6], 0.33, "cuts", "optional", "first-person", [70, 120], "optional", "found", "mixed", "sparse", false, "none", false]),
+  style("wes-anderson", "Wes Anderson", "drama", "Composition and performance timing turn social relationships into visible arrangements.", any(DRAMA, COMEDY, /whimsical/), [[3, 7], 1, "kinetic", "optional", "third-person", [60, 100], "required", "found", "sync-first", "cards", false, "none", false]),
+  style("christopher-nolan", "Christopher Nolan", "drama", "Separate strands acquire urgency as their relationship becomes intelligible.", any(DRAMA, /action/), [[3, 6], 0.8, "cuts", "optional", "third-person", [20, 50], "required", "score", "sync-first", "cards", false, "none", false]),
+  style("denis-villeneuve", "Denis Villeneuve", "drama", "A small human perception or gesture gains force against a vast environment.", DRAMA, [[6, 15], 2, "cuts", "optional", "first-person", [15, 40], "required", "score", "mixed", "none", false, "none", false]),
+  style("edgar-wright", "Edgar Wright", "drama", "Setup, action, sound and payoff form a pattern the audience can recognize and anticipate.", any(DRAMA, COMEDY, /action|montage/), [[1, 3], 0.2, "kinetic", "optional", "third-person", null, "required", "song", "sync-first", "kinetic", false, "none", true]),
+  style("terrence-malick", "Terrence Malick", "drama", "Image, gesture and voice suggest an experience larger than any literal illustration.", any(DRAMA, /memory|poetic|elegy/), [[2, 5], 1, "cuts", "required", "first-person", [20, 50], "required", "choral", "mixed", "none", false, "none", false]),
   // --- patriotic / political
-  style("frank-capra", "Frank Capra", "political", "the case for the fight: the enemy's own footage turned against him, a neighbourly narrator with numbers, maps that move, contrast pairs", any(POL, /\bwar\b|explainer/), [[3, 6], 1, "cuts", "required", "presenter", [100, 140], "required", "period", "mixed", "cards", false, "none", false]),
-  style("sergei-eisenstein", "Sergei Eisenstein", "political", "the collision: meaning made by hitting two shots together, motifs returning faster, overlapping action, intertitles", any(POL, DRAMA, /montage/), [[1, 3], 0.3, "cuts", "none", "none", null, "required", "score", "muted", "cards", false, "none", true]),
-  style("tony-schwartz", "Tony Schwartz", "political", "the responsive chord: one image, one sound, one implication — the audience completes the message", any(POL, AD), [[5, 10], 1, "cuts", "required", "third-person", [40, 80], "optional", "cue", "sync-first", "cards", false, "none", false]),
-  style("lincoln-project", "The Lincoln Project", "political", "the prosecution: the subject's own words against the pictures of what they cost, a grim narrator, bold captions, a dread cue", any(POL, /satir|spot/), [[2, 4], 0.7, "cuts-and-black", "required", "third-person", [100, 130], "required", "cue", "sync-first", "kinetic", false, "none", false]),
+  style("frank-capra", "Frank Capra", "political", "A clearly stated argument is developed through organized archival evidence and explanation.", any(POL, /\bwar\b|explainer/), [[3, 6], 1, "cuts", "required", "presenter", [100, 140], "required", "period", "mixed", "cards", false, "none", false]),
+  style("sergei-eisenstein", "Sergei Eisenstein", "political", "Relationships between images and bodily forms create an idea or conflict.", any(POL, DRAMA, /montage/), [[1, 3], 0.3, "cuts", "optional", "third-person", null, "required", "score", "muted", "cards", false, "none", true]),
+  style("tony-schwartz", "Tony Schwartz", "political", "A familiar sound changes meaning through a sharply designed association.", any(POL, AD), [[5, 10], 1, "cuts", "required", "third-person", [40, 80], "optional", "cue", "sync-first", "cards", false, "none", false]),
+  style("lincoln-project", "The Lincoln Project", "political", "Existing statements are organized to make a contradiction or consequence easy to follow.", any(POL, /satir|spot/), [[2, 4], 0.7, "cuts-and-black", "required", "third-person", [100, 130], "required", "cue", "sync-first", "kinetic", false, "none", false]),
   // --- trailers
-  style("mark-woollen", "Mark Woollen", "trailer", "the mood piece: a slow choral cover, quiet images, dialogue as poetry, black between lines, the title when the song breaks", TRAILER, [[2, 4], 0.8, "cuts-and-black", "none", "none", null, "required", "song", "sync-first", "cards", false, "none", false]),
-  style("buddha-jones", "Buddha Jones", "trailer", "the dread: a warped pop song, black frames between accelerating shots, a sound that stops, the monster withheld", any(TRAILER, /horror|thriller/), [[1.5, 3], 0.15, "cuts-and-black", "none", "none", null, "required", "cue", "mixed", "cards", false, "none", true]),
-  style("av-squad", "AV Squad", "trailer", "the blockbuster rise: a cold open, a riser that never stops, tempo doubling to a beat-locked money sequence, a stopdown, the title, a button", any(TRAILER, /action|blockbuster/), [[1.5, 3], 0.3, "cuts", "none", "none", null, "required", "cue", "sync-first", "cards", false, "none", true]),
-  style("a24", "A24", "trailer", "the cryptic teaser: shows almost everything, tells almost nothing — one sound idea, one typeface, the film sold as an object", any(TRAILER, /art|indie/), [[2, 5], 0.4, "cuts", "none", "none", null, "optional", "found", "mixed", "cards", false, "none", false]),
-  style("anais-bimpel", "Anaïs Bimpel", "trailer", "the rhythmic trailer: the picture's own sounds sequenced into the beat, the cue entering late already in time", any(TRAILER, /rhythm|spot/), [[1, 3], 0.25, "cuts", "none", "none", null, "required", "cue", "sync-first", "cards", false, "none", true]),
+  style("mark-woollen", "Mark Woollen", "trailer", "A distinctive music-and-image proposition sells the film's emotional experience.", TRAILER, [[2, 4], 0.8, "cuts-and-black", "optional", "third-person", null, "required", "song", "sync-first", "cards", false, "none", false]),
+  style("buddha-jones", "Buddha Jones", "trailer", "Controlled information and changing sonic pressure build anticipation and reversal.", any(TRAILER, /horror|thriller/), [[1.5, 3], 0.15, "cuts-and-black", "optional", "third-person", null, "required", "cue", "mixed", "cards", false, "none", true]),
+  style("av-squad", "AV Squad", "trailer", "campaign-led spectacle: a specific hook, escalating moments, musical contrast and a distinctive finish", any(TRAILER, /action|blockbuster/), [[1, 4], 0.2, "cuts", "optional", "none", null, "required", "cue", "mixed", "cards", false, "none", false]),
+  style("a24", "A24", "trailer", "Campaign specificity is the useful starting point; there is no defensible single-director system.", any(TRAILER, /art|indie/), [[2, 5], 0.4, "cuts", "optional", "third-person", null, "optional", "found", "mixed", "cards", false, "none", false]),
+  style("anais-bimpel", "Anaïs Bimpel", "trailer", "sound-led construction: character moments, source sounds and musical phrases arranged with elastic timing", any(TRAILER, /rhythm|spot/), [[1, 3], 0.25, "cuts", "optional", "none", null, "required", "cue", "mixed", "cards", false, "none", false]),
   // --- essay / explainer
-  style("tony-zhou", "Tony Zhou", "essay", "Every Frame a Painting: one idea about film form, the clips as evidence shown twice with the point marked, every clip cited", any(ESSAY, /film|cinema/), [[3, 6], 1, "cuts", "required", "first-person", [110, 140], "optional", "bed", "sync-first", "lower-thirds", false, "none", false]),
-  style("johnny-harris", "Johnny Harris", "essay", "the map essay: a journalist in front of a paper wall, label-free maps that zoom and orbit, kinetic type that answers the narration", any(ESSAY, DOC, /youtube/), [[3, 6], 1, "kinetic", "required", "first-person", [140, 160], "required", "bed", "mixed", "kinetic", true, "direct-address", false]),
+  style("tony-zhou", "Taylor Ramos & Tony Zhou", "essay", "The viewer sees an argument demonstrated through the audiovisual evidence itself.", any(ESSAY, /film|cinema/), [[3, 6], 1, "cuts", "required", "first-person", [110, 140], "optional", "bed", "sync-first", "lower-thirds", false, "none", false]),
+  style("johnny-harris", "Johnny Harris", "essay", "A question is developed through visual explanation with a clear promise to the viewer.", any(ESSAY, DOC, /youtube/), [[3, 6], 1, "kinetic", "required", "first-person", [140, 160], "required", "bed", "mixed", "kinetic", true, "direct-address", false]),
   // --- comedy
-  style("christopher-guest", "Christopher Guest", "comedy", "the mockumentary: sincere interviews in front of a wall, stolen observational footage, the joke in the gap and the pause", COMEDY, [[4, 8], 1.5, "cuts", "none", "none", null, "none", "none", "sync-first", "lower-thirds", false, "produced", false]),
+  style("christopher-guest", "Christopher Guest", "comedy", "Committed characters reveal the gap between their self-image and observable behavior.", COMEDY, [[4, 8], 1.5, "cuts", "none", "none", null, "none", "none", "sync-first", "lower-thirds", false, "produced", false]),
   // --- youtube creators
-  style("mrbeast", "MrBeast", "youtube", "retention: the premise in the first sentence, a new visual event every few seconds, risers and hits on every reveal, nothing skippable", any(YT, /entertainment|stunt/), [[1, 3], 0.3, "kinetic", "required", "presenter", [150, 180], "required", "bed", "sync-first", "kinetic", false, "direct-address", false]),
-  style("casey-neistat", "Casey Neistat", "youtube", "the cinematic vlog: a day told like a short film — wide-angle walking, time-lapses, jump-cut monologues, a track the day is cut to", YT, [[2, 4], 0.7, "kinetic", "required", "presenter", [130, 160], "required", "song", "sync-first", "sparse", false, "direct-address", true]),
-  style("mkbhd", "MKBHD", "youtube", "the clean review: a dark studio with one red accent, gliding macro b-roll, a calm exact voice, specs on screen when spoken", YT, [[3, 6], 1, "cuts", "required", "presenter", [130, 150], "required", "bed", "sync-first", "lower-thirds", false, "direct-address", false]),
-  style("tom-scott", "Tom Scott", "youtube", "the single take on location: one presenter, one place, one idea, no cuts if he can help it, no music until the end card", any(YT, ESSAY, /places|fact/), [[6, 12], 2, "cuts", "required", "presenter", [150, 170], "none", "none", "sync-first", "sparse", false, "direct-address", false]),
-  style("veritasium", "Veritasium", "youtube", "the misconception: what everyone believes said on camera, a demonstration that contradicts it, diagrams drawn on the words", any(YT, ESSAY), [[3, 6], 1.5, "cuts", "required", "presenter", [130, 150], "required", "bed", "sync-first", "kinetic", false, "produced", false]),
-  style("vsauce", "Vsauce", "youtube", "the tangent: a simple question walked backwards through five others, engravings and props, snap zooms, a plucked eerie bed", any(YT, ESSAY, /philosoph/), [[2, 4], 0.7, "kinetic", "required", "presenter", [140, 160], "required", "bed", "sync-first", "cards", true, "direct-address", false]),
-  style("mark-rober", "Mark Rober", "youtube", "the build: problem, plan, build montage, a test that fails, a fix, slow-motion success, a payoff seen from the air", YT, [[2, 4], 0.5, "kinetic", "required", "presenter", [140, 160], "required", "bed", "sync-first", "kinetic", false, "direct-address", true]),
-  style("emma-chamberlain", "Emma Chamberlain", "youtube", "the chaotic self-edit: snap zooms on her own mistakes, sound effects on a sip, captions that argue with her, outtakes as commentary", YT, [[1.5, 3], 0.3, "kinetic", "required", "presenter", [150, 180], "required", "bed", "sync-first", "kinetic", false, "direct-address", false]),
-  style("peter-mckinnon", "Peter McKinnon", "youtube", "the cinematic vlog: every shot a moving photograph — shallow depth, speed ramps, whip pans that land on the next scene, a warm LUT", any(YT, /cinematic|photograph/), [[2, 4], 0.5, "kinetic", "required", "presenter", [130, 150], "required", "song", "sync-first", "lower-thirds", false, "direct-address", true]),
+  style("mrbeast", "MrBeast", "youtube", "A legible objective, stakes and changing progress sustain attention.", any(YT, /entertainment|stunt/), [[1, 3], 0.3, "kinetic", "required", "presenter", [150, 180], "required", "bed", "sync-first", "kinetic", false, "direct-address", false]),
+  style("casey-neistat", "Casey Neistat", "youtube", "A personal intention becomes an improvised journey with a visible result.", YT, [[2, 4], 0.7, "kinetic", "required", "presenter", [130, 160], "required", "song", "sync-first", "sparse", false, "direct-address", true]),
+  style("mkbhd", "MKBHD", "youtube", "A clear judgment is supported by an immediately relevant demonstration.", YT, [[3, 6], 1, "cuts", "required", "presenter", [130, 150], "required", "bed", "sync-first", "lower-thirds", false, "direct-address", false]),
+  style("tom-scott", "Tom Scott", "youtube", "A surprising proposition leads to an understandable mechanism and its limit.", any(YT, ESSAY, /places|fact/), [[6, 12], 2, "cuts", "required", "presenter", [150, 170], "none", "none", "sync-first", "sparse", false, "direct-address", false]),
+  style("veritasium", "Veritasium", "youtube", "A plausible mental model is tested and revised through evidence.", any(YT, ESSAY), [[3, 6], 1.5, "cuts", "required", "presenter", [130, 150], "required", "bed", "sync-first", "kinetic", false, "produced", false]),
+  style("vsauce", "Vsauce", "youtube", "A small question opens a chain of meaningful conceptual connections.", any(YT, ESSAY, /philosoph/), [[2, 4], 0.7, "kinetic", "required", "presenter", [140, 160], "required", "bed", "sync-first", "cards", true, "direct-address", false]),
+  style("mark-rober", "Mark Rober", "youtube", "A playful objective becomes a visible engineering problem and a satisfying test.", YT, [[2, 4], 0.5, "kinetic", "required", "presenter", [140, 160], "required", "bed", "sync-first", "kinetic", false, "direct-address", true]),
+  style("emma-chamberlain", "Emma Chamberlain", "youtube", "The edit reveals the gap between a performed self and a more candid thought.", YT, [[1.5, 3], 0.3, "kinetic", "required", "presenter", [150, 180], "required", "bed", "sync-first", "kinetic", false, "direct-address", false]),
+  style("peter-mckinnon", "Peter McKinnon", "youtube", "Tactile supplementary footage gives an everyday activity sensory appeal and continuity.", any(YT, /cinematic|photograph/), [[2, 4], 0.5, "kinetic", "required", "presenter", [130, 150], "required", "song", "sync-first", "lower-thirds", false, "direct-address", true]),
 ];
 
 export const styleById = (id: string | null | undefined): Style | undefined => (id ? STYLES.find((s) => s.id === id) : undefined);

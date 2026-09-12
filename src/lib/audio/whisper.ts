@@ -97,7 +97,7 @@ async function runWhisperOnce(
   updateJob(jobId, { message: `Transcribing with “${model}” model…` });
 
   await new Promise<void>((resolve, reject) => {
-    const proc = spawn(args[0], args.slice(1), { env: { ...process.env, PYTHONUNBUFFERED: "1" } });
+    const proc = spawn(args[0], args.slice(1), { windowsHide: true, env: { ...process.env, PYTHONUNBUFFERED: "1" } });
     let stderr = "";
     proc.stdout.on("data", () => {});
     proc.stderr.on("data", (d) => {

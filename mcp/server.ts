@@ -22,6 +22,7 @@ import { registerPreproductionTools } from "./tools/preproduction";
 import { registerTypographyTools } from "./tools/typography";
 import { registerSourcingTools } from "./tools/sourcing";
 import { loadGuide, registerGuide } from "./guide";
+import { INTERVIEW_UI } from "./interview-ui";
 
 export function buildServer(): McpServer {
   const { rules, playbooks } = loadGuide();
@@ -29,7 +30,7 @@ export function buildServer(): McpServer {
     { name: "slopstudio", version: "0.2.0" },
     {
       instructions:
-        "SlopStudio is a video editor. NEW PIECE: interview the person first — one question at a time, multiple choice (interview_next + the host's question UI; prompt `interview`) → set_brief → author the plan → set_plan → check_plan until it passes → plan_document to the person → their yes → approve_plan → plan_tasks → fan out the parallel tasks (source_clips or clip-scout sub-agents, generate_ai_shots, generate_narration per line, music) → assemble. EDIT LOOP: create_project (or list_projects) → import_media → LOOK (get_contact_sheet, detect_scenes, detect_silences, transcribe) → " +
+        "SlopStudio is a video editor. NEW PIECE: interview the person first — prefetch interview_batch once, then ask one multiple-choice question at a time from the cached queue with minimal processing between replies; review the answers together after collection → set_brief → author the plan → set_plan → check_plan until it passes → plan_document to the person → their yes → approve_plan → plan_tasks → fan out the parallel tasks (source_clips or clip-scout sub-agents, generate_ai_shots, generate_narration per line, music) → assemble. EDIT LOOP: create_project (or list_projects) → import_media → LOOK (get_contact_sheet, detect_scenes, detect_silences, transcribe) → " +
         "create_checkpoint → cut (add_segment: same asset, different trimStartS/durationS; update_segments; apply_edit_list) → render_draft → CHECK (get_frame, check_cuts, pacing_report, verify_export) → " +
         "iterate or restore_checkpoint → render_final and hand over the file path. Times are seconds at 30 fps. " +
         `Playbooks for common jobs (get_playbook): ${[...playbooks.keys()].join(", ") || "none installed"}. search_guide / read_guide hold the full craft guide.\n\n` +
@@ -99,7 +100,7 @@ export function buildServer(): McpServer {
     "interview",
     {
       title: "Interview the person (pre-production)",
-      description: "One question at a time, multiple choice, recommended answer first — the questions that pin a new piece down before any footage is touched; then set_brief.",
+      description: "Quick one-question-at-a-time interview: prefetch questions, offer multiple choice, save detailed reasoning until the end, then set_brief.",
       argsSchema: { request: z.string().describe("what the person said they want, verbatim"), projectId: z.string().optional() },
     },
     ({ request, projectId }) => ({
@@ -111,13 +112,13 @@ export function buildServer(): McpServer {
             text:
               `The person asked: "${request}"\n` +
               (projectId ? `Project: ${projectId}.\n` : "Create the project once the brief is set (create_project with the aspect/resolution from the brief).\n") +
-              "\nRun the pre-production interview ONE QUESTION AT A TIME, like a planning prompt:\n" +
+              "\nRun the pre-production interview ONE QUESTION AT A TIME FROM A CACHED QUEUE:\n" +
               "1) Put everything the request already answers into `answers` (e.g. kind, durationS) — never ask it again.\n" +
-              "2) Call interview_next {request, answers}. It returns the next question with its options and which one to recommend.\n" +
-              "3) Present exactly that one question through the host's question UI (Claude Code: the AskUserQuestion tool; one question, 2–4 options, the recommended option first with '(Recommended)', multiSelect when the question says so). In a plain chat, a numbered list. When the question says `agentFills`, write 3–4 concrete options yourself from what you know of the subject — specific, one line each — and keep 'Other' last.\n" +
-              "   The 'materials' question (early) asks whether they already have a script or a shot list; if so the next question asks them to paste it — record it verbatim. The plan is then written from it.\n" +
-              "   The 'style' question offers directing styles (real filmmakers: list_styles / get_style) that fit the genre — present the three that fit the request and tone best, House style last.\n" +
-              "4) Record the answer under the question's id (the option's value; for agentFills the option's text; for 'Other' what they typed) and go back to 2) until interview_next returns done with the brief.\n" +
+              "2) Call interview_batch {request, answers} once. Cache the returned questions and offer them one at a time; prefer the supplied multiple-choice options.\n" +
+              `3) ${INTERVIEW_UI}\n` +
+              "   Keep directing style in the queue. Record supplied scripts or shot lists verbatim.\n" +
+              "   Use the cached style choices or accept a named reference. Save get_style and other research for after the interview.\n" +
+              "4) After each reply, record the value and immediately ask the next unanswered cached question. Call interview_batch again only when the queue is exhausted or a changed answer invalidates dependent questions. When collection is complete, review all answers together and resolve material contradictions.\n" +
               "5) set_brief with that brief, then continue with the 'preproduction' prompt: propose the plan (storyboard + script, clip list / AI shots), check it, show it as the table, wait for the yes.",
           },
         },
@@ -141,7 +142,7 @@ export function buildServer(): McpServer {
             text:
               `Project ${projectId}: get_brief, then read get_playbook preproduction and write the plan.\n` +
               "00) If the brief carries materials (production notes: their own script / shot list), those are the plan's spine — spoken lines verbatim, shots in their order; propose only what they left open and say so in notes.\n" +
-              "0) If the brief names a directing style (production.style.id), get_style it FIRST and hold the plan to it: its Structure for the beats, its Narration section for the lines (voice, person, words per minute), its Sound section for the music brief and the sync policy, its Picture section for the clip list and AI prompts; say in the plan's notes how the style was applied. check_plan enforces the style's parameters.\n" +
+              "0) If the brief names a directing style, get_style it FIRST. Read its reference, evidence, prerequisites, creative choices and shared director-style playbook. Write plan.styleTreatment: reference, mechanism, materialPlan, rhythm, sound, typography, exceptions and evaluation. Carry the treatment into shots, script and sound. Creative defaults are review prompts; technical validity remains enforced. Do not invent missing performance or footage with cosmetic effects.\n" +
               "1) Beats first (3–6 for a short piece), contiguous, adding up to the brief's length. 2) The script: narration lines with atS (≤ 2 words/s over the piece, never over a sync-sound bite), the sound bites you expect to find, the text cards. 3) The storyboard: shots in order, each with duration, description, source, sound decision (sync | muted | vo), card text, transition — average shot length inside the genre norm. 4) The clip list for YouTube shots (id, what it must contain, 2–3 search queries, preferred channels, the wanted moment) and the AI shot list (prompt, model from list_video_models, length the model makes). 5) Music brief + queries; narration voice.\n" +
               "set_plan → read the check → fix every error and the warnings you agree with → plan_document → paste its text into your reply VERBATIM inside a code block (it is laid out for a terminal: boxed tables, the AV script with VIDEO and AUDIO columns) and ask for a yes or changes. Do NOT source, generate or cut before approve_plan. After approval: plan_tasks, then run every task in `parallelNow` at once (sub-agents per clip for precision, source_clips for speed; generate_ai_shots; generate_narration per line; music via search_youtube + import_youtube kind=audio + set_music + balance_music), then assemble per the storyboard, titles, checks, draft, storyboard_sheet + draft to the person, final.",
           },
@@ -288,7 +289,7 @@ function installActivityFeed(server: McpServer) {
     });
 }
 
-async function main() {
+export async function startMcpServer() {
   const server = buildServer();
   const transport = new StdioServerTransport();
   await server.connect(transport);
@@ -297,7 +298,7 @@ async function main() {
 
 const isMain = process.argv[1] && /server\.(ts|js|mjs)$/.test(process.argv[1]);
 if (isMain) {
-  main().catch((e) => {
+  startMcpServer().catch((e) => {
     console.error("[slopstudio-mcp] fatal:", e);
     process.exit(1);
   });

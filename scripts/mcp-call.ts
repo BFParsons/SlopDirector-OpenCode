@@ -16,7 +16,7 @@ async function main() {
   }
   const outIdx = rest.indexOf("--out");
   const outDir = outIdx >= 0 ? rest[outIdx + 1] : process.env.MCP_OUT ?? ".";
-  const transport = new StdioClientTransport({ command: path.resolve(__dirname, "../node_modules/.bin/tsx"), args: [path.resolve(__dirname, "../mcp/server.ts")], env: process.env as Record<string, string>, stderr: "pipe" });
+  const transport = new StdioClientTransport({ command: process.execPath, args: [path.resolve(__dirname, "../mcp/run.cjs")], env: process.env as Record<string, string>, stderr: "pipe" });
   const client = new Client({ name: "mcp-call", version: "0.0.1" });
   await client.connect(transport);
   const res = (await client.callTool({ name: tool, arguments: JSON.parse(argsJson) }, undefined, { timeout: 10 * 60_000 })) as { content: { type: string; text?: string; data?: string; mimeType?: string }[]; isError?: boolean };

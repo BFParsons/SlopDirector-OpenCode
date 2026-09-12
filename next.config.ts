@@ -52,7 +52,7 @@ const nextConfig: NextConfig = {
   // electron-builder output), which would otherwise copy the previous AppImage
   // into the next build and compound the bundle size every rebuild.
   outputFileTracingExcludes: {
-    "*": ["dist/**", "docs/**", "qa/**", ".data/**", "src/generated/**", "vendor/**", "**/*.tsbuildinfo"],
+    "/*": ["dist/**", "docs/**", "qa/**", ".data/**", ".venv/**", ".env*", ".codex/**", ".git/**", "tests/**", "src/generated/**", "vendor/**", "**/*.tsbuildinfo"],
   },
   ...(basePath ? { basePath } : {}),
   async headers() {

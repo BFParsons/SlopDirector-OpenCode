@@ -1,67 +1,63 @@
-# Sergei Eisenstein — the collision
+# Sergei Eisenstein
 
-Films: *Strike*, *Battleship Potemkin* (the Odessa Steps), *October*, *Alexander Nevsky*, *Ivan the Terrible*.
+## Reference and mechanism
 
-## The signature
+Expressive montage and staging; distinguish silent-film montage from the later sound films.
 
-Meaning made by hitting two shots together. A crowd fleeing down steps; a soldier's boots; a mother; a pram; a lion statue that seems to rise. Time is stretched by overlapping the same action from several angles, then compressed by cutting faster than the eye. Faces are types, not people: the worker, the priest, the officer. The cut is the argument; the audience makes the third meaning.
+Relationships between images and bodily forms create an idea or conflict.
 
-## Structure — how a scene is built
+## Evidence
 
-- A state (order) → an intrusion (the boots) → the collision (the massacre, the strike, the charge) → a metaphor (the lion, the slaughtered ox) → the aftermath.
-- The collision is built from five or six motifs (the boots, the pram, the mother, the steps, the guns, the crowd), each returning 4–8 times, faster each time.
-- Overlapping action: the same movement shown from two or three angles in a row, so a fall takes three times as long; then a brutal ellipsis.
-- The metaphor shot is not in the scene's space (a statue, an animal, a machine) and comes at the climax.
+Criterion's analysis of Ivan the Terrible documents expressive performance, musical construction and a color sequence. Bordwell's account foregrounds staging derived from dance and painting. These counter the harness's reduction to silent, monochrome, impersonal rapid montage.
 
-## The cut
+**Basis:** Specialist analysis. The production choices below are editorial translations, not measured career-wide rules.
 
-- Average shot 1–3 s; the collision 0.5–1.5 s a shot; the metaphor 2–3 s; establishing 4–6 s. Nothing under 0.3 s (RULES 9: deliberate flurries are allowed at the peak).
-- Straight cuts only. No dissolves, no fades inside; iris or black between chapters if at all.
-- Graphic matches and clashes: a diagonal against a vertical, a face against a machine, light against dark; movement in opposite directions on consecutive shots.
-- Camera: fixed, formal, often low; the frame is a composition first; monochrome, high contrast (`colorLook` MONO, `contrast` up); intertitles between sequences in a standalone piece.
+## Material prerequisites
 
-## Narration
+**Production fit:** Archive plus graphics. Images with a purposeful conceptual or graphic relation; for staged work, precise poses and movement.
 
-- None. Intertitles carry the words (a single line in capitals, 2–3 s, between sequences: "AND SUDDENLY —").
+## Picture and clip selection
 
-## Sound
+Write the intended relationship between two images before selecting them. Choose contrast in scale, direction, social role or gesture that adds a thought beyond either image alone.
 
-- Music is a **score** built for the cut: percussive, orchestral, driving (Prokofiev is the reference; search "orchestral percussion driving public domain", "1920s silent film score piano CC"); the cut rhythm and the music are composed together (`check_beat_alignment` on the collision).
-- Sync sound: none as sync; designed hits (a gunshot, a scream, boots) placed as audio-only clips on the motif returns.
-- Silence for one shot at the peak, then the loudest cut.
+## Framing and camera
 
-## Picture — sources and text
+Treat bodies, architecture and shadows as active compositional forms. A held arrangement may express a conflict more clearly than additional cutting.
 
-- Sources: archive of crowds, machinery, soldiers, statues, animals; generated shots as "types" ("extreme close-up, an old woman's face screaming, black and white, high contrast, 1925 Soviet film"), the same action from several angles.
-- Text: intertitles as `card` shots (black, white capitals, serif), 2–3 s, between sequences; no overlays on picture.
+## Structure and rhythm
 
-## Do not
+Test the same material in two orders. Use repetition, duration and collision to develop an argument; speed up only when the increasing pressure remains intelligible.
 
-- No continuity editing for its own sake; no reaction shot that explains; no naturalistic pacing.
-- No colour, no dissolve, no camera move beyond a slow pan.
-- No individual psychology; the face is a class.
+## Narration and sound
+
+For a sound-film reference, plan music and gesture together or test deliberate audiovisual counterpoint. Do not force all material into a modern beat grid.
 
 ## Type
 
-**The signature.** Soviet intertitles: heavy grotesque capitals, white on black, two or three words; the constructivist poster is the reference.
+Intertitles can state or complicate a proposition, but should not merely explain every juxtaposition. Choose color from the specific reference rather than a historical stereotype.
 
-**Stand-ins.** Anton for the heavy grotesque. Faces: Anton 400. Case: upper. Colour #FFFFFF on #000000. Entrance: none.
+Bundled typography presets are starting treatments. Choose a named work and a coherent project-specific title and supporting-text system. Fonts, colors, cases and roles may vary; source labels and accessibility captions remain available. Check safe areas, reading time and overlap.
 
-**Roles** (`add_text_overlay {role}` with this style in the brief):
+## Exceptions and review
 
-- **intertitle (default)** — an intertitle between sequences. Anton · capitals · 6.5 %.
-- **title** — the title. Anton · capitals · 9 %.
+Remove universal bans on color, camera movement, individual psychology and continuity. Preserve deliberate relations between shots and expressive staging.
 
-**Never:** lower-third, caption, callout, citation, label, quote, date.
+Numeric pacing and narration ranges in the catalogue are editorial starting points, not measurements of the creator's career. Explain purposeful departures in styleTreatment.exceptions. Source integrity and technical validity still apply.
 
-**Survey note.** Assumption from the films: the intertitles are heavy capitals on black; no text is ever superimposed on picture.
+## Evaluation
 
-## Harness parameters
+Build two 20-second sequences from the same six images in different orders. Viewers should identify a meaning changed by the arrangement, not only a different pace.
 
-asl 1–3 s (collision 0.5–1.5 s) · min shot 0.3 s · transitions cuts · narration none · music required, score (percussive) · sync muted · text cards (intertitles) · interviews none · beat-cut yes
+**Failure mode:** Fast cutting between unrelated images creates density without a dialectical or dramatic relationship.
+
+The duration above is a suggested experiment length. Plan the test within the approved production scope; it is not a new approval gate or a claim that the test has passed.
 
 ## Applying it in SlopStudio
 
-- Plan: beats state / intrusion / collision / metaphor / aftermath; the collision lists its 5–6 motifs and their return counts; the metaphor shot's source is stated; intertitles as `card` shots.
-- Cut: `apply_edit_list` from the motif schedule; `update_project colorLook MONO contrast 1.25`; `check_beat_alignment` on the collision.
-- Music: `set_music` the percussive score; `balance_music` gap 3; `add_segment audioOnly` for the hits on motif returns.
+Read the shared director-style playbook included by get_style. Store reference, mechanism, materialPlan, rhythm, sound, typography, exceptions and evaluation in plan.styleTreatment. Carry these choices into actual shot descriptions, durations, script offsets and audio decisions. Inspect available material before committing exact timing; identify missing coverage instead of compensating with effects. Report technical checks, picture/motion review, listening review and the observed style result separately.
+
+## Sources
+
+- [Ivan the Terrible, Parts I and II](https://www.criterion.com/current/posts/535-ivan-the-terrible-parts-i-and-ii) — J. Hoberman, Criterion; 2001-04-23. Specialist film analysis.
+
+- [Staging and Performance in Ivan the Terrible, Part 2](https://www.criterionchannel.com/videos/staging-and-performance-in-ivan-the-terrible-part-2) — David Bordwell, Criterion Channel; 2018 context; undated video page. Film scholar's original audiovisual analysis; publisher synopsis.

@@ -1,5 +1,10 @@
 # SlopStudio Pro — Dependencies & Setup
 
+**Native Windows desktop and Codex:** use [WINDOWS-CODEX.md](WINDOWS-CODEX.md).
+It supersedes the older Windows/WSL guidance below. Desktop/headless launchers
+now run through Node, use SQLite, and need no Bash script-shell or PostgreSQL.
+`desktop:build:win` builds an NSIS installer with Windows FFmpeg executables.
+
 Everything you need to run, develop, and build SlopStudio Pro — with a dedicated
 **[Windows section](#windows-setup)** since dev is moving to a Windows machine.
 
@@ -310,59 +315,17 @@ screenshots for failures under `test-results/` (gitignored).
 
 ## Windows setup
 
-The codebase is portable Node/TypeScript and runs on Windows, **but a few pieces are
-Linux-shaped today.** Two viable paths:
+Use [WINDOWS-CODEX.md](WINDOWS-CODEX.md) for the native Electron desktop and
+Codex harness. Install Node 24, Git, FFmpeg, and the project dependencies, then
+run `corepack pnpm codex:setup` and `corepack pnpm desktop:prod`.
+No WSL, Bash script-shell, or PostgreSQL is needed for this SQLite target.
+`corepack pnpm desktop:build:win` produces the Windows NSIS installer.
 
-### Option A — WSL2 (recommended, closest to this Linux dev box)
-
-Install **WSL2 + Ubuntu**, then follow the Linux instructions verbatim:
-`scripts/pg.sh`, the Python stack, `pnpm dev`. Everything above works unchanged.
-The only thing WSL doesn't do well is **building/running the Electron *desktop* app**
-(GUI) — do that natively on Windows (Option B) or just develop the web target in WSL.
-
-### Option B — Native Windows
-
-What changes vs. Linux:
-
-1. **Node + pnpm + Git** — install natively (nvm-windows or the Node installer;
-   `corepack enable` for pnpm). No change.
-2. **PostgreSQL** — `scripts/pg.sh` is **bash and won't run** on native Windows. Install
-   PostgreSQL for Windows (or run it in Docker Desktop), create a `slopstudio_pro`
-   database + a `spotforge` role, and set `DATABASE_URL` to it. Then `pnpm exec prisma
-   db push` + `create-admin`.
-3. **ffmpeg** — install ffmpeg for Windows and put `ffmpeg.exe`/`ffprobe.exe` on PATH
-   (e.g. `winget install Gyan.FFmpeg`), or set `SLOPSTUDIO_FFMPEG_DIR` to their folder.
-4. **Audio Studio Python deps** — install Python 3.x for Windows, then
-   `pip install demucs openai-whisper torchcodec` (no `--break-system-packages` needed
-   on Windows). For GPU, install the CUDA build of torch from pytorch.org. **torchcodec
-   is still required** for saving. Set `SLOPSTUDIO_PYTHON` to your `python.exe` /
-   venv if `python3` isn't on PATH (on Windows the launcher is usually `py` or
-   `python`).
-5. **pnpm scripts use Unix shell syntax** (inline env vars, `rm -rf`, `&&`). Put
-   `script-shell=C:\PROGRA~1\Git\bin\bash.exe` in your **user** `%USERPROFILE%\.npmrc`
-   (8.3 short path avoids the space in "Program Files"). It is deliberately *not*
-   in the repo `.npmrc` any more — a project-level value can't be overridden and
-   broke every script on Linux.
-6. **Desktop build for Windows** — the AppImage target is Linux-only. To make a Windows
-   build you'd add an electron-builder **`win` target** (NSIS or portable), and:
-   - bundle **Windows** ffmpeg/ffprobe `.exe` (the `vendor/ffmpeg` binaries are Linux
-     ELF — `scripts/fetch-ffmpeg.sh` would need a Windows branch),
-   - ensure Prisma's **Windows query engine** is traced into the standalone (Prisma
-     downloads the right engine per-platform; build on Windows so the native engine +
-     `@node-rs/argon2` Windows binary are included).
-   This isn't wired yet — **flag it as a follow-up** if you need a distributable Windows
-   desktop app. The **web** target needs none of this.
-
-### Recommended Windows workflow
-
-- **Develop the web app in WSL2** (matches this box; Python/Postgres/ffmpeg all "just
-  work").
-- Or **native Windows web dev** with the four changes above.
-- Treat the **Windows *desktop* build as a separate task** (needs the `win` target +
-  Windows ffmpeg + a Windows build host).
+For web/PostgreSQL development, follow the database and web sections above;
+WSL remains an option for that target. Optional Python audio tools can be installed
+locally with `scripts/setup-audio.ps1`.
 
 ---
-
 ## Quick start (Linux/WSL, web target)
 
 ```bash

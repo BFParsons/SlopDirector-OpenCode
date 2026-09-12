@@ -1,71 +1,63 @@
-# LEMMiNO — the dark documentary
+# LEMMiNO
 
-Work: "Consumed by the Apocalypse", "The Search for D.B. Cooper", "Cicada 3301", "Top 10 Facts", "The Dyatlov Pass Case"; David Wångstedt's channel, made alone.
+## Reference and mechanism
 
-## The signature
+Researched mystery and spatial explanation; the book-depository episode is a bounded reference.
 
-A dark, slow, meticulously researched documentary made from maps, documents and photographs: a black background, a clean serif, a map that lights up its region, a photograph with a slow drift, a document with a phrase highlighted, a diagram animated exactly on the narration; a deep, calm narrator who never editorialises; original ambient music with a single motif. Forty minutes without a talking head. Every claim has a source in the description.
+A confusing event becomes a set of inspectable claims, positions and uncertainties.
 
-## Structure — how a video is built
+## Evidence
 
-- A cold open on the mystery's most concrete detail (a photograph, a number, a quote) over black; the title.
-- Chapters, chronological, each opening on a map or a date card; each built claim by claim (document → photograph → diagram → the narrator's plain sentence); a "however" at the end of each.
-- Competing theories weighed in turn, each given its evidence and its holes; no verdict beyond what the evidence allows.
-- The ending returns to the opening detail with what is now known; the sources listed on a card.
+LEMMiNO's episode page provides an extensive source apparatus and music credits; the FAQ documents production tools. These establish a research and production foundation, but do not establish mandatory movement on every still or a fixed chapter-map formula.
 
-## The cut
+**Basis:** Creator's documentation; visual mechanics proposed. The production choices below are editorial translations, not measured career-wide rules.
 
-- Average shot 5–10 s; documents 6–12 s (long enough to read the highlight); maps 6–10 s; nothing under 2 s.
-- Slow dissolves (1–1.5 s) between stills on black; a fade to black between chapters; straight cuts onto a date card.
-- Motion: every still drifts (`imageMotion` slow push or pan); maps animate a region filling and a route drawing; a diagram builds in three steps; nothing snaps.
-- Grade: dark; stills desaturated 20 % with a slight cool tone; black backgrounds; `vignette` 0.4.
+## Material prerequisites
 
-## Narration — the archivist
+**Production fit:** Archive plus graphics. A source-backed timeline and a diagram or spatial model whose known and uncertain elements can be distinguished.
 
-- Third person, past tense, measured, dense with specifics (dates, names, distances), never rhetorical: "At 8:13 pm, the aft stairs were lowered. The aircraft was over the Lewis River." 110–130 wpm; long paragraphs with a 2–3 s pause between chapters.
-- Voice: deep, calm, slightly Scandinavian-English (`generate_narration` voice leo, "low, calm, precise, unhurried, no emphasis").
+## Picture and clip selection
 
-## Sound
+Organize material by the question each item answers. Prefer records that establish time, position, visibility or contradiction; retain unresolved alternatives in the research ledger.
 
-- Music is an **ambient score** with one motif: a slow synth pad, a piano note, a low pulse in the tense chapters (search "dark ambient documentary score library", "minimal piano motif CC", "slow synth pad drone"); continuous, ducked 8–10 LU, swelling only at a chapter's end.
-- Sound design: subtle — a paper slide when a document appears, a low thud on a date card, wind under a map (audio-only clips at −20 dB); no hits, no risers.
-- No sync sound; archive clips play muted with their own sound at −25 dB if at all.
+## Framing and camera
 
-## Picture — sources and text
+Use a stable diagram orientation before moving the virtual camera. Show the entire relationship, then isolate the relevant line of sight or location.
 
-- Sources: photographs, documents, maps, diagrams, newspaper pages (archives, public-domain collections, official records, uploads); short archive clips; generated maps and diagrams ("dark map of the Pacific Northwest, a single route glowing, minimal, black background") as cards.
-- Text: a clean serif on black — chapter titles (3–4 s), date cards (2–3 s), highlighted phrases on documents (a translucent bar, 4–6 s), map labels (small caps), a sources card (10 s).
+## Structure and rhythm
 
-## Do not
+Introduce one question, establish the model, test the claim, then update the model. Move into a new chapter only when the current uncertainty has changed.
 
-- No talking heads, no host, no stock footage, no speculation stated as fact, no music sting, no fast cut.
-- No still without motion; no document without a highlight; no chapter without a map or a date.
-- No adjective in the narration that judges.
+## Narration and sound
+
+Try a restrained recurring texture with distinct section changes. Reduce musical activity during dense evidence; reserve an accent for a real evidentiary turn.
 
 ## Type
 
-**The signature.** Sleek squared display capitals for titles and chapter cards, a quiet serif for documents, everything on black with slow fades.
+Give known, inferred and unknown information different line or fill treatments with a legend. Label locations and dates consistently; avoid visual precision unsupported by the sources.
 
-**Stand-ins.** Bebas Neue for the Bebas-like display face viewers identify; Noto Serif for the document serif. Faces: Bebas Neue 400, Noto Serif 400, Noto Sans 400. Case: upper. Colour #E8E8E8 on #0B0B0B. Entrance: fade.
+Bundled typography presets are starting treatments. Choose a named work and a coherent project-specific title and supporting-text system. Fonts, colors, cases and roles may vary; source labels and accessibility captions remain available. Check safe areas, reading time and overlap.
 
-**Roles** (`add_text_overlay {role}` with this style in the brief):
+## Exceptions and review
 
-- **title** — the title. Bebas Neue · spaced capitals · 8 %.
-- **card (default)** — a chapter or a date card on black. Bebas Neue · spaced capitals · 5 % · hold 3.5 s.
-- **quote** — the highlighted phrase of a document. Noto Serif · 3.8 %.
-- **label** — a map label. Noto Sans · 2.8 %.
-- **citation** — a source. Noto Sans.
+Remove automatic still motion, compulsory map/date beats and blanket stock-footage bans. Require a reason for each movement and a source for each apparently precise diagram.
 
-**Never:** lower-third, caption, callout.
+Numeric pacing and narration ranges in the catalogue are editorial starting points, not measurements of the creator's career. Explain purposeful departures in styleTreatment.exceptions. Source integrity and technical validity still apply.
 
-**Survey note.** Surveyed: viewers identify the title face as Bebas-like with a squarer finish; the serif and the labels are assumptions.
+## Evaluation
 
-## Harness parameters
+Create a 30-second explanation of one line-of-sight claim. A viewer should distinguish the measured geometry from assumptions without reading the research notes.
 
-asl 5–10 s · min shot 2 s · transitions dissolves (black between chapters) · narration required, third-person archivist, 110–130 wpm · music required, ambient score · sync muted · text cards (serif on black) · stills yes · interviews none · beat-cut no
+**Failure mode:** Photorealistic reconstruction can make weak evidence appear more certain than it is.
+
+The duration above is a suggested experiment length. Plan the test within the approved production scope; it is not a new approval gate or a claim that the test has passed.
 
 ## Applying it in SlopStudio
 
-- Plan: chapters as beats opening on a `card` (date or map); stills with `imageMotion` in every description; document shots list the highlighted phrase as `text`; a sources `card` last.
-- Cut: `update_project transition DISSOLVE transitionMs 1200 vignette 0.4 saturation 0.8`; `update_segments imageMotion` on every still; `add_text_overlay` highlights (BOX, translucent) and labels.
-- Music: `set_music` the ambient score; `balance_music` gap 9; `audioFadeOutS` 4.
+Read the shared director-style playbook included by get_style. Store reference, mechanism, materialPlan, rhythm, sound, typography, exceptions and evaluation in plan.styleTreatment. Carry these choices into actual shot descriptions, durations, script offsets and audio decisions. Inspect available material before committing exact timing; identify missing coverage instead of compensating with effects. Report technical checks, picture/motion review, listening review and the observed style result separately.
+
+## Sources
+
+- [The Kennedy Assassination: Inside the Book Depository](https://www.lemmi.no/p/the-kennedy-assassination-inside-the-book-depository) — LEMMiNO; 2023-07-24. Creator's episode bibliography and credits.
+
+- [FAQ](https://www.lemmi.no/faq) — LEMMiNO; Undated. Creator's production information.

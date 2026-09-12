@@ -1,72 +1,61 @@
-# The Lincoln Project — the prosecution
+# The Lincoln Project
 
-Work: "Mourning in America", "Covita", "Wake Up", "Fellow Traveler", the 2020–2024 anti-Trump spots. A house style built by former Republican admen (Rick Wilson, Steve Schmidt, Reed Galen, Ben Howe's editors), fast, cheap and personal.
+## Reference and mechanism
 
-## The signature
+An organization and its campaign teams; Ben Howe's 2020 interview is the bounded reference.
 
-The subject's own words, cut against the pictures of what they cost. A grim voice, a single bass note, a ticking edit that speeds up; captions in bold white type that repeat the accusation as it is spoken; grainy footage of hospital corridors, empty streets, a golf swing. It is an attack that pretends to be a mourning; a parody that pretends to be an anthem. Sixty seconds, made in a day.
+Existing statements are organized to make a contradiction or consequence easy to follow.
 
-## Structure — how a spot is built
+## Evidence
 
-- The frame: borrow a familiar form (Morning in America, a movie trailer, a pharmaceutical ad, a musical) and invert it in the first line.
-- The evidence: 4–6 of the subject's own clips (sync sound, 2–4 s each) each answered by a picture of consequence and a line of narration; the numbers on screen.
-- The verdict: the narrator states it plainly; a card with the accusation; the subject's face, unflattering, frozen; the logo.
-- Optional sting: one more clip of the subject after the card, unanswered.
+Howe describes constructing scripts from existing quotations so the material carries the story. This supports a source-led assembly practice, but does not establish one permanent visual, musical or tonal style for the organization.
 
-## The cut
+**Basis:** Production interview; campaign-bounded. The production choices below are editorial translations, not measured career-wide rules.
 
-- Average shot 2–4 s; the evidence pairs 2–3 s; the opening frame-borrowing 4–6 s; accelerating toward the verdict (1–1.5 s). Nothing under 0.7 s.
-- Straight cuts; a hard cut to black before the verdict; a slow push-in (`imageMotion`) on the subject's frozen face.
-- Footage is deliberately rough: news archive, C-SPAN, phone video, official pool footage, with its bugs and timecodes; the subject's clips are at their least flattering (mid-blink, mid-gesture).
-- Grade: desaturated, dark, high contrast (`saturation` 0.7, `contrast` 1.15, `vignette` 0.3); the borrowed form's palette in the opening only.
+## Material prerequisites
 
-## Narration — the grim narrator
+**Production fit:** Archive-compatible. Verifiable statements with their full context, dates and relevant documented outcomes.
 
-- Third person, present tense, short declaratives, the subject's name or "he" every sentence; 100–130 wpm; deadpan, low, disgusted rather than angry (`generate_narration` voice leo, "low, grave, slightly weary, no shouting").
-- Numbers as accusations: "Two hundred thousand dead. He played golf."
-- The last line is short and final ("America needs a president. Not a con man.").
+## Picture and clip selection
 
-## Sound
+Build a statement ledger before a selects reel. Pair claims only where the relationship is fair and the chronology is clear; preserve qualifications that change the proposition.
 
-- Music is a **cue** of dread: a low sustained bass note, a ticking or a slow heartbeat, a rising tension pad, a single hit at the verdict (search "dark tension pad low bass library", "ticking clock tension cue CC"); or the borrowed form's music played straight until the turn.
-- Sync sound: the subject's own words at full level (`muted: false`, `volume` 1.1), unducked; the bed drops under them.
-- A stinger (a boom, a reverse hit) as an audio-only clip at the cut to black.
+## Framing and camera
 
-## Picture — sources and text
+Use recognizable source framing and leave room for unobtrusive provenance. Avoid crops that imply a reaction to an event occurring elsewhere or later.
 
-- Sources: the subject's own appearances (official channels, C-SPAN, news archive, pool footage), consequence footage (hospitals, closed shops, funerals — archive and news, `licence` archives), unflattering stills.
-- Text: bold condensed white captions of the narration's key phrases as they are spoken (2–3 words, 1.5–2 s each, centred low), the numbers big; the verdict card white on black (4 s); a source citation in small type under any claim.
+## Structure and rhythm
 
-## Do not
+Test assertion → relevant evidence → concise consequence. Let the actual statement remain intelligible; additional montage should contribute a new fact rather than merely intensify tone.
 
-- No cut inside the subject's sentence that changes its meaning (RULES 4: the clip must say what they said); the attack is the juxtaposition, not the edit.
-- No cheerful music unless it is the borrowed form's, and then it turns.
-- No lower-third of the subject (everyone knows who it is); no still that is not a real frame.
+## Narration and sound
+
+Keep source dialogue intelligible and distinguish editorial effects from recorded sound. Test a restrained and an unscored version before committing to an emotional bed.
 
 ## Type
 
-**The signature.** Bold condensed white capitals landing on the spoken phrase, numbers big, a verdict card on black, sources in small type.
+Label quotation, date and source consistently. A graphic may summarize an established contrast; it should not introduce a stronger unsupported allegation.
 
-**Stand-ins.** Oswald Bold for the Tungsten / Knockout register; Liberation Sans for the citations. Faces: Oswald 700, Liberation Sans 400. Case: upper. Colour #FFFFFF on #000000. Entrance: pop.
+Bundled typography presets are starting treatments. Choose a named work and a coherent project-specific title and supporting-text system. Fonts, colors, cases and roles may vary; source labels and accessibility captions remain available. Check safe areas, reading time and overlap.
 
-**Roles** (`add_text_overlay {role}` with this style in the brief):
+## Exceptions and review
 
-- **caption (default)** — the key phrase as it is spoken, 2–3 words. Oswald Bold · capitals · 6.5 % · outline 4 %.
-- **callout** — a number, big. Oswald Bold · capitals · 9 % · center · outline 4 %.
-- **card** — the verdict on black. Oswald Bold · capitals · 6 % · hold 4 s.
-- **citation** — the source under a claim. Liberation Sans · 2.4 %.
+Replace organizational style absolutes with a campaign-specific brief. Keep factual context as a firm requirement and treat ominous music, attack tone and typography as choices.
 
-**Never:** lower-third, quote, intertitle, label.
+Numeric pacing and narration ranges in the catalogue are editorial starting points, not measurements of the creator's career. Explain purposeful departures in styleTreatment.exceptions. Source integrity and technical validity still apply.
 
-**Survey note.** Surveyed loosely from the spots: condensed bold capitals, white on darkened footage; the exact face was not documented.
+## Evaluation
 
-## Harness parameters
+Use a nonpolitical institutional claim and documented result in a 20-second evidence comparison. Viewers should identify the contradiction and the source of both halves.
 
-asl 2–4 s · min shot 0.7 s · transitions cuts (one cut to black) · narration required, grim third person, 100–130 wpm · music required, cue (dread) · sync sync-first · text kinetic captions · interviews none · beat-cut no
+**Failure mode:** A forceful montage can mislead if it erases the dates or qualifications that make the comparison fair.
+
+The duration above is a suggested experiment length. Plan the test within the approved production scope; it is not a new approval gate or a claim that the test has passed.
 
 ## Applying it in SlopStudio
 
-- Plan: beats frame / evidence / verdict / sting; evidence pairs as consecutive shots (bite `sound: "sync"` then consequence `sound: "vo"`); the captions as `text` lines in `script` at the narration's timestamps; a `card` for the verdict.
-- Sourcing: `youtube_captions` on the subject's own channel to find the exact quotes before importing (the words are the evidence).
-- Cut: `update_project saturation 0.7 contrast 1.15 vignette 0.3`; `add_text_overlay` captions style BOX, centred low; `check_cuts` must be clean on every bite (the meaning must survive).
-- Music: `set_music` the dread cue; `balance_music` gap 6; `check_mix_levels` bites ≥ 12 LU over the bed.
+Read the shared director-style playbook included by get_style. Store reference, mechanism, materialPlan, rhythm, sound, typography, exceptions and evaluation in plan.styleTreatment. Carry these choices into actual shot descriptions, durations, script offsets and audio decisions. Inspect available material before committing exact timing; identify missing coverage instead of compensating with effects. Report technical checks, picture/motion review, listening review and the observed style result separately.
+
+## Sources
+
+- [Meet the Lincoln Project's Video Wiz, Who's Driving Trump Insane](https://www.vanityfair.com/news/2020/07/lincoln-project-video-wiz-ben-howe-ads-are-driving-trump-insane) — Vanity Fair; Ben Howe interview; 2020-07. First-person production interview.

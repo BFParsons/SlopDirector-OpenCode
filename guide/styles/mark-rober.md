@@ -1,69 +1,61 @@
-# Mark Rober — the build
+# Mark Rober
 
-Work: "Glitter Bomb" (porch pirates), "World's Largest Nerf Gun", "Squirrel Maze", "Backyard Squirrel Maze 2.0", "Egg Drop From Space", "Ocean Cleanup"; a former NASA engineer's channel.
+## Reference and mechanism
 
-## The signature
+Engineering spectacle with accessible scientific explanation; use a specific experiment or build reference.
 
-A problem, a plan, a build, a test that fails, a fix, a test that works, a payoff you can see from the air. Engineering explained with drawings and a grin; a whiteboard, a 3D model spinning, a montage of the build set to music; slow-motion of the moment it works; cameras hidden everywhere for the reaction. The host is the enthusiastic explainer; the video is a story with a machine as the hero.
+A playful objective becomes a visible engineering problem and a satisfying test.
 
-## Structure — how a video is built
+## Evidence
 
-- The problem (0–30 s): the thing that annoys or delights, shown; the promise ("so I built…") with a flash-forward of the payoff (2–3 s).
-- The plan (30 s–2 min): the drawing (a whiteboard or a 3D model), the physics in one analogy, the parts.
-- The build (montage, 60–90 s): fast, to music, with three small jokes and one failure.
-- Test, fail, fix (2–4 min): the first test fails visibly; the diagnosis; the fix; the second test succeeds in slow motion from four angles.
-- The payoff (1–3 min): the machine in the world; the hidden-camera reactions; the numbers; the message (a cause, a lesson) in three sentences.
+The Stanford event report records Rober discussing science embedded in entertaining storytelling and the value of authenticity. It supports accessible engineering narratives, not a requirement to fabricate a failed attempt or slow every successful result.
 
-## The cut
+**Basis:** Firsthand event reporting. The production choices below are editorial translations, not measured career-wide rules.
 
-- Average shot 2–4 s; the build montage 0.8–1.5 s; the success in slow motion 4–8 s per angle; reactions 2–4 s; nothing under 0.5 s.
-- Straight cuts; snap zooms on the host's reactions; a "replay" with a graphic; whips in the montage; no dissolves.
-- Camera: the host to camera in the workshop, wides of the machine, GoPros on the machine, phantom-style slow motion (`speed` 0.1–0.25) for the success, drone for the payoff.
-- Grade: bright, warm, clean (`saturation` 1.1); no vignette.
+## Material prerequisites
 
-## Narration — the engineer
+**Production fit:** Requires planned production. A real build, measurable constraints, documented iterations and coverage of a valid test.
 
-- First person, past and present tense, enthusiastic, clear analogies, numbers: "That's about the weight of a small car — and it has to stop in a tenth of a second." 140–160 wpm; a laugh at his own failure; the message plain at the end.
-- Voice: the host's (sync) or `generate_narration` voice rex, "enthusiastic, clear, friendly, an engineer who loves this".
+## Picture and clip selection
 
-## Sound
+Choose an ambitious but legible objective and the engineering obstacle that matters most. Include an actual design decision and its consequence; omit decorative workshop footage that explains nothing.
 
-- Music is a **library bed** that changes with the phase: light and curious for the plan, driving for the build montage, tense for the test, triumphant for the success (search "upbeat build montage library", "playful curious bed CC", "triumphant orchestral pop"); ducked under the voice; out for the slow-motion success (the machine's own sound, slowed).
-- Sync: the host, the machine, the reactions (`muted: false`, `volume` 1); a riser before the test; a hit on the failure (comic) and on the success.
+## Framing and camera
 
-## Picture — sources and text
+Establish the apparatus and test conditions clearly. Capture normal-speed cause and effect before using a close-up or slow-motion replay to reveal the mechanism.
 
-- Sources: the project's own build footage; generated shots ("a man in a workshop drawing on a whiteboard, medium, bright, 4K", "slow motion of a spinning contraption launching, high speed camera look"); 3D-model turntables as cards; hidden-camera reactions.
-- Text: the physics labels on the drawing (kinetic text over the whiteboard, 3–5 s); numbers as callouts; a "Test 1" / "Test 2" card; the cause's name and a link card at the end.
+## Structure and rhythm
 
-## Do not
+Try goal → constraint → design choice → test → explanation of result. Compress routine fabrication but preserve the decision that makes the solution understandable.
 
-- No build without a failure; no success without slow motion; no message before the payoff.
-- No dissolves; no music under the slow-motion success; no shot of the plan longer than 5 s without a drawing on it.
-- No number without a comparison.
+## Narration and sound
+
+Use music to support anticipation around the test. Let the device's real sound carry the event where useful; add a replay cue only if it helps identify a newly visible detail.
 
 ## Type
 
-**The signature.** Heavy geometric capitals for numbers and test cards, semi-bold labels on the drawings, outlined white.
+Draw the mechanism at the moment viewers need it. Label measured results and relevant conditions; keep a simplified schematic distinct from a precise technical drawing.
 
-**Stand-ins.** Montserrat for the geometric sans. Faces: Montserrat 900, Montserrat 600. Case: upper. Colour #FFFFFF on #000000. Entrance: pop.
+Bundled typography presets are starting treatments. Choose a named work and a coherent project-specific title and supporting-text system. Fonts, colors, cases and roles may vary; source labels and accessibility captions remain available. Check safe areas, reading time and overlap.
 
-**Roles** (`add_text_overlay {role}` with this style in the brief):
+## Exceptions and review
 
-- **label (default)** — a physics label on the whiteboard. Montserrat SemiBold · 3 %.
-- **callout** — a number with its comparison. Montserrat Black · capitals · 5 % · center · no box · outline 8 %.
-- **card** — 'TEST 1' on black. Montserrat Black · capitals · 6 %.
+Remove mandatory failure, mandatory slow-motion success and fixed narration limits. Authentic progression is the requirement; the footage determines the available arc.
 
-**Never:** quote, intertitle, citation.
+Numeric pacing and narration ranges in the catalogue are editorial starting points, not measurements of the creator's career. Explain purposeful departures in styleTreatment.exceptions. Source integrity and technical validity still apply.
 
-**Survey note.** Assumption: the channel's face was not documented; heavy geometric capitals are the manner.
+## Evaluation
 
-## Harness parameters
+Create a 30-second build story with one constraint and one design response. Viewers should explain why the design improved the result.
 
-asl 2–4 s (montage 0.8–1.5 s, success 4–8 s) · min shot 0.5 s · transitions cuts (snap zooms, whips) · narration required, first-person engineer, 140–160 wpm · music required, phase beds · sync sync-first · text kinetic (labels, callouts, test cards) · interviews direct-address (host) · beat-cut yes (the build montage)
+**Failure mode:** A spectacular payoff with no understandable design choice becomes a stunt rather than engineering storytelling.
+
+The duration above is a suggested experiment length. Plan the test within the approved production scope; it is not a new approval gate or a claim that the test has passed.
 
 ## Applying it in SlopStudio
 
-- Plan: five beats (problem / plan / build / test-fail-fix / payoff); the flash-forward is a 2–3 s shot in beat 1 reused in the payoff; montage shots 0.8–1.5 s on the beat; the success shot `speed 0.2` ×4 angles.
-- Cut: `update_segments speed 0.2` on the success sources; `add_text_overlay` labels and test cards; `add_segment audioOnly` riser / hits; `check_beat_alignment` on the montage.
-- Music: `set_music` phase beds as audio-only clips per beat (or one bed and the montage cue as a clip); `balance_music` gap 7.
+Read the shared director-style playbook included by get_style. Store reference, mechanism, materialPlan, rhythm, sound, typography, exceptions and evaluation in plan.styleTreatment. Carry these choices into actual shot descriptions, durations, script offsets and audio decisions. Inspect available material before committing exact timing; identify missing coverage instead of compensating with effects. Report technical checks, picture/motion review, listening review and the observed style result separately.
+
+## Sources
+
+- [YouTuber and former NASA engineer Mark Rober draws full crowd, speaks to scientific storytelling](https://stanforddaily.com/2025/05/19/youtuber-and-former-nasa-engineer-mark-rober-draws-full-crowd-speaks-to-scientific-storytelling/) — Jack Quach and Steven D. Liu, The Stanford Daily; 2025-05-19. Firsthand event reporting with direct quotations.

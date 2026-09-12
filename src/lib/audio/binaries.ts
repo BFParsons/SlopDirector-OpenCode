@@ -18,7 +18,7 @@ import path from "node:path";
 
 function pythonBin(): string {
   const p = process.env.SLOPSTUDIO_PYTHON;
-  return p && p.trim() ? p.trim() : "python3";
+  return p && p.trim() ? p.trim() : process.platform === "win32" ? "python" : "python3";
 }
 
 function parseArgvOverride(envName: string): string[] | null {
@@ -48,7 +48,7 @@ export function demucsArgv(): string[] {
 export function whisperArgv(): string[] {
   const override = parseArgvOverride("SLOPSTUDIO_WHISPER_ARGV");
   if (override) return override;
-  const ct2 = path.join(path.dirname(pythonBin()), "whisper-ctranslate2");
+  const ct2 = path.join(path.dirname(pythonBin()), process.platform === "win32" ? "whisper-ctranslate2.exe" : "whisper-ctranslate2");
   if (existsSync(ct2)) return [ct2, "--compute_type", "int8"];
   return [pythonBin(), "-m", "whisper"];
 }

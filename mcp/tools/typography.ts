@@ -5,7 +5,7 @@
  */
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { FONTS, SAFE_PROFILES, TYPE_PRESETS, TYPE_ROLES, checkText, presetForStyle, safeAreas, typeSystemFor } from "../../src/lib/typography";
+import { FONTS, SAFE_PROFILES, TYPE_PRESETS, TYPE_ROLES, checkText, presetForStyle, roleSpecFor, safeAreas, typeSystemFor } from "../../src/lib/typography";
 import { api, snapshot, frameOf } from "../client";
 import { guarded, text } from "../format";
 
@@ -36,11 +36,16 @@ export function registerTypographyTools(server: McpServer) {
         }
       }
       const safe = safeAreas(frame.w, frame.h, safeProfile);
+      const style = typeSystemFor(styleId);
       return text({
         frame,
         safe,
         profiles: SAFE_PROFILES,
-        styleType: typeSystemFor(styleId) ?? null,
+        styleType: style ? { ...style, roles: { ...style.roles, title: roleSpecFor(style, "title") } } : null,
+        hierarchy: {
+          title: "The name of the standalone clip or film. Design its font, palette, composition and reveal separately; role=title. Usually 8–12% landscape height or 6–8% portrait, with a dedicated readable hold. Quiet styles can establish prominence through space instead of size.",
+          supportingText: "Cards, chapters, captions, labels and credits serve the story. Keep a consistent supporting family and reserve the title treatment for the film's identity. A slogan or CTA is a card, not automatically a title.",
+        },
         stylePreset: styleId ? { style: styleId, preset: presetForStyle(styleId).id } : null,
         roles: TYPE_ROLES,
         presets: TYPE_PRESETS,
@@ -54,7 +59,7 @@ export function registerTypographyTools(server: McpServer) {
     {
       title: "Check burned-in text",
       description:
-        "Mechanical typography check (guide §12) on the project's text overlays: every text box inside the title-safe area (error outside action-safe), readable size, line length, three lines at most, reading time against the hold, two texts on top of each other — and, when the brief names a directing style, its type: no text on a no-text style, one family, the style's case, the roles it uses. Runs inside verify_export too.",
+        "Mechanical typography check (guide §12): safe areas, readable size, line length, reading time and overlapping text. Film titles may have independent fonts and casing; otherwise no-text styles permit their title and specified credits. Supporting text is checked against its directing style's faces and role-specific case. Runs inside verify_export too.",
       inputSchema: { projectId: z.string(), profile: z.enum(SAFE_PROFILES).optional().describe("check against another safe-area profile (default: the project's)") },
       annotations: { readOnlyHint: true },
     },

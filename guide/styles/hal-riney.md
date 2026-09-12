@@ -1,65 +1,61 @@
-# Hal Riney — Morning in America
+# Hal Riney
 
-Work: Reagan–Bush '84 "Prouder, Stronger, Better" ("It's morning again in America"), "Bear"; Bartles & Jaymes, Saturn "A Different Kind of Company", Perrier; the Tuesday Team.
+## Reference and mechanism
 
-## The signature
+Restrained voice-led advertising; the 1984 Bear execution is a counterexample to an exclusively warm style.
 
-A soft, grainy morning: a fishing boat, a wedding, a paperboy, a flag going up, a family moving into a house. A warm, unhurried voice — his own — saying plain sentences with numbers folded in like they were weather. Strings that climb a half-step each time the picture changes. Nothing is argued; a feeling is described, and the candidate's name arrives at the end like the sun coming up.
+A simple spoken idea gains force from a carefully chosen everyday or symbolic image.
 
-## Structure — how a spot is built
+## Evidence
 
-- A sequence of small, real, sunlit moments (8–12 in 60 s), each an ordinary person doing an ordinary good thing; the narration lays facts over them ("Today more men and women will go to work than ever before in our country's history.").
-- The middle raises the stakes gently ("Why would we ever want to return to where we were less than four short years ago?"); the end names the person and the picture is the flag or a family.
-- No opponent is shown; the contrast is implied by the word "again".
+The museum archive's Bear advertisement combines restrained delivery with ominous imagery and sound. It shows why a Riney profile cannot be defined solely by reassurance, warmth or the absence of suspense.
 
-## The cut
+**Basis:** Primary advertisement and institutional context. The production choices below are editorial translations, not measured career-wide rules.
 
-- Average shot 4–6 s; slow dissolves (1–1.5 s) between moments; a longer hold (7–9 s) on the flag or the wedding; nothing under 2 s.
-- Camera: slow, gentle moves (a drift, a slow zoom), backlit by low sun, lens diffusion; people never look at the camera; children and old people; wide shots of towns.
-- Grade: warm, soft, low contrast, film grain (`colorLook` warm, `grain` 0.25, `contrast` 0.9); flares welcome.
+## Material prerequisites
 
-## Narration — the neighbour at dawn
+**Production fit:** Archive-compatible. One intelligible proposition, specific images that can sustain it and an unforced spoken performance.
 
-- Third person, present tense, plain declaratives with numbers stated gently: "This afternoon 6,500 young men and women will be married." 70–100 wpm, slow, warm, a little gravel (`generate_narration` voice sal or leo, "warm, unhurried, kindly, as if talking to a friend at breakfast").
-- No adjectives of attack; the only comparative is "again", "more", "better".
-- The name appears once, at the end.
+## Picture and clip selection
 
-## Sound
+Choose a small set of concrete actions or images with an understandable relationship to the premise. Test the concept with neutral subjects before applying any historical campaign analogy.
 
-- Music is a **score** of climbing strings and a soft piano: sustained chords that modulate up at each cut, suspended and resolved on the name (search "warm strings modulating uplifting library", "soft piano sunrise CC"); ducking light (the voice sits on it, not above it).
-- Sync sound is ambience only — birds, a harbour, a school bell — at −20 dB.
+## Framing and camera
 
-## Picture — sources and text
+Use stable compositions that allow the image to be read while the voice remains conversational. Avoid covering every noun with a separate illustrative shot.
 
-- Sources: archive of small-town and working life at dawn, weddings, harbours, flags, families (official channels, stock-like archive, uploads); generated shots ("soft golden morning light, a paperboy on a bicycle on a tree-lined street, 16 mm film grain, gentle slow motion").
-- Text: the name and a line at the end (serif, centred, warm, 4 s); otherwise none.
+## Structure and rhythm
 
-## Do not
+Let the proposition develop over a few connected images. Place the final sentence after the visual idea has become comprehensible, without an unnecessary extra montage.
 
-- No opponent's face, no hard cuts, no fast montage, no dark palette, no rhetorical anger.
-- No music with a beat; no sting; no on-screen statistics.
-- No sentence longer than 15 words in the narration.
+## Narration and sound
+
+Record a close, natural voice with audible phrasing. Test a sparse musical or environmental motif appropriate to the concept; restrained delivery can coexist with tension.
 
 ## Type
 
-**The signature.** A warm serif card for the name and the line, soft white, a slow fade.
+Use a clear final statement or identity with adequate reading time. Set a word budget from the actual sentence and frame, not an inherited maximum.
 
-**Stand-ins.** EB Garamond for a warm serif. Faces: EB Garamond 400, EB Garamond 700. Case: sentence. Colour #FFF6E8 on #000000. Entrance: fade.
+Bundled typography presets are starting treatments. Choose a named work and a coherent project-specific title and supporting-text system. Fonts, colors, cases and roles may vary; source labels and accessibility captions remain available. Check safe areas, reading time and overlap.
 
-**Roles** (`add_text_overlay {role}` with this style in the brief):
+## Exceptions and review
 
-- **card (default)** — the name and the line at the end. EB Garamond Bold · 5 % · hold 4 s.
+Remove blanket bans on dark tone, rhythmic sound, hard cuts and statistics. Keep simplicity, vocal credibility and a coherent image-to-claim relationship.
 
-**Never:** lower-third, caption, callout, citation, label, intertitle.
+Numeric pacing and narration ranges in the catalogue are editorial starting points, not measurements of the creator's career. Explain purposeful departures in styleTreatment.exceptions. Source integrity and technical validity still apply.
 
-**Survey note.** Assumption: the closing card ('President Reagan: Leadership That's Working') is set in a serif; the exact face was not documented.
+## Evaluation
 
-## Harness parameters
+Cut a 20-second nonpolitical public-service concept. A viewer should repeat its single proposition and identify which image made it memorable.
 
-asl 4–6 s · min shot 2 s · transitions dissolves · narration required, warm third person, 70–100 wpm · music required, score (strings) · sync muted · text sparse · interviews none · beat-cut no
+**Failure mode:** A gentle voice and nostalgic stock footage can conceal the absence of a specific idea.
+
+The duration above is a suggested experiment length. Plan the test within the approved production scope; it is not a new approval gate or a claim that the test has passed.
 
 ## Applying it in SlopStudio
 
-- Plan: one beat of moments, one of the gentle stakes, one of the name; `transition: "dissolve"` on every shot; the last shot's `text` carries the name and line.
-- Cut: `update_project transition DISSOLVE transitionMs 1200 colorLook` warm, `grain 0.25`; `update_segments speed 0.8` on two moments.
-- Music: `set_music` the strings; `balance_music` gap 5; `audioFadeOutS` 4.
+Read the shared director-style playbook included by get_style. Store reference, mechanism, materialPlan, rhythm, sound, typography, exceptions and evaluation in plan.styleTreatment. Carry these choices into actual shot descriptions, durations, script offsets and audio decisions. Inspect available material before committing exact timing; identify missing coverage instead of compensating with effects. Report technical checks, picture/motion review, listening review and the observed style result separately.
+
+## Sources
+
+- [Bear](https://www.livingroomcandidate.org/commercials/1984/bear) — Museum of the Moving Image, The Living Room Candidate; 1984 advertisement; undated archive entry. Primary advertisement and museum context.

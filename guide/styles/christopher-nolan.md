@@ -1,67 +1,63 @@
-# Christopher Nolan — the clockwork
+# Christopher Nolan
 
-Films: *Memento*, *The Prestige*, *The Dark Knight*, *Inception*, *Interstellar*, *Dunkirk*, *Oppenheimer*.
+## Reference and mechanism
 
-## The signature
+Braided time and escalating dramatic information; Oppenheimer is the principal editing reference.
 
-Three timelines cut against each other, each ticking at its own speed, all arriving at the same second. Enormous, real images — an aircraft, a mountain, a city street — shot large-format and steady. Exposition delivered fast by clever people while walking. A score that is one rising line: a tick, a Shepard tone, a brass blast, that never resolves until the cut to black.
+Separate strands acquire urgency as their relationship becomes intelligible.
 
-## Structure — how a scene is built
+## Evidence
 
-- Parallel action: two or three strands (A: the plan; B: the execution; C: the consequence), each with its own clock, intercut with strictly increasing frequency. The scene converges: the last 20 s cut between all strands every 1–2 s, then one hold, then black.
-- Open on the largest image with the ticking already running; explain the rules of the scene in the first third through dialogue in motion; execute in the second third; break the rule in the last.
-- Endings withhold: cut to black one beat before the answer.
+Jennifer Lame discusses controlling the information load in Oppenheimer and preserving performance within its complex structure. Ludwig Goransson's account describes substantial music development before editing, reinforcing the connection between score and dramatic character.
 
-## The cut
+**Basis:** Editor and composer craft accounts. The production choices below are editorial translations, not measured career-wide rules.
 
-- Average shot 3–6 s, falling to 1–2 s at the convergence; the establishing wides hold 6–10 s. Nothing under 0.8 s.
-- Straight cuts only; no dissolves; the strands are distinguished by light and palette, never by a transition. Black between the largest movements only.
-- Camera: steady — dolly, crane, aerial, IMAX-style wides; handheld only inside the action strand; the horizon level; faces close and lit from one side.
-- Grade: cool steel and warm skin, high contrast, clean (`colorLook` cinematic, no grain, slight vignette); the strands may carry different colour temperatures.
+## Material prerequisites
 
-## Narration
+**Production fit:** Archive plus graphics. Distinct causal strands, reliable chronology and identifiable characters or processes.
 
-- None as narration; the exposition is dialogue (a bite from a source, or generated dialogue lines) spoken over action. If the brief requires a narrator, one calm third-person voice, sparing (20–50 wpm), stating rules and stakes, never feelings.
+## Picture and clip selection
 
-## Sound
+Assign every candidate shot to a strand and a specific change of state. Choose correspondences with narrative significance, not just matching motion.
 
-- Music is a **score** built on a pulse: a ticking clock, a rising synth line, low brass hits at the strand switches (search "ticking clock tension cue", "Shepard tone riser library", "low brass hit braam CC"). It runs continuously and grows; it does not stop until the black.
-- Sync sound is big and specific: engines, wind, boots, a lock; audio-only clips at the strand switches; dialogue kept intelligible above the score (`check_mix_levels` ratio ≥ 12 LU).
-- Silence: one, at the moment before the cut to black.
+## Framing and camera
 
-## Picture — sources and text
+Give strands stable orientation or visual distinctions. Preserve enough context for a face, object or place to be recognized when it returns.
 
-- Sources: archive of real machinery, aviation, cities, crowds, weather; generated shots ("IMAX wide, aircraft over the sea at dawn, steady aerial, 65 mm, high contrast, no grain"); dialogue shots close and side-lit.
-- Text: a title card for each timeline's clock at its first appearance ("The Mole — one week", "The Sea — one day", "The Air — one hour"), plain sans, 2–3 s; nothing else.
+## Structure and rhythm
 
-## Do not
+Establish each strand before accelerating alternation. Shorten intervals only as the relationship becomes clearer; let a sustained performance interrupt the mechanism when it adds weight.
 
-- No dissolves, no slow motion for pathos, no montage set to a song, no lens flares.
-- No explanation in voiceover of what the cut already shows; no jokes at the convergence.
-- No strand that stops advancing; every return to a strand shows progress.
+## Narration and sound
+
+Try one repeating pulse or motif whose orchestration changes with convergence. Use an intentional dropout or acoustic shift to make a decisive moment legible.
 
 ## Type
 
-**The signature.** Heavy geometric capitals, spaced, white on black: Gotham Bold (Oppenheimer), Avenir Black (Inception), Helvetica Neue Black on the branding; Didot for Interstellar.
+Use dates or locations where viewers need them. Typography may disambiguate time; it should not be asked to repair a fundamentally unreadable braid.
 
-**Stand-ins.** Montserrat for Gotham / Avenir / Helvetica Neue Black; Playfair Display for Didot. Faces: Montserrat 600, Montserrat 900, Playfair Display 400. Case: spaced capitals. Colour #FFFFFF on #000000. Entrance: fade.
+Bundled typography presets are starting treatments. Choose a named work and a coherent project-specific title and supporting-text system. Fonts, colors, cases and roles may vary; source labels and accessibility captions remain available. Check safe areas, reading time and overlap.
 
-**Roles** (`add_text_overlay {role}` with this style in the brief):
+## Exceptions and review
 
-- **card (default)** — a timeline's clock card ('THE AIR — ONE HOUR'). Montserrat SemiBold · spaced capitals · 4 % · hold 3 s.
-- **title** — the title in heavy spaced capitals. Montserrat Black · spaced capitals · 8 %.
-- **date** — a date on black. Montserrat SemiBold · spaced capitals · 3.4 % · center.
+Keep strand progression and causal clarity. Relax universal bans on songs, dissolves, humor and slow motion; preserve the reference's dramatic function rather than an effects blacklist.
 
-**Never:** lower-third, caption, callout, citation, label, quote.
+Numeric pacing and narration ranges in the catalogue are editorial starting points, not measurements of the creator's career. Explain purposeful departures in styleTreatment.exceptions. Source integrity and technical validity still apply.
 
-**Survey note.** Surveyed: Oppenheimer Gotham Bold, Interstellar Linotype Didot, Inception Avenir Black, Helvetica Neue Black on the branding.
+## Evaluation
 
-## Harness parameters
+Create a 30-second two-strand sequence ending in a shared consequence. Ask viewers to explain the relationship and temporal order before increasing the cut rate.
 
-asl 3–6 s (converging to 1–2 s) · min shot 0.8 s · transitions cuts · narration optional, third person, 20–50 wpm · music required, score (pulse) · sync sync-first · text cards · interviews none · beat-cut no
+**Failure mode:** A ticking clock over alternating archive suggests urgency without establishing causality.
+
+The duration above is a suggested experiment length. Plan the test within the approved production scope; it is not a new approval gate or a claim that the test has passed.
 
 ## Applying it in SlopStudio
 
-- Plan: beats are the strands (A/B/C) with the intercut order written in `notes`; each shot's description names its strand; the last beat's shots are 1–2 s; the final shot `transition: "fadeToBlack"` on a standalone piece.
-- Cut: `reorder_segments` to the intercut order; `check_cuts` clean on dialogue; `pacing_report` will show a falling ASL — correct.
-- Music: `set_music` a rising pulse cue; `balance_music` gap 6; `audioFadeOutS` 0 (the black cuts the score).
+Read the shared director-style playbook included by get_style. Store reference, mechanism, materialPlan, rhythm, sound, typography, exceptions and evaluation in plan.styleTreatment. Carry these choices into actual shot descriptions, durations, script offsets and audio decisions. Inspect available material before committing exact timing; identify missing coverage instead of compensating with effects. Report technical checks, picture/motion review, listening review and the observed style result separately.
+
+## Sources
+
+- [Jennifer Lame interview | How to edit Oppenheimer (and win a BAFTA while you do it)](https://filmstories.co.uk/features/jennifer-lame-interview-how-to-edit-oppenheimer-without-breaking-your-brain/) — James Harvey, Film Stories; 2024-02-19. Editor interview.
+
+- [Oppenheimer composer Ludwig Goransson interview](https://www.vanityfair.com/hollywood/2023/07/oppenheimer-music-interview-composer-ludwig-goransson) — Vanity Fair; 2023-07. Composer interview.

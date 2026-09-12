@@ -1,68 +1,63 @@
-# Mark Woollen — the mood piece
+# Mark Woollen
 
-Work: trailers for *The Social Network*, *A Serious Man*, *The Tree of Life*, *Gone Girl*, *12 Years a Slave*, *Little Children*, *Schindler's List* (re-release), *A Hidden Life*; Mark Woollen & Associates.
+## Reference and mechanism
 
-## The signature
+Concept-led feature-film trailers; The Social Network campaign is a documented reference.
 
-A trailer that maps the film's mood, not its plot. A choir sings a slow cover of a pop song; ordinary images (a screen, a hand, a field) run under it for a minute before anyone speaks; dialogue is used as poetry — one line, then silence, then a card; the title arrives when the song breaks. It sits you in the film's world and withholds the story.
+A distinctive music-and-image proposition sells the film's emotional experience.
 
-## Structure — how a trailer is built
+## Evidence
 
-- Act 1 (0–40 s): the world, in quiet images under the song's first verse; one line of dialogue that is a question or a confession; a card ("From the director of…") only if it earns the pause.
-- Act 2 (40–90 s): the fracture — the song's chorus lifts; dialogue lines alternate with silent shots; the cut quickens slightly; a card with one word or a date.
-- Act 3 (90–120 s): the song strips back to a single voice or drops out; a sequence of 6–10 wordless shots; the title on black; one last line or image as a button.
-- No montage of the film's best moments; no stakes explained.
+Woollen's WIRED interview describes music selection, developing alternative concepts and obtaining extra material for The Social Network. These are creative development choices, not evidence for a permanent ban on voiceover, fast montage or plot information.
 
-## The cut
+**Basis:** Direct craft accounts. The production choices below are editorial translations, not measured career-wide rules.
 
-- Average shot 2–4 s; act 1 holds 4–6 s; act 3 quickens to 1.5–2 s; nothing under 0.8 s.
-- Straight cuts, and cuts to black (0.5–1 s) between lines — the black is the trailer's breath; a dissolve never.
-- Sound leads: a line of dialogue starts over black, the picture follows; a shot ends on a sound, not a movement.
-- Grade: the film's own; no trailer-house sweetening.
+## Material prerequisites
 
-## Narration
+**Production fit:** Archive-compatible. Strong character moments, a film-specific premise and an editable musical cue whose structure supports the concept.
 
-- None. Dialogue lines only: 6–10 in two minutes, each one alone, each a complete thought; a card may carry a line ("You don't get to 500 million friends without making a few enemies.").
+## Picture and clip selection
 
-## Sound
+Create separate reels for emotional promise, premise clarity and memorable images. Choose one organizing tension before assembling chronology; keep enough setup for strangers to understand the stakes.
 
-- Music is a **cover**: a slow, sparse, choral or solo-voice version of a known song, starting quietly, building, ending in a cliff (search "choir cover slow" + a title, "solo piano cover CC", "cinematic cover version library"); it is the trailer's spine and the cuts follow its phrases, not its beats.
-- Sync dialogue at full level, clean, with the room; the song ducks under lines and returns in the gaps.
-- Sound design: one designed silence before the title; a low hit under the title; no braams, no risers.
+## Framing and camera
 
-## Picture — sources and text
+Preserve the intended subject and useful negative space when adapting source shots. Select footage whose visual relationships survive trailer compression.
 
-- Sources: the film's footage (uploads or the project's own shots); for a generated trailer, quiet images of the world (a room, a walk, a screen) rather than action.
-- Text: cards in a thin serif or the film's type, white on black, 2–3 s: a quote, a date, a name; the title card 3–4 s; nothing over picture.
+## Structure and rhythm
 
-## Do not
+Try hook → emotional proposition → complication → escalating promise → unresolved final image. Rearrange for the trailer's argument while avoiding false story claims.
 
-- No voice-over ("In a world…"), no explanation, no braam, no riser, no fast montage, no dissolve, no lower-thirds.
-- No line of dialogue that gives away the plot; the lines are mood.
-- No card that says what the picture already says.
+## Narration and sound
+
+Audition substantially different musical interpretations of the same selects. Plan a recognizable opening, space for dialogue, a change of musical state and a final punctuation; the cue need not be a cover or choir.
 
 ## Type
 
-**The signature.** Thin sentence-case cards on black between the lines (the Social Network's light Klavika); the title in the film's own face.
+Write cards as part of the concept. Give the film title a distinct typographic event and check that reviews or credentials do not interrupt the emotional progression.
 
-**Stand-ins.** Montserrat Light for light Klavika / Gotham Light. Faces: Montserrat 300. Case: sentence. Colour #FFFFFF on #000000. Entrance: fade.
+Bundled typography presets are starting treatments. Choose a named work and a coherent project-specific title and supporting-text system. Fonts, colors, cases and roles may vary; source labels and accessibility captions remain available. Check safe areas, reading time and overlap.
 
-**Roles** (`add_text_overlay {role}` with this style in the brief):
+## Exceptions and review
 
-- **card (default)** — a line of dialogue or a phrase, on black, between shots. Montserrat Light · 4.2 % · hold 3 s.
-- **title** — the title when the song breaks. Montserrat Light · spaced capitals · 6.5 % · hold 4 s.
-- **date** — the date on black. Montserrat Light · spaced capitals · 3.4 % · center.
+Remove categorical bans on narration, risers, rapid montage and premise explanation. Require a named campaign reference and a concept-led music rationale.
 
-**Never:** lower-third, caption, callout, citation, label, intertitle.
+Numeric pacing and narration ranges in the catalogue are editorial starting points, not measurements of the creator's career. Explain purposeful departures in styleTreatment.exceptions. Source integrity and technical validity still apply.
 
-**Survey note.** Surveyed: The Social Network's graphics in Klavika with Futura; the trailer's cards are thin white sans on black.
+## Evaluation
 
-## Harness parameters
+Make two 30-second concepts from the same footage with different music structures. Ask viewers what film experience each promises, not merely which is louder.
 
-asl 2–4 s (act 1 holds 4–6 s) · min shot 0.8 s · transitions cuts-and-black · narration none · music required, cover song · sync sync-first (dialogue) · text cards · interviews none · beat-cut no (phrase-cut)
+**Failure mode:** An unusual song over beautiful clips may feel tasteful while failing to sell a specific movie.
+
+The duration above is a suggested experiment length. Plan the test within the approved production scope; it is not a new approval gate or a claim that the test has passed.
 
 ## Applying it in SlopStudio
 
-- Plan: three beats with the song's structure written in `notes` (verse / chorus / strip-back); dialogue bites as `script` `bite` lines with `atS`; cards as `card` shots with `transition: "fadeToBlack"` before them; the title as the last card.
-- Cut: `apply_edit_list` with black gaps (a `card` shot with empty text, 0.5–1 s); `check_cuts` clean on every bite.
-- Music: `set_music` the cover; `balance_music` gap 4; `audioFadeOutS` 0 (the song ends on its own cliff, trimmed to land on the title).
+Read the shared director-style playbook included by get_style. Store reference, mechanism, materialPlan, rhythm, sound, typography, exceptions and evaluation in plan.styleTreatment. Carry these choices into actual shot descriptions, durations, script offsets and audio decisions. Inspect available material before committing exact timing; identify missing coverage instead of compensating with effects. Report technical checks, picture/motion review, listening review and the observed style result separately.
+
+## Sources
+
+- [Secrets of a Trailer Guru: How This Guy Gets You to the Movies](https://www.wired.com/2013/06/online-trailers-mark-woollen/) — Jason Kehe, WIRED; Mark Woollen interview; 2013-06-18. First-person craft interview.
+
+- [Mark Woollen and Michael Greenfeld](https://freshairarchive.org/segments/mark-woollen-and-michael-greenfeld) — Fresh Air Archive; 2003-03-20. Primary interview archive.

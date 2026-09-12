@@ -46,6 +46,19 @@ export type Brief = z.infer<typeof briefSchema>;
 
 const idStr = z.string().min(1).max(60);
 
+/** Assessment of the selected audible asset/range, not the picture or a model name. */
+export const sourceAudioSchema = z.object({
+  music: z.enum(["none", "present", "unknown"]),
+  treatment: z.enum(["original", "isolated", "replacement"]),
+  review: z.enum(["pending", "listened"]),
+  assetId: z.string().min(1).optional(),
+  startS: z.number().min(0).optional(),
+  endS: z.number().min(0).optional(),
+  originalMusic: z.enum(["none", "present", "unknown"]).optional(),
+  notes: z.string().max(1000).optional(),
+}).refine(a => a.startS == null || a.endS == null || a.endS > a.startS, { message: "source audio end must follow start" });
+export type SourceAudio = z.infer<typeof sourceAudioSchema>;
+
 export const planSchema = z.object({
   version: z.number().int().min(1).default(1),
   status: z.enum(["proposed", "approved", "superseded"]).default("proposed"),
@@ -85,6 +98,7 @@ export const planSchema = z.object({
           hint: z.string().max(300).optional(),
         }),
         sound: z.enum(["sync", "muted", "vo"]),
+        sourceAudio: sourceAudioSchema.optional(),
         text: z.string().max(300).optional(),
         transition: z.enum(["cut", "dissolve", "fadeToBlack"]).default("cut"),
       }),
@@ -125,6 +139,16 @@ export const planSchema = z.object({
     })
     .nullable()
     .default(null),
+  styleTreatment: z.object({
+    reference: z.string().trim().min(1).max(1000),
+    mechanism: z.string().trim().min(1).max(1000),
+    materialPlan: z.string().trim().min(1).max(1500),
+    rhythm: z.string().trim().min(1).max(1500),
+    sound: z.string().trim().min(1).max(1500),
+    typography: z.string().trim().min(1).max(1500),
+    exceptions: z.array(z.string().trim().min(1).max(800)).max(20).default([]),
+    evaluation: z.string().trim().min(1).max(1500),
+  }).optional(),
   risks: z.array(z.string().max(400)).max(30).default([]),
   notes: z.string().max(4000).optional(),
 });

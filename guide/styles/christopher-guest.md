@@ -1,66 +1,63 @@
-# Christopher Guest — the mockumentary
+# Christopher Guest
 
-Films: *This Is Spinal Tap* (Rob Reiner, with Guest), *Waiting for Guffman*, *Best in Show*, *A Mighty Wind*, *For Your Consideration*, *Mascots*.
+## Reference and mechanism
 
-## The signature
+Improvised ensemble comedy in Guest-directed films such as Best in Show; do not credit him as director of This Is Spinal Tap.
 
-A documentary crew that everyone in the film believes is real. Sit-down interviews in front of a wall, with people explaining themselves with complete sincerity and no self-awareness; hand-held observational footage of the thing they are preparing for; the comedy is in the gap between what they say and what we see, and in the pause before the cut. Nobody winks. Nothing is underlined.
+Committed characters reveal the gap between their self-image and observable behavior.
 
-## Structure — how a scene is built
+## Evidence
 
-- The interview sets the claim ("We're basically the most important folk group of our era."); the observation shows the truth (a rehearsal in a garage); the interview returns to explain the truth away; a final beat of silence on a face.
-- The scene is one preparation (a rehearsal, a dog wash, a town meeting) followed from start to failure.
-- Interviews are two-shots or singles with the subject looking just off lens at the unseen interviewer; the questions are never heard.
-- The scene ends on an interviewee's pause — the moment they realise, or don't.
+The Best in Show production account describes outline-based improvisation and extensive editing. Mark Yoshikawa emphasizes reviewing the material and finding comic timing in performance, supporting a selective rather than mechanically uncut approach.
 
-## The cut
+**Basis:** Production account and editor interview. The production choices below are editorial translations, not measured career-wide rules.
 
-- Average shot 4–8 s; interview answers hold 8–20 s (the answer must be allowed to go wrong on its own); observation 3–6 s; nothing under 1.5 s.
-- Straight cuts; a cut from the claim to its contradiction is the joke — no music sting, no zoom.
-- Camera: interviews locked, slightly too wide or too centred, natural light, a mundane wall or an object behind the subject (a trophy, a plant); observation handheld, a zoom now and then, "stolen" angles.
-- Grade: flat, documentary, slightly warm; no vignette; no grade.
+## Material prerequisites
 
-## Narration
+**Production fit:** Needs specific source footage. Believable character desires, improvised or natural conversational detail and reactions from the actual exchange.
 
-- None. The interviewees narrate themselves. A title card per subject the first time (name and a self-description they would have written).
+## Picture and clip selection
 
-## Sound
+Choose a statement of self-belief and a behavior that complicates it. Prefer sincere specificity to performers signaling that they know they are funny.
 
-- Sync sound only: the interviews (`muted: false`, `volume` 1) and the observation with its room (`muted: false`); no score — music only when it is in the scene (the band rehearsing, a tape deck, a PA).
-- The pause is the punctuation: hold 1–2 s of room tone after the answer before the cut (`check_cuts` must not trim the pause).
-- No sound effects; no laugh cues.
+## Framing and camera
 
-## Picture — sources and text
+Let characters share space when the relationship carries the humor. Reserve a closer reaction for a meaningful change, not a compulsory cue telling viewers to laugh.
 
-- Sources: generated interview shots ("documentary interview, a middle-aged man in a sweater sitting in front of a beige wall with a framed photo, looking just off camera, natural window light, 16:9, 2000s DV look"), observational footage (archive of amateur rehearsals, dog shows, small-town events; generated handheld shots).
-- Text: lower-thirds in a plain, slightly dated broadcast style (name · self-description), 3–4 s, first appearance only; nothing else.
+## Structure and rhythm
 
-## Do not
+Protect the setup and find the smallest pause that allows the contradiction to register. Compare a held reaction with an earlier cut; select by the performance's actual timing.
 
-- No music under the joke, no zoom-in on the punchline, no reaction cutaway that tells you to laugh, no narrator.
-- No interviewee who knows they are funny; no line that comments on the situation.
-- No cut that shortens the answer past its own collapse.
+## Narration and sound
+
+Keep conversational texture and intelligible details. Test the joke without score first; add music only when the scene's own premise or chosen reference justifies it.
 
 ## Type
 
-**The signature.** The 2000s DV-documentary lower-third: plain white sans with a drop shadow, no bar, cut in and out, once per subject.
+Use ordinary documentary identification when it supports the fiction. Avoid exaggerated caption commentary that announces the joke before the character reveals it.
 
-**Stand-ins.** Liberation Sans for Arial / Helvetica. Faces: Liberation Sans 400. Case: sentence. Colour #FFFFFF on #000000. Entrance: none.
+Bundled typography presets are starting treatments. Choose a named work and a coherent project-specific title and supporting-text system. Fonts, colors, cases and roles may vary; source labels and accessibility captions remain available. Check safe areas, reading time and overlap.
 
-**Roles** (`add_text_overlay {role}` with this style in the brief):
+## Exceptions and review
 
-- **lower-third (default)** — name · self-description, first appearance. Liberation Sans · 3.6 % · no box · shadow 6 % · none · hold 4 s.
+Keep respect for sincere performance. Remove fixed rules that every answer must remain whole or every awkward pause must be extended; the comedy is shaped in selection and timing.
 
-**Never:** caption, callout, card, intertitle, quote, date, label, citation.
+Numeric pacing and narration ranges in the catalogue are editorial starting points, not measurements of the creator's career. Explain purposeful departures in styleTreatment.exceptions. Source integrity and technical validity still apply.
 
-**Survey note.** Assumption: Best in Show's lower-thirds imitate television documentary of the time.
+## Evaluation
 
-## Harness parameters
+Create a 25-second character introduction with one self-description and one contradicting action. Viewers should identify the character's belief before explaining the joke.
 
-asl 4–8 s (interviews 8–20 s) · min shot 1.5 s · transitions cuts · narration none · music none (in-scene only) · sync sync-first · text lower-thirds · interviews produced (off-lens, deadpan) · beat-cut no
+**Failure mode:** Random pauses, zooms and reaction shots can ridicule a person without creating a coherent comic character.
+
+The duration above is a suggested experiment length. Plan the test within the approved production scope; it is not a new approval gate or a claim that the test has passed.
 
 ## Applying it in SlopStudio
 
-- Plan: beats claim / observation / explanation / silence; interview shots `sound: "sync"` 8–20 s with the answer text in `script` as `bite`; observation shots `sound: "sync"`; `music: null`.
-- Cut: `update_segments muted:false volume 1` throughout; `check_cuts` clean and out-points after the pause (+1–2 s of room tone); `add_text_overlay` lower-thirds (OUTLINE, bottom-left, 3.5 s) on first appearance.
-- Verify: `check_soundtrack` will report no bed and sound bites everywhere — the style.
+Read the shared director-style playbook included by get_style. Store reference, mechanism, materialPlan, rhythm, sound, typography, exceptions and evaluation in plan.styleTreatment. Carry these choices into actual shot descriptions, durations, script offsets and audio decisions. Inspect available material before committing exact timing; identify missing coverage instead of compensating with effects. Report technical checks, picture/motion review, listening review and the observed style result separately.
+
+## Sources
+
+- [Best in Show](https://www.tcm.com/articles/220874/best-in-show) — Turner Classic Movies; Undated article. Institutional production account.
+
+- [Mark Yoshikawa Talks of Editing Terrence Malick, Christopher Guest, and the New Reminiscence](https://cinemontage.org/mark-yoshikawa-talks-of-editing-terrence-malick-christopher-guest-and-the-new-reminiscence/) — CineMontage; 2021. Editor interview.

@@ -44,7 +44,7 @@ export async function runDemucs(
   args.push(inputAbs);
 
   await new Promise<void>((resolve, reject) => {
-    const proc = spawn(args[0], args.slice(1), { env: { ...process.env, PYTHONUNBUFFERED: "1" } });
+    const proc = spawn(args[0], args.slice(1), { windowsHide: true, env: { ...process.env, PYTHONUNBUFFERED: "1" } });
     let stderr = "";
     const onData = (d: Buffer) => {
       const text = d.toString();

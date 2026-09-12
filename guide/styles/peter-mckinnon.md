@@ -1,68 +1,61 @@
-# Peter McKinnon — the cinematic vlog
+# Peter McKinnon
 
-Work: the photography and filmmaking channel: "How to make your video look CINEMATIC", coffee and camera-bag vlogs, the Leica and travel films; the transition and LUT tutorials.
+## Reference and mechanism
 
-## The signature
+Cinematic vlog and filmmaking instruction; the 2018 Epidemic Sound BTS provides a specific workflow account.
 
-Every shot looks like a still photograph that started moving: shallow depth, a slow push, a speed ramp on a gesture, a whip pan that lands on the next scene, a LUT with lifted blacks and warm highlights. A coffee poured in slow motion. A voice that is easy and warm, explaining the craft, and a b-roll sequence that is the craft. Cinematic on a desk.
+Tactile supplementary footage gives an everyday activity sensory appeal and continuity.
 
-## Structure — how a video is built
+## Evidence
 
-- Open on a b-roll sequence (10–20 s) cut to music — the coffee, the gear, the light — then the host to camera with the topic in one sentence.
-- Sections: each opens with a b-roll transition (a whip, a match cut, a speed ramp) and a title; the host explains, the b-roll demonstrates; a before/after when it is a technique.
-- The ending: a last b-roll sequence with the music up, the host's sign-off, an end card.
+The BTS account describes McKinnon finding structure in the timeline, using B-roll to establish scenes and bridge story gaps, and sometimes choosing music before filming and sometimes afterward. It does not support requiring movement and a sound effect on every transition.
 
-## The cut
+**Basis:** Production participant's account; commercial context disclosed. The production choices below are editorial translations, not measured career-wide rules.
 
-- Average shot 2–4 s; b-roll sequences 1–2 s a shot on the music; the host to camera 6–12 s; nothing under 0.5 s.
-- Whip pans (from the source), match cuts (a shape into a shape), speed ramps (`speed` 0.3 → 1.5 within a shot — noted as two segments), masks and light-leak transitions rarely; straight cuts inside the host's speech.
-- Camera: gimbal and slider moves, 50–85 mm looks, wide open, backlit; slow motion (`speed` 0.4–0.5) on hands and liquids; a top-down desk shot.
-- Grade: a warm cinematic LUT (`colorLook` cinematic or a LUT asset), lifted blacks, orange-teal, `vignette` 0.25, light `grain`.
+## Material prerequisites
 
-## Narration — the host
+**Production fit:** Requires planned production. Coherent coverage of a real activity, useful detail shots and motion that can connect adjacent images.
 
-- First person, present tense, warm, encouraging, practical: "This is the one thing that changed my b-roll." 130–150 wpm; a "let's get into it"; a list of three.
-- Voice: the host's (sync) or `generate_narration` voice rex, "warm, friendly, confident, a Canadian creator".
+## Picture and clip selection
 
-## Sound
+Collect beginning, action and result alongside texture. Choose details that locate the activity or reveal a step; use beauty shots to strengthen a sequence with an actual progression.
 
-- Music is a **track** with a build: indie electronic or cinematic hip hop that the b-roll cuts to (search "cinematic hip hop instrumental library", "indie electronic build CC"); up under b-roll, ducked 8 LU under the host.
-- Sound design on the transitions: whooshes on whips, a bass hit on the speed ramp, the coffee's own sound in slow motion (audio-only clips).
-- Sync: the host (`muted: false`); b-roll's real sound at 0.5 under the track.
+## Framing and camera
 
-## Picture — sources and text
+Control light direction, reflections and foreground depth. Mix wide context, medium action and close detail; include static frames where they make texture or action easier to read.
 
-- Sources: the project's own b-roll; generated shots ("slow motion, coffee poured into a glass, backlit, shallow depth of field, warm, 120 fps look", "top-down desk with a camera and a notebook, slider move"); the host to camera in a dark room with practical lights.
-- Text: section titles (a clean sans, white, animated in with the whip, 2–3 s); a before/after label; the end card; no captions.
+## Structure and rhythm
 
-## Do not
+Build a short action sequence before adding transitions. Match movement only where it preserves orientation or creates a purposeful reveal; keep the result on screen long enough to register.
 
-- No flat lighting, no static b-roll, no cut without a move, no music at one level throughout.
-- No transition without a sound; no LUT without lifted blacks.
-- No host section longer than 15 s without a b-roll insert.
+## Narration and sound
+
+Use captured practical sounds for tactile detail and a music phrase for overall flow. Test transitions without effects and retain accents only where they clarify or enhance the action.
 
 ## Type
 
-**The signature.** Clean geometric capitals, spaced, for section titles (arriving on the whip), a hand-drawn brush flourish for the title (the McKinnon Brush face).
+Keep tutorial labels functional and title design separate from the montage. Grade for consistent material and skin rendering rather than enforcing one LUT or black level.
 
-**Stand-ins.** Montserrat for the geometric sans; Permanent Marker for the brush hand. Faces: Montserrat 600, Permanent Marker 400. Case: spaced capitals. Colour #FFFFFF on #000000. Entrance: slide up.
+Bundled typography presets are starting treatments. Choose a named work and a coherent project-specific title and supporting-text system. Fonts, colors, cases and roles may vary; source labels and accessibility captions remain available. Check safe areas, reading time and overlap.
 
-**Roles** (`add_text_overlay {role}` with this style in the brief):
+## Exceptions and review
 
-- **lower-third (default)** — a section title on the whip. Montserrat SemiBold · spaced capitals · 3.6 % · no box · shadow 4 % · slide up · hold 2.5 s.
-- **title** — the title in the brush hand. Permanent Marker · 7 % · shadow 4 %.
-- **label** — before / after. Montserrat SemiBold · capitals · 3 %.
+Remove compulsory camera movement, transition sounds and host-duration ceilings. Require B-roll to establish, connect, demonstrate or reveal.
 
-**Never:** caption, intertitle, quote, citation.
+Numeric pacing and narration ranges in the catalogue are editorial starting points, not measurements of the creator's career. Explain purposeful departures in styleTreatment.exceptions. Source integrity and technical validity still apply.
 
-**Survey note.** Surveyed: the McKinnon Brush typeface (Oban Jones) for his branding; the section titles are a clean sans.
+## Evaluation
 
-## Harness parameters
+Create a 20-second everyday-task montage. A viewer should reconstruct the action's beginning and result without narration; remove any beauty shot that breaks that logic.
 
-asl 2–4 s (b-roll 1–2 s) · min shot 0.5 s · transitions cuts + whips, match cuts, speed ramps · narration required, first-person host, 130–150 wpm · music required, track with a build · sync sync-first (host) / muted (b-roll under track) · text lower-thirds (titles) · interviews direct-address · beat-cut yes (b-roll)
+**Failure mode:** Slow motion and whooshes can make a sequence attractive while leaving it narratively incomplete.
+
+The duration above is a suggested experiment length. Plan the test within the approved production scope; it is not a new approval gate or a claim that the test has passed.
 
 ## Applying it in SlopStudio
 
-- Plan: beats opening b-roll / sections ×N / closing b-roll; b-roll shots 1–2 s `sound: "muted"` on the beat with the transition named; speed ramps as two consecutive segments of the same source (`speed 0.4` then `1.5`); host shots `sound: "sync"`.
-- Cut: `update_segments speed` for ramps; `set_lut` or `colorLook` cinematic, `vignette 0.25`, `grain 0.1`; `add_segment audioOnly` whooshes and hits; `check_beat_alignment` on the b-roll.
-- Music: `set_music` the track; `balance_music` gap 6; `audioFadeOutS` 2.
+Read the shared director-style playbook included by get_style. Store reference, mechanism, materialPlan, rhythm, sound, typography, exceptions and evaluation in plan.styleTreatment. Carry these choices into actual shot descriptions, durations, script offsets and audio decisions. Inspect available material before committing exact timing; identify missing coverage instead of compensating with effects. Report technical checks, picture/motion review, listening review and the observed style result separately.
+
+## Sources
+
+- [Behind the Creator's Lens: Peter McKinnon](https://www.epidemicsound.com/blog/behind-the-creators-lens-peter-mckinnon/) — Epidemic Sound; 2018-03-15. Production participant's BTS account; commercial music supplier.

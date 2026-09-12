@@ -1,5 +1,9 @@
 # SlopStudio Pro — desktop build
 
+For native Windows launch, NSIS packaging and Codex editing, see
+[WINDOWS-CODEX.md](WINDOWS-CODEX.md). The Linux architecture below also applies
+to Windows, using `.exe` media tools and the platform Prisma query engine.
+
 SlopStudio Pro is the **desktop fork** of SlopStudio. The web app (the original
 repo) stays as-is; Pro diverges toward a packaged, offline, high-performance NLE.
 This document describes the desktop target and what is / isn't wired yet.

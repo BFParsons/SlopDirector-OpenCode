@@ -1,68 +1,61 @@
-# Casey Neistat — the cinematic vlog
+# Casey Neistat
 
-Work: the daily vlog (2015–16), "Snowboarding with the NYPD", "Bike Lanes", "Make It Count" (Nike), "Do What You Can't" (Samsung), the 368 videos.
+## Reference and mechanism
 
-## The signature
+Personal action-led filmmaking and vlogs; Make It Count is a concrete edit-discovery reference.
 
-A day told like a short film: a wide-angle camera on a tripod with a boom, held at arm's length, the city moving past; time-lapses of streets and skies; a drone over the roof; jump cuts inside a monologue; a music track that the whole day is cut to; a first-person voice that talks directly to you about the point of the day. Sunglasses, a scooter, the studio. It is fast but it breathes.
+A personal intention becomes an improvised journey with a visible result.
 
-## Structure — how a video is built
+## Evidence
 
-- Open on the day's premise in one sentence to camera, mid-motion; a title card drawn by hand (a marker on paper) with the day's number or name.
-- The day in three or four movements (the walk, the meeting, the build, the flight), each with a time-lapse to travel and a monologue to think; the story is the day's problem and how it went.
-- The end: a wide from the roof, a line to camera about what it meant, a cut to black on the music's last beat. No outro beyond a two-second card.
+Neistat's Little Black Book interview describes finding Make It Count's story from a substantial body of travel footage. It supports discovering structure through editing and treating equipment as a means, not defining the style by particular cameras or transitions.
 
-## The cut
+**Basis:** Direct craft account. The production choices below are editorial translations, not measured career-wide rules.
 
-- Average shot 2–4 s; monologue takes 6–12 s with jump cuts every sentence; time-lapses 3–5 s; drone wides 5–8 s; nothing under 0.7 s.
-- Straight cuts on the music; jump cuts are the grammar (the same framing, the next sentence); a smash cut to a time-lapse as a transition; no dissolves.
-- Camera: ultra-wide (the "vlog" look), handheld and moving, at arm's length; time-lapses (`speed` 8–30); drone; glidecam wides; a lot of walking.
-- Grade: warm, contrasty, natural (`contrast` 1.1, `saturation` 1.05); sunlight and neon.
+## Material prerequisites
 
-## Narration — the monologue
+**Production fit:** Needs specific source footage. A real personal objective, action coverage, spatial context and evidence of what changed.
 
-- First person, present tense, direct to camera, casual, opinionated, clear: "Here's the thing about that." 130–160 wpm in the monologues; silence under the time-lapses and the drone.
-- The point of the day is said once, near the end, plainly.
-- Voice: the host's (sync); if generated, `generate_narration` voice rex, "casual, quick, direct, a New Yorker talking to a friend".
+## Picture and clip selection
 
-## Sound
+Build a day or journey around an intention and obstacle. Collect practical transitions such as leaving, traveling, arriving and doing, alongside the most revealing unexpected moment.
 
-- Music is a **track** (an instrumental with drive, an indie or electronic piece from a library) that the day is cut to; it runs through the time-lapses at full level and ducks under the monologues (search "upbeat indie electronic instrumental library", "chill hip hop beat CC").
-- Sync: the monologues and the street (`muted: false`, `volume` 1 on the monologue, 0.5 on the street under the track).
-- No sound effects except the natural ones (a scooter, a door, a drone motor).
+## Framing and camera
 
-## Picture — sources and text
+Use self-placement, wide context and tactile details to establish presence. An improvised camera position can feel purposeful when it clearly shows the action.
 
-- Sources: the project's own footage; generated shots ("ultra-wide handheld selfie angle, a man in sunglasses walking through Manhattan, morning, 16:9"), time-lapses (archive of cities, skies), drone wides.
-- Text: a hand-drawn title card (marker on paper, 2 s) at the start; occasional hand-written words over a shot; no captions, no lower-thirds.
+## Structure and rhythm
 
-## Do not
+Try intention → attempt → complication → revised action → result. Use travel compression between meaningful scenes; retain an imperfect take if its event is stronger.
 
-- No talking head at a desk, no studio lighting, no dissolves, no slow build, no music over the monologue at full level.
-- No shot without motion; no vlog without a point.
-- No outro longer than a card.
+## Narration and sound
+
+Let actual city, travel or task sounds establish place. Use a music phrase to compress movement, then step out of it for a decisive encounter or spoken thought.
 
 ## Type
 
-**The signature.** Marker handwriting on paper: the day's title drawn by hand, a word scrawled over a shot.
+Use handwritten or physical notes only when they express planning, evidence or personality. A map should explain the journey rather than function as a compulsory vlog transition.
 
-**Stand-ins.** Permanent Marker for the marker hand. Faces: Permanent Marker 400. Case: lower. Colour #111111 on #F4F1EA. Entrance: none.
+Bundled typography presets are starting treatments. Choose a named work and a coherent project-specific title and supporting-text system. Fonts, colors, cases and roles may vary; source labels and accessibility captions remain available. Check safe areas, reading time and overlap.
 
-**Roles** (`add_text_overlay {role}` with this style in the brief):
+## Exceptions and review
 
-- **title (default)** — the day's title, marker on paper (a card shot). Permanent Marker · 7 % · #111111 · none · hold 2.5 s.
-- **label** — a word over a shot. Permanent Marker · 3.6 % · #FFFFFF · no box · shadow 5 % · none.
+Relax bans on studio, desk, static shots and dissolves. Keep first-person agency and a clear story of doing something.
 
-**Never:** lower-third, caption, callout, citation, quote, intertitle, date.
+Numeric pacing and narration ranges in the catalogue are editorial starting points, not measurements of the creator's career. Explain purposeful departures in styleTreatment.exceptions. Source integrity and technical validity still apply.
 
-**Survey note.** Surveyed: hand-drawn marker titles and physical chapter markers.
+## Evaluation
 
-## Harness parameters
+Build a 30-second personal errand film. A viewer should identify the initial intention and what altered it, even with the music muted.
 
-asl 2–4 s · min shot 0.7 s · transitions cuts (jump cuts, smash to time-lapse) · narration required, first-person to camera, 130–160 wpm · music required, track · sync sync-first · text sparse (hand-drawn card) · interviews direct-address · beat-cut yes (the time-lapses)
+**Failure mode:** Timelapses and travel montages show activity without a personal story.
+
+The duration above is a suggested experiment length. Plan the test within the approved production scope; it is not a new approval gate or a claim that the test has passed.
 
 ## Applying it in SlopStudio
 
-- Plan: beats premise / movements ×3 / roof; monologue shots `sound: "sync"` 6–12 s; time-lapse shots `speed 12` 3–5 s; drone wides 5–8 s; the title as a `card` (hand-drawn text).
-- Cut: `update_segments speed 12` on the time-lapse sources; `check_beat_alignment` on the time-lapse cuts; `update_project contrast 1.1`.
-- Music: `set_music` the track; `balance_music` gap 6; `audioFadeOutS` 0 (cut on the last beat).
+Read the shared director-style playbook included by get_style. Store reference, mechanism, materialPlan, rhythm, sound, typography, exceptions and evaluation in plan.styleTreatment. Carry these choices into actual shot descriptions, durations, script offsets and audio decisions. Inspect available material before committing exact timing; identify missing coverage instead of compensating with effects. Report technical checks, picture/motion review, listening review and the observed style result separately.
+
+## Sources
+
+- [Breakfast with Casey Neistat](https://lbbonline.com/news/breakfast-with-casey-neistat/) — Little Black Book; 2014-09-24. First-person interview.

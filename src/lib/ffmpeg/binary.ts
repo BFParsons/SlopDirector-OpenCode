@@ -18,7 +18,7 @@ function resolve(pathEnv: string, dirEnv: string, name: string): string {
   const explicit = process.env[pathEnv];
   if (explicit && explicit.trim()) return explicit.trim();
   const dir = process.env[dirEnv];
-  if (dir && dir.trim()) return join(dir.trim(), name);
+  if (dir && dir.trim()) return join(dir.trim(), process.platform === "win32" ? `${name}.exe` : name);
   return name;
 }
 

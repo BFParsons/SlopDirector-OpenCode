@@ -23,7 +23,7 @@ export interface LoudnessReport {
 export function measureLoudness(inputAbs: string): Promise<LoudnessReport> {
   const args = ["-hide_banner", "-nostats", "-vn", "-i", inputAbs, "-af", "ebur128=peak=true", "-f", "null", "-"];
   return new Promise((resolve) => {
-    const proc = spawn(ffmpegPath(), args);
+    const proc = spawn(ffmpegPath(), args, { windowsHide: true });
     let stderr = "";
     proc.stderr.on("data", (d) => (stderr += d.toString()));
     proc.on("error", () => resolve(empty()));
@@ -68,7 +68,7 @@ export function detectSilence(
   const min = opts.minS ?? 0.5;
   const args = ["-hide_banner", "-nostats", "-i", inputAbs, "-af", `silencedetect=noise=${th}dB:d=${min}`, "-f", "null", "-"];
   return new Promise((resolve) => {
-    const proc = spawn(ffmpegPath(), args);
+    const proc = spawn(ffmpegPath(), args, { windowsHide: true });
     let stderr = "";
     proc.stderr.on("data", (d) => (stderr += d.toString()));
     proc.on("error", () => resolve([]));
@@ -110,7 +110,7 @@ bpm = float(tempo[0]) if hasattr(tempo, "__len__") else float(tempo)
 print(json.dumps({"bpm": round(bpm, 1), "beatsS": [round(float(t), 3) for t in times]}))
 `;
   return new Promise((resolve) => {
-    const proc = spawn(python(), ["-c", script, inputAbs]);
+    const proc = spawn(python(), ["-c", script, inputAbs], { windowsHide: true });
     let stdout = "";
     let stderr = "";
     proc.stdout.on("data", (d) => (stdout += d.toString()));

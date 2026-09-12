@@ -1,68 +1,61 @@
-# Emma Chamberlain — the chaotic self-edit
+# Emma Chamberlain
 
-Work: the 2018–2020 vlogs ("a day in my life", "i tried thrifting", coffee videos), *Anything Goes*; the editing style copied by a generation of vloggers.
+## Reference and mechanism
 
-## The signature
+Personal vlog and editorial self-observation; identify a period rather than freezing the creator in an early style.
 
-She films herself alone, mid-thought, and then edits herself like a hostile friend: a snap zoom into her face when she says something stupid, a sound effect on a sip of coffee, a fisheye on a bad take, her own outtakes cut in as commentary, text on screen that argues with her, a voice pitched down to say what she actually meant. The energy is unhinged, self-deprecating and precise; the pace is relentless but the content is a girl in a kitchen.
+The edit reveals the gap between a performed self and a more candid thought.
 
-## Structure — how a video is built
+## Evidence
 
-- No hook beyond herself starting to talk; the premise arrives in the second sentence ("today I'm going to…").
-- A loose sequence of the day (getting ready, the errand, the food, the thing going wrong), each moment made into a bit by the edit: a zoom, an effect, a caption, an outtake.
-- Every 30–60 s, a deliberate "mistake" kept in and pointed at (a zoom on her eye, a replay, a "what?" caption).
-- The ending is abrupt: a sentence trailing off, a zoom, black.
+Chamberlain's V Magazine interview describes enjoyment of editing, creative autonomy and limits on constant filming. It supports the importance of a personal editorial voice; comments about slowing life down should not be misreported as measured evidence of slower cutting.
 
-## The cut
+**Basis:** Direct interview; era-specific visual prescriptions proposed. The production choices below are editorial translations, not measured career-wide rules.
 
-- Average shot 1.5–3 s; jump cuts every sentence or half-sentence; the snap zoom (`imageMotion` fast push, 0.3–0.6 s) is the punctuation; freezes and replays; nothing under 0.3 s.
-- Straight cuts and jump cuts; a hard zoom in and out; a fisheye or a mirror effect on one shot per video (`effects`); no dissolves.
-- Camera: handheld phone or a camera on a table, wide, natural window light, no make-up of the frame; bad framing kept when it is funny.
-- Grade: slightly desaturated, film-like, a little green (`saturation` 0.9, `grain` 0.15).
+## Material prerequisites
 
-## Narration — herself, and the edit
+**Production fit:** Needs specific source footage. Authentic first-person material, meaningful self-reaction and ordinary moments whose context is retained.
 
-- The speech is sync, first person, rambling, self-interrupting, 150–180 wpm with long pauses she then cuts around; the edit is a second narrator: text captions and a pitched-down voice (an audio-only clip, `speed` 0.8 on a re-read line) answering her.
-- Generated: `generate_narration` voice ara, "casual, tired, self-mocking, mid-thought, Gen-Z vlogger"; the edit-voice is the same line at `speed 0.75`.
+## Picture and clip selection
 
-## Sound
+Choose a small experience with a genuine change of thought. Preserve the detail that makes it personal; avoid substituting generic awkwardness for the speaker's actual perspective.
 
-- Sound effects are the comedy: a crunch, a sip, a record scratch, a cartoon boing, a bass drop on the zoom, a vine boom (search "vlog sound effects pack CC", "record scratch", "bass drop short"); one every 15–30 s as audio-only clips on the zoom or the mistake.
-- Music: a lo-fi or indie bed under the errands (search "lofi chill beat library", "indie folk instrumental CC"), ducked 8 LU, dropped out for the bits.
-- Sync: everything (`muted: false`, `volume` 1); room noise kept.
+## Framing and camera
 
-## Picture — sources and text
+Use proximity or a self-directed camera when it creates intimacy. Keep a wider or quiet observational shot if it contributes to the experience rather than rejecting polish automatically.
 
-- Sources: the project's own selfie footage; generated shots ("a young woman in a hoodie talking to a phone camera in a small kitchen, morning window light, slightly off-centre, 16:9"); outtakes are the same shots re-used at a different point.
-- Text: captions in a plain typewriter or hand-written face, white, lower-third or centred, 1–2 s, that comment rather than transcribe ("she did not do that", "???", "day 1 of 1"); an arrow to something in frame; nothing branded.
+## Structure and rhythm
 
-## Do not
+Test a straightforward spoken version, then add a small number of editorial asides, ellipses or reframings. Each should reveal a thought absent from the unedited delivery.
 
-- No polished b-roll, no drone, no clean intro, no dissolves, no smooth transitions, no explanation of the bits.
-- No caption that transcribes the speech; the caption argues.
-- No zoom without a reason (the reason is a mistake or a lie).
+## Narration and sound
+
+Use room sound, breath or a selective interruption to expose the moment. Music is a tonal choice; silence should feel connected to the experience rather than mechanically inserted.
 
 ## Type
 
-**The signature.** A typewriter face (the American Typewriter / Courier register), lower-case, white with a shadow, arguing with her.
+Write captions as an additional thought only when that voice is authentic. Separate necessary accessibility captions from optional comic or reflective commentary.
 
-**Stand-ins.** Courier Prime for the typewriter. Faces: Courier Prime 700, Courier Prime 400. Case: lower. Colour #FFFFFF on #000000. Entrance: none.
+Bundled typography presets are starting treatments. Choose a named work and a coherent project-specific title and supporting-text system. Fonts, colors, cases and roles may vary; source labels and accessibility captions remain available. Check safe areas, reading time and overlap.
 
-**Roles** (`add_text_overlay {role}` with this style in the brief):
+## Exceptions and review
 
-- **caption (default)** — a caption that comments ('she did not do that'). Courier Prime Bold · lower-case · 3.6 % · bottom-center · no box · shadow 5 % · none · hold 1.8 s.
-- **label** — an arrow word. Courier Prime · lower-case · 3.2 % · no box · shadow 5 % · none.
+Remove blanket bans on polished footage, smooth transitions and clean introductions. Label early chaotic-edit references separately from other periods.
 
-**Never:** lower-third, intertitle, quote, citation, date, card.
+Numeric pacing and narration ranges in the catalogue are editorial starting points, not measurements of the creator's career. Explain purposeful departures in styleTreatment.exceptions. Source integrity and technical validity still apply.
 
-**Survey note.** Surveyed loosely: a typewriter face for the captions; American Typewriter is the usual identification.
+## Evaluation
 
-## Harness parameters
+Create a 25-second ordinary-life scene with two editorial interventions. Viewers should identify what those edits reveal about the speaker beyond the literal words.
 
-asl 1.5–3 s · min shot 0.3 s · transitions cuts (jump cuts, snap zooms, freezes) · narration required as sync speech, first person rambling, 150–180 wpm · music required, lo-fi bed (out for bits) · sync sync-first · text kinetic (commenting captions) · interviews direct-address · beat-cut no
+**Failure mode:** Random zooms and self-deprecating captions imitate mannerisms without a personal point of view.
+
+The duration above is a suggested experiment length. Plan the test within the approved production scope; it is not a new approval gate or a claim that the test has passed.
 
 ## Applying it in SlopStudio
 
-- Plan: beats = moments of the day; each moment lists its bit (the zoom, the effect, the caption, the sound); outtake shots re-use an earlier shot id; the ending `transition: "cut"` to a black `card` 0.5 s.
-- Cut: `update_segments imageMotion` fast push on the zooms, `effects` fisheye on one shot; `add_text_overlay` commenting captions (POP or OUTLINE); `add_segment audioOnly` sound effects at the zooms; a pitched-down re-read as an audio-only clip at `speed 0.75`.
-- Music: `set_music` the lo-fi bed; `balance_music` gap 8; `audioFadeOutS` 0.
+Read the shared director-style playbook included by get_style. Store reference, mechanism, materialPlan, rhythm, sound, typography, exceptions and evaluation in plan.styleTreatment. Carry these choices into actual shot descriptions, durations, script offsets and audio decisions. Inspect available material before committing exact timing; identify missing coverage instead of compensating with effects. Report technical checks, picture/motion review, listening review and the observed style result separately.
+
+## Sources
+
+- [Emma Chamberlain and Derek Blasberg interview](https://vmagazine.com/article/emma-chamberlain-derek-blasberg-interview-cartier-louis-vuitton/) — V Magazine; 2022-07-27. First-person interview.

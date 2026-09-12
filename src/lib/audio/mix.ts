@@ -52,7 +52,7 @@ function probeDuration(abs: string): Promise<number> {
       "-show_entries", "format=duration",
       "-of", "default=nokey=1:noprint_wrappers=1",
       abs,
-    ]);
+    ], { windowsHide: true });
     let out = "";
     proc.stdout.on("data", (d) => (out += d.toString()));
     proc.on("error", () => resolve(0));
@@ -131,7 +131,7 @@ export async function runMix(
   ];
 
   await new Promise<void>((resolve, reject) => {
-    const proc = spawn(ffmpegPath(), args);
+    const proc = spawn(ffmpegPath(), args, { windowsHide: true });
     let stderr = "";
     proc.stderr.on("data", (d) => (stderr += d.toString()));
     proc.on("error", reject);

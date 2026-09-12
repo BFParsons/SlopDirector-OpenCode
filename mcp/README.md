@@ -7,6 +7,12 @@ truth and the open editor live-updates while the agent works.
 
 ## Start SlopStudio, then add the server
 
+**Windows + Codex:** follow [the native setup guide](../docs/WINDOWS-CODEX.md).
+`corepack pnpm codex:setup` writes the project MCP config with absolute paths;
+`corepack pnpm desktop:prod` starts the editor on the same port. The portable stdio
+entry is `node /absolute/path/to/repo/mcp/run.cjs`, including on Windows. It handles
+the working directory and TypeScript loader without a `.cmd` or Bash shim.
+
 ```bash
 # the app must be running: the app-menu entry, scripts/launch-desktop.sh --prod,
 # or, with no display:
@@ -34,9 +40,10 @@ claude mcp add slopstudio -e SLOPSTUDIO_URL=http://127.0.0.1:38473 -- \
 
 ```toml
 [mcp_servers.slopstudio]
-command = "/path/to/SlopStudio-Omarchy/node_modules/.bin/tsx"
-args = ["/path/to/SlopStudio-Omarchy/mcp/server.ts"]
-env = { SLOPSTUDIO_URL = "http://127.0.0.1:38473" }
+command = "node"
+args = ["/path/to/SlopStudio-Omarchy/mcp/run.cjs"]
+tool_timeout_sec = 600
+env = { SLOPSTUDIO_URL = "http://127.0.0.1:38473", SLOPSTUDIO_AGENT_NAME = "Codex" }
 ```
 
 Against a multi-user server (desktop auth off) add `SLOPSTUDIO_API_TOKEN` to
@@ -48,7 +55,7 @@ Open the project in the app and watch the editor: clips the agent adds fade in o
 
 ## Tools
 
-Pre-production first for a new piece: the `interview` prompt drives `interview_next` one multiple-choice question at a time (AskUserQuestion in Claude Code) into `set_brief`, `set_plan` / `check_plan` / `plan_document` / `approve_plan` / `plan_tasks`, then sourcing in parallel (`search_youtube`, `source_clips`, `add_ai_shot` / `generate_ai_shots`, `generate_narration`, `list_video_models`) and `storyboard_sheet` to review a cut. Sub-agent definitions for Claude Code live in `.claude/agents/` (clip-scout, narrator, shot-picker).
+Pre-production first for a new piece: the `interview` prompt drives `interview_batch`, prefetching a queue and asking one short multiple-choice question at a time, with no per-answer tool calls or research. After collection, review the answers together and clarify gaps (`interview_next` is a fallback for clients without a queue), then proceed to `set_brief`, `set_plan` / `check_plan` / `plan_document` / `approve_plan` / `plan_tasks`, then sourcing in parallel (`search_youtube`, `source_clips`, `add_ai_shot` / `generate_ai_shots`, `generate_narration`, `list_video_models`) and `storyboard_sheet` to review a cut. Sub-agent definitions for Claude Code live in `.claude/agents/` (clip-scout, narrator, shot-picker).
 
 | Group | Tools |
 |---|---|

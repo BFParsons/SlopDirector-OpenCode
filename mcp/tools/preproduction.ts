@@ -8,7 +8,8 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { briefSchema, planSchema } from "../../src/lib/validation/brief";
 import { api } from "../client";
-import { nextQuestion } from "../interview";
+import { interviewBatch, nextQuestion } from "../interview";
+import { INTERVIEW_UI } from "../interview-ui";
 import { styleText } from "../guide";
 import { CATEGORIES, STYLES, styleById, stylesFor } from "../../src/lib/styles";
 import { guarded, image, text } from "../format";
@@ -17,11 +18,23 @@ type Check = { pass: boolean; findings: { severity: string; rule: string; messag
 
 export function registerPreproductionTools(server: McpServer) {
   server.registerTool(
+    "interview_batch",
+    {
+      title: "Gather the film brief",
+      description:
+        "Prefetch the interview queue: returns all currently applicable unanswered questions in one call, or done with the finished brief. Cache the questions and present them one at a time with minimal processing between replies; submit accumulated answers when the queue is exhausted. Scene context, supplied material text, footage licence and music selection/reference questions may appear after their parent answers. " + INTERVIEW_UI,
+      inputSchema: { request: z.string().min(1).max(4000).describe("what the person asked for, verbatim"), answers: z.record(z.string(), z.unknown()).default({}).describe("all answers so far, keyed by question id; include information already supplied") },
+      annotations: { readOnlyHint: true },
+    },
+    guarded(async ({ request, answers }) => text(interviewBatch(request, answers))),
+  );
+
+  server.registerTool(
     "interview_next",
     {
       title: "Next interview question",
       description:
-        "The pre-production interview, one question at a time with multiple choice — like a planning prompt. Pass the person's request and the answers so far ({questionId: value}); get the next question (id, header, question, options with the recommended one marked, multiSelect) or, when everything needed is in, the finished brief to pass to set_brief. Present each question through the host's question UI (Claude Code: AskUserQuestion — one question, the options as given, recommended first labelled '(Recommended)'); in a plain chat, a numbered list. When the question says `agentFills`, write 3–4 concrete options yourself from what you know of the subject (the tool cannot), keep 'Other' last, and store the chosen text as the value. Never ask two questions at once; never ask what the request already answered — put it in `answers` yourself.",
+        "Compatibility fallback for clients that cannot retain a question queue. For a faster one-question-at-a-time interview, prefetch interview_batch and advance locally instead of calling this tool after each answer. Pass the person's request and answers so far ({questionId: value}); get the next question or the finished brief to pass to set_brief. " + INTERVIEW_UI,
       inputSchema: { request: z.string().min(1).max(4000).describe("what the person asked for, verbatim"), answers: z.record(z.string(), z.unknown()).default({}).describe("answers so far, keyed by question id") },
     },
     guarded(async ({ request, answers }) => text(nextQuestion(request, answers))),
@@ -32,13 +45,13 @@ export function registerPreproductionTools(server: McpServer) {
     {
       title: "List directing styles",
       description:
-        "The directing styles the interview can offer — real filmmakers and houses (Adam Curtis, Ken Burns, Ridley Scott, Michel Gondry, Wes Anderson, Frank Capra, Mark Woollen, MrBeast…) translated into parameters the harness checks (ASL range, shot floor, transitions, narration policy / voice / words-per-minute, music policy / kind, sync policy, text, stills, interviews, beat-cut) and prose the agent follows (get_style). Pass a genre / form to see which fit it (all otherwise), grouped by category.",
+        "The directing styles the interview can offer — real filmmakers and houses (Adam Curtis, Ken Burns, Ridley Scott, Michel Gondry, Wes Anderson, Frank Capra, Mark Woollen, MrBeast…) translated into editorial defaults the harness reviews (ASL range, shot floor, transitions, narration policy / voice / words-per-minute, music policy / kind, sync policy, text, stills, interviews, beat-cut) and prose the agent follows (get_style). Pass a genre / form to see which fit it (all otherwise), grouped by category.",
       inputSchema: { genre: z.string().max(200).optional().describe("the brief's genre / form, e.g. 'scripted historical documentary', 'attack ad', 'music video', 'trailer', 'vlog'") },
       annotations: { readOnlyHint: true },
     },
     guarded(async ({ genre }) => {
       const fits = genre ? new Set(stylesFor(genre).map((x) => x.id)) : null;
-      const rows = STYLES.filter((x) => !fits || fits.has(x.id)).map((x) => ({ id: x.id, name: x.name, category: x.category, oneLine: x.oneLine, params: x.params }));
+      const rows = STYLES.filter((x) => !fits || fits.has(x.id)).map((x) => ({ id: x.id, name: x.name, category: x.category, oneLine: x.oneLine, params: x.params, parameterBasis: x.parameterBasis, reference: x.craft?.reference ?? null, materialFit: x.craft?.materialFit ?? null }));
       return text({ genre: genre ?? null, count: rows.length, categories: CATEGORIES.map((c) => ({ ...c, styles: rows.filter((r) => r.category === c.id).map((r) => r.id) })).filter((c) => c.styles.length), styles: rows });
     }),
   );
@@ -48,7 +61,7 @@ export function registerPreproductionTools(server: McpServer) {
     {
       title: "Read a directing style",
       description:
-        "The full instructions for a directing style (guide/styles/<id>.md): the signature, how a scene is built, the cut (numbers), narration (voice, person, density, sentence shapes), sound, picture and text, what not to do, the harness parameters, and how to apply it with SlopStudio's tools. Read it before writing a plan for a brief that names the style.",
+        "Read a directing reference: documented mechanism, source evidence, material prerequisites, shot selection, framing, rhythm, sound, typography, exceptions and an observable evaluation. Includes the shared director-style playbook. Parameters are editorial starting defaults, not career-wide prohibitions. Use the craft fields to write plan.styleTreatment before planning the shots.",
       inputSchema: { id: z.string().min(1).max(60).describe("a style id from list_styles, e.g. adam-curtis") },
       annotations: { readOnlyHint: true },
     },
@@ -56,7 +69,7 @@ export function registerPreproductionTools(server: McpServer) {
       const st = styleById(id);
       const doc = styleText(id);
       if (!st && !doc) throw new Error(`unknown style "${id}" — list_styles has the registry`);
-      return text({ id, name: st?.name ?? doc?.title ?? id, category: st?.category ?? null, oneLine: st?.oneLine ?? null, params: st?.params ?? null, text: doc?.text ?? null });
+      return text({ id, name: st?.name ?? doc?.title ?? id, category: st?.category ?? null, oneLine: st?.oneLine ?? null, params: st?.params ?? null, parameterBasis: st?.parameterBasis ?? null, craft: st?.craft ?? null, text: doc?.text ?? null });
     }),
   );
 

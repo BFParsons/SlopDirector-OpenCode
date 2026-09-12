@@ -1,63 +1,61 @@
-# Hype Williams — the gloss
+# Hype Williams
 
-Work: Missy Elliott "The Rain (Supa Dupa Fly)", Busta Rhymes "Put Your Hands Where My Eyes Could See", Notorious B.I.G. "Mo Money Mo Problems", TLC "No Scrubs", Kanye West "Gold Digger" and "Stronger", Beyoncé "Drunk in Love".
+## Reference and mechanism
 
-## The signature
+Artist-specific music-video image-making; use a named video or period rather than a universal 1990s preset.
 
-The fisheye lens, the metallic suit, the tunnel of light. Everything is bigger, shinier and closer than life: colour saturated to the edge, frames doubled or stacked, a performer in the centre of a distorted world that bends around them. Split screens, letterboxed widescreen, a single colour per section.
+The performer becomes an unmistakable visual icon matched to the music.
 
-## Structure — how a video is built
+## Evidence
 
-- Sections by colour: each verse or chorus owns a set, a palette and a lens (verse 1 gold fisheye tunnel; chorus white cyc, split screen; verse 2 blue rain).
-- The performer addresses the lens; there is no story, only presence; the hook returns to the widest, most saturated set.
-- Wealth and scale are the subject: cars, jewellery, crowds, a single figure in a huge space.
+Williams's RBMA conversation emphasizes responding to the music and seeing each artist distinctly. He also describes his changing practice, making a fixed package of fisheye, luxury locations and saturated color an inadequate career-wide rule.
 
-## The cut
+**Basis:** Direct craft account. The production choices below are editorial translations, not measured career-wide rules.
 
-- Cuts on the beat and on the lyric's stresses; average shot 0.8–2 s; the hook runs faster (0.5–1 s); a performance line may hold 3–4 s. Nothing under 0.25 s.
-- Straight cuts; split-screen (2–3 panels) on the hook; a strobe of 3–5 frames' cuts at the drop once per song.
-- Fisheye and ultra-wide lenses close to the face; slow, glossy dolly moves; slow motion (`speed` 0.5) on the walk and the pour.
-- Grade: saturated, high-key, one dominant colour per section (`saturation` up, `contrast` up); letterbox.
+## Material prerequisites
 
-## Narration
+**Production fit:** Requires planned production. Strong performance, controlled wardrobe and set silhouettes, and coverage that preserves musical attitude.
 
-- None; the lyric and the ad-libs are the voice.
+## Picture and clip selection
 
-## Sound
+Start with the performer's most specific gesture or stance. Design a few contrasting setups around that identity; avoid replacing personality with generic luxury imagery.
 
-- The **song** is the soundtrack at full level; a sound-designed hit on the section change (a whoosh, a reverse cymbal) as an audio-only clip is allowed. No sync sound.
+## Framing and camera
 
-## Picture — sources and text
+Test lens proximity, low viewpoint and exaggerated foreground deliberately. Check faces and body proportions rather than applying distortion indiscriminately; create readable silhouette against the set.
 
-- Sources: generated performance shots ("fisheye lens close-up, performer in a metallic suit, gold tunnel of light, high-key, saturated, 1998 music video"), generated set wides, archive of luxury objects and crowds.
-- Text: the artist and title as a broadcast-style card in the first 5 s and the last 5 s (bottom-left, small caps); no other text.
+## Structure and rhythm
 
-## Do not
+Organize performance setups by verse, hook or musical change. Return to a signature image with increased scale or intensity; let a powerful performance hold when it carries the phrase.
 
-- No naturalism, no handheld realism, no muted palette, no narrative.
-- No cut off the beat in the hook; no dissolve.
-- No location that looks like a real place unless it is a mansion or a tarmac.
+## Narration and sound
+
+Preserve the track's authority. Use editorial accents sparingly around musical entrances; avoid stacking generic impacts over every strong beat.
 
 ## Type
 
-**The signature.** The 1990s MTV credit block: bold Helvetica capitals, white, lower-left, three lines — artist, song, director.
+Derive supporting graphics from the artist's visual world. Letterboxing and display type are campaign choices, not mandatory proof of the style.
 
-**Stand-ins.** Liberation Sans Bold for Helvetica Bold. Faces: Liberation Sans 700. Case: upper. Colour #FFFFFF on #000000. Entrance: none.
+Bundled typography presets are starting treatments. Choose a named work and a coherent project-specific title and supporting-text system. Fonts, colors, cases and roles may vary; source labels and accessibility captions remain available. Check safe areas, reading time and overlap.
 
-**Roles** (`add_text_overlay {role}` with this style in the brief):
+## Exceptions and review
 
-- **credit (default)** — ARTIST / SONG / DIRECTOR, lower-left, first and last five seconds. Liberation Sans Bold · capitals · 3.2 % · no box · shadow 6 % · none · hold 5 s.
+Remove restrictions to mansions or tarmacs, compulsory distortion and bans on simplicity or narrative. Make artist identity and musical response the first selection criteria.
 
-**Never:** caption, callout, card, intertitle, quote, date, label, citation.
+Numeric pacing and narration ranges in the catalogue are editorial starting points, not measurements of the creator's career. Explain purposeful departures in styleTreatment.exceptions. Source integrity and technical validity still apply.
 
-**Survey note.** Assumption: the network's credit block, not the director's; the gloss is in the picture.
+## Evaluation
 
-## Harness parameters
+Create a 20-second hook study using three setups. A viewer should remember one distinctive performer-image pairing without relying on the song title.
 
-asl 0.8–2 s · min shot 0.25 s · transitions cuts · narration none · music required, the song · sync muted · text lower-thirds (title cards) · interviews none · beat-cut yes
+**Failure mode:** Fisheye and neon applied to weak performance produce decoration rather than presence.
+
+The duration above is a suggested experiment length. Plan the test within the approved production scope; it is not a new approval gate or a claim that the test has passed.
 
 ## Applying it in SlopStudio
 
-- Plan: beats = song sections, each with a colour and a lens in the description; shots 1–2 s; the hook beats note split-screen (V2 overlay track with `add_segment track 1`).
-- Cut: `update_segments saturation 1.4 contrast 1.15`; `check_beat_alignment` on the hook cuts; overlays for the split screen.
-- Music: `set_music volume 1 ducking false`; `add_text_overlay` the title card, style BOX, bottom-left, 4 s.
+Read the shared director-style playbook included by get_style. Store reference, mechanism, materialPlan, rhythm, sound, typography, exceptions and evaluation in plan.styleTreatment. Carry these choices into actual shot descriptions, durations, script offsets and audio decisions. Inspect available material before committing exact timing; identify missing coverage instead of compensating with effects. Report technical checks, picture/motion review, listening review and the observed style result separately.
+
+## Sources
+
+- [Hype Williams lecture](https://www.redbullmusicacademy.com/lectures/hype-williams/) — Red Bull Music Academy; interview by Jeff Mao; 2018. First-person lecture transcript.

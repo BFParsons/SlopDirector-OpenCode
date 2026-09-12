@@ -99,7 +99,7 @@ export function downloadYouTubeClip(opts: {
     args.push(...cookies.args);
     args.push("-o", outTmpl, url);
 
-    const proc = spawn(env.YTDLP_BIN, args, { stdio: ["ignore", "pipe", "pipe"] });
+    const proc = spawn(env.YTDLP_BIN, args, { windowsHide: true, stdio: ["ignore", "pipe", "pipe"] });
     let stderr = "";
     const killer = setTimeout(() => {
       proc.kill("SIGKILL");
@@ -182,7 +182,7 @@ export function downloadYouTubeAudio(opts: {
     args.push(...cookies.args);
     args.push("-o", outTmpl, url);
 
-    const proc = spawn(env.YTDLP_BIN, args, { stdio: ["ignore", "pipe", "pipe"] });
+    const proc = spawn(env.YTDLP_BIN, args, { windowsHide: true, stdio: ["ignore", "pipe", "pipe"] });
     let stderr = "";
     const killer = setTimeout(() => {
       proc.kill("SIGKILL");

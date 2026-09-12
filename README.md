@@ -1,5 +1,10 @@
 # SlopStudio-Omarchy
 
+**Windows + Codex:** Native Electron/SQLite launchers, Windows packaging and the
+interview-driven Codex editing workflow are documented in
+**[docs/WINDOWS-CODEX.md](docs/WINDOWS-CODEX.md)**. Start with
+`corepack pnpm codex:setup`, then `corepack pnpm desktop:prod`.
+
 SlopStudio Pro for **Omarchy** (Arch Linux + Hyprland) — the desktop NLE fork **without the Storyboard mode**, fitted to a 1080p laptop at 2× scale. Upstream: `BFParsons/slopstudio-pro`.
 
 > **This fork removes the Storyboard mode** (the AI concept → shot-list board, its

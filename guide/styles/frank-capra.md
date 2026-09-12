@@ -1,71 +1,61 @@
-# Frank Capra — the case for the fight
+# Frank Capra
 
-Films: *Why We Fight* series (1942–45: *Prelude to War*, *The Nazis Strike*, *The Battle of Britain*); features *It's a Wonderful Life*, *Mr. Smith Goes to Washington*.
+## Reference and mechanism
 
-## The signature
+The Why We Fight compilation documentaries, not Capra's entire dramatic and comic career.
 
-The enemy's own footage turned against him. A narrator who talks to you like a neighbour, with numbers, and a map that moves: arrows, a spreading stain, a globe. Contrast montage: their marching children against our playing children; their leader shouting against our president speaking calmly. Newsreel, animation and a plain, warm, angry voice — the argument of a lawyer who is also your uncle.
+A clearly stated argument is developed through organized archival evidence and explanation.
 
-## Structure — how a scene is built
+## Evidence
 
-- The claim, stated in the first sentence ("This is a fight between a free world and a slave world."); the evidence in three moves (what they did, what it cost, what it means for you); the call ("That's why we fight.").
-- The contrast pair is the unit: two shots, one of them, one of us, on the same action; 4–6 pairs per scene.
-- Maps carry the geography: a map shot (4–8 s) every time the story moves; arrows and stains animate on the narration's verbs.
-- The scene ends on a face (a child, a soldier, a worker) and the narrator's last line.
+The National Archives account describes Prelude to War's compilation of existing material, narration and explanatory animation. These are historically situated propaganda films; their confident form does not make every historical claim independently reliable.
 
-## The cut
+**Basis:** Archival institutional analysis. The production choices below are editorial translations, not measured career-wide rules.
 
-- Average shot 3–6 s; the contrast pairs 2–3 s each; maps 4–8 s; nothing under 1 s.
-- Straight cuts; a dissolve into and out of the map; a fade to black at a chapter's end.
-- Archive is used as evidence: their newsreels with their titles and their music briefly heard, then cut off by the narrator ("That's what they told their people.").
-- Grade: newsreel monochrome (`colorLook` MONO), `grain` medium; maps high contrast.
+## Material prerequisites
 
-## Narration — the neighbour
+**Production fit:** Archive plus graphics. Provenanced footage, a defensible explanatory proposition and maps or diagrams where geography matters.
 
-- Second person and first person plural, present tense, plain American speech: "Take a look at this." "They told their people it was self-defence. It wasn't." "Here's what it cost." 100–140 wpm; relentless but warm; numbers as facts ("Sixty million people. Gone from the map.").
-- Sarcasm allowed against the enemy's own claims; never against the audience.
-- Voice: strong, confident, mid-range (`generate_narration` voice rex).
+## Picture and clip selection
 
-## Sound
+Arrange material as proposition, evidence and consequence. Keep the origin of appropriated footage visible in the research record and avoid presenting an opponent's staged imagery as neutral observation.
 
-- Music is a **score** of the period: martial themes for us, ominous low strings for them, a hymn at the end (search "1940s orchestral newsreel library", "ominous low strings public domain", "patriotic hymn orchestral CC"); the bed shifts with the contrast pairs.
-- Sync sound: the enemy's rallies, their leader's voice for 3–5 s, their anthem, cut off by the narrator; our sound is quiet (a factory, a school).
-- Effects on the maps: a drum roll, a boom as a stain spreads (audio-only clips).
+## Framing and camera
 
-## Picture — sources and text
+Preserve the action or institution needed for the argument. Use a map at the scale required to explain movement, with labels that can be read at normal playback.
 
-- Sources: archive newsreels (both sides), captured footage, official channels and national archives; generated maps ("1940s animated map, dark arrows spreading across Europe, black and white, hand-drawn style") as AI shots or cards; contrast footage of ordinary life.
-- Text: a title card for each chapter (bold sans, on black, 3 s); on the maps, place names as text overlays (2–3 per map); a quotation card of the enemy's own words with attribution (4–5 s).
+## Structure and rhythm
 
-## Do not
+Let each section answer a distinct question. Alternate an assertion with an example or explanation; use comparison where it adds a verifiable relationship.
 
-- No neutral tone; no "both sides"; the narrator names the enemy and the cause.
-- No stock beauty shots; no modern graphics style; no music with a beat.
-- No evidence shown without the narrator saying what it proves.
+## Narration and sound
+
+Record narration with clear sentence structure and emphasis. Test music by whether it clarifies the section's dramatic role, without letting certainty of tone replace evidence.
 
 ## Type
 
-**The signature.** Wartime title cards in heavy gothic capitals, maps with stencilled place names, a quotation card with attribution.
+Use maps, dates and source labels to make the argument inspectable. Distinguish historical propaganda graphics from newly authored explanatory material.
 
-**Stand-ins.** Oswald Bold for the poster gothics; Liberation Sans for the map names. Faces: Oswald 700, Liberation Sans 400. Case: upper. Colour #FFFFFF on #000000. Entrance: none.
+Bundled typography presets are starting treatments. Choose a named work and a coherent project-specific title and supporting-text system. Fonts, colors, cases and roles may vary; source labels and accessibility captions remain available. Check safe areas, reading time and overlap.
 
-**Roles** (`add_text_overlay {role}` with this style in the brief):
+## Exceptions and review
 
-- **intertitle (default)** — a chapter title in heavy capitals. Oswald Bold · capitals · 7 %.
-- **label** — a place name on the map. Liberation Sans · capitals · 3 % · no box · outline 5 % · none.
-- **quote** — the enemy's own words, with attribution. Liberation Sans · 3.8 %.
-- **title** — the series title. Oswald Bold · capitals · 9 %.
+Rename or scope the profile to Why We Fight. Remove career-wide claims about neutrality, contemporary music or graphics; preserve archival attribution and argumentative clarity.
 
-**Never:** caption, lower-third, callout, citation.
+Numeric pacing and narration ranges in the catalogue are editorial starting points, not measurements of the creator's career. Explain purposeful departures in styleTreatment.exceptions. Source integrity and technical validity still apply.
 
-**Survey note.** Assumption: the Why We Fight lettering was not documented; heavy display capitals in the 1940s poster manner.
+## Evaluation
 
-## Harness parameters
+Create a 30-second historical explanation with one claim, two source-backed examples and one map. Viewers should separate the factual evidence from the narrator's interpretation.
 
-asl 3–6 s · min shot 1 s · transitions cuts (dissolves on maps) · narration required, second person plain speech, 100–140 wpm · music required, period score · sync mixed · text cards · interviews none · beat-cut no
+**Failure mode:** Authoritative narration and marching music can give an unsupported compilation the appearance of proof.
+
+The duration above is a suggested experiment length. Plan the test within the approved production scope; it is not a new approval gate or a claim that the test has passed.
 
 ## Applying it in SlopStudio
 
-- Plan: beats claim / evidence ×3 / call; contrast pairs as consecutive shots with "THEM:" and "US:" in the descriptions; a `card` map shot per geographic move; enemy sync shots `sound: "sync"` of 3–5 s followed by a narration line.
-- Text: `add_text_overlay` chapter titles (BOX, centred) and map labels (OUTLINE); quotation cards as `card` shots.
-- Music: `set_music` the period score; `balance_music` gap 7; `audioFadeOutS` 3.
+Read the shared director-style playbook included by get_style. Store reference, mechanism, materialPlan, rhythm, sound, typography, exceptions and evaluation in plan.styleTreatment. Carry these choices into actual shot descriptions, durations, script offsets and audio decisions. Inspect available material before committing exact timing; identify missing coverage instead of compensating with effects. Report technical checks, picture/motion review, listening review and the observed style result separately.
+
+## Sources
+
+- [Why We Fight: Prelude to War, America's Crash History Lesson](https://unwritten-record.blogs.archives.gov/2020/09/01/why-we-fight-prelude-to-war-americas-crash-history-lesson/) — US National Archives, The Unwritten Record; 2020-09-01; updated 2021-03-22. Archival institutional analysis.

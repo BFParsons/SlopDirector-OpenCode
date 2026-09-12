@@ -1,64 +1,63 @@
-# Anton Corbijn — the grain
+# Anton Corbijn
 
-Work: Depeche Mode "Enjoy the Silence", "Personal Jesus", "Walking in My Shoes"; Nirvana "Heart-Shaped Box"; Joy Division "Atmosphere"; U2 "One"; Metallica "Hero of the Day"; features *Control*, *A Most Wanted Man*.
+## Reference and mechanism
 
-## The signature
+Symbolic musician portraiture; keep the music-video practice distinct from Control's historical reconstruction.
 
-Black and white, or colour so desaturated it might as well be. Super 8 and 16 mm grain, slow shutter, hard daylight and long shadows. A performer alone in a landscape — a king with a deckchair on a hill, a man walking a road — photographed like a portrait: still, frontal, unsmiling. The band plays to camera in a bare room. Surreal props, deadpan.
+A performer, a landscape and a recurring emblem imply an inner condition.
 
-## Structure — how a video is built
+## Evidence
 
-- Two strands intercut: the portrait strand (the singer alone in a place, one action, one costume, walking) and the performance strand (the band in a bare interior, playing straight to lens). The strands never meet.
-- Each verse advances the walk; each chorus returns to the performance; the bridge is a single held portrait.
-- No story is explained; the props are metaphors left alone (a chair, a crown, a mirror, a bird).
+Corbijn explains that Control's monochrome relates to his memory of Joy Division and its contemporary visual culture, while explicitly noting that he also works in color. His podcast account describes Enjoy the Silence through a simple king-and-chair concept.
 
-## The cut
+**Basis:** Direct craft accounts. The production choices below are editorial translations, not measured career-wide rules.
 
-- Average shot 3–6 s; portraits hold 6–10 s; performance cuts on the phrase, not the beat. Nothing under 1 s.
-- Straight cuts; a slow fade to black at the very end only.
-- Camera: static tripod or a slow, wide handheld; frontal framing; the horizon flat and low; hard sun or window light.
-- Grade: monochrome (`colorLook` MONO) or a heavy desaturation with a sepia lean; grain heavy (`grain` 0.4); slight overexposure; `speed` 0.7–0.8 for the walk.
+## Material prerequisites
 
-## Narration
+**Production fit:** Needs specific source footage. Expressive portraits, a consistent symbolic object or costume and locations that can sustain the concept.
 
-- None. Occasionally a spoken line by the singer to camera, unamplified.
+## Picture and clip selection
 
-## Sound
+Choose an emblem that changes the performer's apparent status or isolation. Favor images with a clear bodily attitude rather than generic moody scenery.
 
-- The **song** at full level; sync sound is nothing but wind, if anything (an audio-only clip at −25 dB under the portraits).
+## Framing and camera
 
-## Picture — sources and text
+Use negative space, distance and scale to relate the person to the environment. Decide color treatment from the reference and material; preserve texture without obscuring expression.
 
-- Sources: generated shots ("black and white 16 mm film, heavy grain, a man in a long coat walking alone on a mountain road, hard sunlight, wide static frame"), archive landscapes, performance shots in a bare room.
-- Text: none; the title and artist as small white text bottom-left for 4 s at the start, if at all.
+## Structure and rhythm
 
-## Do not
+Alternate portrait and journey or ritual. Return to the emblem with a changed setting or relationship, allowing the repeated image to gather meaning.
 
-- No colour saturation, no fast cutting, no lens flares, no smooth gimbal moves, no dissolves.
-- No smiling, no dancing, no crowd.
-- No performance shot that pretends to be a concert.
+## Narration and sound
+
+Let musical phrasing govern the recurrence of the motif. Test fewer cuts through a strong phrase; avoid explaining every lyric with a literal image.
 
 ## Type
 
-**The signature.** Photobook captions: tiny spaced capitals in a plain grotesk, white, once.
+Treat titles and symbols as a small related visual family. A restrained handwritten or photographic treatment is an option to test, not an attributed universal rule.
 
-**Stand-ins.** Liberation Sans for the plain grotesk. Faces: Liberation Sans 400. Case: spaced capitals. Colour #FFFFFF on #000000. Entrance: none.
+Bundled typography presets are starting treatments. Choose a named work and a coherent project-specific title and supporting-text system. Fonts, colors, cases and roles may vary; source labels and accessibility captions remain available. Check safe areas, reading time and overlap.
 
-**Roles** (`add_text_overlay {role}` with this style in the brief):
+## Exceptions and review
 
-- **credit (default)** — artist · song, tiny spaced capitals, lower-left. Liberation Sans · spaced capitals · 2.6 % · no box · none · hold 4 s.
-- **title** — a title, small. Liberation Sans · spaced capitals · 4 %.
+Remove the assumption that saturated color, movement or performance footage is inherently incompatible. Specify whether the target is a particular music video or Control.
 
-**Never:** lower-third, caption, callout, card, intertitle, quote, date, label.
+Numeric pacing and narration ranges in the catalogue are editorial starting points, not measurements of the creator's career. Explain purposeful departures in styleTreatment.exceptions. Source integrity and technical validity still apply.
 
-**Survey note.** Assumption: Control's title face was not documented; the manner follows the photobooks.
+## Evaluation
 
-## Harness parameters
+Build a 25-second sequence around one person and one object. Viewers should infer a consistent emotional relationship without being given a plot summary.
 
-asl 3–6 s · min shot 1 s · transitions cuts · narration none · music required, the song · sync muted · text sparse · interviews none · beat-cut optional
+**Failure mode:** Desaturation and grain alone cannot create a symbolic relationship.
+
+The duration above is a suggested experiment length. Plan the test within the approved production scope; it is not a new approval gate or a claim that the test has passed.
 
 ## Applying it in SlopStudio
 
-- Plan: two beats alternating (portrait / performance) across the song's sections; portrait shots 6–10 s, performance 3–4 s; the last shot `transition: "fadeToBlack"` on a standalone piece.
-- Cut: `update_project colorLook MONO grain 0.4`; `update_segments speed 0.75` on the walk; `check_cuts` on the phrase boundaries of the performance shots (the singer's mouth, if generated with lip-sync, must land on the lyric).
-- Music: `set_music volume 1 ducking false`.
+Read the shared director-style playbook included by get_style. Store reference, mechanism, materialPlan, rhythm, sound, typography, exceptions and evaluation in plan.styleTreatment. Carry these choices into actual shot descriptions, durations, script offsets and audio decisions. Inspect available material before committing exact timing; identify missing coverage instead of compensating with effects. Report technical checks, picture/motion review, listening review and the observed style result separately.
+
+## Sources
+
+- [Control: Anton Corbijn Interview](https://www.cinema.com/articles/5185/control-anton-corbijn-interview.phtml) — Cinema.com; Undated; Control production context. First-person interview; original publication date unspecified.
+
+- [Ep 123: Anton Corbijn](https://metacast.app/podcast/midnight-chats/9wlqUhaV/ep-123-anton-corbijn/q5YQ2xlV) — Midnight Chats; transcript hosted by Metacast; 2024-03-26; recorded 2023-07. First-person interview transcript mirror.

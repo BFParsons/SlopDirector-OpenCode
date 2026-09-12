@@ -9,9 +9,7 @@
 //     same process, an embedded SQLite DB + assets under the OS user-data dir,
 //     and the bundled ffmpeg on the path. Then open a window onto it.
 //
-// NOTE: the prod packaging path (SQLite client + bundled ffmpeg/prisma engines)
-// is scaffolded but not yet fully wired — see docs/DESKTOP.md. The dev path runs
-// today.
+// Native Windows and Linux builds use the platform Prisma engine and ffmpeg.
 
 const { app, BrowserWindow, shell, ipcMain, dialog, screen } = require("electron");
 const path = require("node:path");
@@ -29,7 +27,7 @@ const DEV = process.env.ELECTRON_DEV === "1";
 // VaapiVideoDecodeLinuxGL + AcceleratedVideoDecodeLinuxGL (before app.ready).
 const HOST = "127.0.0.1";
 const PORT = Number(process.env.SLOPSTUDIO_PORT || 38473);
-const DEV_URL = "http://localhost:3000";
+const DEV_URL = process.env.SLOPSTUDIO_DEV_URL || "http://localhost:3000";
 const PROD_URL = `http://${HOST}:${PORT}`;
 
 let serverProc = null;
@@ -76,15 +74,17 @@ function startServer() {
 
   // Point the ffmpeg resolver at a bundled binary ONLY if it actually exists;
   // otherwise leave SLOPSTUDIO_FFMPEG_DIR unset so the resolver falls back to the
-  // system ffmpeg on PATH. (We don't bundle ffmpeg yet, so this is the live path.)
+  // system ffmpeg on PATH.
   const bundledFfmpegDir =
     process.env.SLOPSTUDIO_FFMPEG_DIR || path.join(process.resourcesPath || "", "ffmpeg");
-  const ffmpegEnv = fs.existsSync(path.join(bundledFfmpegDir, "ffmpeg"))
+  const exe = process.platform === "win32" ? ".exe" : "";
+  const ffmpegEnv = ["ffmpeg", "ffprobe"].every((name) => fs.existsSync(path.join(bundledFfmpegDir, name + exe)))
     ? { SLOPSTUDIO_FFMPEG_DIR: bundledFfmpegDir }
     : {};
 
   serverProc = spawn(process.execPath, [serverEntry], {
     stdio: "inherit",
+    windowsHide: true,
     cwd,
     env: {
       ...process.env,
@@ -100,7 +100,7 @@ function startServer() {
       // Embedded, per-user, offline data + SQLite-shaped encodings.
       SLOPSTUDIO_DB: "sqlite",
       DATABASE_URL:
-        process.env.DATABASE_URL || `file:${path.join(userData, "slopstudio.db")}`,
+        process.env.DATABASE_URL || `file:${path.join(userData, "slopstudio.db").replaceAll("\\", "/")}`,
       SLOPSTUDIO_SCHEMA_SQL: ddl, // first-launch DDL (src/lib/db/bootstrap.ts)
       ASSET_ROOT: process.env.ASSET_ROOT || path.join(userData, "assets"),
       // Per-install session secret (auth needs it; generated on first launch).

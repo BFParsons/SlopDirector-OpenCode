@@ -32,7 +32,7 @@ function runProbe(absPath: string): Promise<MediaProbe> {
       "-of",
       "json",
       absPath,
-    ]);
+    ], { windowsHide: true });
     let out = "";
     proc.stdout.on("data", (d) => (out += d.toString()));
     proc.on("error", () => resolve(EMPTY));

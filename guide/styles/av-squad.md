@@ -1,69 +1,60 @@
-# AV Squad — the blockbuster rise
+# AV Squad — campaign-led trailer construction
 
-Work: trailers for *Doctor Strange*, *Avengers*, *Star Wars* spots, *Project Hail Mary*, *Top Gun: Maverick* spots; the action-trailer house.
+AV Squad is a trailer agency with work across genres, not a single director with
+one fixed formula. Start with a named execution and the experience it sells.
+The [action portfolio](https://featured.avsquad.com/action) identifies individual
+pieces, including the *Top Gun: Maverick* teaser "Service".
 
-## The signature
+## Creative constraints
 
-A trailer built like a rocket: a quiet cold open with one line, a riser that never stops rising, and a cut that doubles its tempo every twenty seconds until the title, then a button. Music with a beat and a brass hit on every cut of the last act; visual "rhymes" (a punch, a door, a jump) cut on the downbeat; a silence before the biggest shot. The plot is stated in three cards.
+Follow [Trailer construction](../playbooks/trailer-construction.md). The ranges
+below are starting points for a draft. They do not require a fixed act count,
+three premise cards, tempo doubling, a hit on every cut, or an all-on-grid climax.
 
-## Structure — how a trailer is built
+## Structure and selection
 
-- Cold open (0–15 s): a wide, a line of dialogue, a stinger; black; the studio card.
-- Act 1 (15–45 s): who and where, in 6–8 shots over a slow pulse; a card with the premise ("One pilot. One mission.").
-- Act 2 (45–80 s): the stakes escalate on a riser; dialogue lines answer each other across cuts; the tempo doubles.
-- Act 3 (80–110 s): the money sequence — 12–20 shots on the beat, each a big image (the vehicle, the leap, the explosion), sync hits on every cut; a stopdown (2 s of silence and one slow shot); the title on the biggest hit; a button gag.
+- State the selling idea, then select a hook, character moments, a change in
+  pressure, and genuinely distinctive payoff material.
+- Organize those moments into an arc that fits the requested duration. A cold
+  open, stopdown, title hit and button are options, each with a purpose.
+- Select moments before locking their lengths. A new crop of the same gesture
+  must contribute new meaning to earn another slot.
+- Preserve real quotation context and distinguish separate archival events.
 
-## The cut
+## Picture and editing
 
-- Average shot 1.5–3 s; act 3 0.5–1 s on the beat; the stopdown 2–4 s; nothing under 0.3 s.
-- Straight cuts; a speed ramp (`speed` 0.5 → 1) on the hero shot; whip transitions rarely; a cut to black before the title.
-- The rhythm is the music's grid: `check_beat_alignment` on act 3 must be nearly all on grid.
-- Grade: the film's, pushed: `contrast` 1.1, `saturation` 1.1, teal-orange; `vignette` light.
+- Use straight cuts as a starting point; motivate other transitions through
+  action, sound, a change in time, or an intended association.
+- Vary shot lengths with attention and readability. Short bursts, off-beat
+  cuts, reaction holds and longer scenes are all available.
+- Use beat analysis for selected musical passages. It is a timing aid, not a
+  target percentage or a requirement to cut at every accent.
+- Preserve the source film's visual identity. Choose grade, crops, retiming and
+  motion for the actual material, then inspect a rendered excerpt.
 
-## Narration
+## Dialogue, music and sound
 
-- None (the modern blockbuster trailer has no narrator); the cards carry the premise in three lines; dialogue is 8–12 short lines, each cut to land its last word on a hit.
+- Dialogue should reveal character or change the situation. Narration is an
+  available campaign choice; the agency name alone does not prohibit it.
+- Audition the exact music version and passage for attitude, development,
+  dialogue space and ending. A song, bespoke score or designed sonic motif may
+  fit better than a hybrid orchestral cue.
+- Build a phrase and audio-event map. A sound or gesture can land on an accent
+  while the picture holds. Quiet can retain ambience or an expressive tail.
+- Keep dialogue, music, effects and ambience separately adjustable. No mandatory
+  hit under a last word, prescribed gain, or permanent riser.
 
-## Sound
+## Typography
 
-- Music is a **trailer cue**: a hybrid orchestral track with a riser, a drop, a beat-driven back half, brass hits (search "epic hybrid trailer music library", "cinematic riser braam CC", "trailer drums build"); the cut is built on it.
-- Sound design: braams and hits on the act changes, whooshes on the whips, a sub drop at the stopdown, silence before the title; each as an audio-only clip on the grid.
-- Sync: dialogue lines clean and loud (`volume` 1.1); effects from the shots (an engine, a punch) kept where they land on beats (`muted: false`).
-
-## Picture — sources and text
-
-- Sources: the film's footage; for a synthetic trailer, generated hero shots ("wide shot, a fighter jet banking over a desert canyon at sunset, anamorphic, motion blur, 65 mm"), faces, hands on controls.
-- Text: premise cards (bold condensed sans, white or the film's type, 2–2.5 s, one line each); the title card animated in with the hit (3–4 s); a date card; a lower-third for the studio at the start.
-
-## Do not
-
-- No shot off the grid in act 3; no dissolves; no long dialogue; no mood-piece silence except the stopdown.
-- No dialogue line without a hit under its last word; no card over four words.
-- No plot beyond the three cards.
-
-## Type
-
-**The signature.** Condensed grotesk premise cards (the Trade Gothic Bold Condensed / Tungsten register), the title in heavy geometric capitals slamming in on the hit.
-
-**Stand-ins.** Oswald Bold for Trade Gothic Bold Condensed / Tungsten; Montserrat Black for the Gotham-class title. Faces: Oswald 700, Montserrat 900. Case: upper. Colour #FFFFFF on #000000. Entrance: pop.
-
-**Roles** (`add_text_overlay {role}` with this style in the brief):
-
-- **card (default)** — a premise card, one line, on black. Oswald Bold · capitals · 6 % · pop · hold 2.2 s.
-- **title** — the title on the biggest hit. Montserrat Black · spaced capitals · 9 % · pop.
-- **date** — the date card. Oswald Bold · capitals · 4 % · center · pop.
-- **lower-third** — the studio card at the start. Oswald Bold · capitals · 3 % · no box · shadow 4 %.
-
-**Never:** quote, citation, label, intertitle.
-
-**Survey note.** Assumption from the house's trailers: condensed gothic cards and a geometric title; the specific faces are per campaign.
+Design the campaign title separately from supporting copy. Oswald Bold and
+Montserrat Black are available stand-ins, not verified agency-wide house faces.
+The existing card/title presets are starting points; choose font, layout,
+animation and duration for the campaign. Use as many cards as the idea needs,
+including none. Necessary dates, labels and citations are allowed.
 
 ## Harness parameters
 
-asl 1.5–3 s (act 3 0.5–1 s) · min shot 0.3 s · transitions cuts · narration none · music required, trailer cue · sync sync-first (lines and hits) · text cards · interviews none · beat-cut yes
-
-## Applying it in SlopStudio
-
-- Plan: four beats (cold open / act 1 / act 2 / act 3 + button); act 3 shots on the cue's beat grid with a hit per cut; three premise `card` shots; the title card after the stopdown.
-- Cut: `analyze_audio` the cue for its grid; `apply_edit_list` the act-3 sequence at the grid; `add_segment audioOnly` braams/hits/whooshes; `update_segments speed 0.5` on the hero shot; `check_beat_alignment toleranceFrames 2`.
-- Music: `set_music` the cue, `volume 0.8`, ducking on for the lines; `audioFadeOutS` 0.
+ASL 1–4 s as a review reference; minimum style reference 0.2 s; cuts as a default;
+narration optional; music recommended; mixed sync; cards optional; beat-grid
+verification only for passages designed around a grid. Technical frame and
+delivery checks still apply.

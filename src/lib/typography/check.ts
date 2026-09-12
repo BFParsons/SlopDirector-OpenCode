@@ -7,7 +7,8 @@
 import { estimateTextBox, readingTimeS } from "./measure";
 import { anchorNum } from "./place";
 import { overflow, safeAreas, type Rect, type SafeAreas, type SafeProfile } from "./safe";
-import { roleOf, type TypeSystem } from "./styleType";
+import { roleOf, roleSpecFor, type TypeSystem } from "./styleType";
+import { presetById } from "./presets";
 
 export interface TextOverlayLike {
   id?: string;
@@ -87,21 +88,28 @@ export function checkText(overlays: TextOverlayLike[], frame: { w: number; h: nu
       const inSpace = A.x < B.x + B.w && B.x < A.x + A.w && A.y < B.y + B.h && B.y < A.y + A.h;
       if (inTime && inSpace) findings.push({ severity: "warn", rule: "§12 one thing at a time", message: `"${short(a.text)}" and "${short(b.text)}" overlap on screen at the same time`, fix: "stagger them, or move one to another anchor" });
     }
-  // The directing style's type (§12): no text where the style has none, one
-  // family, the style's case, the roles it uses.
-  if (style && overlays.length) {
+  // Supporting text follows the style's faces and role-specific case.
+  // Film identity has its own display treatment, including in no-text styles.
+  if (style && !style.preferenceOnly && overlays.length) {
     const rule = `style: ${style.name} type`;
-    if (style.noText) findings.push({ severity: "warn", rule, message: `${style.name} puts no text on the frame beyond a title; ${overlays.length} overlay(s) planned`, fix: "let the picture and the voice carry it, or say in notes why this piece departs" });
-    const foreign = overlays.filter((o) => o.font && !style.faces.includes(o.font as (typeof style.faces)[number]));
+    const supporting = overlays.filter((o) => roleOf(o.preset) !== "title");
+    const restricted = supporting.filter((o) => !(roleOf(o.preset) === "credit" && style.roles.credit));
+    if (style.noText && restricted.length) findings.push({ severity: "warn", rule, message: `${style.name} reserves text for its title or specified credits; ${restricted.length} supporting overlay(s) planned`, fix: "let the picture and the voice carry it, or say in notes why this piece departs" });
+    const foreign = supporting.filter((o) => o.font && !style.faces.includes(o.font as (typeof style.faces)[number]));
     if (foreign.length) findings.push({ severity: "warn", rule, message: `${foreign.length} overlay(s) use a face outside ${style.name}'s family (${style.faces.join(", ")}): ${[...new Set(foreign.map((o) => o.font))].join(", ")}`, fix: "add_text_overlay with a role (the style's face is filled in) or pass one of the style's faces" });
     for (const o of overlays) {
+      const role = roleOf(o.preset);
+      // The display title may have a different face and case from captions.
+      // Geometry, reading time and overlap checks above still apply to it.
+      if (role === "title") continue;
+      const spec = role ? roleSpecFor(style, role) : undefined;
+      const letterCase = spec ? (spec.transform ?? presetById(spec.preset)?.transform ?? "none") : style.case;
       const label = `"${short(o.text)}"`;
       const letters = o.text.replace(/[^\p{L}]/gu, "");
       const allCaps = letters.length >= 4 && letters === letters.toUpperCase();
       const anyCaps = /\p{Lu}/u.test(letters.slice(1));
-      if ((style.case === "sentence" || style.case === "lower") && allCaps) findings.push({ severity: "warn", rule, overlayId: o.id, message: `${label} is set in capitals; ${style.name} sets text in ${style.case} case` });
-      if ((style.case === "upper" || style.case === "tracked-upper") && letters.length >= 4 && !allCaps && !anyCaps) findings.push({ severity: "info", rule, overlayId: o.id, message: `${label} is not in capitals; ${style.name}'s titles and cards are` });
-      const role = roleOf(o.preset);
+      if ((letterCase === "sentence" || letterCase === "lower") && allCaps) findings.push({ severity: "warn", rule, overlayId: o.id, message: `${label} is set in capitals; this ${role ?? "text"} uses ${letterCase} case` });
+      if ((letterCase === "upper" || letterCase === "tracked-upper") && letters.length >= 4 && !allCaps && !anyCaps) findings.push({ severity: "info", rule, overlayId: o.id, message: `${label} is not in capitals; this ${role ?? "text"} uses capitals` });
       if (role && style.never?.includes(role)) findings.push({ severity: "warn", rule, overlayId: o.id, message: `${label} is a ${role}; ${style.name} does not use one`, fix: `the style's roles: ${Object.keys(style.roles).join(", ")}` });
     }
   }

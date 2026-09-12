@@ -1,74 +1,61 @@
-# Ken Burns — the chronicle
+# Ken Burns
 
-Films: *The Civil War*, *Baseball*, *Jazz*, *The War*, *The Vietnam War*, *The American Revolution*.
+## Reference and mechanism
 
-## The signature
+Historical archive documentary; attention directed within still images and testimony.
 
-Photographs that breathe. The camera drifts across a still, finds a face, rests. A measured narrator tells the story in the third person; then a letter or a diary, read in the first person by another voice, with the writer's name and date spoken or shown. Period music, played on period instruments, under nearly everything. Dissolves between images; fades to black at the end of a chapter. Lit, unhurried talking heads who speak as if remembering.
+An image changes meaning as its context and human stakes become visible.
 
-## Structure — how a scene is built
+## Evidence
 
-- The scene is a chapter: it opens on a wide (a landscape, a map, a street), states its date and place in the first line, and moves through 3–5 images per idea.
-- A first-person document sits at the centre of the scene: a letter, a report, a diary entry, read by a different voice, introduced by the narrator ("…wrote to his wife.") and closed with the name ("— Sullivan Ballou").
-- Talking heads (one or two per scene, 10–20 s each) interpret, never narrate facts.
-- The chapter ends on an image held over the last line of music, then a fade to black.
+Burns describes developing music alongside the writing and archive search. He gives a concrete example of a photograph whose wider framing transforms an apparently ordinary domestic scene into something chilling.
 
-## The cut
+**Basis:** Direct craft account. The production choices below are editorial translations, not measured career-wide rules.
 
-- Average shot 6–12 s; a still with motion needs 6 s minimum to breathe; nothing under 3 s.
-- Stills carry `imageMotion`: a slow pan to a face, a slow push-in on a detail, a slow pull-out from a detail to the whole. One move per image; it starts and ends on something.
-- Dissolves (1–2 s) between images inside a beat; a straight cut into and out of a talking head; fade to black (2–3 s) at the chapter's end only.
-- Archive film, when it exists, is treated as a still would be: slowed slightly, held, not chopped.
+## Material prerequisites
 
-## Narration — two voices
+**Production fit:** Archive-compatible. High-resolution photographs with useful internal detail, reliable dates and first-person records.
 
-- The narrator: third person, past tense, even, unhurried, never ironic; sentences of 10–18 words; place and date early ("In the spring of 1862, at Shiloh, …"). Numbers are spoken as people ("thirteen thousand men"). 70–105 words a minute overall, with room for the readings.
-- The readings: first person, in the writer's register, introduced by the narrator and signed at the end; a different voice (`generate_narration` a second voice — the narrator sal or leo, the readings ara, eve or rex depending on the writer).
-- No questions, no "imagine", no judgement; the sadness is in the facts and the music.
+## Picture and clip selection
 
-## Sound
+Find photographs containing both an initial point of attention and a consequential wider context. Collect letters or testimony that individualize the event without exceeding what the record establishes.
 
-- Music is **period**: fiddle, piano, brass band, hymns, a solo violin — of the story's own time and place, sparse and acoustic (search "traditional fiddle 1860s", "solo piano hymn public domain", "brass band march 1900s", CC / public-domain recordings).
-- The bed runs under narration and readings (ducking on, gap 6–8) and comes up on the image holds; it ends with the chapter (`audioFadeOutS` 3–4).
-- Sync sound is rare: a talking head's room; an archive film's own sound as a texture under narration at −20 dB; ambient beds (birds, wind, a crowd) added as audio-only clips under stills.
+## Framing and camera
 
-## Picture — sources and text
+Design a start frame, discovery and resting frame. Preserve enough resolution for the largest crop; hold still when the photograph's composition already communicates the point.
 
-- Sources: photographs (archives, libraries, museums; YouTube compilations of stills from official channels; uploads), paintings and maps, archive film, produced talking heads (generated: soft key light, dark neutral background, three-quarter angle, the speaker looking just off lens).
-- Text: sparse — a name and a date under a reading, in a serif face, lower-left, 3 s; a chapter title card only at the start of a standalone piece.
+## Structure and rhythm
 
-## Do not
+Move or reveal on a change of meaning in the testimony. Alternate a personal detail with the broader historical situation rather than applying the same zoom to every still.
 
-- No fast cutting, no music with drums, no modern stock footage, no drone shots.
-- No irony, no first-person filmmaker, no confrontation.
-- No image that moves without a reason (a move that starts nowhere and ends nowhere).
-- No still that is cropped so hard it loses its grain and period.
+## Narration and sound
+
+Build a small thematic palette before final assembly. Let music recur with changed context; give testimony space and use environmental sound selectively, without implying it is original recording.
 
 ## Type
 
-**The signature.** A book serif in the period's manner: names and dates lower-left under a reading, chapter titles in spaced capitals, ivory on black, slow fades.
+Use discreet dates and source labels. Separate editorial titles from archival lettering; avoid an obligatory sepia treatment or decorative period type.
 
-**Stand-ins.** EB Garamond for the Garamond-class serifs of the PBS films. Faces: EB Garamond 400, EB Garamond 700. Case: sentence. Colour #F2E9D8 on #000000. Entrance: fade.
+Bundled typography presets are starting treatments. Choose a named work and a coherent project-specific title and supporting-text system. Fonts, colors, cases and roles may vary; source labels and accessibility captions remain available. Check safe areas, reading time and overlap.
 
-**Roles** (`add_text_overlay {role}` with this style in the brief):
+## Exceptions and review
 
-- **date (default)** — the writer's name and the date under a reading. EB Garamond · 3.6 % · bottom-left · shadow 3 % · hold 3.5 s.
-- **quote** — a line of a letter over the photograph. EB Garamond · 4.2 %.
-- **card** — a chapter title in spaced capitals on black. EB Garamond · spaced capitals · 4.6 % · hold 4 s.
-- **label** — a talking head's name, once. EB Garamond · 3.2 % · bottom-left · shadow 3 %.
-- **title** — the film's title. EB Garamond Bold · spaced capitals · 7 %.
+Keep disciplined image motion and historical specificity. Remove unsupported career-wide bans on drums, rapid cutting or first-person passages; these should be reference-specific choices.
 
-**Never:** caption, callout, lower-third, intertitle.
+Numeric pacing and narration ranges in the catalogue are editorial starting points, not measurements of the creator's career. Explain purposeful departures in styleTreatment.exceptions. Source integrity and technical validity still apply.
 
-**Survey note.** Assumption: the exact faces vary by film and were not documented in the survey; the manner (serif, ivory, lower-left names, spaced capitals for titles) is consistent across the PBS films.
+## Evaluation
 
-## Harness parameters
+Make a 20-second still-image sequence whose final framing changes the opening interpretation. Test once without movement: retain motion only if it improves the discovery.
 
-asl 6–12 s · min shot 3 s · transitions dissolves · narration required, third person + readings, 70–105 wpm · music required, period · sync muted · text sparse · stills yes · interviews produced
+**Failure mode:** Continuous slow zooms without a designed reveal create movement but little historical insight.
+
+The duration above is a suggested experiment length. Plan the test within the approved production scope; it is not a new approval gate or a claim that the test has passed.
 
 ## Applying it in SlopStudio
 
-- Plan: shots with `source.type: "upload"` or `"youtube"` stills, description naming the move ("push-in to the boy's face"); `transition: "dissolve"` inside beats, `"fadeToBlack"` on the last shot of a standalone chapter (not on a scene of a longer film); readings are `narration` lines with `note: "reading — voice ara"`.
-- Cut: `update_segments imageMotion` on stills; `update_project transition DISSOLVE transitionMs 1500` for the beat interiors.
-- Music: `set_music` a period track; `balance_music` gap 7.
-- Verify: `pacing_report` with the style (the norm is 6–12 s); `check_cuts` will not complain about dissolves here.
+Read the shared director-style playbook included by get_style. Store reference, mechanism, materialPlan, rhythm, sound, typography, exceptions and evaluation in plan.styleTreatment. Carry these choices into actual shot descriptions, durations, script offsets and audio decisions. Inspect available material before committing exact timing; identify missing coverage instead of compensating with effects. Report technical checks, picture/motion review, listening review and the observed style result separately.
+
+## Sources
+
+- [No Longer Just Wallpaper: Archival Footage Can Inform and Shape Your Film's Story](https://documentary.org/feature/no-longer-just-wallpaper-archival-footage-can-inform-and-shape-your-films-story) — Lauren Cardillo, International Documentary Association; 2013-04-01. Craft reporting with direct Burns interview.

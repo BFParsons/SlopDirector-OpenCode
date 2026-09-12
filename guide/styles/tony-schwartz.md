@@ -1,65 +1,61 @@
-# Tony Schwartz — the responsive chord
+# Tony Schwartz
 
-Work: "Daisy" (Johnson 1964), "Ice Cream" (1964), hundreds of radio spots; the book *The Responsive Chord*. He was a sound man: the picture serves the sound.
+## Reference and mechanism
 
-## The signature
+Sound-centered advertising; Daisy is a historical case with DDB collaborators, not a universal solo-authored template.
 
-One image, one sound, one implication. A child counts petals; a voice counts down; a flash; a voice says "these are the stakes". The opponent is never named; the audience supplies the rest from what they already fear or hope. Thirty seconds, and most of it is silence, a child's voice and a countdown.
+A familiar sound changes meaning through a sharply designed association.
 
-## Structure — how a spot is built
+## Evidence
 
-- The chord: pick the feeling the audience already has (a fear, a hope), and find the one sound that strikes it (a child, a heartbeat, a phone ringing, a countdown).
-- Build: 15–20 s of the ordinary sound and image; the turn (3–5 s: the countdown, the flash, the silence); the resolution: a calm voice states the choice in one or two sentences; the name and the date.
-- Never state the accusation; the picture and the sound imply it.
+The archived Daisy transcript shows a child's counting yielding to a countdown and explosion, followed by political voiceover. The specific transition matters more than a general rule forbidding music, montage or additional voices.
 
-## The cut
+**Basis:** Primary advertisement and institutional context. The production choices below are editorial translations, not measured career-wide rules.
 
-- Very few shots: 3–6 in 30 s; the opening hold 8–15 s (a child, a face, a kitchen); the turn a single hard cut, or a zoom into the eye (`imageMotion` slow push to black); the end a still or black with text.
-- Straight cuts; a slow push-in as the tension rises; black for 1–2 s at the turn.
-- Camera: static or a slow push; natural light; a real place; no glamour.
-- Grade: natural, slightly desaturated; or monochrome for the turn.
+## Material prerequisites
 
-## Narration
+**Production fit:** Archive-compatible. A recognizable sound pattern, a contrasting second pattern and a concept that can be understood without misleading context.
 
-- Two voices: the ordinary (a child counting, a woman on the phone) as sync; and the calm authority at the end, 20–40 words, slow, low, unhurried: "These are the stakes. To make a world in which all of God's children can live, or to go into the dark. We must either love each other, or we must die." (`generate_narration` voice leo, "grave, calm, not dramatic").
-- No narration in the build; the sound does it.
+## Picture and clip selection
 
-## Sound
+For a neutral demonstration, find two sounds that share a structure but imply different situations. Choose a simple visual action capable of holding attention through the transition.
 
-- The sound is the spot: the child's voice (`muted: false`, `volume` 1), then the countdown (an audio-only clip, a flat male voice), then silence (1–2 s), then the explosion or the hit, then the calm voice; no music, or a single low drone under the end (search "low drone sustained CC").
-- Room tone and silence are composed, not left; the silence before the hit is the loudest moment.
+## Framing and camera
 
-## Picture — sources and text
+Keep attention on the sound's source until the change needs a different image. A closer framing should have a perceptual purpose rather than serve as generic tension.
 
-- Sources: one generated or archive shot of the ordinary (a child in a field, a phone on a table, a kitchen); one image of the stake (a mushroom cloud, an empty crib, a door) as archive or a still; black.
-- Text: the choice and the date on black at the end (plain sans, 4–5 s): "Vote for President Johnson on November 3."
+## Structure and rhythm
 
-## Do not
+Design the sound transition first, then place the visual change where it alters interpretation. Avoid extra inserts that compete with the central association.
 
-- No montage, no music bed, no naming the opponent, no statistics, no explanation.
-- No second idea; no cutaway that adds information; no fast cut.
-- No voice that sounds like an announcer in the build.
+## Narration and sound
+
+Shape the handoff in rhythm, perspective and loudness. Test whether the listener can identify both sources; retain clarity rather than relying on a startling peak.
 
 ## Type
 
-**The signature.** One plain card of gothic capitals on black: 'Vote for President Johnson on November 3.'
+Use a concise identifying or explanatory end frame when needed. Do not assume all necessary context must fit into the sound association itself.
 
-**Stand-ins.** Libre Franklin for the Franklin / News Gothic of 1964 television. Faces: Libre Franklin 700. Case: upper. Colour #FFFFFF on #000000. Entrance: none.
+Bundled typography presets are starting treatments. Choose a named work and a coherent project-specific title and supporting-text system. Fonts, colors, cases and roles may vary; source labels and accessibility captions remain available. Check safe areas, reading time and overlap.
 
-**Roles** (`add_text_overlay {role}` with this style in the brief):
+## Exceptions and review
 
-- **card (default)** — the choice and the date, on black, at the end. Libre Franklin Bold · capitals · 4.6 % · hold 5 s.
+Replace one-ad prohibitions with a sound-first concept requirement. Credit the agency and collaborators, and separate historical persuasion analysis from factual validation.
 
-**Never:** lower-third, caption, callout, citation, label, intertitle, quote.
+Numeric pacing and narration ranges in the catalogue are editorial starting points, not measurements of the creator's career. Explain purposeful departures in styleTreatment.exceptions. Source integrity and technical validity still apply.
 
-**Survey note.** Surveyed: the Daisy spot ends on a plain text card on black; the face is assumed to be a 1960s gothic.
+## Evaluation
 
-## Harness parameters
+Create a 15-second nonpolitical sound study, such as a domestic timer becoming a race-start cue. A listener should identify the shift before reading the end frame.
 
-asl 5–10 s (3–6 shots) · min shot 1 s · transitions cuts (one push to black) · narration required at the end only, calm authority, 40–80 wpm in its window · music none (a drone allowed) · sync sync-first · text cards · interviews none · beat-cut no
+**Failure mode:** An abrupt loud sound is a startle; it becomes an idea only when the association is meaningful.
+
+The duration above is a suggested experiment length. Plan the test within the approved production scope; it is not a new approval gate or a claim that the test has passed.
 
 ## Applying it in SlopStudio
 
-- Plan: three beats (ordinary / turn / choice); the ordinary shot 8–15 s `sound: "sync"`; the turn a `card` (black) or a still with `imageMotion` push; the choice as one `narration` line and one `text` line.
-- Cut: `update_segments imageMotion` slow push on the ordinary shot; `add_segment audioOnly` the countdown and the hit; `update_project audioFadeOutS 0`.
-- Verify: `check_soundtrack` will warn "nothing but sync and one narration" — the style; `detect_silences` on the draft must show the composed silence, not a gap.
+Read the shared director-style playbook included by get_style. Store reference, mechanism, materialPlan, rhythm, sound, typography, exceptions and evaluation in plan.styleTreatment. Carry these choices into actual shot descriptions, durations, script offsets and audio decisions. Inspect available material before committing exact timing; identify missing coverage instead of compensating with effects. Report technical checks, picture/motion review, listening review and the observed style result separately.
+
+## Sources
+
+- [Peace Little Girl (Daisy)](https://www.livingroomcandidate.org/commercials/1964/peace-little-girl-daisy) — Museum of the Moving Image, The Living Room Candidate; 1964 advertisement; undated archive entry. Primary advertisement transcript and institutional attribution.

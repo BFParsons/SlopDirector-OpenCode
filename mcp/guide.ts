@@ -10,6 +10,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { guarded, text } from "./format";
+import { styleById } from "../src/lib/styles";
 
 export function guideDir(): string {
   if (process.env.SLOPSTUDIO_GUIDE_DIR) return process.env.SLOPSTUDIO_GUIDE_DIR;
@@ -92,13 +93,33 @@ export function loadGuide() {
     }
   }
   // Directing styles (guide/styles/<id>.md; parameters in src/lib/styles).
+  // Keep the researched library readable as one document, while serving only
+  // the chosen style's references to avoid loading every style into a plan.
+  const musicReferences = new Map<string, string>();
+  const musicFile = path.join(dir, "music-references.md");
+  if (existsSync(musicFile)) {
+    const music = readFileSync(musicFile, "utf8");
+    const markers = [...music.matchAll(/^<!-- style: ([a-z0-9-]+) -->\r?$/gm)];
+    for (let i = 0; i < markers.length; i++) {
+      const marker = markers[i];
+      musicReferences.set(marker[1], music.slice(marker.index! + marker[0].length, markers[i + 1]?.index ?? music.length).trim());
+    }
+  }
   const styles = new Map<string, { id: string; title: string; text: string }>();
   const stDir = path.join(dir, "styles");
   if (existsSync(stDir)) {
     for (const f of readdirSync(stDir).filter((x) => x.endsWith(".md") && x !== "README.md").sort()) {
       const t = readFileSync(path.join(stDir, f), "utf8");
       const id = f.replace(/\.md$/, "");
-      styles.set(id, { id, title: /^# (.+)/m.exec(t)?.[1] ?? id, text: t });
+      const music = musicReferences.get(id);
+      const references = music ? `\n\n---\n\n## Associated music references\n\nResearch library: guide/music-references.md. Association labels distinguish film use, trailers, performances and catalogue leads. Listening directions are harness suggestions. Follow the project's sourcing brief and the style's sound policy; audition the exact passage before selecting it.\n\n${music}` : "";
+      const trailerGuide = styleById(id)?.category === "trailer"
+        ? playbooks.get("trailer-construction")?.text
+        : undefined;
+      const constraints = trailerGuide ? `\n\n---\n\n${trailerGuide}` : "";
+      const directorGuide = playbooks.get("director-style")?.text;
+      const craftGuide = directorGuide ? "\n\n---\n\n" + directorGuide : "";
+      styles.set(id, { id, title: /^# (.+)/m.exec(t)?.[1] ?? id, text: t + craftGuide + constraints + references + (playbooks.get("film-dialogue") ? "\n\n---\n\n" + playbooks.get("film-dialogue")!.text : "") });
     }
   }
   cache = { sections, rules, playbooks, styles };

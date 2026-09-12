@@ -1,66 +1,61 @@
-# Jonathan Glazer — the sensory spot
+# Jonathan Glazer
 
-Work: Guinness "Surfer" and "Swimblack", Levi's "Odyssey", Stella Artois "Ice Skating Priests", Sony Bravia "Paint"; music videos "Karma Police", "Virtual Insanity", "Rabbit in Your Headlights"; features *Under the Skin*, *The Zone of Interest*.
+## Reference and mechanism
 
-## The signature
+Concept-driven advertising; Surfer provides the best documented production mechanism here.
 
-Monochrome or near-monochrome, slow motion, one physical event that becomes a myth — waves become horses, a man runs through walls, paint explodes over a housing estate. A voice, if any, is a chant or a poem. The spot is a single sensation stretched to 60 s and cut to a rhythm you feel in the chest.
+One precise visual analogy becomes a forceful sensory event.
 
-## Structure — how a spot is built
+## Evidence
 
-- One event, one location, one build: waiting → the event in slow motion → the aftermath; the product line as the last breath.
-- The waiting is long (a third of the spot): faces, a held wide, a rhythm beginning under it.
-- The event runs on the music's peak; the aftermath is quiet and quick.
+The Surfer collaborators describe planning and combining horse and water elements, alongside iterative post-production and sound work. Its effects depended on captured physical material and a coherent concept, not on adding an arbitrary surreal layer.
 
-## The cut
+**Basis:** Collaborators' craft accounts. The production choices below are editorial translations, not measured career-wide rules.
 
-- Average shot 2–4 s; the build accelerates: 5 s → 3 s → 1.5 s → flurries of 0.5 s at the peak; then a 6–8 s hold. Nothing under 0.4 s.
-- Straight cuts, cut on the drum; slow motion (`speed` 0.3–0.5) on the event, real time on the faces.
-- Monochrome or a single-colour palette (`colorLook` mono / desaturated); heavy grain; high contrast; wide lenses close to bodies.
-- Camera: static wides and handheld details; no drone.
+## Material prerequisites
 
-## Narration
+**Production fit:** Requires planned production. Compatible plates or footage whose motion, perspective and texture can support one visual analogy.
 
-- A chant, a quotation, a few lines of poetry ("Tick, follow, tock, follow…"), spoken by a rough voice under the build; or nothing. 20–60 wpm, rhythmic, repeating one phrase.
+## Picture and clip selection
 
-## Sound
+Identify a physical correspondence first: force, direction, rhythm or shape. Select both sides of the analogy for that correspondence before choosing the most impressive shots.
 
-- Music is **rhythm**: drums, a tribal or industrial loop, a heartbeat that accelerates (search "tribal drums build library", "industrial percussion loop CC"); it is the spot's spine and the cuts sit on it (`check_beat_alignment`).
-- Sync sound designed: the sea, breath, a crack — big, close, mono; audio-only clips at the beats.
-- Silence before the peak (0.5–1 s), then the event lands with the loudest hit.
+## Framing and camera
 
-## Picture — sources and text
+Match horizon, scale, light and movement where the images must merge. Where compositing is impossible, make the relationship legible through juxtaposition rather than an unconvincing effect.
 
-- Sources: generated shots ("black and white, slow motion, wave breaking, surfers waiting, heavy film grain, high contrast, wide lens"), archive of natural forces, faces close.
-- Text: the line and the logo at the end on black, 3 s. Nothing else.
+## Structure and rhythm
 
-## Do not
+Give anticipation its own duration, then let the central event accumulate power. Repeat an image only when it changes scale, proximity or expectation.
 
-- No colour for its own sake, no explanation, no product demonstration, no dialogue.
-- No smooth dissolves; no orchestral swell (the drum is the swell).
-- No cut that is not on a beat inside the build.
+## Narration and sound
+
+Try a recognizable rhythmic figure against strongly physical effects. Leave space around the principal event so the sound is not a continuous wall of impact.
 
 ## Type
 
-**The signature.** Small spaced capitals in a plain grotesk, white on black, once — Under the Skin's credits; the spot's line at the end.
+Keep the conceptual payoff visually uncluttered. End text should complete the communication rather than explain an analogy the images failed to establish.
 
-**Stand-ins.** Liberation Sans for the plain grotesk. Faces: Liberation Sans 400. Case: spaced capitals. Colour #FFFFFF on #000000. Entrance: none.
+Bundled typography presets are starting treatments. Choose a named work and a coherent project-specific title and supporting-text system. Fonts, colors, cases and roles may vary; source labels and accessibility captions remain available. Check safe areas, reading time and overlap.
 
-**Roles** (`add_text_overlay {role}` with this style in the brief):
+## Exceptions and review
 
-- **card (default)** — the line at the end, spaced capitals on black. Liberation Sans · spaced capitals · 3.6 %.
-- **title** — a title, small. Liberation Sans · spaced capitals · 5 %.
+No evidence supports career-wide bans on color, dialogue or off-beat cuts. Specify the selected campaign's image and sound relationship instead.
 
-**Never:** lower-third, caption, callout, citation, label, intertitle.
+Numeric pacing and narration ranges in the catalogue are editorial starting points, not measurements of the creator's career. Explain purposeful departures in styleTreatment.exceptions. Source integrity and technical validity still apply.
 
-**Survey note.** Surveyed: Under the Skin's credits are white lettering on black; the Guinness spots end on the brand's serif line — here a small spaced grotesk.
+## Evaluation
 
-## Harness parameters
+Create a 20-second visual analogy from two compatible movements. A viewer should describe the shared physical quality before seeing the final title.
 
-asl 2–4 s (accelerating) · min shot 0.4 s · transitions cuts · narration optional, chant, 20–60 wpm · music required, rhythm cue · sync mixed · text sparse · interviews none · beat-cut yes
+**Failure mode:** Unrelated uncanny images create novelty but do not develop a concept.
+
+The duration above is a suggested experiment length. Plan the test within the approved production scope; it is not a new approval gate or a claim that the test has passed.
 
 ## Applying it in SlopStudio
 
-- Plan: beats waiting / event / aftermath with shot durations that halve across the build; the event shots note `speed 0.4`; the chant is one `narration` line repeated with gaps.
-- Cut: `update_segments speed` on the event; `colorLook` MONO, `grain 0.3`, `contrast +`; `check_beat_alignment toleranceFrames 2` must be mostly on grid.
-- Music: `set_music` the drum loop; `balance_music` gap 3–4 (the drum is loud); `audioFadeOutS` 0.
+Read the shared director-style playbook included by get_style. Store reference, mechanism, materialPlan, rhythm, sound, typography, exceptions and evaluation in plan.styleTreatment. Carry these choices into actual shot descriptions, durations, script offsets and audio decisions. Inspect available material before committing exact timing; identify missing coverage instead of compensating with effects. Report technical checks, picture/motion review, listening review and the observed style result separately.
+
+## Sources
+
+- [Guinness Surfer: an oral history of the VFX](https://beforesandafters.com/2019/03/18/guinness-surfer-oral-history-vfx/) — Ian Failes, befores & afters; 2019-03-18. Production collaborators' oral history.

@@ -25,7 +25,7 @@ export interface NormalizeResult {
 
 function run(args: string[]): Promise<{ code: number; stderr: string }> {
   return new Promise((resolve, reject) => {
-    const proc = spawn(ffmpegPath(), ["-hide_banner", "-nostdin", ...args]);
+    const proc = spawn(ffmpegPath(), ["-hide_banner", "-nostdin", ...args], { windowsHide: true });
     let stderr = "";
     proc.stdout.on("data", () => {});
     proc.stderr.on("data", (d: Buffer) => {

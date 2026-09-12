@@ -138,13 +138,13 @@ export function registerTimelineTools(server: McpServer) {
   server.registerTool(
     "add_text_overlay",
     {
-      title: "Add burned-in text",
+      title: "Add a film title or supporting text",
       description:
         "A title / lower-third / caption / card drawn over the video from startS to endS. Give a `role` and the brief's directing style decides the face, case, colour, placement and entrance (the director's type — list_typography); or give a `preset` (list_typography: lower-third, callout, caption-pop, card-archive, card-editorial, title, intertitle, quote, date-card, map-label, mono-note, citation) and the face, size, placement, box / outline / shadow, entrance and hold are filled in for this frame — any field you pass overrides it. Text anchors to the TITLE-SAFE area of the frame (safe areas by aspect / project.safeArea; marginPx moves it further in), so it is never cut or covered on delivery; check_text verifies. position: TOP_LEFT|TOP_CENTER|TOP_RIGHT|MIDDLE_LEFT|CENTER|MIDDLE_RIGHT|BOTTOM_LEFT|BOTTOM_CENTER|BOTTOM_RIGHT. animation: NONE|FADE|SLIDE_UP|POP.",
       inputSchema: {
         projectId: z.string(),
         text: z.string().min(1).max(500),
-        role: z.enum(TYPE_ROLES as [string, ...string[]]).optional().describe("what the text is — title, card, intertitle, lower-third, caption, callout, citation, date, quote, label, credit — resolved through the brief's directing style (its face, case, colour, entrance; list_typography shows the style's roles); without a style, the generic preset for the role"),
+        role: z.enum(TYPE_ROLES as [string, ...string[]]).optional().describe("title = the name of the clip or film, with an independent prominent display treatment; card = a statement or CTA; intertitle = a chapter. Other supporting roles: lower-third, caption, callout, citation, date, quote, label, credit. Resolved through the directing style; title font/color/size may be independently overridden. list_typography shows the hierarchy and role defaults."),
         preset: z.enum(TYPE_PRESETS.map((p) => p.id) as [string, ...string[]]).optional().describe("a generic preset, when no style applies or to override the style's choice"),
         position: z.string().optional(),
         startS: z.number().min(0).default(0),

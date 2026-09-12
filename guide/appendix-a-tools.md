@@ -488,14 +488,30 @@ Sets musicVolume from measured loudness so the bed sits `gapLu` (default 6) belo
 | `projectId` | string | required |
 | `gapLu` | number | default 6 |
 
+### `interview_batch`
+
+The default pre-production interview. Pass `{request, answers}` (answers keyed
+by question id) to get `{done: false, questions, progress}` containing every
+currently applicable unanswered question, or `{done: true, brief}` when complete.
+Cache the returned queue and ask one short question at a time, multiple choice
+where practical. Clip type comes early, immediately followed by director style.
+The style question preloads `optionsByGenre` menus; select by the clip-type answer
+locally, or use the closest cached genre for a custom type. Offer three named
+styles plus House style where the UI allows; custom references use free text.
+Between replies only record the answer, skip supplied fields,
+and ask the next queued question. No per-answer MCP calls, research or recaps.
+Call again when the queue is exhausted, or changed answers invalidate dependent
+choices. Scene context, material text and footage licence may appear afterward;
+ask these individually too. Review all answers together after collection.
+Map labels to values, multi-selects to arrays, and preserve scripts verbatim.
+Explicit "you decide" delegates choices; silence/defaults do not. Show all
+questions together only on request. Interview answers do not approve a plan.
+
 ### `interview_next`
 
-The pre-production interview, one question at a time with multiple choice — like a planning prompt. Pass the person's request and the answers so far ({questionId: value}); get the next question (id, header, question, options with the recommended one marked, multiSelect) or, when everything needed is in, the finished brief to pass to set_brief. Present each question through the host's question UI (Claude Code: AskUserQuestion — one question, the options as given, recommended first labelled '(Recommended)'); in a plain chat, a numbered list. When the question says `agentFills`, write 3–4 concrete options yourself from what you know of the subject (the tool cannot), keep 'Other' last, and store the chosen text as the value. Never ask two questions at once; never ask what the request already answered — put it in `answers` yourself.
-
-| Parameter | Type | Notes |
-|---|---|---|
-| `request` | string | required; what the person asked for, verbatim |
-| `answers` | object | default {}; answers so far, keyed by question id |
+Compatibility fallback for clients that cannot cache a question queue. Returns
+`{done: false, question, progress}` or `{done: true, brief}` using the same answer
+map. Prefer `interview_batch` prefetching for fewer tool round trips.
 
 ### `list_styles`
 

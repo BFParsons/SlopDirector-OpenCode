@@ -3,6 +3,117 @@
 Notable changes, newest first. See [DEPENDENCIES.md](DEPENDENCIES.md) for setup and
 [AUDIO_STUDIO.md](AUDIO_STUDIO.md) for the audio workspace.
 
+## 2026-09-11 — Music choices in the interview
+
+- Separate music's role from its selection: delegate, draw from a named film or
+  series soundtrack, or specify artists/tracks/files.
+- Ask for missing references only; preserve names, paths, links and cue
+  preferences in the brief and music plan. No music skips the follow-ups.
+- Keep music references independent of directing style and defer track research
+  until after interview collection.
+
+## 2026-09-10 — Film dialogue cleanup and Martin Scorsese
+
+- Require clean dialogue selection or source separation when reusing film clips; audit embedded music separately from speech and loudness.
+- Add range-bound source-audio assessments to plans and soundtrack checks. Unknown or unreviewed audio remains a review finding; known embedded music fails the check.
+- Add Martin Scorsese with five collaborator/title sources, actionable craft, adaptable typography and three documented film music references.
+
+## 2026-09-10 — Research-backed director references
+
+- Incorporate 39 researched profiles with concrete selection, framing, rhythm,
+  sound, typography, material prerequisites, source evidence and evaluation tests.
+- Expose craft records and production fit through get_style/list_styles; correct
+  the Every Frame a Painting collaborator credit and scope studio/agency references.
+- Add optional structured styleTreatment to plans, every plan document format
+  and production task handoffs, preserving compatibility with stored plans.
+- Treat creative departures as review warnings. Keep technical checks, source
+  integrity and explicit user constraints; make typography presets adaptable.
+- Add a shared director-style playbook to every served profile and planning/review
+  guidance. Film experiments remain untested until actually performed.
+
+## 2026-09-10 — Flexible trailer constraints
+
+- Increase visual edit capacity to 120 segments and audio overlays to 32 while
+  retaining the AI-generation cost guard.
+- Treat six-to-nine-frame accents as readability warnings and trailer style
+  policy departures as review warnings; preserve technical validation.
+- Replace rigid AV Squad/Anaïs Bimpel timing and card recipes with flexible
+  campaign guidance, served with a shared trailer construction playbook.
+- Separate technical, picture and listening review; include selects, exact music
+  auditions and a bounded proof sequence in trailer preproduction.
+- Validate with six focused regression tests, TypeScript, targeted lint, the
+  production build and a fresh MCP connection.
+
+## 2026-09-09 — Offer director styles immediately after clip type
+
+- Move clip type and director style before materials, duration and aspect questions.
+  Offer Documentary, Trailer, Short movie and Commercial, with custom types accepted.
+- Cache genre-specific style menus in the first interview response so the next
+  question offers three relevant directors/studios plus House style without
+  another tool call. Preserve supplied styles and accept custom references.
+- Verify menu selection, stored style IDs, custom types and the real MCP interview
+  flow: eight interview tests pass, plus TypeScript and targeted lint checks.
+
+## 2026-09-09 — Correct Adam Curtis title treatment
+
+- Add an explicit bold, uppercase, turquoise film-title role informed by the
+  Bitter Lake title frame, separate from plain white supporting cards.
+- Document visual references and distinguish artwork from in-film title evidence;
+  font substitution, sizes and hex color are implementation choices.
+
+## 2026-09-09 — Film titles and supporting typography
+
+- Separate Film titles and Supporting text sections, add buttons and purpose
+  classification in the editor; expose the bundled font selector for each item.
+- Reserve the title preset for the film's identity, with a clean display default.
+  Style profiles without title specifications inherit a prominent title in their
+  own face; explicit quiet title designs remain intact.
+- Allow independent title fonts/casing in typography checks, permit titles and
+  specified credits in otherwise no-text styles, and check supporting casing by role.
+- Harness planning describes title composition/palette/reveal separately from
+  supporting text, without adding processing between interview questions.
+
+## 2026-09-09 — Quick sequential interviews
+
+- Prefetch the question queue once, then present one short multiple-choice
+  question at a time. Between replies, record the answer and advance locally;
+  refresh only when the queue is exhausted or dependent choices change.
+- Defer research, style reading, recaps and creative planning until collection
+  is complete. The full questionnaire remains available on request.
+- Genre, tone and audience have ready-made choices to avoid generating menus each turn.
+
+## 2026-09-09 — Interview questions up front
+
+- `interview_batch` returns all applicable unanswered questions in one call.
+  Codex and Claude gather a compact questionnaire in one reply, review the
+  answers together, and follow up only for missing details or contradictions.
+- Directing style is included even before a genre is chosen. Known answers are
+  reused, supplied scripts are preserved verbatim, and explicit delegation is
+  distinguished from unanswered questions. Plan approval remains a separate step.
+- `interview_next` retains the single-question interface for people who prefer it.
+
+## 2026-09-09 — Smooth image motion
+
+- Animated pan/zoom keyframes now sample fractional crop coordinates with cubic
+  interpolation instead of zoompan's integer/chroma-aligned crop. This removes
+  the held frames and sudden jumps most visible in slow, tightly framed previews.
+- Built-in still-motion presets use the same interpolation and retain their
+  existing paths, framing and duration. Static framing remains unchanged.
+- `pnpm test:motion` renders slow pans, zooms, static shots and all eight presets;
+  it checks measured marker motion, endpoints and exact output frame counts.
+
+## 2026-09-09 — Windows desktop and Codex harness
+
+- Native Node/PowerShell desktop and headless launchers share SQLite, local assets
+  and port 38473; first-launch production builds no longer require an existing DB.
+- Codex project setup uses an absolute Node/stdio entry and host-aware interview
+  guidance. AGENTS.md carries the full brief, approval, edit and verification loop.
+- Windows executable resolution, FFmpeg filter-path escaping and standalone pnpm
+  link rebasing; NSIS packaging includes Windows FFmpeg/FFprobe.
+- Optional local Python audio setup and a dependency doctor. Failed beat-analysis
+  results are retried after dependencies are installed rather than cached forever.
+- Native Windows render/MCP regression checks and portable Playwright helpers.
+
 ## 2026-09 — no-storyboard fork
 
 - **The director's type.** Each directing style now carries a surveyed type system

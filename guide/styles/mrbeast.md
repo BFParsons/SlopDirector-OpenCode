@@ -1,71 +1,63 @@
-# MrBeast — retention
+# MrBeast
 
-Work: "I Spent 50 Hours Buried Alive", "$1 vs $1,000,000 Hotel Room", "Last to Leave Circle Wins $500,000", "Squid Game in Real Life"; the Beast Philanthropy channel; the editing house that trained a generation of YouTube editors.
+## Reference and mechanism
 
-## The signature
+Large-premise challenge and spectacle videos; specify a dated reference rather than assuming one enduring editing cadence.
 
-The premise in the first sentence, the stakes in the first shot, the payoff promised in the first five seconds. A cut every 1–3 s; a new angle, a zoom, a graphic or a sound every few seconds; loud captions that repeat the numbers; risers before every reveal, hits on every result; no pause, no transition, no throat-clearing. The host talks to you, fast and cheerful, and the video is re-cut until nothing in it can be skipped.
+A legible objective, stakes and changing progress sustain attention.
 
-## Structure — how a video is built
+## Evidence
 
-- Hook (0–5 s): the premise and the prize, spoken and shown ("I buried myself alive for fifty hours — and if I get out, this guy wins $100,000.").
-- The set-up compressed (5–30 s): the rules in three sentences over the widest shot; a graphic of the stakes.
-- Escalating segments (30 s–end): each 60–120 s, each with a mini-hook ("but then it got worse"), a challenge, a twist, a result with a hit; the number on screen grows or shrinks.
-- The payoff last, no epilogue; a call to the next video only if the brief allows.
-- Re-cut rule: any 10 s the viewer could skip is cut.
+In the 2021 Colin and Samir interview, Donaldson explains that a long video often needs a secondary story or changed situation to renew interest. This is a narrative development principle, not evidence for a universal four-second shot ceiling. Later interview notes document the growing production scale.
 
-## The cut
+**Basis:** Direct interview transcript; 2021 reference. The production choices below are editorial translations, not measured career-wide rules.
 
-- Average shot 1–3 s; reactions 0.5–1 s; the reveal hold 3–4 s; nothing under 0.3 s. A new visual event (angle, zoom, graphic, insert) at least every 5 s.
-- Straight cuts, snap zooms (`imageMotion` fast push), whip transitions with a whoosh; jump cuts inside the host's speech are fine; no dissolves.
-- Camera: multi-angle coverage of one event (a wide, a close, a drone, a GoPro) so every cut is a new angle; the host to camera in a wide with the set behind.
-- Grade: bright, saturated, high-key (`saturation` 1.2, `contrast` 1.05, `brightness` +5 %); no vignette.
+## Material prerequisites
 
-## Narration — the host
+**Production fit:** Needs specific source footage. A real objective, comprehensible rules, observable progress, consequential choices and an authentic payoff.
 
-- First person, present tense, plain, fast, enthusiastic; numbers in every third sentence; "you" often; 150–180 wpm; no sentence over 12 words; a mini-hook every 60 s (`generate_narration` voice rex, "excited, fast, bright, a big smile in the voice").
-- Captions repeat the key words as they are said.
+## Picture and clip selection
 
-## Sound
+Choose material that establishes what someone wants, what makes it difficult and what changes. Prefer decisions and consequences over interchangeable excited reactions.
 
-- Music is a **library bed** with energy: upbeat, drum-driven, changing per segment; it drops out for reveals (silence 0.5 s), and a **riser** precedes every reveal, a **hit** lands every result, a **whoosh** carries every transition (search "upbeat energetic background library", "riser sound effect CC", "impact hit whoosh pack").
-- Sync sound: the host and contestants (`muted: false`, `volume` 1); crowd reactions kept.
-- Ducking on; the bed sits 8–10 LU under speech.
+## Framing and camera
 
-## Picture — sources and text
+Make the scale and rules visible in the same shot where possible. Use close-ups to clarify effort or choice, and wide views to establish the actual challenge.
 
-- Sources: the project's own multi-angle footage or generated shots ("wide shot, a giant glass box in a warehouse, bright lights, a man in a hoodie inside, 4K, high-key"); drone-style wides; graphics as cards.
-- Text: bold, thick, white-with-black-outline captions (2–4 words, 1–2 s, centred, popping in with a hit) for key phrases and every number; a stakes counter in a corner; a progress bar or timer when the challenge has one.
+## Structure and rhythm
 
-## Do not
+Open with a clear promise and evidence that the premise exists. Introduce a real complication or secondary objective when the situation becomes repetitive. Compress repeated attempts while preserving decisions and consequences.
 
-- No intro, no logo, no slow build, no b-roll without a point, no dissolves, no gap between segments.
-- No number said without being shown; no reveal without a riser and a hit.
-- No shot over 4 s except the reveal hold.
+## Narration and sound
+
+Use score and effects to mark changes of state rather than every cut. Protect dialogue explaining a rule or choice, and create headroom before the largest payoff.
 
 ## Type
 
-**The signature.** Anton for the in-video captions, Bebas Neue for the thumbnails — heavy capitals, white with a black outline, popping on the word.
+Display progress when it changes or needs clarification. Counters must reflect real measurements; persistent numbers are optional if the scene already communicates the state.
 
-**Stand-ins.** Anton and Bebas Neue are the real faces (both free). Faces: Anton 400, Bebas Neue 400. Case: upper. Colour #FFFFFF on #000000. Entrance: pop.
+Bundled typography presets are starting treatments. Choose a named work and a coherent project-specific title and supporting-text system. Fonts, colors, cases and roles may vary; source labels and accessibility captions remain available. Check safe areas, reading time and overlap.
 
-**Roles** (`add_text_overlay {role}` with this style in the brief):
+## Exceptions and review
 
-- **caption (default)** — the key words as they are said. Anton · capitals · 7 % · outline 10 %.
-- **callout** — a number, big, yellow. Anton · capitals · 6.5 % · center · #FFE600 · outline 10 %.
-- **label** — a timer or a stakes counter in a corner. Bebas Neue · capitals · 4 % · box.
-- **title** — a title card. Bebas Neue · capitals · 9 % · outline 6 %.
+Remove the universal four-second cap, compulsory riser-hit reveals and permanent on-screen counters. Evaluate clarity and progression separately from cut density.
 
-**Never:** quote, intertitle, citation, date.
+Numeric pacing and narration ranges in the catalogue are editorial starting points, not measurements of the creator's career. Explain purposeful departures in styleTreatment.exceptions. Source integrity and technical validity still apply.
 
-**Survey note.** Surveyed: Anton (captions) and Bebas Neue (thumbnails); Komika Axis in older subtitles.
+## Evaluation
 
-## Harness parameters
+Make a 30-second miniature challenge with a genuine mid-sequence complication. Viewers should state the objective and explain how the new situation changes what they expect next.
 
-asl 1–3 s · min shot 0.3 s · transitions cuts (snap zooms, whips) · narration required, first-person host, 150–180 wpm · music required, energetic bed + risers / hits · sync sync-first · text kinetic captions · interviews direct-address (host to camera) · beat-cut no (event-cut)
+**Failure mode:** Relentless cuts and escalating adjectives cannot replace real progress or a payoff.
+
+The duration above is a suggested experiment length. Plan the test within the approved production scope; it is not a new approval gate or a claim that the test has passed.
 
 ## Applying it in SlopStudio
 
-- Plan: beats hook / set-up / segments ×N / payoff; each segment lists a mini-hook line, a reveal shot (3–4 s hold), a riser and a hit; captions as `text` lines at every number.
-- Cut: `add_segment audioOnly` risers before reveals and hits after; `update_segments imageMotion` push on emphasis shots; `add_text_overlay` POP style captions; `update_project saturation 1.2`.
-- Music: `set_music` the bed per segment (or audio-only clips per segment); `balance_music` gap 8; `pacing_report` will show ASL ≈ 2 s — correct here (`genre: social`).
+Read the shared director-style playbook included by get_style. Store reference, mechanism, materialPlan, rhythm, sound, typography, exceptions and evaluation in plan.styleTreatment. Carry these choices into actual shot descriptions, durations, script offsets and audio decisions. Inspect available material before committing exact timing; identify missing coverage instead of compensating with effects. Report technical checks, picture/motion review, listening review and the observed style result separately.
+
+## Sources
+
+- [An Unfiltered Conversation with MrBeast](https://www.colinandsamir.com/resources/an-unfiltered-conversation-with-mrbeast) — Colin and Samir; Undated publisher page. Primary interview publisher's notes.
+
+- [Colin and Samir Show: with MrBeast (Transcript)](https://singjupost.com/colin-and-samir-show-with-mrbeast-transcript/) — Colin and Samir with Jimmy Donaldson; The Singju Post transcript; 2021-09-20 interview; later transcript publication. First-person interview transcript mirror.

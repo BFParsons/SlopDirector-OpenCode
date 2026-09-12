@@ -174,7 +174,7 @@ export function applyChain(inputAbs: string, outputAbs: string, effects: AudioEf
   args.push("-c:a", "pcm_s16le", outputAbs);
 
   return new Promise((resolve, reject) => {
-    const proc = spawn(ffmpegPath(), args);
+    const proc = spawn(ffmpegPath(), args, { windowsHide: true });
     let stderr = "";
     proc.stderr.on("data", (d) => (stderr += d.toString()));
     proc.on("error", reject);
@@ -204,7 +204,7 @@ export function duckMusicUnderVoice(
     `[ducked][vmix]amix=inputs=2:duration=longest:dropout_transition=0[out]`;
   const args = ["-y", "-i", musicAbs, "-i", voiceAbs, "-filter_complex", filter, "-map", "[out]", "-c:a", "pcm_s16le", outputAbs];
   return new Promise((resolve, reject) => {
-    const proc = spawn(ffmpegPath(), args);
+    const proc = spawn(ffmpegPath(), args, { windowsHide: true });
     let stderr = "";
     proc.stderr.on("data", (d) => (stderr += d.toString()));
     proc.on("error", reject);
@@ -225,7 +225,7 @@ export function trimSilence(
     `stop_periods=-1:stop_silence=${dur}:stop_threshold=${th}dB`;
   const args = ["-y", "-i", inputAbs, "-af", filter, "-c:a", "pcm_s16le", outputAbs];
   return new Promise((resolve, reject) => {
-    const proc = spawn(ffmpegPath(), args);
+    const proc = spawn(ffmpegPath(), args, { windowsHide: true });
     let stderr = "";
     proc.stderr.on("data", (d) => (stderr += d.toString()));
     proc.on("error", reject);
@@ -249,7 +249,7 @@ export function stretchAudio(
   const filter = `rubberband=tempo=${tempo.toFixed(4)}:pitch=${pitch.toFixed(4)}:transients=crisp`;
   const args = ["-y", "-i", inputAbs, "-af", filter, "-c:a", "pcm_s16le", outputAbs];
   return new Promise((resolve, reject) => {
-    const proc = spawn(ffmpegPath(), args);
+    const proc = spawn(ffmpegPath(), args, { windowsHide: true });
     let stderr = "";
     proc.stderr.on("data", (d) => (stderr += d.toString()));
     proc.on("error", reject);
@@ -293,7 +293,7 @@ export function renderAudiogram(
     outputAbs,
   ];
   return new Promise((resolve, reject) => {
-    const proc = spawn(ffmpegPath(), args);
+    const proc = spawn(ffmpegPath(), args, { windowsHide: true });
     let stderr = "";
     proc.stderr.on("data", (d) => (stderr += d.toString()));
     proc.on("error", reject);

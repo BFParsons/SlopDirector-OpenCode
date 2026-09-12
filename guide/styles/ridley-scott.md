@@ -1,67 +1,61 @@
-# Ridley Scott — the cinematic spot
+# Ridley Scott
 
-Work: Apple "1984", Hovis "Bike Round" (1973), Chanel No. 5 "Share the Fantasy", Pepsi "Archaeology"; features *Blade Runner*, *Gladiator*.
+## Reference and mechanism
 
-## The signature
+Commercial world-building; avoid collapsing the full feature-film career into the 1984 advertisement.
 
-A commercial shot like the first two minutes of an epic. Smoke, backlight, shafts of light through dust, a crowd moving in unison, one figure who breaks the pattern. The product arrives late and once. The picture is so large that the spot needs almost no words.
+A believable visual world makes a brief action feel consequential.
 
-## Structure — how a spot is built
+## Evidence
 
-- One image-idea, told as a myth: a world in order, a disruption, a release. 30 s: 8 s world, 14 s disruption, 6 s release and the line, 2 s logo.
-- No dialogue; one voice at the end (a line or a slogan), or a single on-screen sentence.
-- The product is the release, not the subject: it appears in the last 20 % of the running time.
+Scott's DGA interview connects his drawing and design background with practical camera experience. He explicitly includes handheld among the methods he used while operating commercial shoots, contradicting the harness's blanket exclusion.
 
-## The cut
+**Basis:** Direct craft account. The production choices below are editorial translations, not measured career-wide rules.
 
-- Average shot 2–4 s in the build, one long shot (6–10 s) at the centre, quick cuts (1–1.5 s) at the release. Nothing under 0.7 s.
-- Straight cuts. One slow dissolve allowed to open. No wipes, no whip pans.
-- Wide shots dominate; every third shot is a detail (a face, a hand, a machine part) lit from behind. Camera moves are slow and mechanical (dolly, crane), never handheld.
-- Grade: smoky teal and amber; deep blacks; `colorLook` cinematic, `vignette` on, `grain` light.
+## Material prerequisites
 
-## Narration
+**Production fit:** Requires planned production. Environment, costume, lighting and action coverage designed to belong to the same world.
 
-- Almost none: a single line of copy at the end, spoken low and slow (`generate_narration` voice leo), or on-screen text only. 10–25 words in 30 s.
+## Picture and clip selection
 
-## Sound
+Choose shots that establish a rule of the world, a figure acting within it and the consequence. Reject spectacular inserts that introduce incompatible architecture, light or social context.
 
-- Music is a **score**: orchestral or synth, slow build, one hit at the release (search "epic orchestral build library", "synth swell cinematic CC"). It carries the spot; ducking only for the closing line.
-- Sync sound: designed effects (wind, machinery, footsteps in unison, a shatter) as audio-only clips at the beats; no location chatter.
-- Silence for 0.5–1 s before the release beat.
+## Framing and camera
 
-## Picture — sources and text
+Plan foreground, subject and depth separately. Establish motivated light sources and material texture; choose camera stability according to the action rather than a permanent prohibition.
 
-- Sources: generated shots ("wide shot, cavernous industrial hall, hundreds of identical figures, volumetric backlight through smoke, anamorphic, 35 mm, teal and amber"), archive of crowds and industry, product shots on black.
-- Text: one sentence of copy at the end, centred, serif or clean sans, 3–4 s; then the logo on black.
+## Structure and rhythm
 
-## Do not
+Open with enough orientation for the decisive action to register. Use closer details to clarify intent, then widen for consequence; reserve an accelerated burst for a meaningful rupture.
 
-- No jokes, no presenter, no montage of happy customers, no lower-thirds.
-- No product before the release; no packshot longer than 3 s.
-- No handheld, no natural-light realism, no pop song.
+## Narration and sound
+
+Build the world with machinery, crowd, weather or other specific ambience before enlarging it with music. Give a decisive action a distinctive acoustic signature.
 
 ## Type
 
-**The signature.** The closing copy in a Garamond (the 1984 spot's Apple Garamond), the epic title in inscriptional capitals (Gladiator's Trajan), the sci-fi title in disjointed Helvetica Black (Alien).
+Design the final title or product reveal as part of the environment's visual logic. Set its duration by recognition and message length, not a universal three-second cap.
 
-**Stand-ins.** EB Garamond for Apple Garamond; Cinzel for Trajan; Liberation Sans Bold for Helvetica Black. Faces: EB Garamond 400, Cinzel 400, Liberation Sans 700. Case: sentence. Colour #FFFFFF on #000000. Entrance: fade.
+Bundled typography presets are starting treatments. Choose a named work and a coherent project-specific title and supporting-text system. Fonts, colors, cases and roles may vary; source labels and accessibility captions remain available. Check safe areas, reading time and overlap.
 
-**Roles** (`add_text_overlay {role}` with this style in the brief):
+## Exceptions and review
 
-- **card (default)** — the closing copy, one or two sentences on black. EB Garamond · 4.4 % · hold 5 s.
-- **title** — the epic title, spaced capitals. Cinzel · spaced capitals · 8 %.
+Replace bans on handheld, daylight, humor and particular music genres with reference-specific choices. A dark grade cannot substitute for production design.
 
-**Never:** lower-third, caption, callout, citation, label.
+Numeric pacing and narration ranges in the catalogue are editorial starting points, not measurements of the creator's career. Explain purposeful departures in styleTreatment.exceptions. Source integrity and technical validity still apply.
 
-**Survey note.** Surveyed: Alien's Helvetica Black title (R/Greenberg), Gladiator's Trajan-class title, Apple's 1984 copy in Apple Garamond.
+## Evaluation
 
-## Harness parameters
+In 20 seconds, establish one environmental rule and show an action that breaks it. Viewers should understand the rupture without a premise card.
 
-asl 2–4 s (one hero hold) · min shot 0.7 s · transitions cuts · narration optional, third person, 10–50 wpm · music required, score · sync muted · text sparse · interviews none · beat-cut yes
+**Failure mode:** Unrelated smoky wides and glossy close-ups suggest scale without a coherent world.
+
+The duration above is a suggested experiment length. Plan the test within the approved production scope; it is not a new approval gate or a claim that the test has passed.
 
 ## Applying it in SlopStudio
 
-- Plan: three beats (world / disruption / release); the release beat's first shot is the product; the `script` has one `narration` or one `text` line at the end.
-- AI shots: `generate_ai_shots` with the prompt shape above; 4–6 s each, wides first.
-- Music: `set_music` a building cue; `balance_music` gap 4; `audioFadeOutS` 0 (the logo lands on the hit); `check_beat_alignment` on the release cuts.
-- Grade: `update_project colorLook` cinematic, `vignette 0.3`, `grain 0.1`.
+Read the shared director-style playbook included by get_style. Store reference, mechanism, materialPlan, rhythm, sound, typography, exceptions and evaluation in plan.styleTreatment. Carry these choices into actual shot descriptions, durations, script offsets and audio decisions. Inspect available material before committing exact timing; identify missing coverage instead of compensating with effects. Report technical checks, picture/motion review, listening review and the observed style result separately.
+
+## Sources
+
+- [Man of Vision](https://www.dga.org/craft/dgaq/issues/1003-fall-2010/interview-ridley-scott) — Directors Guild of America; Ridley Scott interview; Fall 2010. First-person craft interview.

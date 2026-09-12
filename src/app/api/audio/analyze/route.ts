@@ -45,7 +45,8 @@ export async function POST(request: Request) {
     const [loudness, silence, tempo] = await Promise.all([
       body.kinds.includes("loudness") ? c("loudness", () => measureLoudness(abs)) : Promise.resolve(null),
       body.kinds.includes("silence") ? c("silence", () => detectSilence(abs)) : Promise.resolve(null),
-      body.kinds.includes("tempo") ? c("tempo", () => detectTempo(abs)) : Promise.resolve(null),
+      // A missing Python dependency must not permanently cache an empty result.
+      body.kinds.includes("tempo") ? cachedJson("tempo", abs, () => detectTempo(abs), (result) => result.bpm != null && result.beatsS.length > 0) : Promise.resolve(null),
     ]);
 
     return ok({ loudness, silence, tempo });

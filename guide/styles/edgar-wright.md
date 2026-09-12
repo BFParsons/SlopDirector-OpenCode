@@ -1,67 +1,61 @@
-# Edgar Wright — the snap
+# Edgar Wright
 
-Films: *Shaun of the Dead*, *Hot Fuzz*, *Scott Pilgrim vs. the World*, *Baby Driver*, *Last Night in Soho*; TV *Spaced*.
+## Reference and mechanism
 
-## The signature
+Designed audiovisual comedy and musical action; music-video and feature practice should inform the edit together.
 
-Everything is cut to a sound. A kettle click becomes a car door; a cash-register beep becomes a doorbell. The mundane is shot like an action film: whip pans, crash zooms, a four-shot montage of pouring a drink. Music is diegetic and the world moves on its beat — footsteps, wipers, gunshots on the snare. The comedy is in the rhythm and the repeat.
+Setup, action, sound and payoff form a pattern the audience can recognize and anticipate.
 
-## Structure — how a scene is built
+## Evidence
 
-- A routine shown fast (the montage of getting ready: 8 shots in 4 s), then the same routine with one thing wrong; then the payoff, where an earlier gag returns transformed.
-- A song runs through the scene and the action is choreographed to it; the scene ends when the song does.
-- Every set-up pays off inside the scene; nothing is introduced that does not return.
+Wright's RBMA conversation describes music planning and the After Hours long-take video as preparation for work in Shaun of the Dead. Musical construction can therefore happen within a continuous shot; it is not synonymous with cutting on every transient.
 
-## The cut
+**Basis:** Direct craft account. The production choices below are editorial translations, not measured career-wide rules.
 
-- Average shot 1–3 s; montages 0.3–0.6 s a shot (RULES 9: deliberate); dialogue two-shots 3–5 s. Cuts on sound effects and on the beat.
-- Whip pans (from the source or a fast in-frame move), crash zooms (`imageMotion` fast push), wipes that follow an object; a smash cut on a sound; dissolves never.
-- Camera: fast dolly, snap zoom, tracking through doors; the frame is busy and precise; a Steadicam one-er (15–30 s) once per scene as the centrepiece.
-- Grade: saturated, punchy, clean; British daylight; no vignette.
+## Material prerequisites
 
-## Narration
+**Production fit:** Requires planned production. Setup and payoff coverage, specific action sounds, readable motion and performances whose timing can carry the joke.
 
-- None. The dialogue is quick and overlapping; a bite is a set-up line that will return.
+## Picture and clip selection
 
-## Sound
+Choose actions with a beginning, contact and consequence. Build a bank of matched mundane details that can recur with changed meaning; prioritize actual visual jokes over unrelated energetic shots.
 
-- Music is a **song**, diegetic (a radio, a jukebox, headphones): the cut and the action hit its beats (`check_beat_alignment` 2 frames); the song is the clock of the scene (search "garage rock instrumental library", "funk breakbeat CC", "1970s soul instrumental").
-- Sound effects are the transitions: every cut in a montage has its own hit (a click, a slam, a whoosh) as an audio-only clip; the sound leads the picture by 1–2 frames.
-- Sync dialogue kept (`muted: false`); the song ducks lightly under it.
+## Framing and camera
 
-## Picture — sources and text
+Keep the geography of an action clear before compressing it. Compose entrances, exits and background information so the frame can deliver a reveal without an explanatory cut.
 
-- Sources: generated shots of ordinary actions ("crash zoom to a hand slamming a kettle, kitchen, morning light, 35 mm, saturated"), archive of the mundane, one long take.
-- Text: on-screen graphics that are part of the world (a text message in a bubble, a sound-effect word, a scoreboard) — 1–2 per scene, snappy, 1–2 s; no lower-thirds.
+## Structure and rhythm
 
-## Do not
+Try a short patterned burst, a deliberate pause and a payoff. Repeat an established action with one changed element; test some beats inside a held shot.
 
-- No cut without a sound; no slow dissolves; no shaky handheld realism; no naturalistic pauses.
-- No music that is not in the scene; no montage that does not repeat later.
-- No gag explained by dialogue.
+## Narration and sound
+
+Map selected actions to the music, preserving dialogue punchlines and physical contacts. Alternate close, dry practical sounds with broader musical passages to create contrast.
 
 ## Type
 
-**The signature.** 1970s poster display capitals in a hot colour with an outline (Baby Driver's Gunplay), text-message bubbles and sound-effect words in the frame.
+Animate type when it participates in a specific joke or rhythmic event. Distinguish the film title from supporting cards and let both have an intentional entrance and exit.
 
-**Stand-ins.** Anton for the Gunplay-class display; Liberation Sans Bold for the bubbles. Faces: Anton 400, Liberation Sans 700. Case: upper. Colour #FFD23F on #000000. Entrance: pop.
+Bundled typography presets are starting treatments. Choose a named work and a coherent project-specific title and supporting-text system. Fonts, colors, cases and roles may vary; source labels and accessibility captions remain available. Check safe areas, reading time and overlap.
 
-**Roles** (`add_text_overlay {role}` with this style in the brief):
+## Exceptions and review
 
-- **title** — the title, hot yellow, outlined. Anton · capitals · 9 % · #FFD23F · outline 6 %.
-- **caption (default)** — a sound-effect word on its cut. Anton · capitals · 6 % · #FFD23F · outline 8 %.
-- **label** — a text message in a bubble. Liberation Sans Bold · 3 % · #111111 · box · pop.
+Replace every-cut synchronization, all-diegetic-music and no-natural-pause rules with a required audiovisual setup/payoff relationship. Timing should serve anticipation and surprise.
 
-**Never:** lower-third, quote, intertitle, citation, date.
+Numeric pacing and narration ranges in the catalogue are editorial starting points, not measurements of the creator's career. Explain purposeful departures in styleTreatment.exceptions. Source integrity and technical validity still apply.
 
-**Survey note.** Surveyed: Baby Driver's title in Gunplay (after The Getaway's poster); the on-screen texts follow the films' in-world graphics.
+## Evaluation
 
-## Harness parameters
+Make a 20-second three-action setup followed by a changed repetition. Viewers should recognize the pattern and describe the variation as the payoff.
 
-asl 1–3 s (montages 0.3–0.6 s) · min shot 0.2 s (deliberate) · transitions cuts (whips, wipes, smashes) · narration none · music required, song (diegetic) · sync sync-first · text kinetic · interviews none · beat-cut yes
+**Failure mode:** Whip transitions and impact sounds cannot manufacture a joke absent from the footage.
+
+The duration above is a suggested experiment length. Plan the test within the approved production scope; it is not a new approval gate or a claim that the test has passed.
 
 ## Applying it in SlopStudio
 
-- Plan: montage beats list 6–10 shots with durations 0.3–0.6 s and a sound effect each; the centrepiece is one shot of 15–30 s `sound: "sync"`; the payoff repeats an earlier shot id.
-- Cut: `apply_edit_list` for the montage; `add_segment audioOnly` for each effect (offset = the cut); `update_segments imageMotion` push for the crash zooms; `check_beat_alignment toleranceFrames 2`.
-- Music: `set_music` the song; `balance_music` gap 3 (it is in the room); `audioFadeOutS` 0.
+Read the shared director-style playbook included by get_style. Store reference, mechanism, materialPlan, rhythm, sound, typography, exceptions and evaluation in plan.styleTreatment. Carry these choices into actual shot descriptions, durations, script offsets and audio decisions. Inspect available material before committing exact timing; identify missing coverage instead of compensating with effects. Report technical checks, picture/motion review, listening review and the observed style result separately.
+
+## Sources
+
+- [Edgar Wright lecture](https://www.redbullmusicacademy.com/lectures/edgar-wright-lecture/) — Red Bull Music Academy; conversation with Brian Reitzell; 2017. First-person lecture transcript.

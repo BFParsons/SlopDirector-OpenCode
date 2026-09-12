@@ -44,7 +44,7 @@ export function searchYouTube(query: string, limit = 12): Promise<YtSearchResult
   args.push(`ytsearch${n}:${q}`);
 
   return new Promise((resolve, reject) => {
-    const proc = spawn(env.YTDLP_BIN, args, { stdio: ["ignore", "pipe", "pipe"] });
+    const proc = spawn(env.YTDLP_BIN, args, { windowsHide: true, stdio: ["ignore", "pipe", "pipe"] });
     let stdout = "";
     let stderr = "";
     const killer = setTimeout(() => proc.kill("SIGKILL"), 45_000);
@@ -120,7 +120,7 @@ export async function importYouTubeMp3(
     updateJob(jobId, { progress: 0.05, message: "Fetching from YouTube…" });
 
     await new Promise<void>((resolve, reject) => {
-      const proc = spawn(env.YTDLP_BIN, args, { stdio: ["ignore", "pipe", "pipe"] });
+      const proc = spawn(env.YTDLP_BIN, args, { windowsHide: true, stdio: ["ignore", "pipe", "pipe"] });
       let stderr = "";
       const killer = setTimeout(() => proc.kill("SIGKILL"), 10 * 60 * 1000);
       const onData = (buf: Buffer) => {
