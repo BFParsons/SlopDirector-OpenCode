@@ -19,6 +19,12 @@ for (const name of ["next", "tsx", "@prisma/client"]) {
   try { report(name, true, require(`${name}/package.json`).version); }
   catch { report(name, false, "run corepack pnpm install --frozen-lockfile"); }
 }
+{
+  // @prisma/client resolving is not enough: it requires a generated .prisma/client
+  // underneath, which only exists after a prisma generate. Probe it the way the app does.
+  const generated = spawnSync(process.execPath, ["-e", "require('@prisma/client')"], { encoding: "utf8", windowsHide: true, timeout: 20000, cwd: ROOT });
+  report("Prisma client (generated)", generated.status === 0, generated.status === 0 ? "generated" : "run corepack pnpm db:sqlite:generate");
+}
 try {
   const dir = dirname(require.resolve("electron/package.json"));
   const installed = existsSync(join(dir, "dist", readFileSync(join(dir, "path.txt"), "utf8").trim()));

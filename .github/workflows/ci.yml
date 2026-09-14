@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+env:
+  # The desktop shell is not needed to type-check or run the platform suites,
+  # and the binary is a slow, flaky download. Skip it.
+  ELECTRON_SKIP_BINARY_DOWNLOAD: "1"
+
+jobs:
+  check:
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # Both desktop targets: NSIS on Windows, AppImage on Linux. The Windows
+        # runner is the one that makes tests/platform/windows.test.ts mean
+        # anything (native exe resolution, FFmpeg filter-path escaping).
+        os: [windows-latest, ubuntu-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Node 24 is pinned deliberately (see mise.toml): Electron 44 embeds the
+      # same major, and on Node 26 Electron's postinstall silently fails to
+      # unpack. Do not float this to `latest`.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Enable corepack
+        run: corepack enable
+
+      # tests/platform/motion.test.ts actually renders, so ffmpeg/ffprobe must
+      # be on PATH.
+      - name: Install FFmpeg (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Install FFmpeg (Windows)
+        if: runner.os == 'Windows'
+        run: choco install ffmpeg -y --no-progress
+
+      - name: Install dependencies
+        run: corepack pnpm install --frozen-lockfile
+
+      # The suites import the Prisma client, which does not exist until it has
+      # been generated. The desktop launchers do this themselves; CI never
+      # launches the app, so it has to be explicit.
+      - name: Generate Prisma client
+        run: corepack pnpm db:sqlite:generate
+
+      - name: Type-check
+        run: corepack pnpm exec tsc --noEmit -p tsconfig.json
+
+      # test:mcp, test:eval and test:e2e are deliberately absent: they need a
+      # running editor on 127.0.0.1:38473, which CI does not start.
+      - name: Tests
+        run: corepack pnpm test:platform
+
+      # Reported, not gating. main carries 9 pre-existing errors: the
+      # react-hooks rules in NewAssemblyCard / ProjectFolderSettings /
+      # AudioMultitrackPanel / useLeaveGuard, plus three no-require-imports in
+      # mcp/run.cjs, which is legitimately CommonJS and wants an eslint override
+      # rather than a code change. Make this gating once those are settled.
+      - name: Lint
+        run: corepack pnpm lint
+        continue-on-error: true
