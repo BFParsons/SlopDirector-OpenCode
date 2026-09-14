@@ -4,7 +4,8 @@
       "command": "node",
       "args": ["mcp/run.cjs"],
       "env": {
-        "SLOPSTUDIO_URL": "http://127.0.0.1:38473"
+        "SLOPSTUDIO_URL": "http://127.0.0.1:38473",
+        "SLOPSTUDIO_AGENT_NAME": "Claude"
       }
     }
   }

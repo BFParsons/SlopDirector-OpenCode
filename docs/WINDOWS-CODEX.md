@@ -5,6 +5,10 @@ natively, with an embedded SQLite database and the same interview → plan → e
 → verify workflow as the Claude harness. WSL, PostgreSQL and Git Bash are not
 required for the desktop target.
 
+**Using Claude Code instead?** Everything below applies unchanged except the
+`corepack pnpm codex:setup` step and the *Connect Codex* section — `.mcp.json` already
+registers the server for Claude Code. See [`CLAUDE.md`](../CLAUDE.md).
+
 ## Setup from PowerShell
 
 Install Node 24 LTS, Git and a full FFmpeg Windows build (both `ffmpeg.exe` and
@@ -149,12 +153,16 @@ launchers set this automatically.
 ## Verification
 
 ```powershell
-corepack pnpm test:windows
+corepack pnpm test:platform
 corepack pnpm test:mcp
 corepack pnpm test:eval
 corepack pnpm exec playwright install chromium
 corepack pnpm test:e2e
 ```
+
+`test:platform` runs every suite in `tests/platform`; the individual ones are
+`test:windows`, `test:motion`, `test:interview`, `test:director-style`,
+`test:typography`, `test:source-music` and `test:trailer`.
 
 The running server is required for MCP/eval checks; Playwright can start a local
 dev server or reuse the production server. Tests create and remove their own

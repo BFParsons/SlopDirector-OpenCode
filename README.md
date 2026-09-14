@@ -37,11 +37,19 @@ narration, music, text, guardrails) → `set_brief` → `get_style` → the plan
 `check_soundtrack`, `check_text` → `render_draft` → `verify_export` → `render_final`.
 Nothing is sourced or cut before approval.
 
-**Run it.** Start the app (`scripts/launch-desktop.sh --prod`, or `pnpm serve:headless`
-with no display); `.mcp.json` registers the server for Claude Code inside the repo, and
-[`mcp/README.md`](mcp/README.md) has the setup for other clients. [`CLAUDE.md`](CLAUDE.md)
-is the short version for an agent, [`docs/AGENT-API.md`](docs/AGENT-API.md) the routes,
-[`docs/CHANGELOG.md`](docs/CHANGELOG.md) the history.
+**Run it.** Start the app — `pnpm desktop:prod` (Electron), `pnpm desktop:dev` (HMR),
+or `pnpm serve:headless` (no window); all bind `127.0.0.1:38473`. On Linux,
+`scripts/launch-desktop.sh --prod` does the same.
+
+**Drive it.** The loop is canonical and host-neutral in
+[`docs/HARNESS-LOOP.md`](docs/HARNESS-LOOP.md); the two host briefs carry it in their own
+idiom and are kept at parity: [`CLAUDE.md`](CLAUDE.md) for **Claude Code** (`.mcp.json`
+registers the server in-repo — no setup step; AskUserQuestion; the `.claude/agents`
+fan-out) and [`AGENTS.md`](AGENTS.md) for **Codex and other MCP clients**
+(`pnpm codex:setup`; see [`docs/WINDOWS-CODEX.md`](docs/WINDOWS-CODEX.md)).
+[`mcp/README.md`](mcp/README.md) has the server setup for other clients,
+[`docs/AGENT-API.md`](docs/AGENT-API.md) the routes, [`docs/CHANGELOG.md`](docs/CHANGELOG.md)
+the history.
 
 # SlopStudio (formerly SpotForge)
 
