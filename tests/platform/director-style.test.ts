@@ -146,6 +146,13 @@ test("the catalogue and research.json do not diverge", () => {
   assert.deepEqual([...catalogue].filter(id => !researched.has(id)), [], "catalogue entries with no research record");
   assert.deepEqual([...researched].filter(id => !catalogue.has(id)), [], "research records with no catalogue entry");
 
+  // guide/styles/README.md restates every oneLine as its catalogue bullet. It is
+  // the page a person reads before list_styles, so the two must not drift.
+  const catalogueMd = readFileSync("guide/styles/README.md", "utf8");
+  const bullets = new Map<string, string>();
+  for (const m of catalogueMd.matchAll(/^- \[[^\]]+\]\(([a-z0-9-]+)\.md\) — (.+)$/gm)) bullets.set(m[1], m[2].trim());
+  for (const s of STYLES) assert.equal(bullets.get(s.id), s.oneLine, s.id + ": catalogue bullet disagrees with oneLine");
+  assert.equal(bullets.size, STYLES.length, "catalogue lists a style the registry does not");
   const required = ["name", "reference", "mechanism", "materialFit", "prerequisites", "selection", "framing", "rhythm", "sound", "typography", "exceptions", "evaluation", "failureMode"];
   const guide = loadGuide();
   const numbers = new Map<number, string>(); // number -> source id

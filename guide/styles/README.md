@@ -6,7 +6,7 @@ Catalogue values are editorial starting defaults. Creative departures receive re
 
 ## Documentary
 
-- [Adam Curtis](adam-curtis.md) — the archive essay: raided archive, an essayist's narration, found music against the picture, hard cuts to black
+- [Adam Curtis](adam-curtis.md) — A calm, certain narration is set against strange archive, and the distance between them carries the argument.
 - [Michael Moore](michael-moore.md) — A public claim becomes a concrete, often absurd encounter.
 - [Errol Morris](errol-morris.md) — Testimony and recurring images expose uncertainty instead of closing it too soon.
 - [Ken Burns](ken-burns.md) — An image changes meaning as its context and human stakes become visible.
@@ -50,9 +50,9 @@ Catalogue values are editorial starting defaults. Creative departures receive re
 
 - [Mark Woollen](mark-woollen.md) — A distinctive music-and-image proposition sells the film's emotional experience.
 - [Buddha Jones](buddha-jones.md) — Controlled information and changing sonic pressure build anticipation and reversal.
-- [AV Squad](av-squad.md) — campaign-led spectacle: hook, escalating moments, musical contrast and a distinctive finish
+- [AV Squad](av-squad.md) — A named execution sells one experience: a hook, escalating moments and a genuinely distinctive payoff arranged for the requested duration.
 - [A24](a24.md) — Campaign specificity is the useful starting point; there is no defensible single-director system.
-- [Anaïs Bimpel](anais-bimpel.md) — sound-led construction: character moments and musical phrases with elastic timing
+- [Anaïs Bimpel](anais-bimpel.md) — Character moments, source sounds and musical phrases are arranged into a rhythm that carries the story's change in pressure.
 
 ## Video essay and explainer
 
