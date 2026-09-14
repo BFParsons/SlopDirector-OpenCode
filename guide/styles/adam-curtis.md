@@ -2,6 +2,22 @@
 
 Films: *The Century of the Self*, *The Power of Nightmares*, *HyperNormalisation*, *Can't Get You Out of My Head*.
 
+## Reference and mechanism
+
+The archive essay as built in The Century of the Self, The Power of Nightmares, HyperNormalisation and Can't Get You Out of My Head; a reference for narrated archive construction, not a universal documentary template.
+
+A calm, certain narration is set against strange archive, and the distance between them carries the argument.
+
+## Evidence
+
+The title survey reproduced in this repository establishes the two-register typography: a Bitter Lake title frame in large turquoise capitals, identified by its publication context, and Can't Get You Out of My Head artwork in cyan capitals with a yellow offset. The construction, shot-length ranges and pause discipline are editorial translations of the archive-essay form as practised in the named films.
+
+**Basis:** Derived from this repository's hand-written profile (guide/styles/adam-curtis.md) and its 2026-09-09 title survey, not from a fresh literature review. The sources below are a reproduced title frame, its publication context and promotional artwork; they establish the title-and-caption distinction and identify the films, and nothing further. Shot-length ranges, narration rate, pause lengths and the exact hex colour are editorial harness defaults, not measurements of the films.
+
+## Material prerequisites
+
+**Production fit:** Archive-dependent. Broadcast archive, newsreel, home-movie or corporate film with texture and oddness, inspected across its whole source window; a thesis about power that can be stated in plain declaratives; and music, usually from other decades than the pictures, that you are able to use.
+
 ## The signature
 
 A story about power, told over other people's footage. The narrator is calm and certain; the archive is strange, often beautiful, often nothing to do with the words; the music is somebody else's record, played against the picture. Cuts to black are punctuation. The film keeps saying "but then something strange happened".
@@ -74,6 +90,14 @@ A story about power, told over other people's footage. The narrator is calm and 
 
 asl 4–9 s · min shot 1.5 s · transitions cuts-and-black · narration required, essayist, 60–95 wpm · music required, found · sync mixed · text cards · interviews none
 
+## Evaluation
+
+Cut a 30-second passage in which the narration states one idea and then stops, and a single archive shot holds the screen after it; a viewer should feel the claim land without the narrator explaining it.
+
+**Failure mode:** Portentous narration over generic stock footage with a song swapped in for mood: attitude in place of an argument, and archive that illustrates the words instead of unsettling them.
+
+The duration above is a suggested experiment length. Plan the test within the approved production scope; it is not a new approval gate or a claim that the test has passed.
+
 ## Applying it in SlopStudio
 
 - Plan: put a compact **Pause map** and **Music turns** table in existing plan `notes`; carry their timing into `script.atS`, shot durations/descriptions and `music.brief`. Do not invent schema fields. For each pause record the preceding line/script id, timeline in/out, shot/clip id, the visible action/payoff and the sound choice. For each music turn record the trigger, before/after emotion, outgoing/incoming cue, timeline handoff and transition method. Source windows may be provisional in the plan; replace them with inspected timecodes in the production cue sheet before assembly.
@@ -84,3 +108,9 @@ asl 4–9 s · min shot 1.5 s · transitions cuts-and-black · narration require
 - Review each music handoff with several seconds of context on both sides: does the intended emotion change, does the new passage register, and are gaps/overlaps deliberate? Metering and beat alignment alone cannot answer this. `pacing_report` may flag intentional long holds; preserve justified holds instead of shortening them to meet the average. `check_soundtrack`/`verify_export` currently may mistake A2 audio-only music for narration or report the special bed missing; verify track placement and rendered music continuity independently and document the limitation.
 
 **Feedback incorporated from Everything is under control (2026-09-09):** the song boundary around 01:26 and the following Trump shot offered a stronger reassurance-to-threat turn. For future films, deliberately audition an incoming passage that makes that shift felt and allow the archive to carry it before narration resumes. Generalize the storytelling decision; do not hardcode this timestamp, person, political role or pair of songs into later films.
+
+## Sources
+
+- [Bitter Lake title frame (reproduced still)](https://entitleblogdotorg3.wordpress.com/wp-content/uploads/2015/03/adam-curtis-bitter-lake-2015.jpg) — Entitle Blog; 2015-03. Reproduced title frame. Very large turquoise sans capitals on two lines with a thin warm edge, over footage; the title register as distinct from plain white captions.
+- [Bitter Lake and waves of a fever: Adam Curtis on chaos, complexity and crisis](https://undisciplinedenvironments.org/2015/03/16/bitter-lake-and-waves-of-a-fever-adam-curtis-on-chaos-complexity-and-crisis/) — Undisciplined Environments; 2015-03-16. Publication context. Identifies the film to which the reproduced title frame belongs.
+- [Adam Curtis - Can't Get You Out of My Head](https://www.stranger-fiction.com/stories-to-watch/adam-curtis-cant-get-you-out-of-my-head) — Stranger Fiction; 2021. Promotional artwork. Large cyan capitals with a yellow offset against red; treated as artwork rather than proof of the episode title sequence.

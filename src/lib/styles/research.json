@@ -1,4 +1,58 @@
 {
+  "adam-curtis": {
+    "name": "Adam Curtis",
+    "reference": "The archive essay as built in The Century of the Self, The Power of Nightmares, HyperNormalisation and Can't Get You Out of My Head; a reference for narrated archive construction, not a universal documentary template.",
+    "mechanism": "A calm, certain narration is set against strange archive, and the distance between them carries the argument.",
+    "materialFit": "Archive-dependent",
+    "prerequisites": "Broadcast archive, newsreel, home-movie or corporate film with texture and oddness, inspected across its whole source window; a thesis about power that can be stated in plain declaratives; and music, usually from other decades than the pictures, that you are able to use.",
+    "selection": "Choose shots for texture and oddness rather than illustration: a shopping centre, a computer room, a ballroom, an uneasy face, a machine performing an unexpected action. Two literal shots in a row is a failure. A shot that carries a pause must hold attention for the whole hold on its own; if it cannot, find another shot rather than stretching it or adding motion.",
+    "framing": "Leave the archive as it arrives: scratches, timecode burn-ins and VHS colour retained, colorLook NONE. Do not grade it clean or crop it into a modern frame.",
+    "rhythm": "Average shot 4-9 s, the montage 3-5 s, the holds 10-20 s, nothing under 1.5 s. Straight cuts, with a hard cut to black of 0.5-1.5 s as punctuation between beats; no dissolves. Reserve the pauses before timing the narration, and let the scene end on an image rather than a sentence.",
+    "sound": "Music is found rather than scored, often from another decade than the picture. Counterpoint is the usual relation, but a narrative turn may deliberately align music with the new emotion. Plan each song change as an emotional event with a named before and after, and choose the handoff deliberately. Keep narration and music on independent tracks; sync sound returns only when it contributes to a hold.",
+    "typography": "Two registers: plain white sentence-case supporting text, held about four seconds on black or straight over the archive, and a separate large, bold, deliberately coloured film title. Do not treat the caption rule as the whole text system.",
+    "exceptions": "Counterpoint is a starting point, not a law. The turquoise title is Bitter Lake-informed and adaptable per film. What does not belong: talking heads and reporter stand-ups as content, drone shots, modern graphics, maps, and narration that judges rather than arranges.",
+    "evaluation": "Cut a 30-second passage in which the narration states one idea and then stops, and a single archive shot holds the screen after it; a viewer should feel the claim land without the narrator explaining it.",
+    "failureMode": "Portentous narration over generic stock footage with a song swapped in for mood: attitude in place of an argument, and archive that illustrates the words instead of unsettling them.",
+    "evidence": {
+      "summary": "The title survey reproduced in this repository establishes the two-register typography: a Bitter Lake title frame in large turquoise capitals, identified by its publication context, and Can't Get You Out of My Head artwork in cyan capitals with a yellow offset. The construction, shot-length ranges and pause discipline are editorial translations of the archive-essay form as practised in the named films.",
+      "basis": "Derived from this repository's hand-written profile (guide/styles/adam-curtis.md) and its 2026-09-09 title survey, not from a fresh literature review. The sources below are a reproduced title frame, its publication context and promotional artwork; they establish the title-and-caption distinction and identify the films, and nothing further. Shot-length ranges, narration rate, pause lengths and the exact hex colour are editorial harness defaults, not measurements of the films.",
+      "sources": [
+        {
+          "number": 58,
+          "id": "curtis-bitter-lake-title",
+          "title": "Bitter Lake title frame (reproduced still)",
+          "author_publisher": "Entitle Blog",
+          "date": "2015-03",
+          "url": "https://entitleblogdotorg3.wordpress.com/wp-content/uploads/2015/03/adam-curtis-bitter-lake-2015.jpg",
+          "evidence_type": "Reproduced title frame",
+          "supports": "Very large turquoise sans capitals on two lines with a thin warm edge, over footage; the title register as distinct from plain white captions.",
+          "accessed": "2026-09-09"
+        },
+        {
+          "number": 59,
+          "id": "curtis-bitter-lake-context",
+          "title": "Bitter Lake and waves of a fever: Adam Curtis on chaos, complexity and crisis",
+          "author_publisher": "Undisciplined Environments",
+          "date": "2015-03-16",
+          "url": "https://undisciplinedenvironments.org/2015/03/16/bitter-lake-and-waves-of-a-fever-adam-curtis-on-chaos-complexity-and-crisis/",
+          "evidence_type": "Publication context",
+          "supports": "Identifies the film to which the reproduced title frame belongs.",
+          "accessed": "2026-09-09"
+        },
+        {
+          "number": 60,
+          "id": "curtis-cgyoomh-artwork",
+          "title": "Adam Curtis - Can't Get You Out of My Head",
+          "author_publisher": "Stranger Fiction",
+          "date": "2021",
+          "url": "https://www.stranger-fiction.com/stories-to-watch/adam-curtis-cant-get-you-out-of-my-head",
+          "evidence_type": "Promotional artwork",
+          "supports": "Large cyan capitals with a yellow offset against red; treated as artwork rather than proof of the episode title sequence.",
+          "accessed": "2026-09-09"
+        }
+      ]
+    }
+  },
   "michael-moore": {
     "name": "Michael Moore",
     "reference": "Author-led investigative satire; Roger & Me as a reference, rather than a universal documentary template.",
@@ -979,6 +1033,70 @@
           "url": "https://vimeo.com/828044253",
           "evidence_type": "Campaign credit record",
           "supports": "A24 client; Buddha Jones agency; Tommy Malatesta, Brent Buckman, Eric Peschel and AVS Music.",
+          "accessed": "2026-09-10"
+        }
+      ]
+    }
+  },
+  "av-squad": {
+    "name": "AV Squad",
+    "reference": "A trailer agency with work across genres, not a single director with one fixed formula; start from a named execution and the experience it sells.",
+    "mechanism": "A named execution sells one experience: a hook, escalating moments and a genuinely distinctive payoff arranged for the requested duration.",
+    "materialFit": "Finished-footage",
+    "prerequisites": "A selling idea that can be stated in a sentence; distinctive payoff material that is actually distinctive; real quotation context preserved for any dialogue; and the exact music version available to audition.",
+    "selection": "State the selling idea, then select a hook, character moments, a change in pressure and the payoff. Choose the moments before locking their lengths: a new crop of the same gesture has to contribute new meaning to earn another slot.",
+    "framing": "Preserve the source film's visual identity; choose grade, crops, retiming and motion for the actual material, then inspect a rendered excerpt rather than trusting the settings.",
+    "rhythm": "ASL 1-4 s as a review reference, with 0.2 s as the shot floor. Vary shot lengths for attention and readability: short bursts, off-beat cuts, reaction holds and longer scenes are all available. A cold open, stopdown, title hit and button are options with purposes, not a required act structure.",
+    "sound": "Dialogue should reveal character or change the situation, and narration is an available campaign choice. Audition the exact music version and passage for attitude, development, dialogue space and ending; a song, bespoke score or designed motif may fit better than a hybrid orchestral cue. Build a phrase and audio-event map, and keep dialogue, music, effects and ambience separately adjustable.",
+    "typography": "Design the campaign title separately from supporting copy. Oswald Bold and Montserrat Black are available stand-ins, not verified agency-wide house faces. Use as many cards as the idea needs, including none; necessary dates, labels and citations are allowed.",
+    "exceptions": "No mandatory hit under a last word, prescribed gain or permanent riser. Beat analysis is a timing aid, not a target percentage or a requirement to cut on every accent.",
+    "evaluation": "Assemble a 30-second cutdown from a selling idea, a hook and one genuinely distinctive payoff; a viewer should be able to say what the film promises and why the payoff was worth waiting for.",
+    "failureMode": "A competent grid of escalating shots with nothing specific to sell: interchangeable risers, a hit on every cut, and a payoff that could belong to any film in the genre.",
+    "evidence": {
+      "summary": "The linked action portfolio identifies individual pieces attributable to the agency, including the Top Gun: Maverick teaser 'Service'. The structure described here is an editorial proposal for campaign-led construction rather than a documented account of the agency's process.",
+      "basis": "Derived from this repository's hand-written profile (guide/styles/av-squad.md). The single source is an agency portfolio page: it establishes which pieces the agency claims, and nothing about how they were built. Ranges and structural options are editorial harness defaults.",
+      "sources": [
+        {
+          "number": 62,
+          "id": "avsquad-portfolio",
+          "title": "AV Squad - action portfolio",
+          "author_publisher": "featured.avsquad.com",
+          "date": "2026",
+          "url": "https://featured.avsquad.com/action",
+          "evidence_type": "Agency portfolio page",
+          "supports": "Attribution of individual campaign pieces; no construction detail.",
+          "accessed": "2026-09-10"
+        }
+      ]
+    }
+  },
+  "anais-bimpel": {
+    "name": "Anaïs Bimpel",
+    "reference": "Sound-led trailer construction as a creative approach to explore, not a claim that every Anaïs Bimpel campaign is built one way.",
+    "mechanism": "Character moments, source sounds and musical phrases are arranged into a rhythm that carries the story's change in pressure.",
+    "materialFit": "Finished-footage",
+    "prerequisites": "A cut film or usable selects with clean dialogue and separable source sound; each usable sound logged with its exact moment and handles; and the actual music recording available to audition, not just its title.",
+    "selection": "Establish the character, situation and change in pressure before making any percussion pattern. Choose actions and lines that mean something in the story, and distinguish authentic sync from extracted sound and added editorial design.",
+    "framing": "Preserve source quality and the campaign's visual identity. Straight cuts are the starting point; other transitions are deliberate choices rather than defaults.",
+    "rhythm": "ASL 1-3 s as a review reference, with 0.25 s as the shot floor. No fixed part lengths, tempo doubling, delayed music entrance or one-bar silence is required. A gesture, word or effect may accent the rhythm inside a held shot, and a longer hold may interrupt a cluster when that serves a joke, an emotion or a transition.",
+    "sound": "Audition the actual recording and passage for attitude and arrangement. Find a tempo that serves the performance and the selected music rather than fitting an arbitrary grid; music may enter immediately, gradually or late. Keep music, dialogue, effects and ambience separately controllable, choose a foreground element per beat, and give dialogue enough space to stay intelligible.",
+    "typography": "Design a distinct title treatment and a supporting text system; cards may sit over picture where legible. Oswald Bold and the existing pop presets are available stand-ins, not verified universal choices. No fixed card count, word count or required title hit.",
+    "exceptions": "Beat-grid verification applies only to passages actually designed around a grid. Narration, sustained score and quiet passages remain available when the concept calls for them.",
+    "evaluation": "Build a 20-second sound-led passage in which one gesture or word accents the rhythm inside a held shot; a listener should follow the dialogue and feel the pressure change without any tempo grid being audible.",
+    "failureMode": "A percussion pattern assembled before the story is established: cuts land on a grid, dialogue is squeezed out of intelligibility, and the rhythm belongs to the cue rather than the film.",
+    "evidence": {
+      "summary": "The linked portfolio and credits identify the campaigns associated with this editor, including Daughters, Life on Our Planet and The Handmaiden. The construction described here is an editorial proposal for a sound-led trailer, not a documented account of how any of those campaigns was cut.",
+      "basis": "Derived from this repository's hand-written profile (guide/styles/anais-bimpel.md). The single source is a portfolio and credits page: it establishes attribution only. No interview, timeline or production record supports the construction, and the numeric ranges are editorial harness defaults.",
+      "sources": [
+        {
+          "number": 61,
+          "id": "bimpel-portfolio",
+          "title": "Anaïs Bimpel - awards and press",
+          "author_publisher": "anaisb.com",
+          "date": "2026",
+          "url": "https://anaisb.com/awards-press",
+          "evidence_type": "Portfolio and credits page",
+          "supports": "Attribution of the named campaigns; no construction detail.",
           "accessed": "2026-09-10"
         }
       ]

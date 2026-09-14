@@ -46,6 +46,12 @@ export interface TypeSystem {
   name: string;
   /** Optional type treatments, not creator-wide bans. */
   preferenceOnly?: boolean;
+  /**
+   * This entry carries its own dated survey and citations (see the note and the
+   * profile it points at). A research record must not flatten it into the generic
+   * adaptable treatment, which would drop the surveyed role bans and the sources.
+   */
+  surveyed?: boolean;
   /** the real typographic signature, in a sentence */
   signature: string;
   /** which bundled faces stand in for which real typefaces */
@@ -70,7 +76,7 @@ const GENERIC_ROLE_PRESET: Record<TypeRole, string> = { title: "title", card: "c
 
 const T = (t: Omit<TypeSystem, "name">, name: string): TypeSystem => {
   const reference = styleById(t.style);
-  if (!reference?.craft) return { name, ...t };
+  if (!reference?.craft || t.surveyed) return { name, ...t };
   return {
     ...t, name: reference.name, preferenceOnly: true, never: [], noText: false,
     signature: reference.craft.typography,
@@ -83,7 +89,7 @@ const T = (t: Omit<TypeSystem, "name">, name: string): TypeSystem => {
 
 export const STYLE_TYPE: TypeSystem[] = [
   // ---------------------------------------------------------------- documentary
-  T({ style: "adam-curtis", signature: "Two registers: plain white sentence-case supporting cards, and large bold film-title lettering with a deliberately vivid palette. Bitter Lake uses turquoise capitals; Can't Get You Out of My Head artwork uses cyan with a yellow offset on red.", standsFor: "Liberation Sans Regular for neutral supporting text; Liberation Sans Bold as a bundled approximation of the bold title grotesk. The original title font and exact colors have not been verified.", faces: ["LiberationSans-Regular", "LiberationSans-Bold"], case: "sentence", color: "#FFFFFF", field: "#000000", motion: "NONE", defaultRole: "card",
+  T({ style: "adam-curtis", surveyed: true, signature: "Two registers: plain white sentence-case supporting cards, and large bold film-title lettering with a deliberately vivid palette. Bitter Lake uses turquoise capitals; Can't Get You Out of My Head artwork uses cyan with a yellow offset on red.", standsFor: "Liberation Sans Regular for neutral supporting text; Liberation Sans Bold as a bundled approximation of the bold title grotesk. The original title font and exact colors have not been verified.", faces: ["LiberationSans-Regular", "LiberationSans-Bold"], case: "sentence", color: "#FFFFFF", field: "#000000", motion: "NONE", defaultRole: "card",
     roles: { title: { preset: "title", font: "LiberationSans-Bold", transform: "upper", sizePct: 16, sizePctVertical: 11, position: "CENTER", color: "#00DED4", boxEnabled: false, outlineW: 0, shadow: 0, animation: "NONE", holdS: 4, use: "the film name in large, bold colored capitals; start from Bitter Lake turquoise, choose deliberate line breaks, and adapt the palette per film" }, card: { preset: "card-archive", font: "LiberationSans-Regular", transform: "none", sizePct: 5.2, sizePctVertical: 4.2, position: "CENTER", boxEnabled: false, animation: "NONE", holdS: 4, use: "a place and a year, or one sentence of the argument, on black" }, caption: { preset: "card-archive", font: "LiberationSans-Regular", transform: "none", sizePct: 4.6, sizePctVertical: 3.8, position: "CENTER", boxEnabled: false, outlineW: 0, animation: "NONE", holdS: 4, use: "the same sentence, straight over the archive, no box, no outline" }, date: { preset: "date-card", font: "LiberationSans-Regular", transform: "none", sizePct: 3.8, position: "TOP_LEFT", boxEnabled: false, outlineW: 0, animation: "NONE", use: "a place · a year, top-left, the archive's own timecode left in" } },
     never: ["lower-third", "callout", "citation", "intertitle"], note: "Visual title references reviewed 2026-09-09: Bitter Lake title frame (turquoise heavy capitals over footage) and Can't Get You Out of My Head artwork (cyan capitals, yellow offset, red field). See guide/styles/adam-curtis.md for sources and limits. The title role is a Bitter Lake-informed starting point, not a universal Curtis wordmark. #00DED4 and 16%/11% sizes are design choices, not sampled production specifications. NONE remains a harness default; motion was not established from these still references." }, "Adam Curtis"),
   T({ style: "michael-moore", signature: "Broadcast-news grammar: bold Helvetica lower-thirds in a bar, plain white cards on black for the dates and the gags, headlines and documents filling the frame.", standsFor: "Liberation Sans for Helvetica / Arial.", faces: ["LiberationSans-Bold", "LiberationSans-Regular"], case: "sentence", color: "#FFFFFF", field: "#000000", motion: "NONE", defaultRole: "lower-third",

@@ -7,6 +7,7 @@ import { briefSchema, planSchema } from "../../src/lib/validation/brief";
 import { checkPlan, planCli, planDocument, planTable, planTasks } from "../../src/lib/projects/plan";
 import { applyRole, typeSystemFor } from "../../src/lib/typography/styleType";
 import { checkText } from "../../src/lib/typography/check";
+import research from "../../src/lib/styles/research.json";
 
 const treatment = {
   reference: "A specific reference version and its collaborators.",
@@ -38,7 +39,7 @@ function fixture(id = "edgar-wright") {
 
 test("all researched references expose matching craft evidence and guide instructions", () => {
   const researched = STYLES.filter(s => s.craft);
-  assert.equal(researched.length, 40);
+  assert.equal(researched.length, STYLES.length);
   const guide = loadGuide();
   const sourceIds = new Set<string>();
   for (const s of researched) {
@@ -57,7 +58,7 @@ test("all researched references expose matching craft evidence and guide instruc
       sourceIds.add(source.id);
     }
   }
-  assert.equal(sourceIds.size, 57);
+  assert.equal(sourceIds.size, 62);
   assert.match(styleById("tony-zhou")!.name, /Taylor Ramos/);
   assert.match(styleById("a24")!.craft!.reference, /studio and distributor/i);
 });
@@ -119,7 +120,10 @@ test("researched typography permits reference-specific faces and source roles wh
     label.endS = 0.1;
     assert.ok(checkText([label], frame, "web", 12, system).findings.some(f => /reading time/.test(f.rule) && f.severity === "error"));
   }
+  // Curtis has a craft record too, but its type system is surveyed: the cited
+  // note and role bans survive instead of being replaced by the generic treatment.
   assert.equal(typeSystemFor("adam-curtis")!.preferenceOnly, undefined);
+  assert.deepEqual(typeSystemFor("adam-curtis")!.never, ["lower-third", "callout", "citation", "intertitle"]);
 });
 
 test("the active guide and catalogue do not reintroduce superseded blanket recipes", () => {
@@ -129,4 +133,49 @@ test("the active guide and catalogue do not reintroduce superseded blanket recip
   assert.equal(styleById("edgar-wright")!.params.narration, "optional");
   assert.equal(styleById("humphrey-jennings")!.params.narration, "optional");
   assert.ok(!styleById("johnny-harris")!.oneLine.includes("label-free"));
+});
+
+test("the catalogue and research.json do not diverge", () => {
+  const records = research as Record<string, Record<string, unknown>>;
+  const catalogue = new Set(STYLES.map(s => s.id));
+  const researched = new Set(Object.keys(records));
+
+  // Neither side may gain an entry the other does not know about. A style
+  // without a record silently loses its craft fields in get_style, and is
+  // skipped by every test that filters on s.craft.
+  assert.deepEqual([...catalogue].filter(id => !researched.has(id)), [], "catalogue entries with no research record");
+  assert.deepEqual([...researched].filter(id => !catalogue.has(id)), [], "research records with no catalogue entry");
+
+  const required = ["name", "reference", "mechanism", "materialFit", "prerequisites", "selection", "framing", "rhythm", "sound", "typography", "exceptions", "evaluation", "failureMode"];
+  const guide = loadGuide();
+  const numbers = new Map<number, string>(); // number -> source id
+  const ids = new Map<string, string>(); // source id -> url
+
+  for (const [id, record] of Object.entries(records)) {
+    for (const field of required) {
+      const v = record[field];
+      assert.equal(typeof v, "string", id + "." + field);
+      assert.ok((v as string).trim().length > 0, id + "." + field + " is empty");
+    }
+    const style = styleById(id)!;
+    assert.equal(record.name, style.name, id + ": name disagrees with the catalogue");
+    assert.equal(record.mechanism, style.oneLine, id + ": mechanism disagrees with oneLine");
+    assert.ok(guide.styles.get(id), id + ": no guide/styles/" + id + ".md");
+    assert.ok(typeSystemFor(id), id + ": no STYLE_TYPE entry");
+
+    const evidence = record.evidence as { basis?: string; summary?: string; sources?: { number: number; id: string; url: string }[] };
+    assert.ok(evidence.basis && evidence.summary, id + ": evidence needs a summary and a basis");
+    for (const source of evidence.sources ?? []) {
+      // One source may legitimately be cited by several styles (the Yoshikawa
+      // interview covers both Malick and Guest). When it is, the number, id and
+      // url must agree everywhere it appears.
+      const seenNumber = numbers.get(source.number);
+      if (seenNumber !== undefined) assert.equal(seenNumber, source.id, "source number " + source.number + " names two different sources");
+      numbers.set(source.number, source.id);
+      const seenUrl = ids.get(source.id);
+      if (seenUrl !== undefined) assert.equal(seenUrl, source.url, "source id " + source.id + " points at two different urls");
+      ids.set(source.id, source.url);
+      assert.equal(new URL(source.url).protocol, "https:", source.id);
+    }
+  }
 });

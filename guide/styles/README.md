@@ -1,6 +1,6 @@
 # Directing references
 
-Choose a named work, campaign or period, then adapt its mechanism to the available material. Read [Applying a director reference](../playbooks/director-style.md). The 40 researched profiles include sources, material prerequisites, production choices, exceptions and an observable evaluation.
+Choose a named work, campaign or period, then adapt its mechanism to the available material. Read [Applying a director reference](../playbooks/director-style.md). The 43 researched profiles include sources, material prerequisites, production choices, exceptions and an observable evaluation.
 
 Catalogue values are editorial starting defaults. Creative departures receive review warnings; technical and factual requirements remain. Store the project-specific treatment in plan.styleTreatment. Typography presets are adaptable treatments, not universal fonts or forbidden roles.
 

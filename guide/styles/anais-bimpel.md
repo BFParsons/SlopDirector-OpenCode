@@ -6,6 +6,22 @@ that every Anaïs Bimpel campaign uses one construction.
 Her [portfolio and credits](https://anaisb.com/awards-press) include *Daughters*,
 *Life on Our Planet* and *The Handmaiden*.
 
+## Reference and mechanism
+
+Sound-led trailer construction as a creative approach to explore, not a claim that every Anaïs Bimpel campaign is built one way.
+
+Character moments, source sounds and musical phrases are arranged into a rhythm that carries the story's change in pressure.
+
+## Evidence
+
+The linked portfolio and credits identify the campaigns associated with this editor, including Daughters, Life on Our Planet and The Handmaiden. The construction described here is an editorial proposal for a sound-led trailer, not a documented account of how any of those campaigns was cut.
+
+**Basis:** Derived from this repository's hand-written profile (guide/styles/anais-bimpel.md). The single source is a portfolio and credits page: it establishes attribution only. No interview, timeline or production record supports the construction, and the numeric ranges are editorial harness defaults.
+
+## Material prerequisites
+
+**Production fit:** Finished-footage. A cut film or usable selects with clean dialogue and separable source sound; each usable sound logged with its exact moment and handles; and the actual music recording available to audition, not just its title.
+
 ## Creative constraints
 
 Follow [Trailer construction](../playbooks/trailer-construction.md). No fixed
@@ -44,9 +60,21 @@ title treatment and supporting text; cards can sit over picture when legible.
 Oswald Bold and the existing pop presets are available stand-ins, not verified
 universal choices. There is no fixed card count, word count, or required title hit.
 
+## Evaluation
+
+Build a 20-second sound-led passage in which one gesture or word accents the rhythm inside a held shot; a listener should follow the dialogue and feel the pressure change without any tempo grid being audible.
+
+**Failure mode:** A percussion pattern assembled before the story is established: cuts land on a grid, dialogue is squeezed out of intelligibility, and the rhythm belongs to the cue rather than the film.
+
+The duration above is a suggested experiment length. Plan the test within the approved production scope; it is not a new approval gate or a claim that the test has passed.
+
 ## Harness parameters
 
 ASL 1–3 s as a review reference; minimum style reference 0.25 s; cuts as a default;
 narration optional; music recommended; mixed sync; cards optional; beat-grid
 verification only for passages designed around a grid. Technical frame and
 delivery checks still apply.
+
+## Sources
+
+- [Anaïs Bimpel - awards and press](https://anaisb.com/awards-press) — anaisb.com; 2026. Portfolio and credits page. Attribution of the named campaigns; no construction detail.

@@ -39,7 +39,7 @@ current harness. Rebuild or reopen the desktop app when its bundled API code cha
 | Always-on rules (38 of them) | [`guide/RULES.md`](../guide/RULES.md) |
 | Craft guide (`search_guide`, `read_guide`) | [`guide/editing-guide.md`](../guide/editing-guide.md) |
 | Playbooks (`get_playbook`) | [`guide/playbooks/`](../guide/playbooks/) |
-| Directing styles — 40 researched profiles (`get_style`, `list_styles`) | [`guide/styles/`](../guide/styles/README.md), `src/lib/styles/research.json` |
+| Directing styles — 43 researched profiles (`get_style`, `list_styles`) | [`guide/styles/`](../guide/styles/README.md), `src/lib/styles/research.json` |
 | Music references | [`guide/music-references.md`](../guide/music-references.md) |
 | Tool reference (generated) | [`guide/appendix-a-tools.md`](../guide/appendix-a-tools.md) |
 

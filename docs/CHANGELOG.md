@@ -3,6 +3,26 @@
 Notable changes, newest first. See [DEPENDENCIES.md](DEPENDENCIES.md) for setup and
 [AUDIO_STUDIO.md](AUDIO_STUDIO.md) for the audio workspace.
 
+## 2026-09-14 — Craft records for the three hand-written references
+
+- Add research records for Adam Curtis, Anaïs Bimpel and AV Squad, derived from their
+  existing profiles rather than replacing them. get_style now returns craft for every
+  catalogue entry; these three previously returned null and were skipped by every test
+  that filters on it.
+- Their oneLine becomes the mechanism sentence, as for the other references, and each
+  profile gains Reference and mechanism, Evidence, Material prerequisites, Evaluation and
+  Sources sections beside its hand-written prose.
+- Evidence is limited to what the repository already cited: a reproduced Bitter Lake title
+  frame with its publication context, Can't Get You Out of My Head artwork, and two portfolio
+  pages. Each basis states that the construction and the numeric ranges are editorial
+  proposals, not measurements.
+- Curtis now follows the researched typography rule like every other reference:
+  preferenceOnly, with the blanket role bans dropped. Its surveyed note and citations
+  remain in guide/styles/adam-curtis.md.
+- Add a divergence check: the catalogue and research.json must describe the same styles,
+  every record must carry all thirteen prose fields plus evidence, and a source number must
+  name the same source everywhere it appears.
+
 ## 2026-09-11 — Music choices in the interview
 
 - Separate music's role from its selection: delegate, draw from a named film or

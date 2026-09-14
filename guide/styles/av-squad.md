@@ -5,6 +5,22 @@ one fixed formula. Start with a named execution and the experience it sells.
 The [action portfolio](https://featured.avsquad.com/action) identifies individual
 pieces, including the *Top Gun: Maverick* teaser "Service".
 
+## Reference and mechanism
+
+A trailer agency with work across genres, not a single director with one fixed formula; start from a named execution and the experience it sells.
+
+A named execution sells one experience: a hook, escalating moments and a genuinely distinctive payoff arranged for the requested duration.
+
+## Evidence
+
+The linked action portfolio identifies individual pieces attributable to the agency, including the Top Gun: Maverick teaser 'Service'. The structure described here is an editorial proposal for campaign-led construction rather than a documented account of the agency's process.
+
+**Basis:** Derived from this repository's hand-written profile (guide/styles/av-squad.md). The single source is an agency portfolio page: it establishes which pieces the agency claims, and nothing about how they were built. Ranges and structural options are editorial harness defaults.
+
+## Material prerequisites
+
+**Production fit:** Finished-footage. A selling idea that can be stated in a sentence; distinctive payoff material that is actually distinctive; real quotation context preserved for any dialogue; and the exact music version available to audition.
+
 ## Creative constraints
 
 Follow [Trailer construction](../playbooks/trailer-construction.md). The ranges
@@ -52,9 +68,21 @@ The existing card/title presets are starting points; choose font, layout,
 animation and duration for the campaign. Use as many cards as the idea needs,
 including none. Necessary dates, labels and citations are allowed.
 
+## Evaluation
+
+Assemble a 30-second cutdown from a selling idea, a hook and one genuinely distinctive payoff; a viewer should be able to say what the film promises and why the payoff was worth waiting for.
+
+**Failure mode:** A competent grid of escalating shots with nothing specific to sell: interchangeable risers, a hit on every cut, and a payoff that could belong to any film in the genre.
+
+The duration above is a suggested experiment length. Plan the test within the approved production scope; it is not a new approval gate or a claim that the test has passed.
+
 ## Harness parameters
 
 ASL 1–4 s as a review reference; minimum style reference 0.2 s; cuts as a default;
 narration optional; music recommended; mixed sync; cards optional; beat-grid
 verification only for passages designed around a grid. Technical frame and
 delivery checks still apply.
+
+## Sources
+
+- [AV Squad - action portfolio](https://featured.avsquad.com/action) — featured.avsquad.com; 2026. Agency portfolio page. Attribution of individual campaign pieces; no construction detail.
