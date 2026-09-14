@@ -143,5 +143,8 @@ corepack pnpm test:eval                            # scored editing tasks (needs
 corepack pnpm test:e2e                             # Playwright
 ```
 
+Tests import the Prisma client. The desktop launchers generate it, so in a fresh
+checkout that has not been launched yet, run `corepack pnpm db:sqlite:generate` first.
+
 **Never push to the upstream `slopstudio-pro` repository.** This repository's remote is
 `BFParsons/SlopDirector`.

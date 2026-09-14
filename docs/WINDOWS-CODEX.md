@@ -164,6 +164,9 @@ corepack pnpm test:e2e
 `test:windows`, `test:motion`, `test:interview`, `test:director-style`,
 `test:typography`, `test:source-music` and `test:trailer`.
 
+Tests import the Prisma client; the launchers generate it, so run
+`corepack pnpm db:sqlite:generate` first in a checkout you have not launched yet.
+
 The running server is required for MCP/eval checks; Playwright can start a local
 dev server or reuse the production server. Tests create and remove their own
 projects. The platform checks render through paths with spaces, apostrophes and
