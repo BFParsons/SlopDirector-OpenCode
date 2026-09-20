@@ -98,24 +98,26 @@ export function registerMediaTools(server: McpServer) {
     {
       title: "Generate a narration line (TTS)",
       description:
-        "Synthesize one narrator line with the TTS model and place it on the timeline as an audio-only clip at offsetS (audible, ducks the music, levelled with volume). One call per line: an ad's six lines become six clips you can move and level separately. Costs credits (~$0.015 per 1k characters). Returns the clip id + duration and the updated project. (The raw route only files the clip in the media bucket, where the render and the checks never see it — this tool puts it on the timeline.)",
+        "Synthesize one narrator line with the server's default narrator and place it on the timeline as an audio-only clip at offsetS (audible, ducks the music, levelled with volume). Leave voice and ttsModel unset to get the house voice: on a machine with ELEVENLABS_API_KEY that is ElevenLabs eleven_v3 with the configured documentary narrator (delivery steered by a v3 audio tag; `instructions` are not sent to it), otherwise Grok Voice via OpenRouter (which does honor `instructions`). One call per line: an ad's six lines become six clips you can move and level separately. Costs credits (ElevenLabs ~$0.30, Grok ~$0.015 per 1k characters). Returns the clip id + duration and the updated project. (The raw route only files the clip in the media bucket, where the render and the checks never see it — this tool puts it on the timeline.)",
       inputSchema: {
         projectId: z.string(),
         text: z.string().min(1).max(2000),
         offsetS: z.number().min(0).describe("timeline second the line starts"),
-        voice: z.string().optional().describe("ara | eve | rex | sal | leo (Grok Voice TTS); default rex"),
-        instructions: z.string().max(500).optional().describe("delivery notes the model may honor: pace, tone, mood, narrative context. For the final sentence of a monologue or film, explicitly direct its emotional landing and closing cadence; do not treat every chunk ending as a narrative ending. Keep these directions out of spoken text."),
+        voice: z.string().optional().describe("leave unset for the house voice. ElevenLabs: a voice id (the catalogue lists the documentary narrator and George); Grok: ara | eve | rex | sal | leo. A voice name from the other provider falls back to the default voice rather than failing."),
+        instructions: z.string().max(500).optional().describe("delivery notes the model may honor: pace, tone, mood, narrative context. For the final sentence of a monologue or film, explicitly direct its emotional landing and closing cadence; do not treat every chunk ending as a narrative ending. Keep these directions out of spoken text. ElevenLabs v3 ignores this field (its delivery comes from the configured audio tag)."),
         volume: z.number().min(0).max(4).optional().describe("gain on the clip (1 = as synthesized)"),
-        ttsModel: z.string().optional(),
+        ttsModel: z.string().optional().describe("a catalogue id (list_video_models does not cover TTS; see src/config/models.ts): elevenlabs/eleven_v3 or x-ai/grok-voice-tts-1.0. Default: the server's configured narrator."),
       },
     },
     guarded(async ({ projectId, text: line, offsetS, voice, instructions, volume, ttsModel }) => {
       const before = await snapshot(projectId);
       const known = new Set(before.segments.map((x) => x.id));
+      // No defaults here: the server decides the narrator (src/lib/tts/synthesize.ts),
+      // so every host — the app, the job worker and this tool — uses the same voice.
       const after = await api.post<Snapshot>(`/api/projects/${projectId}/generate-voiceover`, {
-        ttsModel: ttsModel ?? "x-ai/grok-voice-tts-1.0",
-        voice: voice ?? "rex",
         text: line,
+        ...(ttsModel ? { ttsModel } : {}),
+        ...(voice ? { voice } : {}),
         ...(instructions ? { instructions } : {}),
       });
       const bucket = after.segments.find((x) => !known.has(x.id) && x.audioOnly);

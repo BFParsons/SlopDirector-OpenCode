@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { DEFAULT_TTS_MODEL, TTS_MODELS, getTtsModel, ttsVoices } from "@/config/models";
+import { DEFAULT_TTS_MODEL, TTS_MODELS, getTtsModel, ttsVoiceLabel, ttsVoices } from "@/config/models";
 import { api } from "@/lib/api";
 import type { PanelProps } from "@/types/panel";
 import PanelChrome from "../PanelChrome";
@@ -79,7 +79,7 @@ export default function VoiceoverPanel({ windowControls }: PanelProps) {
             <select className={control} value={voice} onChange={(e) => setVoice(e.target.value)} disabled={readOnly || voices.length <= 1}>
               {voices.map((v) => (
                 <option key={v} value={v}>
-                  {cap(v)}
+                  {cap(ttsVoiceLabel(ttsModel, v))}
                 </option>
               ))}
             </select>

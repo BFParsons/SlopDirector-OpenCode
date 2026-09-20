@@ -290,9 +290,11 @@ export const generateClipSchema = z.object({
 });
 
 // Simplified voiceover generation (the Voiceover panel) → TTS audio clip.
+// ttsModel / voice are optional: left out, the server's default narrator is
+// used (ElevenLabs house voice when configured, else Grok) — src/lib/tts/synthesize.ts.
 export const generateVoiceoverSchema = z.object({
-  ttsModel: z.string().min(1).max(120),
-  voice: z.string().min(1).max(60),
+  ttsModel: z.string().min(1).max(120).optional(),
+  voice: z.string().min(1).max(60).optional(),
   text: z.string().min(1).max(5000),
   instructions: z.string().max(500).optional(),
 });

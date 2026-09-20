@@ -3,7 +3,6 @@ import path from "node:path";
 import type { Project } from "@prisma/client";
 import type { JobType } from "@/lib/db/enums";
 import { env } from "@/env";
-import { getTtsModel } from "@/config/models";
 import { prisma } from "@/lib/db/client";
 import { buildCaptions } from "@/lib/render/captions";
 import { asEffects } from "@/lib/render/effects";
@@ -33,9 +32,8 @@ import { generateScript } from "@/lib/llm/expand";
 import type { BriefInput } from "@/lib/llm/prompts";
 import { downloadYouTubeAudio, downloadYouTubeClip } from "@/lib/youtube/import";
 import { parseYouTubeId } from "@/lib/youtube/url";
-import { OpenRouterError } from "@/lib/openrouter/client";
-import { synthesizeSpeech } from "@/lib/openrouter/tts";
 import { keyForProject } from "@/lib/openrouter/userKey";
+import { synthesizeNarration } from "@/lib/tts/synthesize";
 import {
   type FrameImage,
   getVideoStatus,
@@ -354,45 +352,26 @@ async function synthVoJob(payload: { projectId: string }): Promise<void> {
   }
 
   await setVoStatus(project.id, "RUNNING");
-  const voice = project.ttsVoice ?? getTtsModel(project.ttsModel)?.defaultVoice;
   const instructions = project.voDeliveryNotes ?? undefined;
   const apiKey = await keyForProject(project.id);
 
-  let buf: Buffer;
-  try {
-    buf = await synthesizeSpeech({
-      model: project.ttsModel,
-      input,
-      voice: voice ?? undefined,
-      instructions,
-      apiKey,
-    });
-  } catch (e) {
-    // Not every TTS model accepts `instructions`; retry once without it.
-    if (
-      instructions &&
-      e instanceof OpenRouterError &&
-      e.status >= 400 &&
-      e.status < 500
-    ) {
-      buf = await synthesizeSpeech({
-        model: project.ttsModel,
-        input,
-        voice: voice ?? undefined,
-        apiKey,
-      });
-    } else {
-      throw e;
-    }
-  }
+  // Provider and voice resolve in one place (src/lib/tts/synthesize.ts): the
+  // project's model/voice when set, else the server's configured narrator.
+  const audio = await synthesizeNarration({
+    ttsModel: project.ttsModel,
+    voice: project.ttsVoice,
+    text: input,
+    instructions,
+    openRouterKey: apiKey,
+  });
 
   const asset = await saveAsset({
     projectId: project.id,
     kind: "VO_AUDIO",
     sub: "vo",
-    filename: "voiceover.mp3",
-    data: buf,
-    mime: "audio/mpeg",
+    filename: `voiceover.${audio.ext}`,
+    data: audio.data,
+    mime: audio.mime,
   });
   const durationS = await probeDuration(absolutePath(asset.path));
 

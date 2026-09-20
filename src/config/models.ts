@@ -129,30 +129,61 @@ export const DEFAULT_LLM_MODEL = "google/gemini-3.5-flash";
 
 // ----------------------------------------------------------------------------
 
+/** Who synthesizes: OpenRouter's OpenAI-compatible /audio/speech, or ElevenLabs directly. */
+export type TtsProvider = "openrouter" | "elevenlabs";
+
 export interface TtsModelInfo {
   id: string;
   label: string;
+  provider: TtsProvider;
   defaultVoice?: string;
-  /** Selectable voices for this model. */
+  /** Selectable voices for this model (ElevenLabs: voice ids; the account may own more). */
   voices: string[];
+  /** Human names for voice ids, for the pickers. */
+  voiceLabels?: Record<string, string>;
   /** USD per 1k characters (rough; for cost preview only). */
   pricePer1kCharsUsd: number;
   note?: string;
 }
 
-// Verified 2026-05-27: this is the TTS model exposed to this account via
-// /audio/speech (returns mp3). Voices: eve, ara, rex, sal, leo.
+/** The house narrator: an ElevenLabs voice used on every Curtis-style film since September 2026. */
+export const ELEVENLABS_HOUSE_VOICE_ID = "mliUAyOykvIlRkwruosy";
+
 export const TTS_MODELS: TtsModelInfo[] = [
+  // ElevenLabs v3 with the house narrator. Needs ELEVENLABS_API_KEY on the
+  // server; when it is set this becomes the default model for every narration
+  // path (src/lib/tts/synthesize.ts). Takes are conditioned to 48 kHz mono WAV.
+  {
+    id: "elevenlabs/eleven_v3",
+    label: "ElevenLabs v3 — documentary narrator",
+    provider: "elevenlabs",
+    defaultVoice: ELEVENLABS_HOUSE_VOICE_ID,
+    voices: [ELEVENLABS_HOUSE_VOICE_ID, "JBFqnCBsd6RMkjVDRZzb"],
+    voiceLabels: { [ELEVENLABS_HOUSE_VOICE_ID]: "British Guy Documentary", JBFqnCBsd6RMkjVDRZzb: "George" },
+    pricePer1kCharsUsd: 0.3,
+    note: "Steered with v3 audio tags (ELEVENLABS_STYLE_TAG is prepended); `instructions` are not sent. Any ElevenLabs voice id the account owns is accepted.",
+  },
+  // Verified 2026-05-27: this is the TTS model exposed to this account via
+  // /audio/speech (returns mp3). Voices: eve, ara, rex, sal, leo.
   {
     id: "x-ai/grok-voice-tts-1.0",
     label: "Grok Voice TTS",
+    provider: "openrouter",
     defaultVoice: "ara",
     voices: ["ara", "eve", "rex", "sal", "leo"],
     pricePer1kCharsUsd: 0.015,
   },
 ];
 
-export const DEFAULT_TTS_MODEL = "x-ai/grok-voice-tts-1.0";
+/**
+ * The catalogue default, used by the UI when a project is created.
+ * NEXT_PUBLIC_DEFAULT_TTS_MODEL (baked in at build time) can point it at another
+ * catalogue entry; the server-side default for narration also considers
+ * ELEVENLABS_API_KEY / SLOPSTUDIO_TTS_MODEL — see src/lib/tts/synthesize.ts.
+ */
+const publicDefault = process.env.NEXT_PUBLIC_DEFAULT_TTS_MODEL;
+export const DEFAULT_TTS_MODEL =
+  publicDefault && TTS_MODELS.some((m) => m.id === publicDefault) ? publicDefault : "x-ai/grok-voice-tts-1.0";
 
 export function getTtsModel(id: string): TtsModelInfo | undefined {
   return TTS_MODELS.find((m) => m.id === id);
@@ -163,6 +194,11 @@ export function ttsVoices(id: string): string[] {
   const m = getTtsModel(id);
   if (m?.voices?.length) return m.voices;
   return m?.defaultVoice ? [m.defaultVoice] : [];
+}
+
+/** A voice's display name (ElevenLabs ids carry a label; Grok voices are their own names). */
+export function ttsVoiceLabel(modelId: string, voice: string): string {
+  return getTtsModel(modelId)?.voiceLabels?.[voice] ?? voice;
 }
 
 // ----------------------------------------------------------------------------

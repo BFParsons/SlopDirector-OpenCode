@@ -180,6 +180,13 @@ pnpm db:generate       # IMPORTANT: restore the Postgres client afterwards for w
 | `DATABASE_URL` | Prisma | dev: `postgresql://…@localhost:5434/slopstudio_pro` |
 | `WORKER_ENABLED` | job worker | `"true"` to run the render worker in-process (dev + desktop) |
 | `OPENROUTER_API_KEY` | AI generation | only for the LLM/video/TTS pipeline |
+| `ELEVENLABS_API_KEY` | narration | when set, ElevenLabs becomes the default narrator for the Voiceover panel, the TTS job and MCP `generate_narration` (`src/lib/tts/synthesize.ts`) |
+| `ELEVENLABS_VOICE_ID` | narration | the house voice id (default: the catalogue's "British Guy Documentary", `mliUAyOykvIlRkwruosy`) |
+| `ELEVENLABS_MODEL_ID` / `_STYLE_TAG` | narration | `eleven_v3`; the v3 audio tag prepended to each take (`[serious]`; `""` disables) |
+| `ELEVENLABS_STABILITY` / `_SIMILARITY` / `_SPEED` | narration | voice settings, default 0.5 / 0.8 / 1 |
+| `ELEVENLABS_CONDITION` | narration | ffmpeg filters applied to each take → 48 kHz mono WAV (default `highpass=f=65,loudnorm=I=-16:TP=-2:LRA=7`) |
+| `SLOPSTUDIO_TTS_MODEL` / `_VOICE` | narration | pin the default explicitly to a catalogue model id and one of its voices |
+| `NEXT_PUBLIC_DEFAULT_TTS_MODEL` | UI | build-time default for the model pickers when creating a project |
 | `SLOPSTUDIO_FFMPEG_PATH` / `_DIR` | ffmpeg resolver | override the binary; else PATH |
 | `SLOPSTUDIO_PYTHON` | Audio Studio | path to the Python interpreter (default `python3`) |
 | `SLOPSTUDIO_DEMUCS_ARGV` | Audio Studio | JSON array overriding the demucs argv prefix |

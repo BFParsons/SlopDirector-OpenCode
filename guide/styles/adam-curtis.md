@@ -45,7 +45,7 @@ A story about power, told over other people's footage. The narrator is calm and 
 - Openings: "This is a story about…", "At the same time…", "What nobody noticed was…". Turns: "But then something strange happened.", "But it didn't work out like that." Consequences: "And out of that came…".
 - 60–95 words a minute for the long-form essay, delivered slowly and evenly, no questions or adjectives of judgement. Budget the meaningful pauses separately from speaking time. For shorter trailers, use a natural delivery pace and protect the chosen pauses rather than mechanically inserting 5–15 s after every paragraph.
 - Split narration at the selected statements and place the next clip after the reserved hold. Recheck timings against the recorded takes. When writing the script, reduce words to fit the speech budget; when the user supplied a verbatim script and fixed runtime, flag any conflict in the plan instead of silently removing the holds or speeding up the voice.
-- Voice: measured, English, unhurried (`generate_narration` voice sal or leo; never a "documentary announcer").
+- Voice: measured, English, unhurried; never a "documentary announcer". Call `generate_narration` with **no voice and no ttsModel**: the server supplies the house narrator (the ElevenLabs "British Guy Documentary" voice on eleven_v3 wherever `ELEVENLABS_API_KEY` is configured — every Curtis film since September 2026 uses it). Only where ElevenLabs is not configured does the fallback apply (Grok voice sal or leo).
 
 ## Sound
 

@@ -18,6 +18,32 @@ const schema = z.object({
   OPENROUTER_BASE_URL: z.string().default("https://openrouter.ai/api/v1"),
   OPENROUTER_WEBHOOK_SECRET: z.string().optional(),
 
+  // Narration (TTS). The house narrator: when ELEVENLABS_API_KEY is set the
+  // server's default TTS model becomes ElevenLabs, voiced by ELEVENLABS_VOICE_ID
+  // (see src/lib/tts/synthesize.ts). SLOPSTUDIO_TTS_MODEL / _VOICE pin the
+  // default explicitly (a model id from src/config/models.ts and one of its voices).
+  ELEVENLABS_API_KEY: z.string().optional(),
+  ELEVENLABS_VOICE_ID: z.string().optional(),
+  ELEVENLABS_MODEL_ID: z.string().default("eleven_v3"),
+  // A v3 audio tag prepended to every take unless the text already opens with one; "" disables.
+  ELEVENLABS_STYLE_TAG: z.string().default("[serious]"),
+  ELEVENLABS_STABILITY: z
+    .string()
+    .optional()
+    .transform((v) => (v ? Number(v) : 0.5)),
+  ELEVENLABS_SIMILARITY: z
+    .string()
+    .optional()
+    .transform((v) => (v ? Number(v) : 0.8)),
+  ELEVENLABS_SPEED: z
+    .string()
+    .optional()
+    .transform((v) => (v ? Number(v) : 1)),
+  // ffmpeg audio filter chain applied to every ElevenLabs take before it is filed (48 kHz mono WAV).
+  ELEVENLABS_CONDITION: z.string().default("highpass=f=65,loudnorm=I=-16:TP=-2:LRA=7"),
+  SLOPSTUDIO_TTS_MODEL: z.string().optional(),
+  SLOPSTUDIO_TTS_VOICE: z.string().optional(),
+
   // Auth / crypto
   AUTH_SECRET: z.string().optional(),
 

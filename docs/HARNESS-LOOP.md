@@ -121,6 +121,27 @@ Nothing is sourced or cut before approval.
 For a **targeted edit to an existing project**, use its saved brief, plan and the person's
 request; do not restart the full interview. **Create a checkpoint before changing the cut.**
 
+## The narrator's voice
+
+The voice is decided once, on the server, so every host gets the same narrator:
+`src/lib/tts/synthesize.ts` resolves the provider and voice for the Voiceover panel, the
+TTS_FROM_SCRIPT job and the MCP `generate_narration` tool alike.
+
+1. An explicit `ttsModel` / `voice` from the caller wins — use it only when the person asks
+   for a particular voice.
+2. Otherwise `SLOPSTUDIO_TTS_MODEL` / `SLOPSTUDIO_TTS_VOICE` from `.env`.
+3. Otherwise **ElevenLabs** when `ELEVENLABS_API_KEY` is set — the house narrator
+   ("British Guy Documentary", `ELEVENLABS_VOICE_ID`, model `eleven_v3`, delivery steered by
+   the `ELEVENLABS_STYLE_TAG` audio tag, default `[serious]`; each take is conditioned to
+   48 kHz mono WAV with `ELEVENLABS_CONDITION`, a 65 Hz high-pass and a −16 LUFS normalise).
+4. Otherwise Grok Voice through OpenRouter (voices ara, eve, rex, sal, leo; honours
+   `instructions`).
+
+So: call `generate_narration` with the text and `offsetS` and nothing else. A Grok voice
+name given while ElevenLabs is the default is not an error; the house voice is used. An
+ElevenLabs take that overruns its slot is rewritten shorter and generated again; nothing
+time-stretches it. The catalogue of models and voices is `src/config/models.ts`.
+
 ## The editing loop
 
 1. Follow [`guide/RULES.md`](../guide/RULES.md) at all times (it is also embedded in the

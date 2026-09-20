@@ -433,17 +433,17 @@ Step-by-step procedure (tools + the guide's rules) for a common job. Names: see 
 
 ### `generate_narration`
 
-Synthesize one narrator line with the TTS model and place it on the timeline as an audio-only clip at offsetS (audible, ducks the music, levelled with volume). One call per line: an ad's six lines become six clips you can move and level separately. Costs credits (~$0.015 per 1k characters). Returns the clip id + duration and the updated project. (The raw route only files the clip in the media bucket, where the render and the checks never see it — this tool puts it on the timeline.)
+Synthesize one narrator line with the server's default narrator and place it on the timeline as an audio-only clip at offsetS (audible, ducks the music, levelled with volume). Leave voice and ttsModel unset to get the house voice: on a machine with ELEVENLABS_API_KEY that is ElevenLabs eleven_v3 with the configured documentary narrator (delivery steered by a v3 audio tag; `instructions` are not sent to it), otherwise Grok Voice via OpenRouter (which does honor `instructions`). One call per line: an ad's six lines become six clips you can move and level separately. Costs credits (ElevenLabs ~$0.30, Grok ~$0.015 per 1k characters). Returns the clip id + duration and the updated project. (The raw route only files the clip in the media bucket, where the render and the checks never see it — this tool puts it on the timeline.)
 
 | Parameter | Type | Notes |
 |---|---|---|
 | `projectId` | string | required |
 | `text` | string | required |
 | `offsetS` | number | required; timeline second the line starts |
-| `voice` | string | optional; ara | eve | rex | sal | leo (Grok Voice TTS); default rex |
-| `instructions` | string | optional; delivery notes the model may honor: pace, tone, mood |
+| `voice` | string | optional; leave unset for the house voice. ElevenLabs: a voice id; Grok: ara, eve, rex, sal, leo. A voice from the other provider falls back to its default |
+| `instructions` | string | optional; delivery notes the model may honor: pace, tone, mood (ignored by ElevenLabs v3) |
 | `volume` | number | optional; gain on the clip (1 = as synthesized) |
-| `ttsModel` | string | optional |
+| `ttsModel` | string | optional; `elevenlabs/eleven_v3` or `x-ai/grok-voice-tts-1.0`; default: the server's configured narrator |
 
 ### `draft_result`
 

@@ -109,6 +109,13 @@ source concurrently, but **timeline mutations must stay coordinated** — one wr
 time. The plain tools (`source_clips`, `generate_ai_shots`, `generate_narration`) remain
 available when a subagent is more machinery than the job needs.
 
+**The narrator's voice is the server's decision, not the agent's.** Call
+`generate_narration` without `voice` or `ttsModel`; the app resolves the house narrator
+(`src/lib/tts/synthesize.ts`): the ElevenLabs "British Guy Documentary" voice on eleven_v3
+wherever `ELEVENLABS_API_KEY` is configured, otherwise Grok Voice through OpenRouter. Pass a
+voice only when the person asks for a different one. Details in
+[`docs/HARNESS-LOOP.md`](docs/HARNESS-LOOP.md#the-narrators-voice).
+
 ## The editing loop
 
 1. Follow [`guide/RULES.md`](guide/RULES.md) at all times.

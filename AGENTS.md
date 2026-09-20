@@ -104,7 +104,11 @@ Nothing is sourced or cut before approval. Full detail in
    these tasks itself**; the definitions in `.claude/agents/` are Claude Code's fan-out, not
    a dependency of this harness. Use subagents only where the host and the task instructions
    allow. Concurrent scouts may inspect and source independently, but **keep timeline
-   mutations coordinated**.
+   mutations coordinated**. Call `generate_narration` **without `voice` or `ttsModel`**:
+   the server supplies the house narrator (ElevenLabs "British Guy Documentary" on
+   eleven_v3 wherever `ELEVENLABS_API_KEY` is configured, else Grok Voice via OpenRouter);
+   name a voice only when the person asks for another — see
+   `docs/HARNESS-LOOP.md#the-narrators-voice`.
 7. **Cut and verify**, show the draft for feedback, then render the final.
 
 For a targeted edit to an existing project, use its saved brief and plan rather than

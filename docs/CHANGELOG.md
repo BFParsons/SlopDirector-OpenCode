@@ -3,6 +3,25 @@
 Notable changes, newest first. See [DEPENDENCIES.md](DEPENDENCIES.md) for setup and
 [AUDIO_STUDIO.md](AUDIO_STUDIO.md) for the audio workspace.
 
+## 2026-09-19 — ElevenLabs as the house narrator
+
+- Add an ElevenLabs TTS provider (`src/lib/tts/elevenlabs.ts`): eleven_v3 by voice id, a v3
+  audio tag prepended for delivery (`ELEVENLABS_STYLE_TAG`, default `[serious]`), each take
+  conditioned through ffmpeg to 48 kHz mono WAV (`ELEVENLABS_CONDITION`). No time
+  stretching. Errors surface as upstream-provider errors like OpenRouter's.
+- One resolver for the narrator (`src/lib/tts/synthesize.ts`), used by the Voiceover panel
+  route, the TTS_FROM_SCRIPT job and MCP `generate_narration`: explicit model/voice wins,
+  then `SLOPSTUDIO_TTS_MODEL`/`_VOICE`, then ElevenLabs when `ELEVENLABS_API_KEY` is set,
+  else Grok Voice via OpenRouter. A voice name from the other provider falls back to that
+  provider's default instead of failing.
+- `generate_narration` and the voiceover route no longer default to Grok `rex` in the
+  client: `ttsModel` and `voice` are optional and the server decides. The catalogue
+  (`src/config/models.ts`) gains a `provider` field, the ElevenLabs entry with the
+  "British Guy Documentary" and George voices, voice labels for the pickers, and a
+  build-time `NEXT_PUBLIC_DEFAULT_TTS_MODEL`.
+- Docs: HARNESS-LOOP "The narrator's voice", mirrored in CLAUDE.md and AGENTS.md; the Curtis
+  style now asks for the house voice rather than Grok sal/leo; DEPENDENCIES lists the env.
+
 ## 2026-09-14 — Craft records for the three hand-written references
 
 - Add research records for Adam Curtis, Anaïs Bimpel and AV Squad, derived from their

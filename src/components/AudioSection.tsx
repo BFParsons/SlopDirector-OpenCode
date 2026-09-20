@@ -230,7 +230,7 @@ export function AudioSection({
               </Select>
             </div>
             <div>
-              <Label hint="e.g. ara, eve, rex, sal, leo">Voice</Label>
+              <Label hint="blank = the house narrator; ElevenLabs: a voice id; Grok: ara, eve, rex, sal, leo">Voice</Label>
               <Input
                 value={draft.ttsVoice}
                 disabled={readOnly}
