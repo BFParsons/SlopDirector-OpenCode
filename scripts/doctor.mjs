@@ -42,7 +42,8 @@ check("FFprobe", binary("ffprobe"), ["-version"]);
   // Titles and captions need drawtext (libfreetype) and ass (libass). Homebrew's ffmpeg
   // ships without either; the static build from scripts/fetch-ffmpeg.sh has both.
   const filters = spawnSync(binary("ffmpeg"), ["-hide_banner", "-filters"], { encoding: "utf8", windowsHide: true, timeout: 20000 });
-  const has = (f) => filters.status === 0 && new RegExp("^\s*\S+\s+" + f + "\s", "m").test(filters.stdout);
+  // `ffmpeg -filters` lines look like " T.C drawtext          V->V  Draw text ...": flags, name.
+  const has = (f) => filters.status === 0 && new RegExp("^[ ]*[^ ]+[ ]+" + f + "[ ]", "m").test(filters.stdout);
   const missing = ["drawtext", "ass"].filter((f) => !has(f));
   const hint = process.platform === "darwin" ? "run bash scripts/fetch-ffmpeg.sh (Homebrew's ffmpeg lacks libfreetype/libass)" : process.platform === "win32" ? "run scripts/fetch-ffmpeg.ps1 or install a full ffmpeg build" : "install an ffmpeg built with libfreetype and libass, or run bash scripts/fetch-ffmpeg.sh";
   report("FFmpeg filters", missing.length === 0, missing.length ? `missing ${missing.join(", ")}: ${hint}` : `drawtext + ass (${binary("ffmpeg")})`);
