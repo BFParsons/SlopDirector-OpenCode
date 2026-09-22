@@ -32,6 +32,12 @@ export function localEnvironment() {
   };
   const venvPython = join(ROOT, ".venv", process.platform === "win32" ? "Scripts/python.exe" : "bin/python");
   if (!env.SLOPSTUDIO_PYTHON && existsSync(venvPython)) env.SLOPSTUDIO_PYTHON = venvPython;
+  // vendor/ffmpeg (filled by scripts/fetch-ffmpeg.sh|.ps1) beats PATH: the standalone server
+  // chdirs into .next/standalone, so the resolver's cwd-based fallback cannot see it from
+  // there. On macOS this is the supported ffmpeg — Homebrew's lacks drawtext/ass.
+  const vendorFfmpeg = join(ROOT, "vendor", "ffmpeg");
+  const exe = process.platform === "win32" ? ".exe" : "";
+  if (!env.SLOPSTUDIO_FFMPEG_DIR && !env.SLOPSTUDIO_FFMPEG_PATH && ["ffmpeg", "ffprobe"].every((n) => existsSync(join(vendorFfmpeg, n + exe)))) env.SLOPSTUDIO_FFMPEG_DIR = vendorFfmpeg;
   if (env.SLOPSTUDIO_DB !== "sqlite" || !env.DATABASE_URL.startsWith("file:")) {
     throw new Error("Local desktop launch requires SQLite. Use pnpm dev for PostgreSQL, or update the desktop settings in .env.");
   }

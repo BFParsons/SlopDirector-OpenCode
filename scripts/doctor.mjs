@@ -30,9 +30,23 @@ try {
   const installed = existsSync(join(dir, "dist", readFileSync(join(dir, "path.txt"), "utf8").trim()));
   report("Electron", installed, installed ? "desktop runtime" : "run node node_modules/electron/install.js");
 } catch { report("Electron", false, "run node node_modules/electron/install.js"); }
-const binary = (name) => process.env[`SLOPSTUDIO_${name.toUpperCase()}_PATH`] || (process.env.SLOPSTUDIO_FFMPEG_DIR ? join(process.env.SLOPSTUDIO_FFMPEG_DIR, name + (process.platform === "win32" ? ".exe" : "")) : name);
+// Same order as src/lib/ffmpeg/binary.ts: explicit path, SLOPSTUDIO_FFMPEG_DIR, the
+// vendor/ffmpeg the fetch scripts fill, then PATH.
+const exe = process.platform === "win32" ? ".exe" : "";
+const vendor = join(ROOT, "vendor", "ffmpeg");
+const vendored = ["ffmpeg", "ffprobe"].every((n) => existsSync(join(vendor, n + exe)));
+const binary = (name) => process.env[`SLOPSTUDIO_${name.toUpperCase()}_PATH`] || (process.env.SLOPSTUDIO_FFMPEG_DIR ? join(process.env.SLOPSTUDIO_FFMPEG_DIR, name + exe) : vendored ? join(vendor, name + exe) : name);
 check("FFmpeg", binary("ffmpeg"), ["-version"]);
 check("FFprobe", binary("ffprobe"), ["-version"]);
+{
+  // Titles and captions need drawtext (libfreetype) and ass (libass). Homebrew's ffmpeg
+  // ships without either; the static build from scripts/fetch-ffmpeg.sh has both.
+  const filters = spawnSync(binary("ffmpeg"), ["-hide_banner", "-filters"], { encoding: "utf8", windowsHide: true, timeout: 20000 });
+  const has = (f) => filters.status === 0 && new RegExp("^\s*\S+\s+" + f + "\s", "m").test(filters.stdout);
+  const missing = ["drawtext", "ass"].filter((f) => !has(f));
+  const hint = process.platform === "darwin" ? "run bash scripts/fetch-ffmpeg.sh (Homebrew's ffmpeg lacks libfreetype/libass)" : process.platform === "win32" ? "run scripts/fetch-ffmpeg.ps1 or install a full ffmpeg build" : "install an ffmpeg built with libfreetype and libass, or run bash scripts/fetch-ffmpeg.sh";
+  report("FFmpeg filters", missing.length === 0, missing.length ? `missing ${missing.join(", ")}: ${hint}` : `drawtext + ass (${binary("ffmpeg")})`);
+}
 check("YouTube import", process.env.YTDLP_BIN || "yt-dlp", ["--version"], true);
 check("YouTube JS runtime", "deno", ["--version"], true);
 const venv = join(ROOT, ".venv", process.platform === "win32" ? "Scripts/python.exe" : "bin/python");

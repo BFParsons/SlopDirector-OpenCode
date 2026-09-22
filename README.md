@@ -53,11 +53,12 @@ to claim it listened to something it did not listen to. These are load-bearing r
 ## Quick start (macOS + OpenCode)
 
 ```sh
-brew install node@24 ffmpeg yt-dlp git
+brew install node@24 yt-dlp git
 corepack enable
 
 git clone https://github.com/BFParsons/SlopDirector-OpenCode.git
 cd SlopDirector-OpenCode
+bash scripts/fetch-ffmpeg.sh          # a static ffmpeg WITH drawtext + libass (Homebrew's has neither)
 corepack pnpm install --frozen-lockfile
 corepack pnpm doctor              # tells you what you forgot
 corepack pnpm desktop:prod        # the editor opens; first launch builds the server
@@ -121,6 +122,10 @@ The long version, including the optional Demucs/Whisper audio stack and how to p
 - **No VideoToolbox yet.** The renderer knows NVENC, QSV and VAAPI. On a Mac it falls back to
   software x264, which is correct and merely slower. Adding `h264_videotoolbox` is the
   obvious first pull request.
+- **Homebrew's ffmpeg is not enough.** Its current formula is built without libfreetype and
+  libass, so `drawtext` and `ass` do not exist and every title and caption fails. The fetch
+  script above drops a full static build into `vendor/ffmpeg/`, which the app prefers
+  automatically. `corepack pnpm doctor` will tell you if you skipped this.
 - **YouTube is YouTube.** Sourcing uses `yt-dlp`. Reusing film clips with embedded music will
   fail `check_soundtrack`, on purpose. Clean dialogue or stem separation or pick another shot.
 - **It is called SlopStudio.** The name predates the harness and has been kept out of

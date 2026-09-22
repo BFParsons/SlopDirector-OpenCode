@@ -16,7 +16,7 @@ Install the tools with Homebrew, then enable corepack so `corepack pnpm` picks u
 pinned pnpm from `package.json`:
 
 ```sh
-brew install node@24 ffmpeg yt-dlp git
+brew install node@24 yt-dlp git
 brew link --overwrite node@24        # or use mise / nvm; Node 22–24 are accepted, 26 is not
 corepack enable
 ```
@@ -26,11 +26,12 @@ Node 22 through 25. **Not Node 26** — Electron's postinstall silently fails to
 binary there. If you use [mise](https://mise.jdx.dev), `mise install` in the checkout does
 the Node + pnpm part for you.
 
-Clone and install:
+Clone, fetch ffmpeg, install:
 
 ```sh
 git clone https://github.com/BFParsons/SlopDirector-OpenCode.git
 cd SlopDirector-OpenCode
+bash scripts/fetch-ffmpeg.sh
 corepack pnpm install --frozen-lockfile
 corepack pnpm doctor
 corepack pnpm desktop:prod
@@ -41,8 +42,16 @@ then opens the Electron window. Subsequent launches reuse the build. For active 
 use `corepack pnpm desktop:dev`; for no window at all, `corepack pnpm serve:headless` and
 open `http://127.0.0.1:38473/start`. All three bind **127.0.0.1:38473**, the MCP default.
 
-`doctor` checks Node, ffmpeg/ffprobe, yt-dlp, the Electron binary and the generated Prisma
-client. If it complains about Electron, run `node node_modules/electron/install.js` once —
+**Why not `brew install ffmpeg`?** Homebrew's formula (9.0.x as of Sep 2026) is built without
+libfreetype, fontconfig, harfbuzz and libass, so its ffmpeg has **no `drawtext` and no `ass`
+filter** — every title card and burned-in caption fails with `No such filter: 'drawtext'`.
+`scripts/fetch-ffmpeg.sh` downloads a full static build (ffmpeg.martin-riedl.de, arm64 or
+Intel, includes both) into `vendor/ffmpeg/`, and the app prefers that directory over PATH
+whenever both binaries are present — no env var needed. To use another ffmpeg, set
+`SLOPSTUDIO_FFMPEG_DIR` in `.env`; `doctor` checks that whichever one wins has both filters.
+
+`doctor` checks Node, ffmpeg/ffprobe and their filters, yt-dlp, the Electron binary and the
+generated Prisma client. If it complains about Electron, run `node node_modules/electron/install.js` once —
 the download is large and Homebrew-network flakiness sometimes truncates it.
 
 ### Optional: the Audio Studio (Demucs stems + Whisper captions)
@@ -117,8 +126,8 @@ your own Developer ID by setting `CSC_LINK`/`CSC_KEY_PASSWORD` and removing the 
 override in `package.json`.
 
 A packaged app started from Finder inherits a minimal PATH; `electron/main.js` adds
-`/opt/homebrew/bin` and `/usr/local/bin` so Homebrew `yt-dlp` and, when the bundled copy is
-absent, Homebrew `ffmpeg` still resolve.
+`/opt/homebrew/bin` and `/usr/local/bin` so Homebrew `yt-dlp` still resolves (the bundled
+ffmpeg is used regardless).
 
 ## What is different on a Mac
 

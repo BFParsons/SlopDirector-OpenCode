@@ -75,12 +75,17 @@ function startServer() {
   // Point the ffmpeg resolver at a bundled binary ONLY if it actually exists;
   // otherwise leave SLOPSTUDIO_FFMPEG_DIR unset so the resolver falls back to the
   // system ffmpeg on PATH.
-  const bundledFfmpegDir =
-    process.env.SLOPSTUDIO_FFMPEG_DIR || path.join(process.resourcesPath || "", "ffmpeg");
+  // Candidates in order: an explicit env, the packaged resources/ffmpeg, and — when running
+  // unpackaged — the repo's vendor/ffmpeg that scripts/fetch-ffmpeg.{sh,ps1} fill (the
+  // supported route on macOS, where Homebrew's ffmpeg has no drawtext/ass filters).
   const exe = process.platform === "win32" ? ".exe" : "";
-  const ffmpegEnv = ["ffmpeg", "ffprobe"].every((name) => fs.existsSync(path.join(bundledFfmpegDir, name + exe)))
-    ? { SLOPSTUDIO_FFMPEG_DIR: bundledFfmpegDir }
-    : {};
+  const holdsBoth = (dir) => !!dir && ["ffmpeg", "ffprobe"].every((name) => fs.existsSync(path.join(dir, name + exe)));
+  const bundledFfmpegDir = [
+    process.env.SLOPSTUDIO_FFMPEG_DIR,
+    path.join(process.resourcesPath || "", "ffmpeg"),
+    app.isPackaged ? null : path.join(__dirname, "..", "vendor", "ffmpeg"),
+  ].find(holdsBoth);
+  const ffmpegEnv = bundledFfmpegDir ? { SLOPSTUDIO_FFMPEG_DIR: bundledFfmpegDir } : {};
 
   // A .app opened from Finder inherits launchd's minimal PATH, which has no Homebrew
   // bin dir; add them so `ffmpeg`, `ffprobe` and `yt-dlp` on PATH still resolve.

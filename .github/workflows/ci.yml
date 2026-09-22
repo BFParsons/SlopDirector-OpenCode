@@ -41,9 +41,13 @@ jobs:
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y ffmpeg
 
+      # Not `brew install ffmpeg`: Homebrew's formula is built without libfreetype and
+      # libass, so it has no drawtext or ass filter and the titles/captions test fails
+      # with "No such filter: 'drawtext'". The static build the .app bundles has both;
+      # src/lib/ffmpeg/binary.ts picks vendor/ffmpeg up without any env var.
       - name: Install FFmpeg (macOS)
         if: runner.os == 'macOS'
-        run: brew install ffmpeg
+        run: bash scripts/fetch-ffmpeg.sh
 
       - name: Install FFmpeg (Windows)
         if: runner.os == 'Windows'
