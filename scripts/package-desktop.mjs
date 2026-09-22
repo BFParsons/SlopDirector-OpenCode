@@ -1,6 +1,6 @@
 // electron-builder invokes `pnpm list` itself. Corepack users may have no global
 // pnpm shim; give this build a local shim pointing to the pnpm that launched it.
-import { cpSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { chmodSync, cpSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { delimiter, dirname, join } from "node:path";
 import { ROOT, require, run } from "./local-runtime.mjs";
@@ -31,6 +31,20 @@ try {
     const prismaRequire = createRequire(require.resolve("@prisma/client"));
     const client = dirname(prismaRequire.resolve(".prisma/client/package.json"));
     cpSync(client, join(runtime, "node_modules", ".prisma", "client"), { recursive: true });
+  } else {
+    // macOS / Linux: same idea, a POSIX shim. Without it `corepack pnpm desktop:build:mac`
+    // fails inside electron-builder on a machine that never ran `corepack enable`.
+    const pnpmEntry = env.npm_execpath;
+    if (pnpmEntry && existsSync(pnpmEntry)) {
+      const bin = join(ROOT, ".data", "package-bin");
+      mkdirSync(bin, { recursive: true });
+      const shim = join(bin, "pnpm");
+      writeFileSync(shim, `#!/bin/sh
+exec "${process.execPath}" "${pnpmEntry}" "$@"
+`);
+      chmodSync(shim, 0o755);
+      env.PATH = bin + delimiter + (env.PATH || "");
+    }
   }
   await run(require.resolve("electron-builder/cli.js"), process.argv.slice(2), env);
 } catch (error) {

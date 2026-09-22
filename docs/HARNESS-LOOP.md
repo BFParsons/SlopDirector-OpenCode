@@ -4,7 +4,7 @@ This is the **single source of truth** for how an agent drives SlopStudio throug
 MCP server. It is written for no particular host.
 
 - **Claude Code** reads [`CLAUDE.md`](../CLAUDE.md).
-- **Codex and other MCP clients** read [`AGENTS.md`](../AGENTS.md).
+- **OpenCode, Codex and other MCP clients** read [`AGENTS.md`](../AGENTS.md) (OpenCode also loads this file through `opencode.json`).
 
 Those two files carry the same loop in their own host's idiom — how to ask a question,
 how to register the server, whether subagents exist. **When the loop itself changes,
@@ -173,7 +173,7 @@ limits, and saying so is part of the report.
 
 Setup and dependencies: [`docs/DEPENDENCIES.md`](DEPENDENCIES.md). Routes:
 [`docs/AGENT-API.md`](AGENT-API.md). History: [`docs/CHANGELOG.md`](CHANGELOG.md).
-Windows and Codex specifics: [`docs/WINDOWS-CODEX.md`](WINDOWS-CODEX.md).
+Windows and Codex specifics: [`docs/WINDOWS-CODEX.md`](WINDOWS-CODEX.md). macOS and OpenCode: [`docs/MAC-OPENCODE.md`](MAC-OPENCODE.md).
 
 ```
 corepack pnpm exec tsc --noEmit -p tsconfig.json   # type-check
@@ -194,4 +194,4 @@ Tests import the Prisma client. The desktop launchers generate it, so in a fresh
 checkout that has not been launched yet, run `corepack pnpm db:sqlite:generate` first.
 
 **Never push to the upstream `slopstudio-pro` repository.** This repository's remote is
-`BFParsons/SlopDirector`.
+`BFParsons/SlopDirector-OpenCode` (`upstream` = `BFParsons/SlopDirector`, pull only).

@@ -1,22 +1,34 @@
-# SlopStudio — notes for Codex and other MCP clients
+# SlopStudio — notes for OpenCode, Codex and other MCP clients
 
 SlopStudio is an Electron + Next.js video editor with an ffmpeg engine and an MCP server
-that lets an agent edit video in the running app. This file is the brief for **Codex and
-any other MCP client**.
+that lets an agent edit video in the running app. This file is the brief for **OpenCode**
+(the primary host of this fork), **Codex, and any other MCP client**.
 
 The loop itself — interview, plan, approval, cut, verify — is canonical in
-**[`docs/HARNESS-LOOP.md`](docs/HARNESS-LOOP.md)**. Read that for the full detail. This
-file covers what is specific to this class of host, and repeats enough of the loop to work
-from. `CLAUDE.md` is the same loop for Claude Code; when the loop changes, change
-`docs/HARNESS-LOOP.md` first and reflect it in both.
+**[`docs/HARNESS-LOOP.md`](docs/HARNESS-LOOP.md)**. Read that for the full detail
+(OpenCode loads it automatically through `opencode.json`). This file covers what is
+specific to this class of host, and repeats enough of the loop to work from. `CLAUDE.md`
+is the same loop for Claude Code; when the loop changes, change `docs/HARNESS-LOOP.md`
+first and reflect it in both.
 
 ## Connecting
 
-Run `corepack pnpm codex:setup` once, then open and **trust** this repository in Codex.
+**OpenCode: no setup step.** [`opencode.json`](opencode.json) registers the server for any
+OpenCode session opened in this repository — it runs `node mcp/run.cjs` against
+`http://127.0.0.1:38473` and labels the work `OpenCode` in the editor's Agent panel. The
+slash commands in [`.opencode/commands/`](.opencode/commands/) and the subagents in
+[`.opencode/agents/`](.opencode/agents/) load with it. Mac setup, end to end:
+[`docs/MAC-OPENCODE.md`](docs/MAC-OPENCODE.md).
+
+**Codex:** run `corepack pnpm codex:setup` once, then open and **trust** this repository.
 Setup writes an ignored `.codex/config.toml` with the absolute Node and `mcp/run.cjs`
 paths, the server URL, a 600-second tool timeout and the agent label `Codex`. Run it again
-after moving the checkout. Full instructions, including the Windows install and a global
-(non-project) registration: [`docs/WINDOWS-CODEX.md`](docs/WINDOWS-CODEX.md).
+after moving the checkout. Windows details: [`docs/WINDOWS-CODEX.md`](docs/WINDOWS-CODEX.md).
+
+**Any other client:** the stdio entry is `node <absolute-repo-path>/mcp/run.cjs` with
+`SLOPSTUDIO_URL` and `SLOPSTUDIO_AGENT_NAME` in its environment — see
+[`mcp/README.md`](mcp/README.md). **Do not** launch a `.cmd` or a Unix
+`node_modules/.bin/tsx` shim from an MCP configuration.
 
 The **app must be running** before any tool works:
 
@@ -26,9 +38,8 @@ corepack pnpm desktop:dev       # Electron window with HMR
 corepack pnpm serve:headless    # no window — http://127.0.0.1:38473/start
 ```
 
-The stdio entry is `node <absolute-repo-path>/mcp/run.cjs`. **Do not** launch a `.cmd` or a
-Unix `node_modules/.bin/tsx` shim from an MCP configuration. On Windows use the native Node
-launchers; do not set a global Bash `script-shell`.
+On Windows these are native Node/PowerShell launchers; do not set a global Bash
+`script-shell`.
 
 After changing MCP code, the registry or guide files, verify through a **fresh MCP
 connection** — a running stdio process retains old modules and guide text. If the host
@@ -38,13 +49,15 @@ the desktop app when its bundled API code changes.
 
 ## Asking the person questions
 
-Use `request_user_input_async` where the host offers it; use `request_user_input` only in a
-mode that permits it. Otherwise ask one question in chat.
+In **OpenCode** use the built-in **`question`** tool for the interview — it is the reason
+the one-question-at-a-time flow feels right. In **Codex** use `request_user_input_async`
+where the host offers it, `request_user_input` only in a mode that permits it. Otherwise
+ask one question in chat.
 
 - 2–4 short choices within the host's actual option limit, the **recommended one first**,
   preferably the options the tool supplied.
 - Map labels to **option values** — never store a label where an enum value belongs.
-- **Do not add "Other"** when the host already provides free text.
+- **Do not add "Other"** — OpenCode and Codex already let the person type a custom answer.
 - For `multiSelect`, collect an array; use comma-separated free text if the UI cannot
   select several choices.
 - Free text suits the subject, an original script or shot list, scene context, or a custom
@@ -53,9 +66,21 @@ mode that permits it. Otherwise ask one question in chat.
 A pending question, a preselected default, a timeout or silence is **never** an answer, and
 interview answers never stand in for plan approval.
 
-**MCP prompts are optional here.** Call `interview_batch` and the other tools directly even
-when the host does not expose the `interview`, `preproduction`, `edit_video` or `playbook`
-prompts.
+## Slash commands (OpenCode)
+
+OpenCode does not surface the server's MCP prompts, so the same entry points are project
+commands in [`.opencode/commands/`](.opencode/commands/):
+
+| command | what it does |
+|---|---|
+| `/interview <request>` | runs pre-production: cached queue, one question at a time, then `set_brief` |
+| `/preproduction <projectId>` | authors the plan from the brief, checks it, shows the document, waits for the yes |
+| `/edit-video <projectId> <goal>` | the cut-and-verify loop on an existing project |
+| `/playbook <name>` | loads a named playbook |
+
+They are optional — `interview_batch` and the other tools work directly — but prefer them
+when starting a new piece; they carry the current guidance without you restating it. In
+Codex and other hosts the MCP prompts are likewise optional: call the tools directly.
 
 ## A new composition
 
@@ -99,21 +124,40 @@ Nothing is sourced or cut before approval. Full detail in
    complete document, including any paid generation, and obtain approval for **that
    specific plan**. Call `approve_plan` only then; an approval already given in this
    conversation counts. Film-plan approval does not cover routine repository changes.
-6. **Fan out** — `plan_tasks` describes the dependencies. Source and import permitted media,
-   generate approved AI shots and narration where configured, then assemble. **Codex can do
-   these tasks itself**; the definitions in `.claude/agents/` are Claude Code's fan-out, not
-   a dependency of this harness. Use subagents only where the host and the task instructions
-   allow. Concurrent scouts may inspect and source independently, but **keep timeline
-   mutations coordinated**. Call `generate_narration` **without `voice` or `ttsModel`**:
-   the server supplies the house narrator (ElevenLabs "British Guy Documentary" on
-   eleven_v3 wherever `ELEVENLABS_API_KEY` is configured, else Grok Voice via OpenRouter);
-   name a voice only when the person asks for another — see
-   `docs/HARNESS-LOOP.md#the-narrators-voice`.
+6. **Fan out** — see below.
 7. **Cut and verify**, show the draft for feedback, then render the final.
 
 For a targeted edit to an existing project, use its saved brief and plan rather than
 restarting the interview. **`create_checkpoint` before changing the cut.** Follow activity
-tagged `Codex` in the editor's Agent panel (**Panel → Viewer → Agent**).
+tagged with your agent name in the editor's Agent panel (**Panel → Viewer → Agent**).
+
+## Subagents — the fan-out after approval
+
+`plan_tasks` describes the dependencies. In **OpenCode** the definitions in
+[`.opencode/agents/`](.opencode/agents/) are the fan-out (they mirror Claude Code's
+`.claude/agents/`, restricted to the `slopstudio_*` tools each job needs):
+
+| subagent | job |
+|---|---|
+| `clip-scout` | find and source the clips on the clip list |
+| `narrator` | write and synthesize the narration |
+| `shot-picker` | choose the takes and moments from sourced material |
+
+Delegate the independent tasks in `parallelNow` through the `task` tool in one turn. They
+may inspect and source concurrently, but **timeline mutations must stay coordinated** —
+one writer at a time, and that writer is you. The plain tools (`source_clips`,
+`generate_ai_shots`, `generate_narration`) remain available when a subagent is more
+machinery than the job needs.
+
+**Codex and other hosts can do these tasks themselves**; the subagent definitions are not
+a dependency of this harness. Use subagents only where the host and the task instructions
+allow.
+
+**The narrator's voice is the server's decision, not the agent's.** Call
+`generate_narration` **without `voice` or `ttsModel`**; the app resolves the house narrator
+(`src/lib/tts/synthesize.ts`): ElevenLabs on eleven_v3 wherever `ELEVENLABS_API_KEY` is
+configured, otherwise Grok Voice through OpenRouter. Name a voice only when the person
+asks for another — see [`docs/HARNESS-LOOP.md`](docs/HARNESS-LOOP.md#the-narrators-voice).
 
 ## The editing loop
 
@@ -138,7 +182,8 @@ have listened to audio or inspected frames unless you did.**
 
 ## Working on the code
 
-Setup: [`docs/DEPENDENCIES.md`](docs/DEPENDENCIES.md). Routes:
+Setup: [`docs/DEPENDENCIES.md`](docs/DEPENDENCIES.md) and, on a Mac,
+[`docs/MAC-OPENCODE.md`](docs/MAC-OPENCODE.md). Routes:
 [`docs/AGENT-API.md`](docs/AGENT-API.md). History: [`docs/CHANGELOG.md`](docs/CHANGELOG.md).
 
 ```
@@ -153,8 +198,12 @@ corepack pnpm test:e2e                             # Playwright
 Tests import the Prisma client. The desktop launchers generate it, so in a fresh
 checkout that has not been launched yet, run `corepack pnpm db:sqlite:generate` first.
 
-**Never push to the upstream `slopstudio-pro` repository.** This repository's remote is
-`BFParsons/SlopDirector`.
+Secrets live only in the ignored `.env` (template: [`.env.example`](.env.example)). Never
+commit a key, a cookie jar or a `.env`.
+
+**Never push to the upstream `slopstudio-pro` or `SlopDirector` repositories.** This
+repository's remote is `BFParsons/SlopDirector-OpenCode`; `SlopDirector` is wired as
+`upstream` for pulling only.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

@@ -82,12 +82,21 @@ function startServer() {
     ? { SLOPSTUDIO_FFMPEG_DIR: bundledFfmpegDir }
     : {};
 
+  // A .app opened from Finder inherits launchd's minimal PATH, which has no Homebrew
+  // bin dir; add them so `ffmpeg`, `ffprobe` and `yt-dlp` on PATH still resolve.
+  const pathKey = Object.keys(process.env).find((k) => k.toLowerCase() === "path") || "PATH";
+  const pathEnv =
+    process.platform === "darwin"
+      ? { [pathKey]: ["/opt/homebrew/bin", "/usr/local/bin", process.env[pathKey] || ""].filter(Boolean).join(path.delimiter) }
+      : {};
+
   serverProc = spawn(process.execPath, [serverEntry], {
     stdio: "inherit",
     windowsHide: true,
     cwd,
     env: {
       ...process.env,
+      ...pathEnv,
       // Run server.js as plain Node using Electron's bundled runtime.
       ELECTRON_RUN_AS_NODE: "1",
       NODE_ENV: "production",
@@ -195,7 +204,7 @@ async function createWindow() {
   // Something on screen at once: the embedded server takes a couple of seconds
   // to boot, and a blank dark window reads as "hung".
   mainWindow.loadFile(path.join(__dirname, "splash.html")).catch(() => {});
-  if (!DEV) startServer();
+  if (!DEV && !serverProc) startServer(); // darwin re-activates via createWindow(); one server only
   await waitForServer(url).catch((e) => console.error(e));
   await mainWindow.loadURL(url);
 

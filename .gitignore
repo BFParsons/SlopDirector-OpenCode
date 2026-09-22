@@ -78,3 +78,9 @@ qa-*.py
 
 # eval harness scratch media
 tests/eval/.tmp/
+
+# The template is the one env file that IS tracked; real values live in .env (ignored).
+!.env.example
+
+# Generated OpenCode state, if any host writes it here
+/.opencode/node_modules

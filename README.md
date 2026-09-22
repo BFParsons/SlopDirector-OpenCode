@@ -1,4 +1,13 @@
-# SlopStudio-Omarchy
+# SlopDirector-OpenCode
+
+A fork of [`BFParsons/SlopDirector`](https://github.com/BFParsons/SlopDirector) — the agent-driven
+filmmaking harness on the SlopStudio NLE — set up to be **driven by [OpenCode](https://opencode.ai) on a
+Mac**. It adds `opencode.json` (in-repo MCP registration, no setup step), the `/interview`,
+`/preproduction`, `/edit-video` and `/playbook` slash commands, the `clip-scout` / `narrator` /
+`shot-picker` subagents under `.opencode/agents/`, a macOS packaging target, a `.env.example`
+and no secrets anywhere in the tree or its history. Start with **[docs/MAC-OPENCODE.md](docs/MAC-OPENCODE.md)**:
+`brew install node@24 ffmpeg yt-dlp`, `corepack pnpm install --frozen-lockfile`, `corepack pnpm desktop:prod`,
+then `opencode` in this directory. The Windows + Claude Code / Codex paths below still work unchanged.
 
 **Windows + Codex:** Native Electron/SQLite launchers, Windows packaging and the
 interview-driven Codex editing workflow are documented in
@@ -26,7 +35,7 @@ check its own work, render. All of it is in this repository:
 | The editing guide as knowledge | [`guide/`](guide/) | [`editing-guide.md`](guide/editing-guide.md) (Part II is the harness: sound §7, pre-production §11, typography §12), [`RULES.md`](guide/RULES.md) (38 always-on rules), [`playbooks/`](guide/playbooks/), [`appendix-a-tools.md`](guide/appendix-a-tools.md) (generated from the server). |
 | Directing styles | [`guide/styles/`](guide/styles/README.md), `src/lib/styles` | 43 filmmakers and houses across nine categories, asked for in the interview; each file is the signature, structure, the cut (numbers), narration, sound, picture and text, type, harness parameters, applying it — and `check_plan`, `pacing_report`, `check_soundtrack` hold the piece to it. |
 | Typography on safe areas | `src/lib/typography`, [`public/fonts`](public/fonts/LICENSES.md) | safe-area profiles (web, broadcast, social 9:16, square) anchoring every text and caption in the render, the preview and the checks; 43 bundled open-licence faces; presets; a surveyed type system per style (`add_text_overlay {role}`). |
-| Sub-agents | [`.claude/agents/`](.claude/agents/) | clip-scout, narrator, shot-picker — the fan-out after approval. |
+| Sub-agents | [`.claude/agents/`](.claude/agents/), [`.opencode/agents/`](.opencode/agents/) | clip-scout, narrator, shot-picker — the fan-out after approval, for Claude Code and OpenCode. |
 | Watching it work | the Agent panel; the invisible-editor follow mode | the open editor shows the work as it happens: clips arrive, the playhead follows, the draft takes the monitor. |
 
 **The flow.** `interview_next` (one question at a time, multiple choice: form, your own
@@ -45,8 +54,8 @@ or `pnpm serve:headless` (no window); all bind `127.0.0.1:38473`. On Linux,
 [`docs/HARNESS-LOOP.md`](docs/HARNESS-LOOP.md); the two host briefs carry it in their own
 idiom and are kept at parity: [`CLAUDE.md`](CLAUDE.md) for **Claude Code** (`.mcp.json`
 registers the server in-repo — no setup step; AskUserQuestion; the `.claude/agents`
-fan-out) and [`AGENTS.md`](AGENTS.md) for **Codex and other MCP clients**
-(`pnpm codex:setup`; see [`docs/WINDOWS-CODEX.md`](docs/WINDOWS-CODEX.md)).
+fan-out) and [`AGENTS.md`](AGENTS.md) for **OpenCode, Codex and other MCP clients**
+(`opencode.json` + `.opencode/`; `pnpm codex:setup`; see [`docs/MAC-OPENCODE.md`](docs/MAC-OPENCODE.md) and [`docs/WINDOWS-CODEX.md`](docs/WINDOWS-CODEX.md)).
 [`mcp/README.md`](mcp/README.md) has the server setup for other clients,
 [`docs/AGENT-API.md`](docs/AGENT-API.md) the routes, [`docs/CHANGELOG.md`](docs/CHANGELOG.md)
 the history.

@@ -1,4 +1,5 @@
 import { spawn } from "node:child_process";
+import { env } from "@/env";
 import { mkdtemp, readdir, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -50,7 +51,7 @@ export function fetchCaptions(url: string, lang = "en", timeoutMs = 90_000): Pro
       const dir = await mkdtemp(path.join(tmpdir(), "yt-caps-"));
       // --print implies --simulate (no files written) unless --no-simulate is given.
       const args = ["--skip-download", "--no-simulate", "--write-subs", "--write-auto-subs", "--sub-langs", `${lang}.*,${lang}`, "--sub-format", "vtt", "--no-warnings", "--quiet", "--print", "%(id)s\t%(duration)s\t%(title)s", "-o", path.join(dir, "cap"), url];
-      const proc = spawn("yt-dlp", args, { windowsHide: true, stdio: ["ignore", "pipe", "pipe"] });
+      const proc = spawn(env.YTDLP_BIN, args, { windowsHide: true, stdio: ["ignore", "pipe", "pipe"] });
       let out = "";
       let err = "";
       const timer = setTimeout(() => {

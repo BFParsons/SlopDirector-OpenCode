@@ -6,7 +6,7 @@ that lets an agent edit video in the running app. This file is the **Claude Code
 The loop itself — interview, plan, approval, cut, verify — is canonical in
 **[`docs/HARNESS-LOOP.md`](docs/HARNESS-LOOP.md)**. Read that for the full detail. This
 file covers what is specific to Claude Code, and repeats enough of the loop to work from.
-`AGENTS.md` is the same loop for Codex and other MCP clients; when the loop changes,
+`AGENTS.md` is the same loop for OpenCode, Codex and other MCP clients; when the loop changes,
 change `docs/HARNESS-LOOP.md` first and reflect it in both.
 
 ## Connecting
@@ -154,4 +154,4 @@ Tests import the Prisma client. The desktop launchers generate it, so in a fresh
 checkout that has not been launched yet, run `corepack pnpm db:sqlite:generate` first.
 
 **Never push to the upstream `slopstudio-pro` repository.** This repository's remote is
-`BFParsons/SlopDirector`.
+`BFParsons/SlopDirector-OpenCode` (`upstream` = `BFParsons/SlopDirector`, pull only).

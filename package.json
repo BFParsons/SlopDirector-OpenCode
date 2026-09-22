@@ -27,6 +27,7 @@
     "desktop:standalone": "node scripts/build-desktop.mjs",
     "desktop:build": "node scripts/build-desktop.mjs && bash scripts/fetch-ffmpeg.sh && electron-builder --linux AppImage",
     "desktop:build:win": "node scripts/build-desktop.mjs && powershell -NoProfile -ExecutionPolicy Bypass -File scripts/fetch-ffmpeg.ps1 && node scripts/package-desktop.mjs --win nsis --x64",
+    "desktop:build:mac": "node scripts/build-desktop.mjs && bash scripts/fetch-ffmpeg.sh && node scripts/package-desktop.mjs --mac dmg",
     "codex:setup": "node scripts/setup-codex.mjs",
     "doctor": "node scripts/doctor.mjs",
     "test:windows": "tsx --test tests/platform/windows.test.ts",
@@ -130,6 +131,17 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "deleteAppDataOnUninstall": false
+    },
+    "mac": {
+      "target": ["dmg"],
+      "category": "public.app-category.video",
+      "identity": null,
+      "extraResources": [
+        {
+          "from": ".next/standalone/node_modules",
+          "to": "standalone/node_modules"
+        }
+      ]
     },
     "linux": {
       "extraResources": [

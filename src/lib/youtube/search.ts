@@ -1,4 +1,5 @@
 import { spawn } from "node:child_process";
+import { env } from "@/env";
 
 export type YouTubeCandidate = {
   id: string;
@@ -18,7 +19,7 @@ export type YouTubeCandidate = {
 export function searchYouTube(query: string, max = 8, timeoutMs = 60_000): Promise<YouTubeCandidate[]> {
   const n = Math.min(25, Math.max(1, Math.floor(max)));
   return new Promise((resolve, reject) => {
-    const proc = spawn("yt-dlp", [`ytsearch${n}:${query}`, "--flat-playlist", "--dump-json", "--no-warnings", "--quiet"], { windowsHide: true, stdio: ["ignore", "pipe", "pipe"] });
+    const proc = spawn(env.YTDLP_BIN, [`ytsearch${n}:${query}`, "--flat-playlist", "--dump-json", "--no-warnings", "--quiet"], { windowsHide: true, stdio: ["ignore", "pipe", "pipe"] });
     let out = "";
     let errText = "";
     const timer = setTimeout(() => {

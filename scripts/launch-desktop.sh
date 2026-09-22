@@ -54,11 +54,15 @@ fi
 # --- dev -------------------------------------------------------------------
 # Stop any stale dev server still holding :3000 so Electron connects to the
 # right server (Next would otherwise fall back to 3001 and the window would 404).
-stale="$(ss -ltnpH 'sport = :3000' 2>/dev/null | grep -oE 'pid=[0-9]+' | cut -d= -f2 | sort -u || true)"
+if command -v ss >/dev/null 2>&1; then
+  stale="$(ss -ltnpH 'sport = :3000' 2>/dev/null | grep -oE 'pid=[0-9]+' | cut -d= -f2 | sort -u || true)"
+else # macOS has no iproute2
+  stale="$(lsof -tiTCP:3000 -sTCP:LISTEN 2>/dev/null | sort -u || true)"
+fi
 if [ -n "$stale" ]; then
   echo "Stopping stale dev server on :3000 (pid $stale)…"
   kill $stale 2>/dev/null || true
-  for _ in $(seq 1 20); do ss -ltnH 'sport = :3000' | grep -q . || break; sleep 0.25; done
+  for _ in $(seq 1 20); do { command -v ss >/dev/null 2>&1 && ss -ltnH 'sport = :3000' || lsof -tiTCP:3000 -sTCP:LISTEN 2>/dev/null; } | grep -q . || break; sleep 0.25; done
 fi
 
 echo "Starting SlopStudio Pro (desktop, dev) from $PROJ …"
