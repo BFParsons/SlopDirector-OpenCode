@@ -146,18 +146,6 @@ Markdown: a new playbook in `guide/playbooks/`, a new director in `guide/styles/
 sharper rule in `guide/RULES.md`. Server changes need a fresh MCP connection before you
 trust the output; a running stdio process remembers the old guide text with great loyalty.
 
-## Lineage
-
-SlopStudio started life as SpotForge, a political-ad generator, grew a proper NLE, moved to a
-Linux laptop, then Windows, and now a Mac. The full editor reference (features, ffmpeg
-pipeline, data model, env vars, the original web deploy) is preserved in
-[docs/SLOPSTUDIO-ORIGINS.md](docs/SLOPSTUDIO-ORIGINS.md). The agent harness was added in
-`BFParsons/SlopDirector`; this fork tracks it as `upstream`.
-
-Bundled fonts carry their own licences in [`public/fonts/LICENSES.md`](public/fonts/LICENSES.md).
-The repository itself does not yet have a licence file, which means the default applies:
-you may read and fork it on GitHub, and should ask before redistributing it.
-
 ---
 
 <p align="center"><sub>The robot camera has no name. Suggestions are welcome. Suggestions will be judged.</sub></p>
