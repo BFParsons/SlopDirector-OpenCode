@@ -68,7 +68,7 @@ const nextConfig: NextConfig = {
   // Native / server-only modules must not be bundled by the compiler.
   serverExternalPackages: ["@node-rs/argon2", "@prisma/client", "prisma"],
   // Pin the workspace root to THIS directory. A stray
-  // /home/minipc/package-lock.json otherwise makes Turbopack infer the home
+  // ~/package-lock.json otherwise makes Turbopack infer the home
   // directory as the root and watch/scan the entire tree — a large memory and
   // file-watcher sink (and a likely aggravating factor in the 2026-05-27 crash).
   //

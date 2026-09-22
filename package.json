@@ -1,8 +1,8 @@
 {
-  "name": "slopstudio-omarchy",
+  "name": "slopdirector-opencode",
   "version": "0.1.0",
   "private": true,
-  "description": "SlopStudio Pro for Omarchy: desktop-class NLE with built-in AI generation, without the Storyboard mode.",
+  "description": "SlopDirector: an agent-driven filmmaking harness on the SlopStudio NLE (Electron + Next.js + ffmpeg + MCP), tuned for OpenCode on macOS.",
   "main": "electron/main.js",
   "packageManager": "pnpm@10.33.0",
   "scripts": {
